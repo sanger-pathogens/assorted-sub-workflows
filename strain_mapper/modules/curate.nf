@@ -15,7 +15,8 @@ process CURATE_CONSENSUS {
 
     script:
     ref_basename = reference.baseName
+    align_script = "${projectDir}/assorted_sub_workflows/strain_mapper/bin/generate_consensus.py"
     """
-    python3 generate_consensus.py -v '${vcf_final}' -i '${ref_index}' -o '${meta.id}_${ref_basename}.fa' -s '${meta.id}'
+    python3 ${align_script} -v '${vcf_final}' -i '${ref_index}' -o '${meta.id}_${ref_basename}.fa' -s '${meta.id}'
     """
 }
