@@ -52,7 +52,7 @@ process INDEX_REF {
     label 'mem_1'
     label 'time_1'
 
-    publishDir "${params.outdir}/${meta.id}/sorted_ref", mode: 'copy', overwrite: true
+    publishDir "${params.outdir}/sorted_ref", mode: 'copy', overwrite: true
 
     container 'quay.io/biocontainers/samtools:1.16.1--h00cdaf9_2'
 
