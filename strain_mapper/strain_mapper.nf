@@ -1,10 +1,16 @@
 #!/usr/bin/env nextflow
 
+
 /*
 ========================================================================================
-    IMPORT MODULES/SUBWORKFLOWS
+    REQUIRED PARAMS IN NEXTFLOW.CONFIG
 ========================================================================================
 */
+
+//   only_report_alts = true
+//   VCF_filters = 'QUAL>=50 & MIN(DP)>=8 & ((ALT!="." & DP4[2]>3 & DP4[3]>3) | (ALT="." & DP4[0]>3 & DP4[1]>3))'
+//   skip_filtering = false
+//   keep_raw_vcf = false
 
 //
 // MODULES
