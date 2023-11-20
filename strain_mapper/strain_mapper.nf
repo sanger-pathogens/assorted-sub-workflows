@@ -115,7 +115,7 @@ workflow STRAIN_MAPPER {
         ch_vcf_final
     )
     
-    FINAL_VCF.out.out_vcf
+    ch_vcf_final
         .combine(ch_ref_index)
         .dump(tag: 'vcf_and_ref')
         .set { ch_vcf_and_ref }
