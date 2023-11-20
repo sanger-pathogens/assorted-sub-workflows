@@ -3,7 +3,7 @@ process BCFTOOLS_MPILEUP {
     label 'mem_1'
     label 'time_1'
 
-    publishDir "${params.outdir}/bcftools_mpileup", mode: 'copy', overwrite: true
+    publishDir "${params.outdir}/${meta.id}/bcftools_mpileup", mode: 'copy', overwrite: true
 
     container 'quay.io/biocontainers/bcftools:1.16--haef29d1_2'
 
@@ -83,7 +83,7 @@ process RAW_VCF {
     label 'mem_1'
     label 'time_1'
     
-    publishDir "${params.outdir}/raw_vcf", mode: 'copy', overwrite: true
+    publishDir "${params.outdir}/${meta.id}/raw_vcf", mode: 'copy', overwrite: true
 
     container 'quay.io/biocontainers/bcftools:1.16--haef29d1_2'
 
@@ -116,7 +116,7 @@ process FINAL_VCF {
     label 'mem_1'
     label 'time_1'
     
-    publishDir "${params.outdir}/final_vcf", mode: 'copy', overwrite: true
+    publishDir "${params.outdir}/${meta.id}/final_vcf", mode: 'copy', overwrite: true
 
     container 'quay.io/biocontainers/bcftools:1.16--haef29d1_2'
 
