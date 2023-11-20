@@ -3,7 +3,7 @@ process CURATE_CONSENSUS {
     label 'mem_1'
     label 'time_1'
 
-    publishDir "${params.outdir}/curated_consensus", mode: 'copy', overwrite: true
+    publishDir "${params.outdir}/${meta.id}/curated_consensus", mode: 'copy', overwrite: true
 
     container 'quay.io/biocontainers/python:3.10.2'
 
