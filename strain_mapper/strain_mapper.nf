@@ -115,7 +115,7 @@ workflow STRAIN_MAPPER {
         ch_vcf_final
     )
     
-    ch_vcf_final
+    ch_vcf_final 
         .combine(ch_ref_index)
         .dump(tag: 'vcf_and_ref')
         .set { ch_vcf_and_ref }
@@ -124,6 +124,9 @@ workflow STRAIN_MAPPER {
         ch_vcf_and_ref
     )
     CURATE_CONSENSUS.out.curated_consensus.dump(tag: 'curated_consensus').set { ch_curated }
+
+    emit: 
+    ch_curated
 }
 
 /*
