@@ -124,6 +124,9 @@ workflow STRAIN_MAPPER {
         ch_vcf_and_ref
     )
     CURATE_CONSENSUS.out.curated_consensus.dump(tag: 'curated_consensus').set { ch_curated }
+
+    emit: 
+    ch_curated
 }
 
 /*
