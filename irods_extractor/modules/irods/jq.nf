@@ -11,16 +11,24 @@ process JSON_PREP {
 
     script:
     json_file="input.json"
-    if (study.isNumber())
+    // see config stub for recommended default values to set at pipeline level
+    if (runid < 0) {
         """
         jq -n '{op: "metaquery", args: {object: true}, target: {avus: [{a: "study_id", v: "${study}"}, {a: "target", v: "1"}, {a: "type", v: "cram"}]}}' > ${json_file}
         """
-    else if (!study.isNumber())
+    } else { if (laneid < 0) {
         """
-        jq -n '{op: "metaquery", args: {object: true}, target: {avus: [{a: "study", v: "${study}"}, {a: "target", v: "1"}, {a: "type", v: "cram"}]}}' > ${json_file}
+        jq -n '{op: "metaquery", args: {object: true}, target: {avus: [{a: "study_id", v: "${study}"}, {a: "id_run", v: "${runid}"}, {a: "target", v: "1"}, {a: "type", v: "cram"}]}}' > ${json_file}
         """
-    else
-        error "unrecognised study input"
+    } else { if (plexid < 0) {
+        """
+        jq -n '{op: "metaquery", args: {object: true}, target: {avus: [{a: "study_id", v: "${study}"}, {a: "id_run", v: "${runid}"}, {a: "lane", v: "${laneid}"}, {a: "target", v: "1"}, {a: "type", v: "cram"}]}}' > ${json_file}
+        """
+    } else {
+        """
+        jq -n '{op: "metaquery", args: {object: true}, target: {avus: [{a: "study_id", v: "${study}"}, {a: "id_run", v: "${runid}"}, {a: "lane", v: "${laneid}"}, {a: "tag_index", v: "${plexid}"}, {a: "target", v: "1"}, {a: "type", v: "cram"}]}}' > ${json_file}
+        """
+    }}}
 }
 
 process JSON_PARSE {
