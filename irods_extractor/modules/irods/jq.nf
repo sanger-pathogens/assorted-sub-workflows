@@ -11,7 +11,7 @@ process JSON_PREP {
 
     script:
     json_file="input.json"
-    // see config stub for recommended default values to set at pipeline level
+    // see irods.config params scope for recommended default values to set at pipeline level
     if (runid < 0) {
         """
         jq -n '{op: "metaquery", args: {object: true}, target: {avus: [{a: "study_id", v: "${study}"}, {a: "target", v: "1"}, {a: "type", v: "cram"}]}}' > ${json_file}
