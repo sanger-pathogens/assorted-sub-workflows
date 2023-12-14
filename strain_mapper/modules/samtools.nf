@@ -26,7 +26,7 @@ process SAMTOOLS_SORT {
     label 'mem_8'
     label 'time_12'
 
-    if (${params.keep_sorted_bam}){ publishDir "${params.outdir}/${meta.id}/samtools_sort", mode: 'copy', overwrite: true }
+    if (params.keep_sorted_bam){ publishDir "${params.outdir}/${meta.id}/samtools_sort", mode: 'copy', overwrite: true }
 
     container 'quay.io/biocontainers/samtools:1.16.1--h00cdaf9_2'
 
