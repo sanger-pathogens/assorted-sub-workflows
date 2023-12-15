@@ -3,8 +3,6 @@ process BOWTIE2 {
     label 'mem_8'
     label 'time_12'
 
-    publishDir "${params.outdir}/${meta.id}/bowtie2", mode: 'copy', overwrite: true
-
     container 'quay.io/biocontainers/bowtie2:2.5.1--py310h8d7afc0_0'
 
     input:

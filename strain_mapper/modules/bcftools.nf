@@ -3,8 +3,6 @@ process BCFTOOLS_MPILEUP {
     label 'mem_1'
     label 'time_1'
 
-    publishDir "${params.outdir}/${meta.id}/bcftools_mpileup", mode: 'copy', overwrite: true
-
     container 'quay.io/biocontainers/bcftools:1.16--haef29d1_2'
 
     input:
