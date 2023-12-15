@@ -35,7 +35,7 @@ process GUBBINS_MASK{
     tuple path(msa), path(recpredgff)
 
     output:
-    path("masked_msa.aln")
+    path("masked_msa.aln"), emit: masked_msa
 
     script:
     """
