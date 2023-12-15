@@ -1,6 +1,6 @@
 process PICARD_MARKDUP {
     label 'cpu_2'
-    label 'mem_1'
+    label 'mem_2'
     label 'time_1'
 
     container 'quay.io/biocontainers/picard:3.1.1--hdfd78af_0'
@@ -14,11 +14,11 @@ process PICARD_MARKDUP {
     tuple val(meta), path("${dedup_reads}"),  emit: dedup_reads
 
     script:
-    dedup_bam = "${meta.id}_duplicates_removed.bam"
+    dedup_reads = "${meta.id}_duplicates_removed.bam"
     """
     picard MarkDuplicates \
       -I $sorted_reads \
-      -O $dedup_bam \
+      -O $dedup_reads \
       -M marked_dup_metrics.txt \
       --REMOVE_DUPLICATES
     """
