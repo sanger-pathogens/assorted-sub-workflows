@@ -81,7 +81,10 @@ workflow STRAIN_MAPPER {
     )
     SAMTOOLS_SORT.out.sorted_reads.dump(tag: 'sorted_reads').set { ch_sorted_reads }
 
-    ch_sorted_reads
+    PICARD_MARKDUP(
+        ch_sorted_reads
+    )
+    PICARD_MARKDUP.out.dedup_reads
         .combine(ch_ref_index)
         .dump(tag: 'sorted_reads_and_ref')
         .set { sorted_reads_and_ref }
