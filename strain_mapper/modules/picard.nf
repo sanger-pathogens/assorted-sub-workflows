@@ -17,10 +17,10 @@ process PICARD_MARKDUP {
     dedup_bam = "${meta.id}_duplicates_removed.bam"
     """
     picard MarkDuplicates \
-      --REMOVE_DUPLICATES \
-      I=$sorted_reads \
-      O=$dedup_bam \
-      M=marked_dup_metrics.txt
+      -I $sorted_reads \
+      -O $dedup_bam \
+      -M marked_dup_metrics.txt \
+      --REMOVE_DUPLICATES
     """
 }
 
