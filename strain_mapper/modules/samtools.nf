@@ -15,7 +15,7 @@ process CONVERT_TO_BAM {
     mapped_reads_bam = "${meta.id}.bam"
     """
     samtools view -@ ${task.cpus} \
-                  -bS \
+                  -bS -F4 \
                   -o ${mapped_reads_bam} \
                   ${mapped_reads}
     """
