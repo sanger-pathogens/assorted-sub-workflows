@@ -1,6 +1,6 @@
-include { GUBBINS; GUBBINS_MASK } from '../modules/gubbins.nf' 
-include { SNP_SITES } from '../modules/snp-sites.nf' 
-include { BUILD_TREE } from '../modules/raxml-ng.nf'
+include { GUBBINS; GUBBINS_MASK } from './modules/gubbins.nf' 
+include { SNP_SITES } from './modules/snp-sites.nf' 
+include { BUILD_TREE } from './modules/raxml-ng.nf'
 
 
 workflow CONSTRUCT_PHYLO {
