@@ -5,19 +5,21 @@ process PICARD_MARKDUP {
 
     container 'quay.io/biocontainers/picard:3.1.1--hdfd78af_0'
 
+    if (params.keep_sorted_bam){ publishDir "${params.outdir}/${meta.id}/picard", mode: 'copy', overwrite: true }
+
     input:
-    tuple val(meta), path("${sorted_reads}")
+    tuple val(meta), path(sorted_reads)
 
     output:
     tuple val(meta), path("${dedup_reads}"),  emit: dedup_reads
 
     script:
-    mpileup_file = "${meta.id}_marked_duplicates.bam"
+    dedup_bam = "${meta.id}_duplicates_removed.bam"
     """
     picard MarkDuplicates \
       --REMOVE_DUPLICATES \
       I=$sorted_reads \
-      O=$mpileup_file \
+      O=$dedup_bam \
       M=marked_dup_metrics.txt
     """
 }
