@@ -14,7 +14,7 @@ def split_metadata(collection_name, linked_metadata) {
 
 workflow IRODS_QUERY {
         take:
-        input_irods_ch //tuple study, runid
+        input_irods_ch //tuple study, runid, laneid, plexid
 
         main:
         JSON_PREP(input_irods_ch)
@@ -48,7 +48,7 @@ workflow IRODS_QUERY {
 workflow CRAM_EXTRACT {
     
     take:
-    input_irods_ch //tuple study, runid
+    meta_cram_ch //tuple meta, cram_path
 
     main:
 
@@ -56,7 +56,7 @@ workflow CRAM_EXTRACT {
         ID = raw_fastq_path.simpleName.split("_1")[0]
     }.ifEmpty("fresh_run").set{ existing_id }
 
-    input_irods_ch.combine( existing_id | collect | map{ [it] })
+    meta_cram_ch.combine( existing_id | collect | map{ [it] })
     | filter { meta, cram_path, existing -> !(meta.ID in existing)}
     | map { it[0,1] }
     | set{ do_not_exist }
@@ -76,7 +76,7 @@ workflow CRAM_EXTRACT {
 workflow IRODS_EXTRACTOR {
 
     take:
-    input_irods_ch //tuple study, runid
+    input_irods_ch //tuple study, runid, laneid, plexid
 
     main:
 

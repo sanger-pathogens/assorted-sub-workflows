@@ -7,8 +7,8 @@ workflow IRODS_MANIFEST_PARSE {
 
     main:
     Channel
-        .fromPath( params.manifest )
-        .ifEmpty {exit 1, "Cannot find path file ${params.manifest}"}
+        .fromPath( params.manifest_of_lanes )
+        .ifEmpty {exit 1, "Cannot find path file ${params.manifest_of_lanes}"}
         .splitCsv ( header:true, sep:',' )
         .map { create_channel(it) }
         .set { meta }
