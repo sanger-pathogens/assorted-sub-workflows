@@ -21,11 +21,15 @@ workflow IRODS_QUERY {
         | BATON
         | JSON_PARSE
 
-        JSON_PARSE.out.json_file.splitJson(path: "result").map{collection ->
+        JSON_PARSE.out.json_file
+        .filter{ it.text.contains('"attribute": "alignment"') }
+        .splitJson(path: "result")
+        .map{collection ->
             meta = [:]
             meta = split_metadata(collection.data_object, collection.avus)
             [meta.ID, meta]
         }.set{ lane_metadata }
+
 
         JSON_PARSE.out.paths.splitText().map{ cram_path ->
         ID = cram_path.split("/")[-1].split(".cram")[0]
@@ -75,6 +79,7 @@ workflow IRODS_EXTRACTOR {
     input_irods_ch //tuple study, runid
 
     main:
+
     IRODS_QUERY(input_irods_ch).set{ meta_cram_ch }
 
     CRAM_EXTRACT(meta_cram_ch)
