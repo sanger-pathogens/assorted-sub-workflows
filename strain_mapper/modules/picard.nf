@@ -5,7 +5,7 @@ process PICARD_MARKDUP {
 
     container 'quay.io/biocontainers/picard:3.1.1--hdfd78af_0'
 
-    if (params.keep_sorted_bam){ publishDir "${params.outdir}/${meta.id}/picard", mode: 'copy', overwrite: true }
+    publishDir "${params.outdir}/${meta.id}/picard", enabled: params.keep_sorted_bam, mode: 'copy', overwrite: true
 
     input:
     tuple val(meta), path(sorted_reads)
