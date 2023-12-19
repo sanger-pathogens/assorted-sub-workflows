@@ -1,7 +1,7 @@
-include { COLLATE_CRAM; FASTQ_FROM_COLLATED_BAM } from '../modules/irods/samtools.nf'
-include { BATON } from '../modules/irods/baton.nf'
-include { JSON_PREP; JSON_PARSE } from '../modules/irods/jq.nf'
-include { RETRIEVE_CRAM } from '../modules/irods/retrieve.nf'
+include { COLLATE_CRAM; FASTQ_FROM_COLLATED_BAM } from '../modules/samtools.nf'
+include { BATON } from '../modules/baton.nf'
+include { JSON_PREP; JSON_PARSE } from '../modules/jq.nf'
+include { RETRIEVE_CRAM } from '../modules/retrieve.nf'
 
 def split_metadata(collection_name, linked_metadata) {
     metadata = [:]
@@ -21,6 +21,7 @@ workflow IRODS_QUERY {
         | BATON
         | JSON_PARSE
 
+        // filter on '"attribute": "alignment"' as the always first value of metadata in AVU format to ensure there is metadata attached
         JSON_PARSE.out.json_file
         .filter{ it.text.contains('"attribute": "alignment"') }
         .splitJson(path: "result")
@@ -48,7 +49,7 @@ workflow IRODS_QUERY {
 workflow CRAM_EXTRACT {
     
     take:
-    input_irods_ch //tuple study, runid
+    meta_cram_ch //tuple meta, cram_path
 
     main:
 
@@ -56,7 +57,7 @@ workflow CRAM_EXTRACT {
         ID = raw_fastq_path.simpleName.split("_1")[0]
     }.ifEmpty("fresh_run").set{ existing_id }
 
-    input_irods_ch.combine( existing_id | collect | map{ [it] })
+    meta_cram_ch.combine( existing_id | collect | map{ [it] })
     | filter { meta, cram_path, existing -> !(meta.ID in existing)}
     | map { it[0,1] }
     | set{ do_not_exist }
