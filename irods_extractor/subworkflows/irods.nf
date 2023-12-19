@@ -1,7 +1,7 @@
-include { COLLATE_CRAM; FASTQ_FROM_COLLATED_BAM } from '../modules/irods/samtools.nf'
-include { BATON } from '../modules/irods/baton.nf'
-include { JSON_PREP; JSON_PARSE } from '../modules/irods/jq.nf'
-include { RETRIEVE_CRAM } from '../modules/irods/retrieve.nf'
+include { COLLATE_CRAM; FASTQ_FROM_COLLATED_BAM } from './modules/irods/samtools.nf'
+include { BATON } from './modules/irods/baton.nf'
+include { JSON_PREP; JSON_PARSE } from './modules/irods/jq.nf'
+include { RETRIEVE_CRAM } from './modules/irods/retrieve.nf'
 
 def split_metadata(collection_name, linked_metadata) {
     metadata = [:]
