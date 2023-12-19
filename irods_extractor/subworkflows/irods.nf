@@ -1,7 +1,7 @@
-include { COLLATE_CRAM; FASTQ_FROM_COLLATED_BAM } from './modules/samtools.nf'
-include { BATON } from './modules/baton.nf'
-include { JSON_PREP; JSON_PARSE } from './modules/jq.nf'
-include { RETRIEVE_CRAM } from './modules/retrieve.nf'
+include { COLLATE_CRAM; FASTQ_FROM_COLLATED_BAM } from '../modules/samtools.nf'
+include { BATON } from '../modules/baton.nf'
+include { JSON_PREP; JSON_PARSE } from '../modules/jq.nf'
+include { RETRIEVE_CRAM } from '../modules/retrieve.nf'
 
 def split_metadata(collection_name, linked_metadata) {
     metadata = [:]
