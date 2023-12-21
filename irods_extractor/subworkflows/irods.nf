@@ -57,11 +57,7 @@ workflow CRAM_EXTRACT {
     }.ifEmpty("fresh_run").set{ existing_id }
 
     meta_cram_ch.combine( existing_id | collect | map{ [it] })
-<<<<<<< HEAD
-    | filter { meta, cram_path, existing -> !(meta.ID in existing)}
-=======
     | filter { metadata, cram_path, existing -> !(metadata.ID in existing)}
->>>>>>> main
     | map { it[0,1] }
     | set{ do_not_exist }
 
