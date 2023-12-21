@@ -37,8 +37,8 @@ workflow IRODS_QUERY {
         [ ID, cram_path ]
         }.set{ cram_ch }
 
-        cram_ch.join(lane_metadata).map{join_identifier, path, meta ->
-            [meta, path]
+        cram_ch.join(lane_metadata).map{join_identifier, path, metamap ->
+            [metamap, path]
         }.set{ meta_cram_ch }
 
         emit:
@@ -58,7 +58,7 @@ workflow CRAM_EXTRACT {
     }.ifEmpty("fresh_run").set{ existing_id }
 
     meta_cram_ch.combine( existing_id | collect | map{ [it] })
-    | filter { meta, cram_path, existing -> !(meta.ID in existing)}
+    | filter { metadata, cram_path, existing -> !(metadata.ID in existing)}
     | map { it[0,1] }
     | set{ do_not_exist }
 
