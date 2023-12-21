@@ -25,9 +25,9 @@ workflow IRODS_QUERY {
         .filter{ it.text.contains('"attribute": "alignment"') }
         .splitJson(path: "result")
         .map{collection ->
-            meta = [:]
-            meta = split_metadata(collection.data_object, collection.avus)
-            [meta.ID, meta]
+            metaparse = [:]
+            metaparse = split_metadata(collection.data_object, collection.avus)
+            [meta.ID, metaparse]
         }.set{ lane_metadata }
 
 
