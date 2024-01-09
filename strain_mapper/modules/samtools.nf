@@ -66,3 +66,23 @@ process INDEX_REF {
     samtools faidx "${reference}" > "${faidx}"
     """
 }
+
+process SAMTOOLS_INDEX_BAM {
+    label 'cpu_2'
+    label 'mem_1'
+    label 'time_1'
+
+    container 'quay.io/biocontainers/samtools:1.16.1--h00cdaf9_2'
+
+    input:
+    tuple val(meta), path(bam)
+
+    output:
+    tuple val(meta), path(bam), path(bam_index),  emit: bam_index
+
+    script:
+    bam_index = "${bam}.bai"
+    """
+    samtools index -b "${bam}"
+    """
+}

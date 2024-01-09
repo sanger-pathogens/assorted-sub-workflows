@@ -54,6 +54,7 @@ process BCFTOOLS_FILTERING {
 
     input:
     tuple val(meta), file(vcf_allpos)
+    val(filter)
 
     output:
     tuple val(meta), path("${filtered_vcf_allpos}"),  emit: filtered_vcf_allpos
@@ -63,7 +64,7 @@ process BCFTOOLS_FILTERING {
     """
     bcftools view -o ${filtered_vcf_allpos} \
                   -O 'v' \
-                  -i '${params.VCF_filters}' \
+                  -i '${filter}' \
                   '${vcf_allpos}'
     """
 }
