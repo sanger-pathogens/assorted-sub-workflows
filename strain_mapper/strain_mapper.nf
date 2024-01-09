@@ -16,9 +16,18 @@
 // MODULES
 //
 include { BOWTIE2; BOWTIE2_INDEX } from './modules/bowtie2'
-include { CONVERT_TO_BAM; SAMTOOLS_SORT; INDEX_REF } from './modules/samtools'
-include { BCFTOOLS_CALL; BCFTOOLS_MPILEUP; BCFTOOLS_FILTERING; FINAL_VCF; RAW_VCF } from './modules/bcftools'
-include { PICARD_MARKDUP } from './modules/picard'
+include { CONVERT_TO_BAM; SAMTOOLS_SORT; INDEX_REF; SAMTOOLS_INDEX_BAM } from './modules/samtools'
+include {
+    BCFTOOLS_CALL;
+    BCFTOOLS_MPILEUP;
+    BCFTOOLS_FILTERING;
+    BCFTOOLS_FILTERING as BCFTOOLS_FILTERING_FOR_GATK;
+    FINAL_VCF as FINAL_BCFTOOLS_VCF;
+    FINAL_VCF as FINAL_GATK_VCF;
+    RAW_VCF
+} from './modules/bcftools'
+include { PICARD_MARKDUP; PICARD_ADD_READGROUP } from './modules/picard'
+include { GATK_REF_DICT; GATK_HAPLOTYPECALLER } from './modules/gatk'
 include { CURATE_CONSENSUS } from './modules/curate'
 
 /*
@@ -59,7 +68,7 @@ workflow STRAIN_MAPPER {
         )
         INDEX_REF.out.ref_index.dump(tag: 'ref_index').set { ch_ref_index }
     }
-    
+
     //
     // MAPPING: Bowtie2
     //
@@ -90,6 +99,55 @@ workflow STRAIN_MAPPER {
         .dump(tag: 'sorted_reads_and_ref')
         .set { sorted_reads_and_ref }
 
+    // GATK WORKFLOW
+    //TODO We could move the dictionary creation to the start if we will always run it, but we might want to separate out the workflows and only run what is necessary for each.
+    GATK_REF_DICT(
+        reference
+    )
+
+    ch_ref_index
+        .combine(GATK_REF_DICT.out.ref_dict)
+        .dump(tag: 'ch_ref_dict')
+        .set { ch_ref_dict }
+
+    // Add artificial read group to satisfy haplotypecaller
+    PICARD_ADD_READGROUP(
+        PICARD_MARKDUP.out.dedup_reads
+    )
+
+    SAMTOOLS_INDEX_BAM(
+        PICARD_ADD_READGROUP.out.rg_added_reads
+    )
+    SAMTOOLS_INDEX_BAM.out.bam_index
+        .combine(ch_ref_dict)
+        .dump(tag: 'haplotypecaller_input')
+        .set { haplotypecaller_input }
+
+    GATK_HAPLOTYPECALLER(
+        haplotypecaller_input
+    )
+
+    if (!params.skip_filtering) {
+        BCFTOOLS_FILTERING_FOR_GATK(
+            GATK_HAPLOTYPECALLER.out.vcf,
+            Channel.value(params.GATK_VCF_filters)
+        )
+        BCFTOOLS_FILTERING_FOR_GATK.out.set { ch_gatk_vcf_final }
+    } else {
+        ch_vcf_allpos.set { ch_gatk_vcf_final }
+    }
+
+    FINAL_GATK_VCF(
+        ch_gatk_vcf_final
+    )
+
+    //TODO provide option to feed this in to create consensus sequence?
+    // ch_vcf_final
+    //     .combine(ch_ref_index)
+    //     .dump(tag: 'vcf_and_ref')
+    //     .set { ch_vcf_and_ref }
+
+    // BCFTOOLS WORKFLOW
     BCFTOOLS_MPILEUP(
         sorted_reads_and_ref
     )
@@ -108,18 +166,19 @@ workflow STRAIN_MAPPER {
 
     if (!params.skip_filtering) {
         BCFTOOLS_FILTERING(
-            ch_vcf_allpos
+            ch_vcf_allpos,
+            Channel.value(params.VCF_filters)
         )
-        BCFTOOLS_FILTERING.out.set { ch_vcf_final }
-    }else{
-        ch_vcf_allpos.set { ch_vcf_final }
+        BCFTOOLS_FILTERING.out.set { ch_bcftools_vcf_final }
+    } else {
+        ch_vcf_allpos.set { ch_bcftools_vcf_final }
     }
 
-    FINAL_VCF(
-        ch_vcf_final
+    FINAL_BCFTOOLS_VCF(
+        ch_bcftools_vcf_final
     )
-    
-    ch_vcf_final
+
+    ch_bcftools_vcf_final
         .combine(ch_ref_index)
         .dump(tag: 'vcf_and_ref')
         .set { ch_vcf_and_ref }
