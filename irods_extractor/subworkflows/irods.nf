@@ -14,21 +14,20 @@ def split_metadata(collection_name, linked_metadata) {
 
 workflow IRODS_QUERY {
         take:
-        input_irods_ch //tuple study, runid
+        input_irods_ch //tuple study, runid, laneid, plexid
 
         main:
         JSON_PREP(input_irods_ch)
         | BATON
         | JSON_PARSE
 
-        // filter on '"attribute": "alignment"' as the always first value of metadata in AVU format to ensure there is metadata attached
         JSON_PARSE.out.json_file
         .filter{ it.text.contains('"attribute": "alignment"') }
         .splitJson(path: "result")
         .map{collection ->
-            meta = [:]
-            meta = split_metadata(collection.data_object, collection.avus)
-            [meta.ID, meta]
+            metaparse = [:]
+            metaparse = split_metadata(collection.data_object, collection.avus)
+            [metaparse.ID, metaparse]
         }.set{ lane_metadata }
 
 
@@ -77,7 +76,7 @@ workflow CRAM_EXTRACT {
 workflow IRODS_EXTRACTOR {
 
     take:
-    input_irods_ch //tuple study, runid
+    input_irods_ch //tuple study, runid, laneid, plexid
 
     main:
 
