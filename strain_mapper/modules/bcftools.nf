@@ -86,7 +86,7 @@ process BCFTOOLS_RAW_VCF {
 
     script:
     out_vcf = "${meta.id}.vcf.gz"
-    if (params.only_report_alts)
+    if (!params.report_ref_and_alt)
         """
         bcftools view -o ${out_vcf} \
             -O 'z' \
@@ -119,7 +119,7 @@ process BCFTOOLS_FINAL_VCF {
 
     script:
     out_vcf = "${meta.id}.vcf.gz"
-    if (params.only_report_alts)
+    if (!params.report_ref_and_alt)
         """
         bcftools view -o ${out_vcf} \
             -O 'z' \
