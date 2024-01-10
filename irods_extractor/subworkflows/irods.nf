@@ -27,7 +27,7 @@ workflow IRODS_QUERY {
         .map{collection ->
             metaparse = [:]
             metaparse = split_metadata(collection.data_object, collection.avus)
-            [meta.ID, metaparse]
+            [metaparse.ID, metaparse]
         }.set{ lane_metadata }
 
 
