@@ -16,7 +16,12 @@
 // MODULES
 //
 include { BOWTIE2; BOWTIE2_INDEX } from './modules/bowtie2'
-include { CONVERT_TO_BAM; SAMTOOLS_SORT; INDEX_REF; SAMTOOLS_INDEX_BAM } from './modules/samtools'
+include { 
+    CONVERT_TO_BAM;
+    SAMTOOLS_SORT;
+    INDEX_REF;
+    SAMTOOLS_INDEX_BAM
+} from './modules/samtools'
 include {
     BCFTOOLS_CALL;
     BCFTOOLS_MPILEUP;
