@@ -21,13 +21,17 @@ include {
     BCFTOOLS_CALL;
     BCFTOOLS_MPILEUP;
     BCFTOOLS_FILTERING;
-    BCFTOOLS_FILTERING as BCFTOOLS_FILTERING_FOR_GATK;
-    FINAL_VCF as FINAL_BCFTOOLS_VCF;
-    FINAL_VCF as FINAL_GATK_VCF;
-    RAW_VCF
+    BCFTOOLS_RAW_VCF;
+    BCFTOOLS_FINAL_VCF;
 } from './modules/bcftools'
 include { PICARD_MARKDUP; PICARD_ADD_READGROUP } from './modules/picard'
-include { GATK_REF_DICT; GATK_HAPLOTYPECALLER } from './modules/gatk'
+include {
+    GATK_REF_DICT;
+    GATK_HAPLOTYPECALLER;
+    GATK_FILTERING;
+    GATK_RAW_VCF;
+    GATK_FINAL_VCF;
+} from './modules/gatk'
 include { CURATE_CONSENSUS } from './modules/curate'
 
 /*
@@ -35,6 +39,102 @@ include { CURATE_CONSENSUS } from './modules/curate'
     RUN MAIN WORKFLOW
 ========================================================================================
 */
+
+workflow GATK_WORKFLOW {
+    take:
+    dedup_reads
+    ch_ref_index
+
+    main:
+    ch_ref_index
+        .map { it -> it[0] }
+        .set { reference }
+
+    GATK_REF_DICT(
+        reference
+    )
+
+    ch_ref_index
+        .combine(GATK_REF_DICT.out.ref_dict)
+        .dump(tag: 'ch_ref_dict')
+        .set { ch_ref_dict }
+
+    // Add artificial read group to satisfy haplotypecaller
+    PICARD_ADD_READGROUP(
+        dedup_reads
+    )
+
+    SAMTOOLS_INDEX_BAM(
+        PICARD_ADD_READGROUP.out.rg_added_reads
+    )
+    SAMTOOLS_INDEX_BAM.out.bam_index
+        .combine(ch_ref_dict)
+        .dump(tag: 'haplotypecaller_input')
+        .set { haplotypecaller_input }
+
+    GATK_HAPLOTYPECALLER(
+        haplotypecaller_input
+    )
+    GATK_HAPLOTYPECALLER.out.vcf
+        .dump(tag: 'gatk_vcf_allpos')
+        .set { ch_vcf_allpos }
+
+    if (params.keep_raw_vcf){
+        GATK_RAW_VCF(
+            ch_vcf_allpos
+        )
+    }
+
+    if (!params.skip_filtering) {
+        GATK_FILTERING(
+            ch_vcf_allpos
+        )
+        GATK_FILTERING.out.set { ch_filtered_vcf }
+    } else {
+        ch_vcf_allpos.set { ch_filtered_vcf }
+    }
+
+    emit:
+    ch_filtered_vcf
+}
+
+workflow BCFTOOLS_WORKFLOW {
+    take:
+    dedup_reads_and_ref
+
+    main:
+    BCFTOOLS_MPILEUP(
+        dedup_reads_and_ref
+    )
+    BCFTOOLS_MPILEUP.out.mpileup_file
+        .dump(tag: 'mpileup_file')
+        .set { ch_mpileup_file }
+
+    BCFTOOLS_CALL(
+        ch_mpileup_file
+    )
+    BCFTOOLS_CALL.out.vcf_allpos
+        .dump(tag: 'vcf_allpos')
+        .set { ch_vcf_allpos }
+
+    if (params.keep_raw_vcf && !params.skip_filtering){
+        BCFTOOLS_RAW_VCF(
+            ch_vcf_allpos
+        )
+    }
+
+    if (!params.skip_filtering) {
+        BCFTOOLS_FILTERING(
+            ch_vcf_allpos
+        )
+        BCFTOOLS_FILTERING.out.set { ch_filtered_vcf }
+    } else {
+        ch_vcf_allpos.set { ch_filtered_vcf }
+    }
+
+    emit:
+    ch_filtered_vcf
+}
 
 workflow STRAIN_MAPPER {
 
@@ -96,93 +196,32 @@ workflow STRAIN_MAPPER {
     )
     PICARD_MARKDUP.out.dedup_reads
         .combine(ch_ref_index)
-        .dump(tag: 'sorted_reads_and_ref')
-        .set { sorted_reads_and_ref }
+        .dump(tag: 'dedup_reads_and_ref')
+        .set { dedup_reads_and_ref }
 
-    // GATK WORKFLOW
-    //TODO We could move the dictionary creation to the start if we will always run it, but we might want to separate out the workflows and only run what is necessary for each.
-    GATK_REF_DICT(
-        reference
+    GATK_WORKFLOW(
+        PICARD_MARKDUP.out.dedup_reads,
+        ch_ref_index
     )
 
-    ch_ref_index
-        .combine(GATK_REF_DICT.out.ref_dict)
-        .dump(tag: 'ch_ref_dict')
-        .set { ch_ref_dict }
-
-    // Add artificial read group to satisfy haplotypecaller
-    PICARD_ADD_READGROUP(
-        PICARD_MARKDUP.out.dedup_reads
+    GATK_FINAL_VCF(
+        GATK_WORKFLOW.out.ch_filtered_vcf
     )
 
-    SAMTOOLS_INDEX_BAM(
-        PICARD_ADD_READGROUP.out.rg_added_reads
-    )
-    SAMTOOLS_INDEX_BAM.out.bam_index
-        .combine(ch_ref_dict)
-        .dump(tag: 'haplotypecaller_input')
-        .set { haplotypecaller_input }
-
-    GATK_HAPLOTYPECALLER(
-        haplotypecaller_input
+    BCFTOOLS_WORKFLOW(
+        dedup_reads_and_ref
     )
 
-    if (!params.skip_filtering) {
-        BCFTOOLS_FILTERING_FOR_GATK(
-            GATK_HAPLOTYPECALLER.out.vcf,
-            Channel.value(params.GATK_VCF_filters)
-        )
-        BCFTOOLS_FILTERING_FOR_GATK.out.set { ch_gatk_vcf_final }
-    } else {
-        ch_vcf_allpos.set { ch_gatk_vcf_final }
-    }
-
-    FINAL_GATK_VCF(
-        ch_gatk_vcf_final
+    BCFTOOLS_FINAL_VCF(
+        BCFTOOLS_WORKFLOW.out.ch_filtered_vcf
     )
 
-    //TODO provide option to feed this in to create consensus sequence?
-    // ch_vcf_final
-    //     .combine(ch_ref_index)
-    //     .dump(tag: 'vcf_and_ref')
-    //     .set { ch_vcf_and_ref }
-
-    // BCFTOOLS WORKFLOW
-    BCFTOOLS_MPILEUP(
-        sorted_reads_and_ref
-    )
-    BCFTOOLS_MPILEUP.out.mpileup_file.dump(tag: 'mpileup_file').set { ch_mpileup_file }
-
-    BCFTOOLS_CALL(
-        ch_mpileup_file
-    )
-    BCFTOOLS_CALL.out.vcf_allpos.dump(tag: 'vcf_allpos').set { ch_vcf_allpos }
-
-    if (params.keep_raw_vcf && !params.skip_filtering){
-        RAW_VCF(
-            ch_vcf_allpos
-        )
-    }
-
-    if (!params.skip_filtering) {
-        BCFTOOLS_FILTERING(
-            ch_vcf_allpos,
-            Channel.value(params.VCF_filters)
-        )
-        BCFTOOLS_FILTERING.out.set { ch_bcftools_vcf_final }
-    } else {
-        ch_vcf_allpos.set { ch_bcftools_vcf_final }
-    }
-
-    FINAL_BCFTOOLS_VCF(
-        ch_bcftools_vcf_final
-    )
-
-    ch_bcftools_vcf_final
+    BCFTOOLS_WORKFLOW.out.ch_filtered_vcf
         .combine(ch_ref_index)
         .dump(tag: 'vcf_and_ref')
         .set { ch_vcf_and_ref }
 
+    //TODO We could move consensus creation into BCFTOOLS_WORKFLOW and have that workflow?
     CURATE_CONSENSUS(
         ch_vcf_and_ref
     )
