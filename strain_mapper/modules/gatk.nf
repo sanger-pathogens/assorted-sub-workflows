@@ -29,7 +29,6 @@ process GATK_HAPLOTYPECALLER {
     container 'broadinstitute/gatk:4.5.0.0'
 
     publishDir "${params.outdir}/${meta.id}/gatk", pattern:"*_bamout.*", enabled: params.keep_gatk_bam, mode: 'copy', overwrite: true
-    publishDir "${params.outdir}/${meta.id}/gatk/temp_compare", pattern:"*.vcf*", mode: 'copy', overwrite: true
 
     input:
     tuple val(meta), path(sorted_reads), path(sorted_reads_index), path(reference), path(reference_index), path(reference_dict)
