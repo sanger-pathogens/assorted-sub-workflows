@@ -47,7 +47,7 @@ process GATK_HAPLOTYPECALLER {
       -I ${sorted_reads} \
       -O ${output_vcf} \
       -bamout ${output_bam} \
-      --output-mode EMIT_ALL_ACTIVE_SITES \
+      --output-mode ${params.gatk_haplotypecaller_output_mode} \
       --native-pair-hmm-threads ${task.cpus}
     """
 }
