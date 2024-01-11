@@ -16,22 +16,22 @@ process JSON_PREP {
     switch(meta.size()) {
         case 1:
             """
-            jq -n '{op: "metaquery", args: {object: true, "avu": true}, target: {avus: [{a: "study_id", v: "${meta.study}"}, {a: "target", v: "1"}, {a: "type", v: "cram"}]}}' > ${json_file}
+            jq -n '{op: "metaquery", args: {object: true, "avu": true}, target: {avus: [{a: "study_id", v: "${meta.studyid}"}, {a: "target", v: "1"}, {a: "type", v: "cram"}]}}' > ${json_file}
             """
             break
         case 2:
             """
-            jq -n '{op: "metaquery", args: {object: true, "avu": true}, target: {avus: [{a: "study_id", v: "${meta.study}"}, {a: "id_run", v: "${meta.runid}"}, {a: "target", v: "1"}, {a: "type", v: "cram"}]}}' > ${json_file}
+            jq -n '{op: "metaquery", args: {object: true, "avu": true}, target: {avus: [{a: "study_id", v: "${meta.studyid}"}, {a: "id_run", v: "${meta.runid}"}, {a: "target", v: "1"}, {a: "type", v: "cram"}]}}' > ${json_file}
             """
             break
         case 3:
             """
-            jq -n '{op: "metaquery", args: {object: true, "avu": true}, target: {avus: [{a: "study_id", v: "${meta.study}"}, {a: "id_run", v: "${meta.runid}"}, {a: "lane", v: "${meta.laneid}"}, {a: "target", v: "1"}, {a: "type", v: "cram"}]}}' > ${json_file}
+            jq -n '{op: "metaquery", args: {object: true, "avu": true}, target: {avus: [{a: "study_id", v: "${meta.studyid}"}, {a: "id_run", v: "${meta.runid}"}, {a: "lane", v: "${meta.laneid}"}, {a: "target", v: "1"}, {a: "type", v: "cram"}]}}' > ${json_file}
             """
             break
         case 4:
             """
-            jq -n '{op: "metaquery", args: {object: true, "avu": true}, target: {avus: [{a: "study_id", v: "${meta.study}"}, {a: "id_run", v: "${meta.runid}"}, {a: "lane", v: "${meta.laneid}"}, {a: "tag_index", v: "${meta.plexid}"}, {a: "target", v: "1"}, {a: "type", v: "cram"}]}}' > ${json_file}
+            jq -n '{op: "metaquery", args: {object: true, "avu": true}, target: {avus: [{a: "study_id", v: "${meta.studyid}"}, {a: "id_run", v: "${meta.runid}"}, {a: "lane", v: "${meta.laneid}"}, {a: "tag_index", v: "${meta.plexid}"}, {a: "target", v: "1"}, {a: "type", v: "cram"}]}}' > ${json_file}
             """
             break
     }
