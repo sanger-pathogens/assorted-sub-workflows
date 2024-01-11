@@ -99,15 +99,25 @@ workflow GATK_WORKFLOW {
         ch_vcf_allpos.set { ch_filtered_vcf }
     }
 
+    GATK_FINAL_VCF(
+        ch_filtered_vcf
+    )
+
     emit:
     ch_filtered_vcf
 }
 
 workflow BCFTOOLS_WORKFLOW {
     take:
-    dedup_reads_and_ref
+    dedup_reads
+    ch_ref_index
 
     main:
+    dedup_reads
+        .combine(ch_ref_index)
+        .dump(tag: 'dedup_reads_and_ref')
+        .set { dedup_reads_and_ref }
+
     BCFTOOLS_MPILEUP(
         dedup_reads_and_ref
     )
@@ -137,8 +147,25 @@ workflow BCFTOOLS_WORKFLOW {
         ch_vcf_allpos.set { ch_filtered_vcf }
     }
 
+    BCFTOOLS_FINAL_VCF(
+        ch_filtered_vcf
+    )
+
+    ch_filtered_vcf
+        .combine(ch_ref_index)
+        .dump(tag: 'vcf_and_ref')
+        .set { ch_vcf_and_ref }
+
+    CURATE_CONSENSUS(
+        ch_vcf_and_ref
+    )
+    CURATE_CONSENSUS.out.curated_consensus
+        .dump(tag: 'curated_consensus')
+        .set { ch_curated }
+
     emit:
     ch_filtered_vcf
+    ch_curated
 }
 
 workflow STRAIN_MAPPER {
@@ -199,41 +226,16 @@ workflow STRAIN_MAPPER {
     PICARD_MARKDUP(
         ch_sorted_reads
     )
-    PICARD_MARKDUP.out.dedup_reads
-        .combine(ch_ref_index)
-        .dump(tag: 'dedup_reads_and_ref')
-        .set { dedup_reads_and_ref }
 
     GATK_WORKFLOW(
         PICARD_MARKDUP.out.dedup_reads,
         ch_ref_index
     )
 
-    GATK_FINAL_VCF(
-        GATK_WORKFLOW.out.ch_filtered_vcf
-    )
-
     BCFTOOLS_WORKFLOW(
-        dedup_reads_and_ref
+        PICARD_MARKDUP.out.dedup_reads,
+        ch_ref_index
     )
-
-    BCFTOOLS_FINAL_VCF(
-        BCFTOOLS_WORKFLOW.out.ch_filtered_vcf
-    )
-
-    BCFTOOLS_WORKFLOW.out.ch_filtered_vcf
-        .combine(ch_ref_index)
-        .dump(tag: 'vcf_and_ref')
-        .set { ch_vcf_and_ref }
-
-    //TODO We could move consensus creation into BCFTOOLS_WORKFLOW and have that workflow?
-    CURATE_CONSENSUS(
-        ch_vcf_and_ref
-    )
-    CURATE_CONSENSUS.out.curated_consensus.dump(tag: 'curated_consensus').set { ch_curated }
-
-    emit: 
-    ch_curated
 }
 
 /*
