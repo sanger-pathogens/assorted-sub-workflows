@@ -227,15 +227,20 @@ workflow STRAIN_MAPPER {
         ch_sorted_reads
     )
 
-    GATK_WORKFLOW(
-        PICARD_MARKDUP.out.dedup_reads,
-        ch_ref_index
-    )
-
-    BCFTOOLS_WORKFLOW(
-        PICARD_MARKDUP.out.dedup_reads,
-        ch_ref_index
-    )
+    if (params.method == "gatk") {
+        GATK_WORKFLOW(
+            PICARD_MARKDUP.out.dedup_reads,
+            ch_ref_index
+        )
+    } else if (params.method == "bcftools") {
+        BCFTOOLS_WORKFLOW(
+                PICARD_MARKDUP.out.dedup_reads,
+                ch_ref_index
+            )
+    } else {
+        log.error("Unexpected argument for `--method`")
+        exit 1
+    }
 }
 
 /*
