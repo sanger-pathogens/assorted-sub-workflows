@@ -1,7 +1,8 @@
 include { COLLATE_CRAM; FASTQ_FROM_COLLATED_BAM } from '../modules/samtools.nf'
-include { BATON } from '../modules/baton.nf'
-include { JSON_PREP; JSON_PARSE } from '../modules/jq.nf'
-include { RETRIEVE_CRAM } from '../modules/retrieve.nf'
+include { BATON                                 } from '../modules/baton.nf'
+include { JSON_PREP; JSON_PARSE                 } from '../modules/jq.nf'
+include { RETRIEVE_CRAM                         } from '../modules/retrieve.nf'
+include { METADATA                              } from '../modules/metadata_save.nf'
 
 def split_metadata(collection_name, linked_metadata) {
     metadata = [:]
@@ -39,6 +40,14 @@ workflow IRODS_QUERY {
         cram_ch.join(lane_metadata).map{join_identifier, path, metamap ->
             [metamap, path]
         }.set{ meta_cram_ch }
+
+        if (params.save_metadata) {
+            meta_cram_ch.map{metadata_map, path -> metadata_map}
+            | collectFile() { map -> [ "lane_metadata.txt", map.collect{it}.join(', ') + '\n' ] }
+            | set{ metadata_only }
+
+            METADATA(metadata_only)
+        }
 
         emit:
         meta_cram_ch
