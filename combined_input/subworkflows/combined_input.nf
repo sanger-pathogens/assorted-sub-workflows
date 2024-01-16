@@ -25,6 +25,7 @@ workflow COMBINE_IRODS{
     // take iRODS dataset specification from CLI options
     if (params.studyid > 0) {
         IRODS_CLI()
+        IRODS_CLI.out.input_irods_from_opt_ch.set{ input_irods_from_opt_ch }
     } else {
         Channel.of("none").set{ input_irods_from_opt_ch }
     }
