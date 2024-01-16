@@ -40,6 +40,14 @@ workflow IRODS_QUERY {
             [metamap, path]
         }.set{ meta_cram_ch }
 
+        if (params.save_metadata) {
+            meta_cram_ch.map{metadata_map, path -> metadata_map}
+            | collectFile() { map -> [ "lane_metadata.txt", map.collect{it}.join(', ') + '\n' ] }
+            | set{ metadata_only }
+
+            METADATA(metadata_only)
+        }
+
         emit:
         meta_cram_ch
 
