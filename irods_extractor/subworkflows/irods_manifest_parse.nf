@@ -22,17 +22,17 @@ workflow IRODS_MANIFEST_PARSE {
 
 def create_channel(LinkedHashMap row) {
     def meta = [:]
-    meta.study = row.study
+    meta.studyid = row.studyid
 
-    if (row.study && row.runid) {
+    if (row.studyid && row.runid) {
         meta.runid = "${row.runid}"
     }
 
-    if (row.study && row.runid && row.laneid) {
+    if (row.studyid && row.runid && row.laneid) {
         meta.laneid = "${row.laneid}"
     }
 
-    if (row.study && row.runid && row.laneid && row.plexid) {
+    if (row.studyid && row.runid && row.laneid && row.plexid) {
         meta.plexid = "${row.plexid}"
     }
 
