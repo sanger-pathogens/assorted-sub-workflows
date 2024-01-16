@@ -2,6 +2,7 @@
 // SUBWORKFLOW: Read in study, run, etc. parameters and pull data from iRODS
 //
 workflow {
+    main:
     // take iRODS dataset specification from CLI options
     if (params.studyid) {
         param_input = Channel.of(["${params.studyid}", "${params.runid}", "${params.laneid}", "${params.plexid}"])
