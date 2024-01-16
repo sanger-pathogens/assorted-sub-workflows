@@ -3,6 +3,7 @@
 import argparse
 import pandas as pd
 
+#This file needs to be moved to the /bin/ folder inside the project directory intending to use this script.
 
 def parse_arguments() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
