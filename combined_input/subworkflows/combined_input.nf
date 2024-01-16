@@ -1,9 +1,10 @@
 include { IRODS_MANIFEST_PARSE } from '../../irods_extractor/subworkflows/irods_manifest_parse.nf'
+include { INPUT_CHECK } from './input_check.nf'
 
 //
 // SUBWORKFLOW: Read in study, run, etc. parameters and pull data from iRODS
 //
-workflow IRODS_CLI{
+workflow IRODS_CLI {
     main:
     param_input = Channel.of(["${params.studyid}", "${params.runid}", "${params.laneid}", "${params.plexid}"])
     
@@ -20,7 +21,7 @@ workflow IRODS_CLI{
     input_irods_from_opt_ch
 }
 
-workflow COMBINE_IRODS{
+workflow COMBINE_IRODS {
     main:
     // take iRODS dataset specification from CLI options
     if (params.studyid > 0) {
@@ -45,9 +46,22 @@ workflow COMBINE_IRODS{
     input_irods_ch
 }
 
-workflow COMBINE_READS{
+workflow COMBINE_READS {
     take:
     reads_ch // [meta, read_1, read_2] as from IRODS_EXTRACTOR
+
+    // Read in samplesheet, validate and stage input files
+    if (params.manifest_of_reads) {
+        input_reads_ch = file(params.manifest_of_reads)
+        INPUT_CHECK (
+            input_reads_ch
+        )
+        INPUT_CHECK.out.shortreads
+            .dump(tag: 'ch_reads_from_manifest')
+            .set { ch_reads_from_manifest }
+    } else {
+        Channel.of("none").set{ ch_reads_from_manifest }
+    }  // ch_reads_from_manifest [meta, [read_1, read_2]]
 
     // change channel structure to match that from INPUT_CHECK
     reads_ch.map{ meta, read_1, read_2 ->
