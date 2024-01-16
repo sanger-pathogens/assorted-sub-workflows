@@ -50,6 +50,7 @@ workflow COMBINE_READS {
     take:
     reads_ch // [meta, read_1, read_2] as from IRODS_EXTRACTOR
 
+    main:
     // Read in samplesheet, validate and stage input files
     if (params.manifest_of_reads) {
         input_reads_ch = file(params.manifest_of_reads)
