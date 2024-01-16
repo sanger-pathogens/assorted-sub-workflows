@@ -61,10 +61,12 @@ workflow CRAM_EXTRACT {
     | map { it[0,1] }
     | set{ do_not_exist }
 
-    RETRIEVE_CRAM(do_not_exist)
-    | COLLATE_CRAM
-    | FASTQ_FROM_COLLATED_BAM
-
+    if (params.cleanup_intermediate_files_irods_extractor){
+        RETRIEVE_CRAM(do_not_exist)
+        | COLLATE_CRAM
+        | FASTQ_FROM_COLLATED_BAM
+    }
+    
     FASTQ_FROM_COLLATED_BAM.out.remove_channel.flatten()
             .filter(Path)
             .map { it.delete() }
