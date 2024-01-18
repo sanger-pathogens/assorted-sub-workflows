@@ -22,8 +22,8 @@ process FASTQ_FROM_COLLATED_BAM {
     label 'time_1'
     container "/software/pathogen/images/samtools-1.17.simg"
 
-    if (params.save_fastqs) publishDir "${params.outdir}/${meta.ID}/raw_fastq/", mode: 'copy', overwrite: true, pattern: "*_1.fastq.gz", saveAs: { filename -> "raw_${forward_fastq}" }
-    if (params.save_fastqs) publishDir "${params.outdir}/${meta.ID}/raw_fastq/", mode: 'copy', overwrite: true, pattern: "*_2.fastq.gz", saveAs: { filename -> "raw_${reverse_fastq}" }
+    publishDir "${params.outdir}/${meta.ID}/raw_fastq/", enabled: params.save_fastqs, mode: 'copy', overwrite: true, pattern: "*_1.fastq.gz", saveAs: { filename -> "raw_${forward_fastq}" }
+    publishDir "${params.outdir}/${meta.ID}/raw_fastq/", enabled: params.save_fastqs, mode: 'copy', overwrite: true, pattern: "*_2.fastq.gz", saveAs: { filename -> "raw_${reverse_fastq}" }
 
     input:
     tuple val(meta), path(bam), path(cram)
