@@ -41,6 +41,7 @@ workflow COMBINE_IRODS {
 
     // combine iRODS specs input channels
     input_irods_from_opt_ch.mix(input_irods_from_man_ch)
+    | filter{ it != "none"}
     | set{ input_irods_ch }
 
     emit:
