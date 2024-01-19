@@ -26,7 +26,6 @@ workflow COMBINE_IRODS {
     // take iRODS dataset specification from CLI options
     if (params.studyid > 0) {
         IRODS_CLI()
-        | dump(tag: 'input_irods_from_opt_ch')
         | set{ input_irods_from_opt_ch }
     } else {
         Channel.of("none").set{ input_irods_from_opt_ch }
@@ -35,7 +34,6 @@ workflow COMBINE_IRODS {
     // take iRODS dataset specification from manifest of lanes
     if (params.manifest_of_lanes) {
         IRODS_MANIFEST_PARSE(params.manifest_of_lanes)
-        | dump(tag: 'input_irods_from_man_ch')
         | set{ input_irods_from_man_ch }
     } else {
         Channel.of("none").set{ input_irods_from_man_ch}
@@ -44,7 +42,6 @@ workflow COMBINE_IRODS {
     // combine iRODS specs input channels
     input_irods_from_opt_ch.mix(input_irods_from_man_ch)
     | filter{ it != "none"}
-    | dump(tag: 'input_irods_ch')
     | set{ input_irods_ch }
 
     emit:
@@ -60,7 +57,6 @@ workflow COMBINE_READS {
     if (params.manifest_of_reads) {
         input_reads_ch = file(params.manifest_of_reads)
         INPUT_CHECK (input_reads_ch)
-        | dump(tag: 'ch_reads_from_manifest')
         | set{ ch_reads_from_manifest }
     } else {
         Channel.of("none").set{ ch_reads_from_manifest }
