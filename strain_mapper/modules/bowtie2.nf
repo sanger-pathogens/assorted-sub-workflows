@@ -6,7 +6,7 @@ process BOWTIE2 {
     container 'quay.io/biocontainers/bowtie2:2.5.1--py310h8d7afc0_0'
 
     input:
-    tuple val(meta), file(reads)
+    tuple val(meta), path(reads_1), path(reads_2)
     path(bt2_index_files)
 
     output:
@@ -18,7 +18,7 @@ process BOWTIE2 {
     # glob pattern to ensure correct bt index name
     bt_index=\$(ls *.bt2* | head -1 | awk -F ".1.bt2" '{ print \$1 }')
     bowtie2 -x \${bt_index} \
-            -1 ${reads[0]} -2 ${reads[1]} \
+            -1 ${reads_1} -2 ${reads_2} \
             -S ${mapped_reads} \
             -p ${task.cpus}
     """
