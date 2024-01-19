@@ -53,7 +53,7 @@ workflow COMBINE_IRODS {
 
 workflow COMBINE_READS {
     take:
-    reads_ch // [meta, read_1, read_2] as from IRODS_EXTRACTOR
+    irods_reads_ch // [meta, read_1, read_2] as from IRODS_EXTRACTOR
 
     main:
     // Read in samplesheet, validate and stage input files
@@ -64,19 +64,10 @@ workflow COMBINE_READS {
         | set{ ch_reads_from_manifest }
     } else {
         Channel.of("none").set{ ch_reads_from_manifest }
-    }  // ch_reads_from_manifest [meta, [read_1, read_2]]
-
-    // change channel structure to match that from INPUT_CHECK
-    reads_ch.map{ meta, read_1, read_2 ->
-        meta_new = [:]
-        meta_new.id = meta.ID
-        reads = [read_1, read_2]
-        [ meta_new, reads ]
-    }.set{ irods_ready_to_map_ch }
-    | dump{tag: 'irods_ready_to_map_ch'}
+    }  // ch_reads_from_manifest [meta, read_1, read_2]
 
     // combine reads input channels
-    irods_ready_to_map_ch.mix(ch_reads_from_manifest.filter{ it != "none"}).set{ all_reads_ready_to_map_ch }
+    irods_reads_ch.mix(ch_reads_from_manifest.filter{ it != "none"}).set{ all_reads_ready_to_map_ch }
 
     emit:
     all_reads_ready_to_map_ch

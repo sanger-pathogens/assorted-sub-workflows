@@ -24,7 +24,7 @@ workflow INPUT_CHECK {
 // Function to get list of [ meta, [ fastq_1, fastq_2 ] ]
 def create_fastq_channels(LinkedHashMap row) {
     def meta = [:]
-    meta.id = row.ID
+    meta.ID = row.ID
 
     def array = []
     // check short reads
@@ -40,6 +40,6 @@ def create_fastq_channels(LinkedHashMap row) {
         }
         fastq_2 = file(row.R2)
     } else { fastq_2 = 'NA' }
-    array = [ meta, [ fastq_1, fastq_2 ] ]
+    array = [ meta, fastq_1, fastq_2 ]
     return array
 }
