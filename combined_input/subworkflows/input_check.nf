@@ -12,16 +12,15 @@ workflow INPUT_CHECK {
         .ifEmpty {exit 1, "Cannot find path file ${samplesheet}"}
         .splitCsv ( header:true, sep:',' )
         .map { create_fastq_channels(it) }
-        .map { meta, reads -> [ meta, reads ] }
-        .filter{ meta, reads -> reads != 'NA' }
-        .filter{ meta, reads -> reads[0] != 'NA' || reads[1] != 'NA' }  // Single end not supported
+        .map { meta, reads_1, reads_2 -> [ meta, fastq_1, fastq_2 ] }
+        .filter{ meta, reads_1, reads_2 -> reads_1 != 'NA' || reads_2 != 'NA' }  // Single end not supported
         .set { shortreads }
 
     emit:
-    shortreads // channel: [ val(meta), [ reads ] ]
+    shortreads // channel: [ val(meta), file(reads_1), file(reads_2) ]
 }
 
-// Function to get list of [ meta, [ fastq_1, fastq_2 ] ]
+// Function to get list of [ meta, fastq_1, fastq_2 ]
 def create_fastq_channels(LinkedHashMap row) {
     def meta = [:]
     meta.ID = row.ID
