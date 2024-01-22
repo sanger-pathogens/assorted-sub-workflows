@@ -1,0 +1,27 @@
+{ 
+    "pipeline": "Irods information",
+    "params": {
+        "irods_params": {
+            "studyid": {
+                "default": -1,
+                "help_text": "Sequencing Study ID"
+            },
+            "runid": {
+                "default": -1,
+                "help_text": "Sequencing Run ID"
+            },
+            "laneid": {
+                "default": -1,
+                "help_text": "Sequencing Lane ID"
+            },
+            "plexid": {
+                "default": -1,
+                "help_text": "Sequencing Plex ID"
+            },
+            "manifest": {
+                "default": "",
+                "help_text": "Path to a manifest of search terms as specified above"
+            }
+        }
+    }
+}
