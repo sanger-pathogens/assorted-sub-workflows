@@ -18,7 +18,7 @@
                 "default": -1,
                 "help_text": "Sequencing Plex ID"
             },
-            "manifest": {
+            "manifest_of_lanes": {
                 "default": "",
                 "help_text": "Path to a manifest of search terms as specified above"
             }
