@@ -61,8 +61,8 @@ workflow CRAM_EXTRACT {
 
     main:
 
-    Channel.fromPath("${params.outdir}/*#*/raw_fastq/*_1.fastq.gz").map{ raw_fastq_path ->
-        ID = raw_fastq_path.simpleName.split("_1")[0]
+    Channel.fromPath("${params.outdir}/*#*/${params.preexisting_fastq_tag}/*_1.fastq.gz").map{ raw_fastq_path ->
+        ID = preexisting_fastq_path.simpleName.split("_1")[0]
     }.ifEmpty("fresh_run").set{ existing_id }
 
     meta_cram_ch.combine( existing_id | collect | map{ [it] })
@@ -89,9 +89,8 @@ workflow IRODS_EXTRACTOR {
 
     main:
 
-    IRODS_QUERY(input_irods_ch).set{ meta_cram_ch }
-
-    CRAM_EXTRACT(meta_cram_ch)
+    IRODS_QUERY
+    | CRAM_EXTRACT
 
     emit:
     reads_ch = CRAM_EXTRACT.out
