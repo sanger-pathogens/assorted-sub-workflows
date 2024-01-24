@@ -29,7 +29,7 @@
                 "help_text": "Save the metadata to the results directory that is returned from IRODS"
             },
             "save_fastqs": {
-                "default": true,
+                "default": false,
                 "help_text": "Save the fastq's to the results directory after unpacking from CRAMS"
             },
             "save_nested_fastqs": {
