@@ -1,7 +1,7 @@
 process COLLATE_CRAM {
     label 'cpu_2'
     label 'mem_1'
-    time { cram.size() > 10.GB ? 12 : 1 }
+    time { cram.size() > 10.GB ? '12h' : '1h' }
     container "/software/pathogen/images/samtools-1.17.simg"
     input:
     tuple val(meta), path(cram)
@@ -19,7 +19,7 @@ process COLLATE_CRAM {
 process FASTQ_FROM_COLLATED_BAM {
     label 'cpu_2'
     label 'mem_1'
-    time { bam.size() > 10.GB ? 12 : 1 }
+    time { bam.size() > 10.GB ? '12h' : '1h' }
     container "/software/pathogen/images/samtools-1.17.simg"
 
     publishDir "${params.outdir}/${meta.ID}/raw_fastq/", enabled: params.save_fastqs, mode: 'copy', overwrite: true, pattern: "*_1.fastq.gz", saveAs: { filename -> "raw_${forward_fastq}" }
