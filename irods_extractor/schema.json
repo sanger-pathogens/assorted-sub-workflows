@@ -22,6 +22,20 @@
                 "default": "",
                 "help_text": "Path to a manifest of search terms as specified above"
             }
+        },
+        "output_params": {
+            "save_metadata":{
+                "default": true,
+                "help_text": "Save the metadata to the results directory that is returned from IRODS"
+            },
+            "save_fastqs": {
+                "default": true,
+                "help_text": "Save the fastq's to the results directory after unpacking from CRAMS"
+            },
+            "save_nested_fastqs": {
+                "default": false,
+                "help_text": "Save the fastq's to the results directory within sample specific subdirectories after unpacking from CRAMS"
+            }
         }
     }
 }
