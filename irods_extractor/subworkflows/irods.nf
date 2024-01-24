@@ -89,7 +89,7 @@ workflow IRODS_EXTRACTOR {
 
     main:
 
-    IRODS_QUERY
+    IRODS_QUERY(input_irods_ch)
     | CRAM_EXTRACT
 
     emit:
