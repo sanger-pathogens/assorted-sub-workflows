@@ -79,7 +79,7 @@ workflow CRAM_EXTRACT {
             .map { it.delete() }
 
     emit:
-    reads_ch = FASTQ_FROM_COLLATED_BAM.out.fastq_channel
+    reads_ch = FASTQ_FROM_COLLATED_BAM.out.fastq_channel // tuple val(meta), path(forward_fastq), path(reverse_fastq)
 }
 
 workflow IRODS_EXTRACTOR {
@@ -93,5 +93,5 @@ workflow IRODS_EXTRACTOR {
     | CRAM_EXTRACT
 
     emit:
-    reads_ch = CRAM_EXTRACT.out
+    reads_ch = CRAM_EXTRACT.out // tuple val(meta), path(forward_fastq), path(reverse_fastq)
 }

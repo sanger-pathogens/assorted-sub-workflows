@@ -66,6 +66,6 @@ workflow COMBINE_READS {
     irods_reads_ch.mix(ch_reads_from_manifest.filter{ it != "none"}).set{ all_reads_ready_to_map_ch }
 
     emit:
-    all_reads_ready_to_map_ch
+    all_reads_ready_to_map_ch  // [meta, read_1, read_2]
 
 }
