@@ -68,7 +68,7 @@ workflow CRAM_EXTRACT {
     meta_cram_ch.combine( existing_id | collect | map{ [it] })
     | filter { metadata, cram_path, existing -> !(metadata.ID in existing)}
     | map { it[0,1] }
-    | set{ do_not_exist }.dump(tag: 'do_not_exist')
+    | set{ do_not_exist }
 
     RETRIEVE_CRAM(do_not_exist)
     | COLLATE_CRAM
