@@ -16,6 +16,6 @@ process METADATA {
     maptocsv = "${projectDir}/assorted-sub-workflows/irods_extractor/bin/map_to_csv.py"
     script:
     """
-    map_to_csv.py --input_map_list ${metadata}
+    ${maptocsv} --input_map_list ${metadata}
     """
 }
