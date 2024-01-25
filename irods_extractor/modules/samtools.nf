@@ -1,7 +1,7 @@
 process COLLATE_CRAM {
     label 'cpu_2'
     label 'mem_1'
-    label 'time_1'
+    label 'time_12'
     container "/software/pathogen/images/samtools-1.17.simg"
     input:
     tuple val(meta), path(cram)
@@ -19,11 +19,14 @@ process COLLATE_CRAM {
 process FASTQ_FROM_COLLATED_BAM {
     label 'cpu_2'
     label 'mem_1'
-    label 'time_1'
+    label 'time_12'
     container "/software/pathogen/images/samtools-1.17.simg"
 
-    if (params.save_fastqs) publishDir "${params.outdir}/${meta.ID}/raw_fastq/", mode: 'copy', overwrite: true, pattern: "*_1.fastq.gz", saveAs: { filename -> "raw_${forward_fastq}" }
-    if (params.save_fastqs) publishDir "${params.outdir}/${meta.ID}/raw_fastq/", mode: 'copy', overwrite: true, pattern: "*_2.fastq.gz", saveAs: { filename -> "raw_${reverse_fastq}" }
+    publishDir "${params.outdir}/fastqs/", enabled: params.save_fastqs, mode: 'copy', overwrite: true, pattern: "*_1.fastq.gz", saveAs: { filename -> "raw_${forward_fastq}" }
+    publishDir "${params.outdir}/fastqs/", enabled: params.save_fastqs, mode: 'copy', overwrite: true, pattern: "*_2.fastq.gz", saveAs: { filename -> "raw_${reverse_fastq}" }
+
+    publishDir "${params.outdir}/${meta.ID}/raw_fastq/", enabled: params.save_nested_fastqs, mode: 'copy', overwrite: true, pattern: "*_1.fastq.gz", saveAs: { filename -> "raw_${forward_fastq}" }
+    publishDir "${params.outdir}/${meta.ID}/raw_fastq/", enabled: params.save_nested_fastqs, mode: 'copy', overwrite: true, pattern: "*_2.fastq.gz", saveAs: { filename -> "raw_${reverse_fastq}" }
 
     input:
     tuple val(meta), path(bam), path(cram)

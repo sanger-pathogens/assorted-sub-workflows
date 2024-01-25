@@ -1,0 +1,41 @@
+{ 
+    "pipeline": "Irods information",
+    "params": {
+        "irods_params": {
+            "studyid": {
+                "default": -1,
+                "help_text": "Sequencing Study ID"
+            },
+            "runid": {
+                "default": -1,
+                "help_text": "Sequencing Run ID"
+            },
+            "laneid": {
+                "default": -1,
+                "help_text": "Sequencing Lane ID"
+            },
+            "plexid": {
+                "default": -1,
+                "help_text": "Sequencing Plex ID"
+            },
+            "manifest_of_lanes": {
+                "default": "",
+                "help_text": "Path to a manifest of search terms as specified above"
+            }
+        },
+        "output_params": {
+            "save_metadata":{
+                "default": true,
+                "help_text": "Save the metadata to the results directory that is returned from IRODS"
+            },
+            "save_fastqs": {
+                "default": false,
+                "help_text": "Save the fastq's to the results directory after unpacking from CRAMS"
+            },
+            "save_nested_fastqs": {
+                "default": false,
+                "help_text": "Save the fastq's to the results directory within sample specific subdirectories after unpacking from CRAMS"
+            }
+        }
+    }
+}
