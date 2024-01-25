@@ -13,7 +13,7 @@ process BOWTIE2 {
     tuple val(meta), path("${mapped_reads}"),  emit: mapped_reads
 
     script:
-    mapped_reads = "${meta.id}.sam"
+    mapped_reads = "${meta.ID}.sam"
     """
     # glob pattern to ensure correct bt index name
     bt_index=\$(ls *.bt2* | head -1 | awk -F ".1.bt2" '{ print \$1 }')

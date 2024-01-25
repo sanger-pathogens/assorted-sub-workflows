@@ -5,7 +5,7 @@ process METADATA {
     
     container '/software/pathogen/images/python-pandas.simg'
 
-    publishDir "${params.results_dir}/", mode: 'copy', overwrite: true, pattern: "metadata.csv"
+    publishDir "${params.outdir}/", mode: 'copy', overwrite: true, pattern: "metadata.csv"
 
     input:
     path(metadata)

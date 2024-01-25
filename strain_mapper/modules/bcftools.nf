@@ -105,7 +105,7 @@ process FINAL_VCF {
     label 'mem_1'
     label 'time_1'
     
-    publishDir "${params.outdir}/${meta.id}/final_vcf", mode: 'copy', overwrite: true
+    publishDir "${params.outdir}/${meta.ID}/final_vcf", mode: 'copy', overwrite: true
 
     container 'quay.io/biocontainers/bcftools:1.16--haef29d1_2'
 
@@ -117,7 +117,7 @@ process FINAL_VCF {
     tuple val(meta), path("${out_vcf}"),  emit: out_vcf
 
     script:
-    out_vcf = "${meta.id}.vcf.gz"
+    out_vcf = "${meta.ID}.vcf.gz"
     if (params.only_report_alts)
         """
         bcftools view -o ${out_vcf} \
