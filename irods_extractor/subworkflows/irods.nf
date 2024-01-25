@@ -63,7 +63,7 @@ workflow CRAM_EXTRACT {
 
     Channel.fromPath("${params.outdir}/*/${params.preexisting_fastq_tag}/*_1.fastq.gz").map{ preexisting_fastq_path ->
         ID = preexisting_fastq_path.simpleName.split("_1")[0]
-    }.ifEmpty("fresh_run").set{ existing_id }.dump(tag: 'existing_id')
+    }.ifEmpty("fresh_run").set{ existing_id }
 
     meta_cram_ch.combine( existing_id | collect | map{ [it] })
     | filter { metadata, cram_path, existing -> !(metadata.ID in existing)}
