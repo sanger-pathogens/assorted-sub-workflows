@@ -61,7 +61,7 @@ workflow CRAM_EXTRACT {
 
     main:
 
-    Channel.fromPath("${params.outdir}/*#*/${params.preexisting_fastq_tag}/*_1.fastq.gz").map{ preexisting_fastq_path ->
+    Channel.fromPath("${params.outdir}/*/${params.preexisting_fastq_tag}/*_1.fastq.gz").map{ preexisting_fastq_path ->
         ID = preexisting_fastq_path.simpleName.split("_1")[0]
     }.ifEmpty("fresh_run").set{ existing_id }.dump(tag: 'existing_id')
 
