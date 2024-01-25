@@ -13,8 +13,8 @@ process METADATA {
     output:
     path("metadata.csv")
     
-    maptocsv = "${projectDir}/assorted-sub-workflows/irods_extractor/bin/map_to_csv.py"
     script:
+    maptocsv = "${projectDir}/assorted-sub-workflows/irods_extractor/bin/map_to_csv.py"
     """
     ${maptocsv} --input_map_list ${metadata}
     """
