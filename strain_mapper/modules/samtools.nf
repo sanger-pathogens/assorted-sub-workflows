@@ -12,7 +12,7 @@ process CONVERT_TO_BAM {
     tuple val(meta), path("${mapped_reads_bam}"),  emit: mapped_reads_bam
 
     script:
-    mapped_reads_bam = "${meta.id}.bam"
+    mapped_reads_bam = "${meta.ID}.bam"
     """
     samtools view -@ ${task.cpus} \
                   -bS -F4 \
@@ -26,7 +26,7 @@ process SAMTOOLS_SORT {
     label 'mem_8'
     label 'time_12'
 
-    publishDir "${params.outdir}/${meta.id}/samtools_sort", enabled: params.keep_sorted_bam, mode: 'copy', overwrite: true
+    publishDir "${params.outdir}/${meta.ID}/samtools_sort", enabled: params.keep_sorted_bam, mode: 'copy', overwrite: true
 
     container 'quay.io/biocontainers/samtools:1.16.1--h00cdaf9_2'
 
@@ -37,7 +37,7 @@ process SAMTOOLS_SORT {
     tuple val(meta), path("${sorted_reads}"),  emit: sorted_reads
 
     script:
-    sorted_reads = "${meta.id}_sorted.bam"
+    sorted_reads = "${meta.ID}_sorted.bam"
     """
     samtools sort -@ ${task.cpus} \
                   -o ${sorted_reads} \
