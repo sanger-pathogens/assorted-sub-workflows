@@ -107,7 +107,10 @@ process FINAL_VCF {
     
     publishDir "${params.outdir}/${meta.ID}/final_vcf", mode: 'copy', overwrite: true
 
-    container 'quay.io/biocontainers/bcftools:1.16--haef29d1_2'
+    conda 'bioconda::bcftools=1.17'
+    // TO DO consider swith to v1.19.1 ?
+    // container "${ singularity.enabled ? '/software/pathogen/images/software/pathogen/images/bcftools-0.1.19-1.simg' : 'quay.io/biocontainers/bcftools:1.17-h3cc50cf_1'}"
+    container 'quay.io/biocontainers/bcftools:1.17-h3cc50cf_1'
 
     // input file can be VCF or BCF as is handled equally by bcftools
     input:

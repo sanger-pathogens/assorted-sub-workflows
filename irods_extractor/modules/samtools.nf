@@ -2,7 +2,9 @@ process COLLATE_CRAM {
     label 'cpu_2'
     label 'mem_1'
     label 'time_12'
-    container "/software/pathogen/images/samtools-1.17.simg"
+
+    conda 'bioconda::samtools=1.17'
+    container "${ singularity.enabled ? '/software/pathogen/images/samtools-1.17.simg' : 'quay.io/biocontainers/samtools:1.17-hd87286a_2' }"
     input:
     tuple val(meta), path(cram)
 
@@ -20,7 +22,9 @@ process FASTQ_FROM_COLLATED_BAM {
     label 'cpu_2'
     label 'mem_1'
     label 'time_12'
-    container "/software/pathogen/images/samtools-1.17.simg"
+
+    conda 'bioconda::samtools=1.17'
+    container "${ singularity.enabled ? '/software/pathogen/images/samtools-1.17.simg' : 'quay.io/biocontainers/samtools:1.17-hd87286a_2' }"
 
     publishDir "${params.outdir}/fastqs/", enabled: params.save_fastqs, mode: 'copy', overwrite: true, pattern: "*_1.fastq.gz", saveAs: { filename -> "raw_${forward_fastq}" }
     publishDir "${params.outdir}/fastqs/", enabled: params.save_fastqs, mode: 'copy', overwrite: true, pattern: "*_2.fastq.gz", saveAs: { filename -> "raw_${reverse_fastq}" }

@@ -3,7 +3,8 @@ process CONVERT_TO_BAM {
     label 'mem_1'
     label 'time_1'
     
-    container 'quay.io/biocontainers/samtools:1.16.1--h00cdaf9_2'
+    conda 'bioconda::samtools=1.17'
+    container "${ singularity.enabled ? '/software/pathogen/images/samtools-1.17.simg' : 'quay.io/biocontainers/samtools:1.17-hd87286a_2' }"
 
     input:
     tuple val(meta), file(mapped_reads)
@@ -28,7 +29,8 @@ process SAMTOOLS_SORT {
 
     publishDir "${params.outdir}/${meta.ID}/samtools_sort", enabled: params.keep_sorted_bam, mode: 'copy', overwrite: true
 
-    container 'quay.io/biocontainers/samtools:1.16.1--h00cdaf9_2'
+    conda 'bioconda::samtools=1.17'
+    container "${ singularity.enabled ? '/software/pathogen/images/samtools-1.17.simg' : 'quay.io/biocontainers/samtools:1.17-hd87286a_2' }"
 
     input:
     tuple val(meta), file(mapped_reads_bam)
@@ -52,7 +54,8 @@ process INDEX_REF {
 
     publishDir "${params.outdir}/sorted_ref", mode: 'copy', overwrite: true
 
-    container 'quay.io/biocontainers/samtools:1.16.1--h00cdaf9_2'
+    conda 'bioconda::samtools=1.17'
+    container 'quay.io/biocontainers/samtools:1.17-hd87286a_2'
 
     input:
     path(reference)
