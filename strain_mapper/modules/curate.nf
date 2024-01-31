@@ -6,7 +6,7 @@ process CURATE_CONSENSUS {
     publishDir "${params.outdir}/${meta.ID}/curated_consensus", mode: 'copy', overwrite: true
 
     conda 'conda-forge::python=3.10.2'
-    container "${ singularity.enabled ? '/software/pathogen/images/python-pandas.simg' : 'quay.io/biocontainers/python:3.10.2' }"
+    container "${ profile.name == 'standard' ? '/software/pathogen/images/python-pandas.simg' : 'quay.io/biocontainers/python:3.10.2' }"
 
     input:
     tuple val(meta), file(vcf_final), path(reference), path(ref_index)

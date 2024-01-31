@@ -4,7 +4,7 @@ process GUBBINS{
     label 'time_12'
 
     conda 'bioconda::gubbins=3.2.1'
-    container "${ singularity.enabled ? '/software/pathogen/images/gubbins-3.2.1.simg' : 'quay.io/biocontainers/gubbins:3.2.1--py38pl5321h4c6a040_1' }"
+    container "${ profile.name == 'standard' ? '/software/pathogen/images/gubbins-3.2.1.simg' : 'quay.io/biocontainers/gubbins:3.2.1--py38pl5321h4c6a040_1' }"
 
     publishDir "${params.outdir}/gubbins", mode: 'copy', overwrite: true, pattern: "${gubprefix}.*"
 

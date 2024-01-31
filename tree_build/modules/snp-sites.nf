@@ -4,7 +4,7 @@ process SNP_SITES{
     label 'time_12'
 
     conda 'bioconda::snp-sites=2.5.1'
-    container "${ singularity.enabled ? '/software/pathogen/images/snp-sites-2.5.1--hed695b0_0.simg' : 'quay.io/biocontainers/snp-sites-2.5.1--hed695b0_0' }"
+    container "${ profile.name == 'standard' ? '/software/pathogen/images/snp-sites-2.5.1--hed695b0_0.simg' : 'quay.io/biocontainers/snp-sites-2.5.1--hed695b0_0' }"
 
     publishDir "${params.outdir}/snp_aln", mode: 'copy', overwrite: true, pattern: "*.snp.aln"
 

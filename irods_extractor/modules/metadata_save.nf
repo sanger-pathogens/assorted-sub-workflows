@@ -5,7 +5,7 @@ process METADATA {
     
     conda 'anaconda::pandas=2.1.4'
     // NOTE discrepancy of version as v2.1.4 not avialable publicly AFAIK
-    container "${ singularity.enabled ? '/software/pathogen/images/python-pandas.simg' : 'biocontainers/pandas:1.5.1_cv1' }"
+    container "${ profile.name == 'standard' ? '/software/pathogen/images/python-pandas.simg' : 'biocontainers/pandas:1.5.1_cv1' }"
     container '/software/pathogen/images/python-pandas.simg'
 
     publishDir "${params.outdir}/", mode: 'copy', overwrite: true, pattern: "metadata.csv"

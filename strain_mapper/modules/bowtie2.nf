@@ -4,7 +4,7 @@ process BOWTIE2 {
     label 'time_12'
 
     conda 'bioconda::bowtie2=2.5.1'
-    container "${ singularity.enabled ? '/software/pathogen/images/bowtie2-2.5.1--py38he00c5e5_2.simg' : 'quay.io/biocontainers/bowtie2:2.5.1--py310h8d7afc0_0' }"
+    container "${ profile.name == 'standard' ? '/software/pathogen/images/bowtie2-2.5.1--py38he00c5e5_2.simg' : 'quay.io/biocontainers/bowtie2:2.5.1--py310h8d7afc0_0' }"
 
     input:
     tuple val(meta), path(reads_1), path(reads_2)
