@@ -4,8 +4,7 @@ process BCFTOOLS_MPILEUP {
     label 'time_1'
 
     conda 'bioconda::bcftools=1.17'
-    // TO DO consider installing v1.17 as container on the farm? or even switch to most recent version v1.19.1 ? 
-    container 'quay.io/biocontainers/bcftools:1.16--haef29d1_2'
+    container 'quay.io/biocontainers/bcftools:1.17--h3cc50cf_1'
 
     input:
     tuple val(meta), path(sorted_reads), path(reference), path(reference_index)
@@ -29,8 +28,7 @@ process BCFTOOLS_CALL {
     label 'time_1'
 
     conda 'bioconda::bcftools=1.17'
-    // TO DO consider installing v1.17 as container on the farm? or even switch to most recent version v1.19.1 ? 
-    container 'quay.io/biocontainers/bcftools:1.16--haef29d1_2'
+    container 'quay.io/biocontainers/bcftools:1.17--h3cc50cf_1'
 
     input:
     tuple val(meta), file(mpileup_file)
@@ -55,8 +53,7 @@ process BCFTOOLS_FILTERING {
     label 'time_1'
 
     conda 'bioconda::bcftools=1.17'
-    // TO DO consider installing v1.17 as container on the farm? or even switch to most recent version v1.19.1 ? 
-    container 'quay.io/biocontainers/bcftools:1.16--haef29d1_2'
+    container 'quay.io/biocontainers/bcftools:1.17--h3cc50cf_1'
 
     input:
     tuple val(meta), file(vcf_allpos)
@@ -81,8 +78,7 @@ process RAW_VCF {
     publishDir "${params.outdir}/${meta.id}/raw_vcf", mode: 'copy', overwrite: true
 
     conda 'bioconda::bcftools=1.17'
-    // TO DO consider installing v1.17 as container on the farm? or even switch to most recent version v1.19.1 ? 
-    container 'quay.io/biocontainers/bcftools:1.16--haef29d1_2'
+    container 'quay.io/biocontainers/bcftools:1.17--h3cc50cf_1'
 
     // input file can be VCF or BCF as is handled equally by bcftools
     input:
@@ -116,8 +112,7 @@ process FINAL_VCF {
     publishDir "${params.outdir}/${meta.ID}/final_vcf", mode: 'copy', overwrite: true
 
     conda 'bioconda::bcftools=1.17'
-    // TO DO consider installing v1.17 as container on the farm? or even switch to most recent version v1.19.1 ? 
-    container 'quay.io/biocontainers/bcftools:1.17-h3cc50cf_1'
+    container 'quay.io/biocontainers/bcftools:1.17--h3cc50cf_1'
 
     // input file can be VCF or BCF as is handled equally by bcftools
     input:
