@@ -4,7 +4,7 @@ process BUILD_TREE {
     label 'time_12'
 
     conda 'bioconda::raxml-ng=1.1.0'
-    container "${ profile.name == 'standard' ? '/software/pathogen/images/raxml-ng-1.1.0.simg' : 'quay.io/biocontainers/raxml-ng:1.1.0--h22e3c99_1' }"
+    container 'quay.io/biocontainers/raxml-ng:1.1.0--h22e3c99_1'
 
     publishDir "${params.outdir}/tree", mode: 'copy', overwrite: true, pattern: "*.support"
 

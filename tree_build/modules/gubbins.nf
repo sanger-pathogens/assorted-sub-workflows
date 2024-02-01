@@ -4,7 +4,7 @@ process GUBBINS{
     label 'time_12'
 
     conda 'bioconda::gubbins=3.2.1'
-    container "${ profile.name == 'standard' ? '/software/pathogen/images/gubbins-3.2.1.simg' : 'quay.io/biocontainers/gubbins:3.2.1--py38pl5321h4c6a040_1' }"
+    container 'quay.io/biocontainers/gubbins:3.2.1--py38pl5321h4c6a040_1'
 
     publishDir "${params.outdir}/gubbins", mode: 'copy', overwrite: true, pattern: "${gubprefix}.*"
 
@@ -32,7 +32,8 @@ process GUBBINS_MASK{
     label 'time_12'
 
     conda 'bioconda::gubbins=3.2.1'
-    container '/software/pathogen/images/gubbins-3.2.1.simg'
+    // need to check if equivalent to below: container '/software/pathogen/images/gubbins-3.2.1.simg'
+    container 'quay.io/biocontainers/gubbins:3.2.1--py38pl5321h4c6a040_1'
 
 
     input:

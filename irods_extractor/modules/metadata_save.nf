@@ -4,8 +4,7 @@ process METADATA {
     label 'time_1'
     
     conda 'anaconda::pandas=2.1.4'
-    // NOTE discrepancy of version as v2.1.4 not avialable publicly AFAIK
-    container "${ profile.name == 'standard' ? '/software/pathogen/images/python-pandas.simg' : 'biocontainers/pandas:1.5.1_cv1' }"
+    // NOTE v2.1.4 not avialable publicly AFAIK so prefering custom image on farm with v2.1.4 vs. quay.io/biocontainers/pandas:1.5.2
     container '/software/pathogen/images/python-pandas.simg'
 
     publishDir "${params.outdir}/", mode: 'copy', overwrite: true, pattern: "metadata.csv"

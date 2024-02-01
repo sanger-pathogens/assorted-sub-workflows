@@ -4,8 +4,6 @@ process PICARD_MARKDUP {
     label 'time_1'
 
     conda 'bioconda::picard=3.1.1'
-    // TO DO when module installed on farm: 
-    // container "${ profile.name == 'standard' ? '/software/pathogen/images/picard:3.1.1--hdfd78af_0.simg' : 'quay.io/biocontainers/picard:3.1.1--hdfd78af_0' }"
     container 'quay.io/biocontainers/picard:3.1.1--hdfd78af_0'
 
     publishDir "${params.outdir}/${meta.ID}/picard", enabled: params.keep_sorted_bam, mode: 'copy', overwrite: true
