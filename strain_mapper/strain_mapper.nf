@@ -41,7 +41,9 @@ workflow STRAIN_MAPPER {
     //
 
     if (params.mapper == "bowtie2") {
+
         // BOWTIE2 INDEX
+        
         ref_without_extension = "${reference.parent}/${reference.baseName}"
         bt2_index_files = file("${ref_without_extension}*.bt2")
         if (bt2_index_files) {
@@ -64,11 +66,12 @@ workflow STRAIN_MAPPER {
             ch_bt2_index 
         )
         BOWTIE2.out.mapped_reads.dump(tag: 'bowtie2').set { ch_mapped }
-    }
-    //
-    //BWA WORKFLOW
-    //
-    if (params.mapper == "bwa") {
+    } else if (params.mapper == "bwa") {
+
+        //
+        //BWA WORKFLOW
+        //
+
 
         // BWA INDEX
         bwa_index_files = file("${reference}.fai")
@@ -93,8 +96,7 @@ workflow STRAIN_MAPPER {
         )
         BWA.out.mapped_reads.dump(tag: 'bwa').set { ch_mapped }
 
-    } 
-    else {
+    } else {
         log.info "supplied mapper: ${params.mapper} is not currently supported"
     }
 
