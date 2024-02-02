@@ -43,7 +43,7 @@ workflow STRAIN_MAPPER {
     if (params.mapper == "bowtie2") {
 
         // BOWTIE2 INDEX
-        
+
         ref_without_extension = "${reference.parent}/${reference.baseName}"
         bt2_index_files = file("${ref_without_extension}*.bt2")
         if (bt2_index_files) {
@@ -97,7 +97,7 @@ workflow STRAIN_MAPPER {
         BWA.out.mapped_reads.dump(tag: 'bwa').set { ch_mapped }
 
     } else {
-        log.info "supplied mapper: ${params.mapper} is not currently supported"
+        error "supplied mapper: ${params.mapper} is not currently supported"
     }
 
 
