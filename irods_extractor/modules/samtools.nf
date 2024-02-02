@@ -4,7 +4,7 @@ process COLLATE_CRAM {
     label 'time_12'
 
     conda 'bioconda::samtools=1.17'
-    container 'quay.io/biocontainers/samtools:1.17-hd87286a_2'
+    container 'quay.io/biocontainers/samtools:1.17--hd87286a_2'
     input:
     tuple val(meta), path(cram)
 
