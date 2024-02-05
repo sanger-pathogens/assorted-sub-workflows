@@ -38,34 +38,37 @@ class NextflowTool {
             def schema_in = new File(schema_path).text
             def json = new JsonSlurper().parseText(schema_in)
 
+            //create a list of keys you want to supress in the json
+            def banned_keylist = master_schema.overwrite_param.keySet() as Set
+
             json.params.each{
-                if (!it.key in master_schema.overwrite_param) {
+                if (!banned_keylist.contains(it.key)) {
                     log.info "${colors.purple} ${it.key} ${colors.reset}"
-                it.value.each {
-                    if (it.key in master_schema.overwrite_param) {
-                        // A groovy json path cannot be queried using a variable unless you force it using eval
-                        // set up the query and then use eval.x to append the search term onto the end of the json object used to overwrite
-                        // this then replaces the default value with the input
+                    it.value.each {
+                        if (it.key in master_schema.overwrite_param) {
+                            // A groovy json path cannot be queried using a variable unless you force it using eval
+                            // set up the query and then use eval.x to append the search term onto the end of the json object used to overwrite
+                            // this then replaces the default value with the input
 
-                        def overwrite_path = 'overwrite_param.' + it.key
+                            def overwrite_path = 'overwrite_param.' + it.key
 
-                        def overwrite_param = Eval.x( master_schema, 'x.' + overwrite_path)
+                            def overwrite_param = Eval.x( master_schema, 'x.' + overwrite_path)
 
-                        if (overwrite_param.help_text != "") {
+                            if (overwrite_param.help_text != "") {
+                                log.info indent + "--" + it.key
+                                log.info indent + indent + "default: " + overwrite_param.default
+                                log.info indent + indent + overwrite_param.help_text
+                            }
+
+                        } else {
+                            //if nothing needs to be overwritten just print what is there
                             log.info indent + "--" + it.key
-                            log.info indent + indent + "default: " + overwrite_param.default
-                            log.info indent + indent + overwrite_param.help_text
+                            log.info indent + indent + "default: " + it.value.default
+                            log.info indent + indent + it.value.help_text
                         }
-
-                    } else {
-                        //if nothing needs to be overwritten just print what is there
-                        log.info indent + "--" + it.key
-                        log.info indent + indent + "default: " + it.value.default
-                        log.info indent + indent + it.value.help_text
                     }
-                }
-                //put a line to seperate
-                log.info dashedLine(monochrome_logs)
+                    //put a line to seperate
+                    log.info dashedLine(monochrome_logs)
                 }
             }
         }
