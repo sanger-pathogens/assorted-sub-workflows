@@ -85,6 +85,7 @@ class NextflowTool {
                 log.info indent + "--" + it.key
                 log.info indent + indent + "default: " + it.value.default
                 log.info indent + indent + it.value.help_text
+                log.info indent
                 }
             }
         //put a line to seperate
