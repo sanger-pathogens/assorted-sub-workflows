@@ -39,7 +39,8 @@ class NextflowTool {
             def json = new JsonSlurper().parseText(schema_in)
 
             json.params.each{
-                log.info "${colors.purple} ${it.key} ${colors.reset}"
+                if (!it.key in master_schema.overwrite_param) {
+                    log.info "${colors.purple} ${it.key} ${colors.reset}"
                 it.value.each {
                     if (it.key in master_schema.overwrite_param) {
                         // A groovy json path cannot be queried using a variable unless you force it using eval
@@ -50,9 +51,11 @@ class NextflowTool {
 
                         def overwrite_param = Eval.x( master_schema, 'x.' + overwrite_path)
 
-                        log.info indent + "--" + it.key
-                        log.info indent + indent + "default: " + overwrite_param.default
-                        log.info indent + indent + overwrite_param.help_text
+                        if (overwrite_param.help_text != "") {
+                            log.info indent + "--" + it.key
+                            log.info indent + indent + "default: " + overwrite_param.default
+                            log.info indent + indent + overwrite_param.help_text
+                        }
 
                     } else {
                         //if nothing needs to be overwritten just print what is there
@@ -63,16 +66,29 @@ class NextflowTool {
                 }
                 //put a line to seperate
                 log.info dashedLine(monochrome_logs)
+                }
             }
         }
         //finally print the params in the master manifest
         master_schema.params.each {
             log.info "${colors.purple} ${it.key} ${colors.reset}"
             it.value.each {
+                if (it.key.toString().contains('header')) {
+                    if (it.value.title){
+                        log.info indent
+                        log.info "${colors.red} ${it.value.title} ${colors.reset}"
+                    }
+                    log.info indent + it.value.subtext
+                    log.info indent
+
+                } else {
                 log.info indent + "--" + it.key
                 log.info indent + indent + "default: " + it.value.default
                 log.info indent + indent + it.value.help_text
+                }
             }
+        //put a line to seperate
+        log.info dashedLine(monochrome_logs)
         }
     }
 
