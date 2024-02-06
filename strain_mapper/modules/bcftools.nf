@@ -27,7 +27,8 @@ process BCFTOOLS_CALL {
     label 'mem_1'
     label 'time_1'
 
-    conda 'bioconda::bcftools=1.17'
+    // using package from conda-forge not bioconda (thus different from what underlies the biocontainers container) as there is a problem with lbgsl see https://github.com/samtools/bcftools/issues/1965
+    conda 'conda-forge::bcftools=1.17' 
     container 'quay.io/biocontainers/bcftools:1.17--h3cc50cf_1'
 
     input:
