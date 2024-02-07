@@ -22,11 +22,9 @@ process FASTQ_FROM_COLLATED_BAM {
     label 'time_12'
     container "/software/pathogen/images/samtools-1.17.simg"
 
-    publishDir "${params.outdir}/fastqs/", enabled: params.save_fastqs, mode: 'copy', overwrite: true, pattern: "*_1.fastq.gz", saveAs: { filename -> "raw_${forward_fastq}" }
-    publishDir "${params.outdir}/fastqs/", enabled: params.save_fastqs, mode: 'copy', overwrite: true, pattern: "*_2.fastq.gz", saveAs: { filename -> "raw_${reverse_fastq}" }
+    publishDir path: { if ("${params.save_method}" == "nested") "${params.outdir}/${meta.ID}/${param.raw_reads_prefix}/" else "${params.outdir}/fastqs/" } , enabled: params.save_fastqs, mode: 'copy', overwrite: true, pattern: "*_1.fastq.gz", saveAs: { filename -> "${param.raw_reads_prefix}${forward_fastq}" }
+    publishDir path: { if ("${params.save_method}" == "nested") "${params.outdir}/${meta.ID}/${param.raw_reads_prefix}/" else "${params.outdir}/fastqs/" } , enabled: params.save_fastqs, mode: 'copy', overwrite: true, pattern: "*_2.fastq.gz", saveAs: { filename -> "${param.raw_reads_prefix}${reverse_fastq}" }
 
-    publishDir "${params.outdir}/${meta.ID}/raw_fastq/", enabled: params.save_nested_fastqs, mode: 'copy', overwrite: true, pattern: "*_1.fastq.gz", saveAs: { filename -> "raw_${forward_fastq}" }
-    publishDir "${params.outdir}/${meta.ID}/raw_fastq/", enabled: params.save_nested_fastqs, mode: 'copy', overwrite: true, pattern: "*_2.fastq.gz", saveAs: { filename -> "raw_${reverse_fastq}" }
 
     input:
     tuple val(meta), path(bam), path(cram)
