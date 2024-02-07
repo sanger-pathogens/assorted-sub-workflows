@@ -34,7 +34,7 @@
             },
             "save_method": {
                 "default": "flat",
-                "help_text": "Structure of the fastq save directory flat puts all reads into 1 fastq directory nested seperates them into directorys for each lane options [flat, nested]"
+                "help_text": "Structure of the fastq save directory. 'flat' puts all reads into 1 fastq directory; 'nested' separates them into directories for each lane. options: [flat, nested]"
             },
             "raw_reads_prefix:": {
                 "default": "raw_",
