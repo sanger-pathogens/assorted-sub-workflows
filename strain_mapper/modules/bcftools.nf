@@ -4,7 +4,7 @@ process BCFTOOLS_MPILEUP {
     label 'time_1'
 
     // using package from conda-forge not bioconda (thus different from what underlies the biocontainers container) as there is a problem with lbgsl see https://github.com/samtools/bcftools/issues/1965
-    conda 'conda-forge::bcftools=1.17' 
+    conda 'conda-forge::gsl=2.7 bioconda::bcftools=1.17' 
     container 'quay.io/biocontainers/bcftools:1.17--h3cc50cf_1'
 
     input:
@@ -29,7 +29,7 @@ process BCFTOOLS_CALL {
     label 'time_1'
 
     // using package from conda-forge not bioconda (thus different from what underlies the biocontainers container) as there is a problem with lbgsl see https://github.com/samtools/bcftools/issues/1965
-    conda 'conda-forge::bcftools=1.17' 
+    conda 'conda-forge::gsl=2.7 bioconda::bcftools=1.17' 
     container 'quay.io/biocontainers/bcftools:1.17--h3cc50cf_1'
 
     input:
@@ -55,7 +55,7 @@ process BCFTOOLS_FILTERING {
     label 'time_1'
 
     // using package from conda-forge not bioconda (thus different from what underlies the biocontainers container) as there is a problem with lbgsl see https://github.com/samtools/bcftools/issues/1965
-    conda 'conda-forge::bcftools=1.17' 
+    conda 'conda-forge::gsl=2.7 bioconda::bcftools=1.17' 
     container 'quay.io/biocontainers/bcftools:1.17--h3cc50cf_1'
 
     input:
@@ -81,7 +81,7 @@ process RAW_VCF {
     publishDir "${params.outdir}/${meta.id}/raw_vcf", mode: 'copy', overwrite: true
 
     // using package from conda-forge not bioconda (thus different from what underlies the biocontainers container) as there is a problem with lbgsl see https://github.com/samtools/bcftools/issues/1965
-    conda 'conda-forge::bcftools=1.17' 
+    conda 'conda-forge::gsl=2.7 bioconda::bcftools=1.17' 
     container 'quay.io/biocontainers/bcftools:1.17--h3cc50cf_1'
 
     // input file can be VCF or BCF as is handled equally by bcftools
@@ -116,7 +116,7 @@ process FINAL_VCF {
     publishDir "${params.outdir}/${meta.ID}/final_vcf", mode: 'copy', overwrite: true
 
     // using package from conda-forge not bioconda (thus different from what underlies the biocontainers container) as there is a problem with lbgsl see https://github.com/samtools/bcftools/issues/1965
-    conda 'conda-forge::bcftools=1.17' 
+    conda 'conda-forge::gsl=2.7 bioconda::bcftools=1.17' 
     container 'quay.io/biocontainers/bcftools:1.17--h3cc50cf_1'
 
     // input file can be VCF or BCF as is handled equally by bcftools
