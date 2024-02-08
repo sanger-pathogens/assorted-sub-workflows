@@ -37,8 +37,8 @@
                 "help_text": "Structure of the fastq save directory. 'flat' saves all fastq files into one directory; 'nested' saves them into sample-specific directories. Options: [flat, nested]"
             },
             "raw_reads_prefix:": {
-                "default": "raw_",
-                "help_text": "Prefix for unpacked reads i.e. 'raw_' prefix makes files named like 'raw_251312_1#195_1.fastq.gz'; set to '' for no prefix"
+                "default": "",
+                "help_text": "Prefix for unpacked reads i.e. 'raw_' prefix makes files named like 'raw_251312_1#195_1.fastq.gz' default is no prefix"
             }
         }
     }
