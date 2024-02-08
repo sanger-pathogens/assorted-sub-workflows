@@ -3,7 +3,8 @@ process BUILD_TREE {
     label 'mem_16'
     label 'time_12'
 
-    container '/software/pathogen/images/raxml-ng-1.1.0.simg'
+    conda 'bioconda::raxml-ng=1.1.0'
+    container 'quay.io/biocontainers/raxml-ng:1.1.0--h22e3c99_1'
 
     publishDir "${params.outdir}/tree", mode: 'copy', overwrite: true, pattern: "*.support"
 
