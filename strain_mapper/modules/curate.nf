@@ -5,6 +5,7 @@ process CURATE_CONSENSUS {
 
     publishDir "${params.outdir}/${meta.ID}/curated_consensus", mode: 'copy', overwrite: true
 
+    conda 'conda-forge::python=3.10.2'
     container 'quay.io/biocontainers/python:3.10.2'
 
     input:
