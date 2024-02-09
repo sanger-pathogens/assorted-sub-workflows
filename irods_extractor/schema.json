@@ -30,7 +30,7 @@
             },
             "save_fastqs": {
                 "default": false,
-                "help_text": "Save the fastq's to the results directory after unpacking from CRAMS"
+                "help_text": "Save the fastq files to the results directory after unpacking data from CRAM files"
             },
             "save_method": {
                 "default": "flat",
