@@ -3,7 +3,7 @@ process BWA {
     label 'mem_8'
     label 'time_12'
 
-    container 'quay.io/biocontainers/bwa:0.7.3a--he4a0461_9'
+    container 'quay.io/biocontainers/bwa:0.7.17--he4a0461_11'
 
     input:
     tuple val(meta), path(reads_1), path(reads_2)
@@ -27,7 +27,7 @@ process BWA_INDEX {
 
     publishDir "${params.outdir}/bwa", mode: 'copy', overwrite: true
 
-    container 'quay.io/biocontainers/bwa:0.7.3a--he4a0461_9'
+    container 'quay.io/biocontainers/bwa:0.7.17--he4a0461_11'
 
     input:
     path(reference)

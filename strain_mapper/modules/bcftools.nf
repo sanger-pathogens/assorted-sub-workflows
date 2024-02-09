@@ -14,7 +14,7 @@ process BCFTOOLS_MPILEUP {
     tuple val(meta), path("${mpileup_file}"),  emit: mpileup_file
 
     script:
-    mpileup_file = "${meta.id}.mpileup"
+    mpileup_file = "${meta.ID}.mpileup"
     """
     bcftools mpileup -o ${mpileup_file} \
                      -O 'u' \
@@ -39,7 +39,7 @@ process BCFTOOLS_CALL {
     tuple val(meta), path("${vcf_allpos}"),  emit: vcf_allpos
 
     script:
-    vcf_allpos = "${meta.id}.vcf"
+    vcf_allpos = "${meta.ID}.vcf"
     """
     bcftools call -o ${vcf_allpos} \
         -O 'v' \
@@ -65,7 +65,7 @@ process BCFTOOLS_FILTERING {
     tuple val(meta), path("${filtered_vcf_allpos}"),  emit: filtered_vcf_allpos
 
     script:
-    filtered_vcf_allpos = "${meta.id}_filtered.vcf"
+    filtered_vcf_allpos = "${meta.ID}_filtered.vcf"
     """
     bcftools view -o ${filtered_vcf_allpos} \
                   -O 'v' \
@@ -78,7 +78,7 @@ process RAW_VCF {
     label 'mem_1'
     label 'time_1'
     
-    publishDir "${params.outdir}/${meta.id}/raw_vcf", mode: 'copy', overwrite: true
+    publishDir "${params.outdir}/${meta.ID}/raw_vcf", mode: 'copy', overwrite: true
 
     // using package from conda-forge not bioconda (thus different from what underlies the biocontainers container) as there is a problem with lbgsl see https://github.com/samtools/bcftools/issues/1965
     conda 'conda-forge::gsl=2.7 bioconda::bcftools=1.17' 
@@ -92,7 +92,7 @@ process RAW_VCF {
     tuple val(meta), path("${out_vcf}"),  emit: out_vcf
 
     script:
-    out_vcf = "${meta.id}.vcf.gz"
+    out_vcf = "${meta.ID}.vcf.gz"
     if (params.only_report_alts)
         """
         bcftools view -o ${out_vcf} \
