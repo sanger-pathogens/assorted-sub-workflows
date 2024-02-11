@@ -24,7 +24,7 @@ workflow IRODS_CLI {
 workflow COMBINE_IRODS {
     main:
     // take iRODS dataset specification from CLI options
-    if (params.studyid > 0) {
+    if (params.studyid > 0 || params.runid > 0) {
         IRODS_CLI()
         | set{ input_irods_from_opt_ch }
     } else {
