@@ -12,29 +12,24 @@ process JSON_PREP {
     script:
     json_file="input.json"
 
-    // see irods.config params scope for recommended default values to set at pipeline level
-    switch(meta.size()) {
-        case 1:
-            """
-            jq -n '{op: "metaquery", args: {object: true, "avu": true}, target: {avus: [{a: "study_id", v: "${meta.studyid}"}, {a: "target", v: "1"}, {a: "type", v: "cram"}]}}' > ${json_file}
-            """
-            break
-        case 2:
-            """
-            jq -n '{op: "metaquery", args: {object: true, "avu": true}, target: {avus: [{a: "study_id", v: "${meta.studyid}"}, {a: "id_run", v: "${meta.runid}"}, {a: "target", v: "1"}, {a: "type", v: "cram"}]}}' > ${json_file}
-            """
-            break
-        case 3:
-            """
-            jq -n '{op: "metaquery", args: {object: true, "avu": true}, target: {avus: [{a: "study_id", v: "${meta.studyid}"}, {a: "id_run", v: "${meta.runid}"}, {a: "lane", v: "${meta.laneid}"}, {a: "target", v: "1"}, {a: "type", v: "cram"}]}}' > ${json_file}
-            """
-            break
-        case 4:
-            """
-            jq -n '{op: "metaquery", args: {object: true, "avu": true}, target: {avus: [{a: "study_id", v: "${meta.studyid}"}, {a: "id_run", v: "${meta.runid}"}, {a: "lane", v: "${meta.laneid}"}, {a: "tag_index", v: "${meta.plexid}"}, {a: "target", v: "1"}, {a: "type", v: "cram"}]}}' > ${json_file}
-            """
-            break
+    def avu_id_query(avukey, avuval){
+        // with validation for numeric id types
+        if (avuval > 0) {
+            avuq = """{a: "${avukey}", v: "${avuval}"}, """
+        else
+            avuq = ""
+        }
+        return avuq
     }
+    studyq = avu_id_query('study_id', meta.studyid)
+    runq = avu_id_query('id_run', meta.runid)
+    laneq = avu_id_query('lane', meta.laneid)
+    plexq = avu_id_query('tag_index', meta.plexid)
+    // would be brilliant if could iterate over keys in meta without having to know them in advance
+
+    """
+    jq -n '{op: "metaquery", args: {object: true, "avu": true}, target: {avus: [${studyq}${runq}${laneq}${plexq}, {a: "target", v: "1"}, {a: "type", v: "cram"}]}}' > ${json_file}
+    """
 }
 
 process JSON_PARSE {

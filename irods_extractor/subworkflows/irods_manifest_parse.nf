@@ -21,20 +21,12 @@ workflow IRODS_MANIFEST_PARSE {
 }
 
 def create_channel(LinkedHashMap row) {
+    
     def meta = [:]
     meta.studyid = row.studyid
-
-    if (row.studyid && row.runid) {
-        meta.runid = "${row.runid}"
-    }
-
-    if (row.studyid && row.runid && row.laneid) {
-        meta.laneid = "${row.laneid}"
-    }
-
-    if (row.studyid && row.runid && row.laneid && row.plexid) {
-        meta.plexid = "${row.plexid}"
-    }
+    meta.runid = "${row.runid}"
+    meta.laneid = "${row.laneid}"
+    meta.plexid = "${row.plexid}"
 
     return meta
 }
