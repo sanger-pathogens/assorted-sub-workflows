@@ -29,6 +29,6 @@ process COLLATE_FASTQ {
     samtools fastq -N \
         -1 ${forward_fastq} \
         -2 ${reverse_fastq} \
-        -@ ${task.cpus} \
+        -@ ${task.cpus}
     """
 }
