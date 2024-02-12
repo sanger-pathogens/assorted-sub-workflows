@@ -1,8 +1,8 @@
-include { COLLATE_CRAM; FASTQ_FROM_COLLATED_BAM } from '../modules/samtools.nf'
-include { BATON                                 } from '../modules/baton.nf'
-include { JSON_PREP; JSON_PARSE                 } from '../modules/jq.nf'
-include { RETRIEVE_CRAM                         } from '../modules/retrieve.nf'
-include { METADATA                              } from '../modules/metadata_save.nf'
+include { COLLATE_FASTQ            } from '../modules/samtools.nf'
+include { BATON                    } from '../modules/baton.nf'
+include { JSON_PREP; JSON_PARSE    } from '../modules/jq.nf'
+include { RETRIEVE_CRAM            } from '../modules/retrieve.nf'
+include { METADATA                 } from '../modules/metadata_save.nf'
 
 def split_metadata(collection_name, linked_metadata) {
     metadata = [:]
@@ -71,10 +71,9 @@ workflow CRAM_EXTRACT {
     | set{ do_not_exist }
 
     RETRIEVE_CRAM(do_not_exist)
-    | COLLATE_CRAM
-    | FASTQ_FROM_COLLATED_BAM
+    | COLLATE_FASTQ
 
-    FASTQ_FROM_COLLATED_BAM.out.remove_channel.flatten()
+    COLLATE_FASTQ.out.remove_channel.flatten()
             .filter(Path)
             .map { it.delete() }
 
