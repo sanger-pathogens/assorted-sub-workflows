@@ -23,7 +23,7 @@ process JSON_PREP {
         else
             avuq=""
         fi
-        echo avuq
+        echo \${avuq}
     }
     studyq=\$(avu_id_query 'study_id' ${meta.studyid})
     runq=\$(avu_id_query 'id_run' ${meta.runid})
