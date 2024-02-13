@@ -19,7 +19,7 @@ process JSON_PREP {
     avuval="\${2}"
     # with validation for numeric id types
     if [ "\${avuval}" -ge 0 ] ; then
-            avuq="{a: '\${avukey}', v: '\${avuval}'}, "
+            avuq="{a: \"\${avukey}\", v: \"\${avuval}\"}, "
         else
             avuq=""
         fi
@@ -29,7 +29,7 @@ process JSON_PREP {
     runq=\$(avu_id_query 'id_run' ${meta.runid})
     laneq=\$(avu_id_query 'lane' ${meta.laneid})
     plexq=\$(avu_id_query 'tag_index' ${meta.plexid})
-    jq -n "{op: 'metaquery', args: {object: true, 'avu': true}, target: {avus: [\${studyq}\${runq}\${laneq}\${plexq}{a: 'target', v: '1'}, {a: 'type', v: 'cram'}]}}" > ${json_file}
+    jq -n "{op: \"metaquery\", args: {object: true, \"avu\": true}, target: {avus: [\${studyq}\${runq}\${laneq}\${plexq}{a: \"target\", v: \"1\"}, {a: \"type\", v: \"cram\"}]}}" > ${json_file}
     """
 }
 
