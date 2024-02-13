@@ -27,10 +27,10 @@ process JSON_PREP {
         fi
         echo avuq
     }
-    studyq=$(avu_id_query 'study_id' meta.studyid)
-    runq=$(avu_id_query 'id_run' meta.runid)
-    laneq=$(avu_id_query 'lane' meta.laneid)
-    plexq=$(avu_id_query 'tag_index' meta.plexid)
+    studyq=\$(avu_id_query 'study_id' meta.studyid)
+    runq=\$(avu_id_query 'id_run' meta.runid)
+    laneq=\$(avu_id_query 'lane' meta.laneid)
+    plexq=\$(avu_id_query 'tag_index' meta.plexid)
     jq -n '{op: "metaquery", args: {object: true, "avu": true}, target: {avus: [${studyq}${runq}${laneq}${plexq}, {a: "target", v: "1"}, {a: "type", v: "cram"}]}}' > ${json_file}
     """
 }
