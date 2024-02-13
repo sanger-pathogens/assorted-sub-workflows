@@ -12,10 +12,10 @@ process JSON_PREP {
     script:
     json_file="input.json"
 
-    def avu_id_query(avukey, avuval){
+    def avu_id_query (avukey, avuval) {
         // with validation for numeric id types
         if (avuval > 0) {
-            avuq = """{a: "${avukey}", v: "${avuval}"}, """
+            avuq = "{a: '${avukey}', v: '${avuval}'}, "
         else
             avuq = ""
         }
