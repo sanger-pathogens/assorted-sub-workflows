@@ -49,7 +49,6 @@ process JSON_PREP {
     """
 }
 
-
 process JSON_PARSE {
     label 'cpu_1'
     label 'mem_1'
