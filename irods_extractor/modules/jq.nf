@@ -19,7 +19,7 @@ def translateKey(in_key) {
 }
 
 def avuIdQuery(meta_query) {
-    def query_list = ["{\"a\": \"target\", \"v\": \"1\"}", "{\"a\": \"type\", \"v\": \"cram\"}"]
+    def query_list = ["""{"a": "target", "v": "1"}", "{"a": "type", "v": "cram"}"""]
     // with validation for numeric id types
     meta_query.each { key, value ->
         irods_key = translateKey(key)
