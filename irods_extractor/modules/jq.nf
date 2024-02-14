@@ -23,7 +23,7 @@ def avuIdQuery(meta_query) {
     // with validation for numeric id types
     meta_query.each { key, value ->
         irods_key = translateKey(key)
-        query_part = "{\"a\": \"${irods_key}\", \"v\": \"${value}\"}"
+        query_part = """{"a": "${irods_key}", "v": "${value}"}"""
         query_list.add(query_part)
         }
     return query_list
