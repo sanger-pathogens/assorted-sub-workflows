@@ -1,3 +1,34 @@
+def translateKey(in_key) {
+    switch(in_key){ 
+        case 'studyid':
+        return 'study_id'
+
+        case 'runid':
+        return 'id_run'
+
+        case 'laneid':
+        return 'lane'
+
+        case 'plexid':
+        return 'tag_index'
+
+        //if none of the cases return in_key
+        default:
+        return in_key
+    }
+}
+
+def avuIdQuery(meta_query) {
+    def query_list = ["""{"a": "target", "v": "1"}, {"a": "type", "v": "cram"}"""]
+    // with validation for numeric id types
+    meta_query.each { key, value ->
+        irods_key = translateKey(key)
+        query_part = """{"a": "${irods_key}", "v": "${value}"}"""
+        query_list.add(query_part)
+        }
+    return query_list
+}
+
 process JSON_PREP {
     label 'cpu_1'
     label 'mem_1'
@@ -10,31 +41,12 @@ process JSON_PREP {
     path(json_file), emit: path_channel
 
     script:
-    json_file="input.json"
+    json_file="input.json"  
 
-    // see irods.config params scope for recommended default values to set at pipeline level
-    switch(meta.size()) {
-        case 1:
-            """
-            jq -n '{op: "metaquery", args: {object: true, "avu": true}, target: {avus: [{a: "study_id", v: "${meta.studyid}"}, {a: "target", v: "1"}, {a: "type", v: "cram"}]}}' > ${json_file}
-            """
-            break
-        case 2:
-            """
-            jq -n '{op: "metaquery", args: {object: true, "avu": true}, target: {avus: [{a: "study_id", v: "${meta.studyid}"}, {a: "id_run", v: "${meta.runid}"}, {a: "target", v: "1"}, {a: "type", v: "cram"}]}}' > ${json_file}
-            """
-            break
-        case 3:
-            """
-            jq -n '{op: "metaquery", args: {object: true, "avu": true}, target: {avus: [{a: "study_id", v: "${meta.studyid}"}, {a: "id_run", v: "${meta.runid}"}, {a: "lane", v: "${meta.laneid}"}, {a: "target", v: "1"}, {a: "type", v: "cram"}]}}' > ${json_file}
-            """
-            break
-        case 4:
-            """
-            jq -n '{op: "metaquery", args: {object: true, "avu": true}, target: {avus: [{a: "study_id", v: "${meta.studyid}"}, {a: "id_run", v: "${meta.runid}"}, {a: "lane", v: "${meta.laneid}"}, {a: "tag_index", v: "${meta.plexid}"}, {a: "target", v: "1"}, {a: "type", v: "cram"}]}}' > ${json_file}
-            """
-            break
-    }
+    query = avuIdQuery(meta)
+    """
+    jq -n '{op: "metaquery", args: {object: true, "avu": true}, target: {avus: ${query}}}' > ${json_file}
+    """
 }
 
 process JSON_PARSE {
