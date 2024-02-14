@@ -1,3 +1,8 @@
+// bellow functions appear to not be thread-safe
+// see https://gitlab.internal.sanger.ac.uk/sanger-pathogens/pipelines/assorted-sub-workflows/-/merge_requests/40
+// leaving them here if we can find a way to bring them in cleanly
+// in the meantime, bring back the less elegant bash function from 7ac9fca2
+/*
 def translateKey(in_key) {
     switch(in_key){ 
         case 'studyid':
@@ -28,6 +33,7 @@ def avuIdQuery(meta_query) {
         }
     return query_list
 }
+*/
 
 process JSON_PREP {
     label 'cpu_1'
@@ -42,10 +48,23 @@ process JSON_PREP {
 
     script:
     json_file="input.json"  
-
-    query = avuIdQuery(meta)
     """
-    jq -n '{op: "metaquery", args: {object: true, "avu": true}, target: {avus: ${query}}}' > ${json_file}
+    avu_id_query () {
+    avukey="\${1}"
+    avuval="\${2}"
+    # with validation for numeric id types
+    if [ "\${avuval}" -ge 0 ] ; then
+            avuq="{a: \\"\${avukey}\\", v: \\"\${avuval}\\"}, "
+        else
+            avuq=""
+        fi
+        echo "\${avuq}"
+    }
+    studyq=\$(avu_id_query 'study_id' ${meta.studyid})
+    runq=\$(avu_id_query 'id_run' ${meta.runid})
+    laneq=\$(avu_id_query 'lane' ${meta.laneid})
+    plexq=\$(avu_id_query 'tag_index' ${meta.plexid})
+    jq -n "{op: \\"metaquery\\", args: {object: true, \\"avu\\": true}, target: {avus: [\${studyq}\${runq}\${laneq}\${plexq}{a: \\"target\\", v: \\"1\\"}, {a: \\"type\\", v: \\"cram\\"}]}}" > ${json_file}
     """
 }
 
