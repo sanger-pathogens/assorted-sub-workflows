@@ -32,7 +32,7 @@ def avuIdQuery(meta_query) {
 process JSON_PREP {
     label 'cpu_1'
     label 'mem_1'
-    label 'time_1'
+    label 'time_30m'
 
     input:
     val(meta)
@@ -52,7 +52,7 @@ process JSON_PREP {
 process JSON_PARSE {
     label 'cpu_1'
     label 'mem_1'
-    label 'time_1'
+    label 'time_30m'
     
     input:
     path(lane_file)
