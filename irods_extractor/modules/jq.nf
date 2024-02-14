@@ -48,8 +48,6 @@ process JSON_PREP {
 
     script:
     json_file="input.json"  
-
-    query = avuIdQuery(meta)
     """
     avu_id_query () {
     avukey="\${1}"
