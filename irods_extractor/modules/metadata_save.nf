@@ -1,7 +1,7 @@
 process METADATA {
     label 'cpu_1'
     label 'mem_1'
-    label 'time_1'
+    label 'time_30m'
     
     conda 'anaconda::pandas=2.1.4'
     // NOTE v2.1.4 not avialable publicly AFAIK so prefering custom image on farm with v2.1.4 vs. quay.io/biocontainers/pandas:1.5.2
