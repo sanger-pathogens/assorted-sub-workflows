@@ -22,10 +22,13 @@ def avuIdQuery(meta_query) {
     def query_list = ["""{"a": "target", "v": "1"}, {"a": "type", "v": "cram"}"""]
     // with validation for numeric id types
     meta_query.each { key, value ->
-        def irods_key = translateKey(key)
-        def query_part = """{"a": "${irods_key}", "v": "${value}"}"""
-        query_list.add(query_part)
-        }
+        if (value >= 0){
+            // will have to think of a way to catch non-integer values
+            def irods_key = translateKey(key)
+            def query_part = """{"a": "${irods_key}", "v": "${value}"}"""
+            query_list.add(query_part)
+         }
+    }
     return query_list
 }
 
