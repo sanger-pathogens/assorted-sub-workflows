@@ -22,16 +22,12 @@ workflow IRODS_MANIFEST_PARSE {
 
 def create_channel(LinkedHashMap row) {
     def meta = [:]
-    meta.studyid = "${row.studyid}"
-    meta.runid = "${row.runid}"
+    meta.studyid = "${row.studyid}" == "" ? -1 : "${row.studyid}".toInteger()
+    meta.runid = "${row.runid}" == "" ? -1 : "${row.runid}".toInteger()
     // only allow selecting data using the laneid or plexid fields when the runid field
     // is also specified, otherwise it would catch too unspecific datasets.
-    if (row.runid && row.laneid) {
-        meta.laneid = "${row.laneid}"
-    }
-    if (row.runid && row.plexid) {
-        meta.plexid = "${row.plexid}"
-    }
-
+    // sets default values of -1 for these specific meta fields
+    meta.laneid = ((row.runid.toInteger() < 0) || ("${row.laneid}" == "")) ? -1 : "${row.laneid}".toInteger()
+    meta.plexid = ((row.runid.toInteger() < 0) || ("${row.plexid}" == "")) ? -1 : "${row.plexid}".toInteger()
     return meta
 }
