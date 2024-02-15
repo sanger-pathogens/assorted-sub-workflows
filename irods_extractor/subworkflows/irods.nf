@@ -18,8 +18,6 @@ workflow IRODS_QUERY {
         input_irods_ch //tuple studyid, runid, laneid, plexid
 
         main:
-        input_irods_ch.view()
-
         JSON_PREP(input_irods_ch)
         | BATON
         | JSON_PARSE
