@@ -1,46 +1,44 @@
 { 
-    "pipeline": "Irods extractor (sub-workflow)",
+    "pipeline": "Strain-mapper (sub-workflow)",
     "params": {
-        "strain_mapper_params": {
-            "Input_parameters": {
-                "header_strain_mapper": {
-                    "title": "Reference input",
-                    "subtext": "Currently only input through path to file is supported"
-                },
-                "reference": {
-                    "default": "none",
-                    "help_text": "Path to a reference in fasta format"
-                }
+        "Input_parameters": {
+            "header_strain_mapper": {
+                "title": "Reference input",
+                "subtext": "Currently only input through path to file is supported"
             },
-            "Procesing options": {
-                "header_strain_mapper": {
-                    "title": "Strain-mapper read mapping options:",
-                    "subtext": ""
-                },
-                "mapper": {
-                    "default": "bwa",
-                    "help_text": "mapping tool to use options [bwa, bowtie2]"
-                },
-                "only_report_alts": {
-                    "default": "true",
-                    "help_text": "When included this flag reports only ALT variants in the VCF output"
-                },
-                "VCF_filters": {
-                    "default": "QUAL>=50 & MIN(DP)>=8 & ((ALT!=\".\" & DP4[2]>3 & DP4[3]>3) | (ALT=\".\" & DP4[0]>3 & DP4[1]>3))",
-                    "help_text": "Parameters for filtering variants in VCF file. Default is to removing records with a quality score below 50 and also requiring 3 reads\n             from each strand with overall greater than 8."
-                },
-                "skip_filtering": {
-                    "default": "false",
-                    "help_text": "Do not filter variants called using `bcftools call` based on metrics defined with --VCF_filters."
-                },
-                "keep_raw_vcf": {
-                    "default": "false",
-                    "help_text": "Save the unfiltered VCF file i.e. direct output of `bcftools call`; can be combined with --only_report_alts=false\n            to report all (unfiltered, REF and ALT) variants; only relevant when --skip_filtering=false;"
-                },
-                "keep_sorted_bam": { 
-                    "default": "false",
-                    "help_text": "Save the mapping file (sorted BAM)"
-                }
+            "reference": {
+                "default": "none",
+                "help_text": "Path to a reference in fasta format"
+            }
+        },
+        "Procesing options": {
+            "header_strain_mapper": {
+                "title": "Strain-mapper read mapping options:",
+                "subtext": ""
+            },
+            "mapper": {
+                "default": "bwa",
+                "help_text": "mapping tool to use options [bwa, bowtie2]"
+            },
+            "only_report_alts": {
+                "default": "true",
+                "help_text": "When included this flag reports only ALT variants in the VCF output"
+            },
+            "VCF_filters": {
+                "default": "QUAL>=50 & MIN(DP)>=8 & ((ALT!=\".\" & DP4[2]>3 & DP4[3]>3) | (ALT=\".\" & DP4[0]>3 & DP4[1]>3))",
+                "help_text": "Parameters for filtering variants in VCF file. Default is to removing records with a quality score below 50 and also requiring 3 reads\n             from each strand with overall greater than 8."
+            },
+            "skip_filtering": {
+                "default": "false",
+                "help_text": "Do not filter variants called using `bcftools call` based on metrics defined with --VCF_filters."
+            },
+            "keep_raw_vcf": {
+                "default": "false",
+                "help_text": "Save the unfiltered VCF file i.e. direct output of `bcftools call`; can be combined with --only_report_alts=false\n            to report all (unfiltered, REF and ALT) variants; only relevant when --skip_filtering=false;"
+            },
+            "keep_sorted_bam": { 
+                "default": "false",
+                "help_text": "Save the mapping file (sorted BAM)"
             }
         }
     }

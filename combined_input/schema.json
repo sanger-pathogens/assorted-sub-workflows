@@ -1,43 +1,42 @@
 { 
     "pipeline": "Combined input (sub-workflow)",
     "params": {
-        "combined_input_params": {
-            "Input_parameters": {
-                "header_combined_input_1": {
-                    "title": "Sequencing reads",
-                    "subtext": "There are two ways of providing input reads, which can be combined\n      1) through direct input of compressed fastq sequence reads files. This kind of input is passed by specifying the paths to the\n      read files via a manifest listing the pair of read files pertaing to a sample, one per row."
-                },
-                "manifest_of_reads": {
-                    "default": "false",
-                    "help_text": "Manifest containing per-sample paths to .fastq.gz files (optional)"
-                },
-                "header_combined_input_2": {
-                    "subtext": "2) through specification of data to be downloaded from iRODS. Each sample is defined by a combination of study, run, lane and plex ids\n      (these ids correspond to the reference of the sequencing experiment). At least one of study id or run id paramaters must be specified.\n      Lane and plex ids are optional parameters that can be provided in addition of the run id: when provided, each parameter restrict the set\n      of data files that match and will be downloaded; when ommitted, samples for all possible values are retrieved.\n      This information can be provided via a combination of workflow parameters passed on through command line options: --studyid, --runid,\n      --laneid and --plexid; this defines a single sequencing dataset based on a combination of study, run, lane and plex ids."
-                },
-                "studyid": {
-                    "default": -1,
-                    "help_text": "Sequencing Study ID"
-                },
-                "runid": {
-                    "default": -1,
-                    "help_text": "Sequencing Run ID"
-                },
-                "laneid": {
-                    "default": -1,
-                    "help_text": "Sequencing Lane ID"
-                },
-                "plexid": {
-                    "default": -1,
-                    "help_text": "Sequencing Plex ID"
-                },
-                "headheader_combined_input_3": {
-                    "subtext": "Alternatively, the user can provide a CSV-format manifest listing a batch of such combinations."
-                },
-                "manifest_of_lanes": {
-                    "default": "false",
-                    "help_text": "Path to a manifest of search terms as specified above.\n      At least one of study id or run id paramaters must be specified; other parameters are not mandatory and corresponding\n      fields in the CSV manifest file can be left blank. Lane and plex ids are only considered when provided aongside a run id."
-                }
+        "Input_parameters": {
+            "header_combined_input_1": {
+                "title": "Sequencing reads",
+                "subtext": "There are two ways of providing input reads, which can be combined\n      1) through direct input of compressed fastq sequence reads files. This kind of input is passed by specifying the paths to the\n      read files via a manifest listing the pair of read files pertaing to a sample, one per row."
+            },
+            "manifest_of_reads": {
+                "default": "false",
+                "help_text": "Manifest containing per-sample paths to .fastq.gz files (optional)"
+            },
+            "header_combined_input_2": {
+                "subtext": "2) through specification of data to be downloaded from iRODS. Each sample is defined by a combination of study, run, lane and plex ids\n      (these ids correspond to the reference of the sequencing experiment). At least one of study id or run id paramaters must be specified.\n      Lane and plex ids are optional parameters that can be provided in addition of the run id: when provided, each parameter restrict the set\n      of data files that match and will be downloaded; when ommitted, samples for all possible values are retrieved.\n      This information can be provided via a combination of workflow parameters passed on through command line options: --studyid, --runid,\n      --laneid and --plexid; this defines a single sequencing dataset based on a combination of study, run, lane and plex ids."
+            },
+            "studyid": {
+                "default": -1,
+                "help_text": "Sequencing Study ID"
+            },
+            "runid": {
+                "default": -1,
+                "help_text": "Sequencing Run ID"
+            },
+            "laneid": {
+                "default": -1,
+                "help_text": "Sequencing Lane ID"
+            },
+            "plexid": {
+                "default": -1,
+                "help_text": "Sequencing Plex ID"
+            },
+            "headheader_combined_input_3": {
+                "subtext": "Alternatively, the user can provide a CSV-format manifest listing a batch of such combinations."
+            },
+            "manifest_of_lanes": {
+                "default": "false",
+                "help_text": "Path to a manifest of search terms as specified above.\n      At least one of study id or run id paramaters must be specified; other parameters are not mandatory and corresponding\n      fields in the CSV manifest file can be left blank. Lane and plex ids are only considered when provided aongside a run id."
             }
         }
     }
 }
+
