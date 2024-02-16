@@ -23,7 +23,7 @@ workflow IRODS_MANIFEST_PARSE {
 def create_channel(LinkedHashMap row) {
     def meta = [:]
 
-    //last entry on the row manifest if empty comes in as null so just remove it as its annoying
+    //last entry on the row if empty comes in as null so just remove it as its annoying
     row.each { key, value ->
         if (value == null) {
             row[key] = ""
