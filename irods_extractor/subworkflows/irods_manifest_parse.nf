@@ -27,7 +27,13 @@ def create_channel(LinkedHashMap row) {
     // only allow selecting data using the laneid or plexid fields when the runid field
     // is also specified, otherwise it would catch too unspecific datasets.
     // sets default values of -1 for these specific meta fields
-    meta.laneid = ((row.runid.isInteger()) || ("${row.laneid}" == "")) ? -1 : "${row.laneid}".toInteger()
-    meta.plexid = ((row.runid.isInteger()) || ("${row.plexid}" == "")) ? -1 : "${row.plexid}".toInteger()
+    def runidInteger = row.runid.isNumber() ? row.runid.toInteger() : -1
+
+    meta.laneid = (runidInteger > 0 && "${row.laneid}".trim() == "") ? -1 : "${row.laneid}".toInteger()
+
+    if (row.plexid != null) {
+        meta.plexid = (runidInteger > 0 && "${row.plexid}".trim() == "") ? -1 : "${row.plexid}".toInteger()
+    }
+
     return meta
 }
