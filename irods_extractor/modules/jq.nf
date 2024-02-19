@@ -27,11 +27,6 @@ def avuIdQuery(meta_query) {
             def irods_key = translateKey(key)
             def query_part = """{"a": "${irods_key}", "v": "${value}"}"""
             query_list.add(query_part)
-         }else {
-            // if set to -1 set to get any from irods
-            def irods_key = translateKey(key)
-            def query_part = """{"a": "${irods_key}", "v": "%", o: "like"}"""
-            query_list.add(query_part)
          }
     }
     return query_list
