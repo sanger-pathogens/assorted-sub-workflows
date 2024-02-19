@@ -14,6 +14,7 @@ workflow IRODS_MANIFEST_PARSE {
         .ifEmpty {exit 1, "File is empty / Cannot find file at ${lane_manifest}"}
         .splitCsv ( header:true, sep:',' )
         .map { create_channel(it) }
+        .view()
         .set { meta }
 
     emit:
