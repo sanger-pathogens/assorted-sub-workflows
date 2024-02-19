@@ -1,3 +1,7 @@
+import java.util.logging.Logger
+
+Logger logger = Logger.getLogger("IRODS_MANIFEST_PARSE")
+
 //
 // Check input manifest and assign idenifier channels
 // Expected to be used as submodule to input data to IRODS extractor
@@ -25,10 +29,12 @@ def create_channel(LinkedHashMap row) {
     def meta = [:]
     meta.studyid = "${row.studyid}" == "" ? -1 : "${row.studyid}".toInteger()
     meta.runid = "${row.runid}" == "" ? -1 : "${row.runid}".toInteger()
-    // only allow selecting data using the laneid or plexid fields when the runid field
-    // is also specified, otherwise it would catch too unspecific datasets.
-    // sets default values of -1 for these specific meta fields
-    meta.laneid = ((meta.runid < 0) || ("${row.laneid}" == "")) ? -1 : "${row.laneid}".toInteger()
-    meta.plexid = ((meta.runid < 0) || ("${row.plexid}" == "")) ? -1 : "${row.plexid}".toInteger()
-    return meta
+    if ((meta.runid < 0) && (("${row.plexid}" != "") || ("${row.laneid}" != ""))) {
+        logger.warning ("cannot submit an iRODS query where the laneid or plexid parameters are spcified but not the runid, as this query would catch too many file objects.\nThe row '${row.studyid},${row.runid},${row.laneid},${row.plexid}' in the input manifest is ignored")
+        return "none" // using same format of empty channel items as in COMBINED_INPUT L39 
+    } else {
+        meta.laneid = "${row.laneid}".toInteger()
+        meta.plexid = "${row.plexid}".toInteger()
+        return meta
+    }
 }
