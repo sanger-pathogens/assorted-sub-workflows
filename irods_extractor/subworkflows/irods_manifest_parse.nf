@@ -1,6 +1,6 @@
 import java.util.logging.Logger
 
-Logger logger = Logger.getLogger("IRODS_MANIFEST_PARSE")
+def logger = Logger.getLogger("IRODS_MANIFEST_PARSE")
 
 //
 // Check input manifest and assign idenifier channels
