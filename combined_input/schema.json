@@ -34,7 +34,7 @@
             },
             "manifest_of_lanes": {
                 "default": "false",
-                "help_text": "Path to a manifest of search terms as specified above.\n      At least one of study id or run id paramaters must be specified; other parameters are not mandatory and corresponding\n      fields in the CSV manifest file can be left blank. Lane and plex ids are only considered when provided aongside a run id."
+                "help_text": "Path to a manifest of search terms as specified above.\n      At least one of study id or run id paramaters must be specified; other parameters are not mandatory and corresponding\n      fields in the CSV manifest file can be left blank. Lane and plex ids are only considered when provided aongside a run id.\n      Example of manifest:\n          studyid,runid,laneid,plexid\n          ,37822,2,354\n          5970,,2,332\n          5970,37822,,332\n          5970,37822,2,"
             }
         }
     }
