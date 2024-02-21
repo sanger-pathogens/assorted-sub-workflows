@@ -1,11 +1,7 @@
 { 
     "pipeline": "Irods extractor (sub-workflow)",
     "params": {
-        "Irods extractor procesing options": {
-            "header_irods": {
-                "title": "iRODS extractor options:", 
-                "subtext": ""
-            },
+        "Irods extractor processing options": {
             "cleanup_intermediate_files_irods_extractor": {
                 "default": "false",
                 "help_text": "delete intermediate CRAM files downloaded from IRODS in work/ folder"
