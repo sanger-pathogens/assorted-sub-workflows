@@ -8,7 +8,7 @@
             },
             "preexisting_fastq_tag": {
                 "default": "raw_fastq",
-                "help_text": "if the expected ouput fastq files exist in the folder named like this under the result folder for the sample e.g. in results/12345_1#67/raw_fastq/12345_1#67_1.fastq.gz,\n       then skip download and any further processing for this sample."
+                "help_text": "if the expected ouput fastq files exist in the folder named like this under the result folder for the sample e.g. in results/12345_1#67/raw_fastq/12345_1#67_1.fastq.gz,\n            then skip download and any further processing for this sample."
             },
             "split_sep_for_ID_from_fastq":{
                 "default": "_1.fastq",

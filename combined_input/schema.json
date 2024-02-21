@@ -3,6 +3,7 @@
     "params": {
         "Sequencing reads input parameters": {
             "header_combined_input_1": {
+                "title": "",
                 "subtext": "There are two ways of providing input reads, which can be combined\n      1) through direct input of compressed fastq sequence reads files. This kind of input is passed by specifying the paths to the\n      read files via a manifest listing the pair of read files pertaing to a sample, one per row."
             },
             "manifest_of_reads": {
@@ -10,6 +11,7 @@
                 "help_text": "Manifest containing per-sample paths to .fastq.gz files (optional)"
             },
             "header_combined_input_2": {
+                "title": "",
                 "subtext": "2) through specification of data to be downloaded from iRODS.\n      The selected set of data files is defined by a combination of parameters: study, run, lane and plex ids (these refer to specifics of the sequencing experiment).\n      Each parameter restricts the set of data files that match and will be downloaded; when ommitted, samples for all possible values of that parameter are retrieved.\n      At least one of study id or run id paramaters must be specified. Lane and plex ids are optional parameters that can be provided only in combination with the run id;\n      if plex and/or lane ids are specified without a run id, the request will be ignored (no iRODS data or metadata download) with a warning\n      - this condition aims to avoid unspecific download of thousands of files across all possible runs.\n      These parameters can be specified through the following command line options: --studyid, --runid, --laneid and --plexid."
             },
             "studyid": {
@@ -29,11 +31,12 @@
                 "help_text": "Sequencing Plex ID"
             },
             "headheader_combined_input_3": {
+                "title": "",
                 "subtext": "Alternatively, the user can provide a CSV-format manifest listing a batch of such combinations."
             },
             "manifest_of_lanes": {
                 "default": "false",
-                "help_text": "Path to a manifest of search terms as specified above.\n      At least one of study id or run id paramaters must be specified; other parameters are not mandatory and corresponding\n      fields in the CSV manifest file can be left blank. Lane and plex ids are only considered when provided aongside a run id.\n      Example of manifest:\n          studyid,runid,laneid,plexid\n          ,37822,2,354\n          5970,,2,332\n          5970,37822,,332\n          5970,37822,2,"
+                "help_text": "Path to a manifest of search terms as specified above.\n            At least one of study id or run id paramaters must be specified; other parameters are not mandatory and corresponding\n            fields in the CSV manifest file can be left blank. Lane and plex ids are only considered when provided aongside a run id.\n\n            Example of manifest:\n                studyid,runid,laneid,plexid\n                ,37822,2,354\n          5970,,2,332\n                5970,37822,,332\n                5970,37822,2,"
             }
         }
     }
