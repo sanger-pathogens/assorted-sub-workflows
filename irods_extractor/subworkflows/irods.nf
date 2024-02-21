@@ -73,10 +73,11 @@ workflow CRAM_EXTRACT {
     RETRIEVE_CRAM(do_not_exist)
     | COLLATE_FASTQ
 
-    COLLATE_FASTQ.out.remove_channel.flatten()
-            .filter(Path)
-            .map { it.delete() }
-
+    if (params.cleanup_intermediate_files_irods_extractor) {
+        COLLATE_FASTQ.out.remove_channel.flatten()
+                .filter(Path)
+                .map { it.delete() }
+    }
     emit:
     reads_ch = COLLATE_FASTQ.out.fastq_channel // tuple val(meta), path(forward_fastq), path(reverse_fastq)
 }

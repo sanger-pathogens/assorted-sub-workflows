@@ -1,104 +1,18 @@
 { 
     "pipeline": "Irods extractor (sub-workflow)",
     "params": {
-        "Input_parameters": {
-            "header_irods": {
-                "title": "Sequencing reads",
-                "subtext": "There are two ways of providing input reads, which can be combined\n      1) through direct input of compressed fastq sequence reads files. This kind of input is passed by specifying the paths to the\n      read files via a manifest listing the pair of read files pertaing to a sample, one per row."
-            },
-            "manifest_of_reads": {
-                "default": "false",
-                "help_text": "Manifest containing per-sample paths to .fastq.gz files (optional)"
-            },
-            "header_2": {
-                "subtext": "2) through specification of data to be downloaded from iRODS. Each sample is defined by a combination of study, run, lane and plex ids\n      (these ids correspond to the reference of the sequencing experiment). Run, lane and plex ids are not mandatory: when provided, these\n      parameters gradually restrict of files to be downloaded; when ommitted, samples for all possible values are retrieved.\n      This information can be provided via a combination of workflow parameters passed on through command line options: --studyid, --runid,\n      --laneid and --plexid; this defines a single sequencing dataset based on a combination of study, run, lane and plex ids."
-            },
-            "studyid": {
-                "default": -1,
-                "help_text": "Sequencing Study ID"
-            },
-            "runid": {
-                "default": -1,
-                "help_text": "Sequencing Run ID"
-            },
-            "laneid": {
-                "default": -1,
-                "help_text": "Sequencing Lane ID"
-            },
-            "plexid": {
-                "default": -1,
-                "help_text": "Sequencing Plex ID"
-            },
-            "header_3": {
-                "subtext": "Alternatively, the user can provide a manifest listing a batch of such combinations."
-            },
-            "manifest_of_lanes": {
-                "default": "false",
-                "help_text": "Path to a manifest of search terms as specified above"
-            },
-            "header_4": {
-                "title": "Reference input",
-                "subtext": "Currently only input through path to file is supported"
-            },
-            "reference": {
-                "default": "none",
-                "help_text": "Path to a reference in fasta format"
-            }
-        },
-        "Procesing options": {
-            "header": {
-                "title": "iRODS extractor options:", 
-                "subtext": ""
-            },
+        "Irods extractor processing options": {
             "cleanup_intermediate_files_irods_extractor": {
                 "default": "false",
-                "help_text": "delete intermediate files from IRODS"
+                "help_text": "delete intermediate CRAM files downloaded from IRODS in work/ folder"
             },
-            "header_2": {
-                "title": "Strain-mapper read mapping options:",
-                "subtext": ""
+            "preexisting_fastq_tag": {
+                "default": "raw_fastq",
+                "help_text": "if the expected ouput fastq files exist in the folder named like this under the result folder for the sample e.g. in results/12345_1#67/raw_fastq/12345_1#67_1.fastq.gz,\n            then skip download and any further processing for this sample."
             },
-            "mapper": {
-                "default": "bwa",
-                "help_text": "mapping tool to use options [bwa, bowtie2]"
-            },
-            "only_report_alts": {
-                "default": "true",
-                "help_text": "When included this flag reports only ALT variants in the VCF output"
-            },
-            "VCF_filters": {
-                "default": "QUAL>=50 & MIN(DP)>=8 & ((ALT!=\".\" & DP4[2]>3 & DP4[3]>3) | (ALT=\".\" & DP4[0]>3 & DP4[1]>3))",
-                "help_text": "Parameters for filtering variants in VCF file. Default is to removing records with a quality score below 50 and also requiring 3 reads\n             from each strand with overall greater than 8."
-            },
-            "skip_filtering": {
-                "default": "false",
-                "help_text": "Do not filter variants called using `bcftools call` based on metrics defined with --VCF_filters."
-            },
-            "keep_raw_vcf": {
-                "default": "false",
-                "help_text": "Save the unfiltered VCF file i.e. direct output of `bcftools call`; can be combined with --only_report_alts=false\n            to report all (unfiltered, REF and ALT) variants; only relevant when --skip_filtering=false;"
-            },
-            "keep_sorted_bam": { 
-                "default": "false",
-                "help_text": "Save the mapping file (sorted BAM)"
-            }
-        },
-        "Output parameters": {
-            "save_metadata":{
-                "default": true,
-                "help_text": "Save the metadata to the results directory that is returned from IRODS"
-            },
-            "save_fastqs": {
-                "default": false,
-                "help_text": "Save the fastq files to the results directory after unpacking data from CRAM files"
-            },
-            "save_method": {
-                "default": "nested",
-                "help_text": "Structure of the fastq save directory. 'flat' saves all fastq files into one directory; 'nested' saves them into sample-specific directories. Options: [flat, nested]"
-            },
-            "raw_reads_prefix:": {
-                "default": "",
-                "help_text": "Prefix for unpacked reads i.e. 'raw_' prefix makes files named like 'raw_251312_1#195_1.fastq.gz'; default is no prefix"
+            "split_sep_for_ID_from_fastq":{
+                "default": "_1.fastq",
+                "help_text": "separator to recognise sample ID from preexisting file."
             }
         }
     }

@@ -1,23 +1,15 @@
 { 
     "pipeline": "Strain-mapper (sub-workflow)",
     "params": {
-        "Input_parameters": {
-            "header_strain_mapper": {
-                "title": "Reference input",
-                "subtext": "Currently only input through path to file is supported"
-            },
+        "Read mapping input parameters": {
             "reference": {
                 "default": "none",
-                "help_text": "Path to a reference in fasta format"
+                "help_text": "Path to reference genome in fasta format"
             }
         },
-        "Procesing options": {
-            "header_strain_mapper": {
-                "title": "Strain-mapper read mapping options:",
-                "subtext": ""
-            },
+        "Read mapping procesing options": {
             "mapper": {
-                "default": "bwa",
+                "default": "bowtie2",
                 "help_text": "mapping tool to use options [bwa, bowtie2]"
             },
             "only_report_alts": {
