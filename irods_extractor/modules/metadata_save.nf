@@ -13,7 +13,7 @@ process METADATA {
     path(metadata)
 
     output:
-    path("metadata.csv")
+    path("${workflow.start}_metadata.csv")
     
     script:
     maptocsv = "${projectDir}/assorted-sub-workflows/irods_extractor/bin/map_to_csv.py"
