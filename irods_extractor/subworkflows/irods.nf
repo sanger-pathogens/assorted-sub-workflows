@@ -62,7 +62,10 @@ workflow CRAM_EXTRACT {
     main:
 
     Channel.fromPath("${params.outdir}/*/${params.preexisting_fastq_tag}/*_1.fastq.gz").map{ preexisting_fastq_path ->
-        ID = preexisting_fastq_path.Name.split("${params.split_sep_for_ID_from_fastq}")[0]
+        ID = preexisting_fastq_path.getName().split("${params.split_sep_for_ID_from_fastq}")[0]
+        // enforce that the ID is also the name of the sample folder
+        sampleID = preexisting_fastq_path.getParent().getParent()
+        return { ID == sampleID ? ID : "none" }
     }.ifEmpty("fresh_run").set{ existing_id }
 
     meta_cram_ch.combine( existing_id | collect | map{ [it] })
