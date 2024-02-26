@@ -1,7 +1,7 @@
 process COLLATE_FASTQ {
     label 'cpu_2'
     label 'mem_1'
-    label 'time_queue_from_normal'
+    label "time_queue_from_${params.start_queue}"
 
     conda 'bioconda::samtools=1.17'
     container 'quay.io/biocontainers/samtools:1.17--hd87286a_2'
