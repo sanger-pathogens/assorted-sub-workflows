@@ -18,10 +18,11 @@
 //
 include { BOWTIE2; BOWTIE2_INDEX } from './modules/bowtie2'
 include { BWA; BWA_INDEX } from './modules/bwa'
-include { CONVERT_TO_BAM; SAMTOOLS_SORT; INDEX_REF } from './modules/samtools'
+include { CONVERT_TO_BAM; SAMTOOLS_SORT; INDEX_REF; INDEX_BAM } from './modules/samtools'
 include { BCFTOOLS_CALL; BCFTOOLS_MPILEUP; BCFTOOLS_FILTERING; FINAL_VCF; RAW_VCF } from './modules/bcftools'
 include { PICARD_MARKDUP } from './modules/picard'
 include { CURATE_CONSENSUS } from './modules/curate'
+include { BAM_COVERAGE } from './modules/deeptools'
 
 /*
 ========================================================================================
@@ -124,6 +125,11 @@ workflow STRAIN_MAPPER {
         ch_mapped_reads_bam
     )
     SAMTOOLS_SORT.out.sorted_reads.dump(tag: 'sorted_reads').set { ch_sorted_reads }
+
+    if (params.bigwig){
+        INDEX_BAM(ch_sorted_reads)
+        | BAM_COVERAGE
+    }
 
     PICARD_MARKDUP(
         ch_sorted_reads

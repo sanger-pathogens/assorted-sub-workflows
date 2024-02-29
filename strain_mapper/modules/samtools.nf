@@ -69,3 +69,27 @@ process INDEX_REF {
     samtools faidx "${reference}" > "${faidx}"
     """
 }
+
+process INDEX_BAM {
+    label 'cpu_2'
+    label 'mem_1'
+    label 'time_1'
+
+    publishDir "${params.outdir}/sorted_ref", mode: 'copy', overwrite: true
+
+    conda 'bioconda::samtools=1.17'
+    container 'quay.io/biocontainers/samtools:1.17--hd87286a_2'
+
+    input:
+    val(meta), file(mapped_reads_bam)
+
+    output:
+    val(meta), file(mapped_reads_bam), file(mapped_reads_bai),  emit: bam_index
+
+    script:
+    mapped_reads_bai = "${meta.ID}.bai"
+    """
+    samtools index -@ ${task.cpus} "${mapped_reads_bam}" "${mapped_reads_bai}"
+    """
+}
+
