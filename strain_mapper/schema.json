@@ -31,6 +31,10 @@
             "keep_sorted_bam": { 
                 "default": "false",
                 "help_text": "Save the mapping file (sorted BAM)"
+            },
+            "bigwig": { 
+                "default": "false",
+                "help_text": "Produce bigwig genome coverage file. Also saves the BAM index (.bai) file from sorted BAM file."
             }
         }
     }
