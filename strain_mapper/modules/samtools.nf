@@ -48,7 +48,7 @@ process SAMTOOLS_SORT {
 }
 
 process INDEX_REF {
-    label 'cpu_2'
+    label 'cpu_1'
     label 'mem_1'
     label 'time_1'
 
