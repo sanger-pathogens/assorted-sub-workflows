@@ -35,7 +35,6 @@ process GUBBINS_MASK{
     // need to check if equivalent to below: container '/software/pathogen/images/gubbins-3.2.1.simg'
     container 'quay.io/biocontainers/gubbins:3.2.1--py38pl5321h4c6a040_1'
 
-
     input:
     tuple path(msa), path(recpredgff)
 
