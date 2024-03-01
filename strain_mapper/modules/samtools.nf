@@ -93,3 +93,28 @@ process INDEX_BAM {
     """
 }
 
+process SAMTOOLS_STATS {
+    label 'cpu_2'
+    label 'mem_1'
+    label 'time_1'
+
+    publishDir "${params.outdir}/samtools_stats", enabled: params.samtools_stats, mode: 'copy', overwrite: true
+
+    conda 'bioconda::samtools=1.17'
+    container 'quay.io/biocontainers/samtools:1.17--hd87286a_2'
+
+    input:
+    val(meta), file(mapped_reads_bam)
+
+    output:
+    file(stats_file), file(flagstats_file),  emit: stats_ch
+
+    script:
+    stats_file = "${meta.ID}.stats"
+    stats_file = "${meta.ID}.flagstats"
+    """
+    samtools stats -@ ${task.cpus} "${mapped_reads_bam}" > "${stats_file}"
+    samtools flagstats -@ ${task.cpus} "${mapped_reads_bam}" > "${flagstats_file}"
+    """
+}
+
