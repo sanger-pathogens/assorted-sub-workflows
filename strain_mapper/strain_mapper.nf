@@ -130,6 +130,10 @@ workflow STRAIN_MAPPER {
         INDEX_BAM(ch_sorted_reads)
         | BAM_COVERAGE
     }
+    
+    if (params.samtools_stats){
+        SAMTOOLS_STATS(ch_sorted_reads)
+    }
 
     PICARD_MARKDUP(
         ch_sorted_reads
