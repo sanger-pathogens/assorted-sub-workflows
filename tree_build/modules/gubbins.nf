@@ -30,11 +30,15 @@ process GUBBINS_MASK{
     label 'cpu_16'
     label 'mem_100M'
     label 'time_12'
+<<<<<<< Updated upstream
 
     conda 'bioconda::gubbins=3.2.1'
     // need to check if equivalent to below: container '/software/pathogen/images/gubbins-3.2.1.simg'
     container 'quay.io/biocontainers/gubbins:3.2.1--py38pl5321h4c6a040_1'
+=======
+>>>>>>> Stashed changes
 
+    container 'quay.io/biocontainers/gubbins:3.2.1--py310pl5321h8472f5a_1'
 
     input:
     tuple path(msa), path(recpredgff)
