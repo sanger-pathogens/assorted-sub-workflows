@@ -32,3 +32,23 @@ process COLLATE_FASTQ {
         -@ ${task.cpus}
     """
 }
+
+process COMBINE_CRAMS {
+    label 'cpu_2'
+    label 'mem_1'
+    label 'time_12'
+
+    conda 'bioconda::samtools=1.17'
+    container 'quay.io/biocontainers/samtools:1.17--hd87286a_2'
+
+    input:
+        tuple val(meta), path(crams)
+
+    output:
+        tuple val(meta), path("${meta.ID}.cram"), emit: merged_cram_ch
+
+    script:
+    """
+    samtools cat -@ ${task.cpus} -o ${meta.ID}.cram ${crams}
+    """
+}
