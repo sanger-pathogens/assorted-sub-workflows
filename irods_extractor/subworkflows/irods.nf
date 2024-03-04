@@ -22,6 +22,8 @@ def generate_metadata_from_map(orginMap){
     orginMap.each { key, value ->
         if (key == "ID") {
             resultMap[key] = "${value}_total"
+        } else if (key == "alignment") {
+            resultMap[key] = "Combined"
         } else{
             resultMap[key] = value
         }
@@ -78,22 +80,69 @@ workflow CRAM_EXTRACT {
     | map { it[0,1] }
     | set{ do_not_exist }
 
-    RETRIEVE_CRAM(do_not_exist.transpose())
-    | groupTuple
-    | set{ grouped_crams }
+    RETRIEVE_CRAM(do_not_exist)
+    | COLLATE_FASTQ
+
+    if (params.cleanup_intermediate_files_irods_extractor) {
+        COLLATE_FASTQ.out.remove_channel.flatten()
+                .filter(Path)
+                .map { it.delete() }
+    }
+    emit:
+    reads_ch = COLLATE_FASTQ.out.fastq_channel // tuple val(meta), path(forward_fastq), path(reverse_fastq)
+}
+
+workflow CRAM_EXTRACT_MERGE {
     
-    grouped_crams.branch{ metaInfo, crams ->
-        multiple_crams: (crams.size() > 1)
-            [ metaInfo, crams ]
+    take:
+    meta_cram_ch //tuple meta, cram_path
 
-        single_cram: (crams.size() == 1)
-            [ metaInfo, crams ]
-    }.set{ crams_to_merge }
+    main:
+    /*
+    Get all the crams first so we can focus on getting the crams packaged as a total unit
+    */
 
-    COMBINE_CRAMS(crams_to_merge.multiple_crams)
+    meta_cram_ch.multiMap{ metaTuple, cram ->
+        def clean_id = "${metadata.id_run}_${metadata.lane}#${metadata.tag_index}"
+        metadata: tuple(clean_id, metaTuple) //no cram for now as it will be grabbed out of the pile later
 
-    COMBINE_CRAMS.out.merged_cram_ch.mix(crams_to_merge.single_cram).set{ crams_ready_to_collate }
+        crams: tuple(clean_id, cram)
+    }.set{ seperated }
     
+    Channel.fromPath("${params.outdir}/*/${params.preexisting_fastq_tag}/*_1.fastq.gz").map{ preexisting_fastq_path ->
+        ID = preexisting_fastq_path.Name.split("${params.split_sep_for_ID_from_fastq}")[0]
+    }.ifEmpty("fresh_run").set{ existing_id }
+
+    seperated.crams.map{ identifer, cram ->
+        def metaMap = [:]
+        metaMap.ID = identifer
+        [ metaMap, cram ]
+    }.combine( existing_id | collect | map{ [it] })
+    | filter { metadata, cram_path, existing -> !(metadata.ID in existing)}
+    | map { it[0,1] }
+    | set{ do_not_exist }
+
+    RETRIEVE_CRAM(do_not_exist).map{ metatuple, cram -> tuple(metatuple.ID, metatuple, cram)}.set { downloaded_crams }
+
+    /*
+    now we have crams in the form of [ meta.ID, all_crams ]
+    */
+
+    seperated.metadata.join(downloaded_crams).groupTuple().map{ clean_id, metaMap, grouping_ID, cramList ->
+            tuple(metaMap, cramList)
+    }.set{ ready_to_sort_ch }
+    
+    ready_to_sort_ch.multiMap{ metaTuples, crams ->
+        def shortest_path = crams.min{ it.getFileName().toString().length() } //take the shortest path won't have _human for example
+        def matchingMeta = metaTuples.find { it.alignment == '1' } //select the alignment 1 meta
+        single: tuple(matchingMeta, shortest_path)
+
+        total: tuple(generate_metadata_from_map(matchingMeta), crams)
+    }.set{ sorted_ch }
+
+    COMBINE_CRAMS(sorted_ch.total)
+
+    COMBINE_CRAMS.out.merged_cram_ch.mix(sorted_ch.single)set{ crams_ready_to_collate }
     
     COLLATE_FASTQ(crams_ready_to_collate)
 
@@ -103,7 +152,7 @@ workflow CRAM_EXTRACT {
                 .map { it.delete() }
     }
     emit:
-    reads_ch = COLLATE_FASTQ.out.fastq_channel // tuple val(meta), path(forward_fastq), path(reverse_fastq)
+    reads_ch = COLLATE_FASTQ.out.fastq_channel // tuple val(meta), path(forward_fastq), path(reverse_fastq
 }
 
 workflow IRODS_EXTRACTOR {
@@ -127,29 +176,8 @@ workflow IRODS_EXTRACTOR_MERGE_CRAMS{
     main:
 
     IRODS_QUERY(input_irods_ch)
-    
-    IRODS_QUERY.out.meta_cram_ch.map{ metatuple, cram ->
-        def clean_id = "${metatuple.id_run}_${metatuple.lane}#${metatuple.tag_index}"
-        [ clean_id, metatuple, cram ]
-    }.set{ clean_id_cram }
-    
-    clean_id_cram.groupTuple().multiMap{ clean_id, meta, cramlist ->
-        def matchingMeta = meta.find { it.ID == clean_id }
-
-        only_target:
-            def shortest_path = cramlist.min{ it.length() } //take the shortest path won't have _human for example
-            [ matchingMeta, shortest_path ]
-
-        total:
-            def total_meta = generate_metadata_from_map(matchingMeta)
-            [ total_meta, cramlist ]
-    }
-    .set{ cram_branch }
-
-    cram_branch.only_target.mix(cram_branch.total).set{ all_crams }
-    
-    CRAM_EXTRACT(all_crams)
+    | CRAM_EXTRACT_MERGE
 
     emit:
-    reads_ch = CRAM_EXTRACT.out // tuple val(meta), path(forward_fastq), path(reverse_fastq)
+    reads_ch = CRAM_EXTRACT_MERGE.out // tuple val(meta), path(forward_fastq), path(reverse_fastq)
 }
