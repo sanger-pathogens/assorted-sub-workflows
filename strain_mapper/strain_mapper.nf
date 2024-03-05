@@ -17,11 +17,13 @@
 //   keep_gatk_bam = false
 //   keep_sorted_bam = false
 //   gatk_java_args = "-Xmx4g"
+//   mapper = bwa
 
 //
 // MODULES
 //
 include { BOWTIE2; BOWTIE2_INDEX } from './modules/bowtie2'
+include { BWA; BWA_INDEX } from './modules/bwa'
 include { 
     CONVERT_TO_BAM;
     SAMTOOLS_SORT;
@@ -181,22 +183,72 @@ workflow STRAIN_MAPPER {
     reference       // file: given reference
 
     main:
-    // BOWTIE2 INDEX
-    ref_without_extension = "${reference.parent}/${reference.baseName}"
-    bt2_index_files = file("${ref_without_extension}*.bt2")
-    if (bt2_index_files) {
-        Channel.fromPath(bt2_index_files)
-            .collect()
-            .dump(tag: 'bt2_index')
-            .set { ch_bt2_index }
-    } else {
-        BOWTIE2_INDEX(
-            reference
+    //
+    //BOWTIE2 WORKFLOW
+    //
+
+    if (params.mapper == "bowtie2") {
+
+        // BOWTIE2 INDEX
+
+        ref_without_extension = "${reference.parent}/${reference.baseName}"
+        bt2_index_files = file("${ref_without_extension}*.bt2")
+        if (bt2_index_files) {
+            Channel.fromPath(bt2_index_files)
+                .collect()
+                .dump(tag: 'bt2_index')
+                .set { ch_bt2_index }
+        } else {
+            BOWTIE2_INDEX(
+                reference
+            )
+            BOWTIE2_INDEX.out.bt2_index.dump(tag: 'bt2_index').set { ch_bt2_index }
+        }
+
+        //
+        // MAPPING: Bowtie2
+        //
+        BOWTIE2 (
+            ch_reads,
+            ch_bt2_index 
         )
-        BOWTIE2_INDEX.out.bt2_index.dump(tag: 'bt2_index').set { ch_bt2_index }
+        BOWTIE2.out.mapped_reads.dump(tag: 'bowtie2').set { ch_mapped }
+    } else if (params.mapper == "bwa") {
+
+        //
+        //BWA WORKFLOW
+        //
+
+
+        // BWA INDEX
+        bwa_index_files = file("${reference}.fai")
+        if (bwa_index_files.isFile()) {
+            Channel.fromPath([reference, "${reference}.fai"])
+                .collect()
+                .dump(tag: 'bwa_index')
+                .set { ch_bwa_index }
+        } else {
+            BWA_INDEX(
+                reference
+            )
+            BWA_INDEX.out.bwa_index.dump(tag: 'bwa_index').set { ch_bwa_index }
+        }
+
+        //
+        // MAPPING: Bwa
+        //
+        BWA(
+            ch_reads,
+            ch_bwa_index 
+        )
+        BWA.out.mapped_reads.dump(tag: 'bwa').set { ch_mapped }
+
+    } else {
+        error "supplied mapper: ${params.mapper} is not currently supported"
     }
 
-    // INDEX REF FASTA
+
+    // INDEX REF FASTA FOR DOWNSTREAM PROCESSES
     faidx_file = file("${reference}.fai")
     if (faidx_file.isFile()) {
         Channel.of( [reference, faidx_file] ).dump(tag: 'ref_index').set { ch_ref_index }
@@ -206,15 +258,6 @@ workflow STRAIN_MAPPER {
         )
         INDEX_REF.out.ref_index.dump(tag: 'ref_index').set { ch_ref_index }
     }
-
-    //
-    // MAPPING: Bowtie2
-    //
-    BOWTIE2 (
-        ch_reads,
-        ch_bt2_index 
-    )
-    BOWTIE2.out.mapped_reads.dump(tag: 'bowtie2').set { ch_mapped }
 
     //
     // POST-PROCESSING

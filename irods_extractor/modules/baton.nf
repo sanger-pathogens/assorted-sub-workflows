@@ -1,9 +1,11 @@
 process BATON {
     label 'cpu_1'
     label 'mem_1'
-    label 'time_1'
+    label 'time_30m'
     maxForks = 10
+
     container "/software/pathogen/images/baton.simg"
+    
     input:
     path(json_file)
 
