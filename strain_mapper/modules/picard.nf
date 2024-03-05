@@ -32,7 +32,7 @@ process PICARD_ADD_READGROUP {
 
     container 'quay.io/biocontainers/picard:3.1.1--hdfd78af_0'
 
-    publishDir "${params.outdir}/${meta.id}/picard", enabled: params.keep_sorted_bam, mode: 'copy', overwrite: true
+    publishDir "${params.outdir}/${meta.ID}/picard", enabled: params.keep_sorted_bam, mode: 'copy', overwrite: true
 
     input:
     tuple val(meta), path(sorted_reads)
@@ -49,6 +49,6 @@ process PICARD_ADD_READGROUP {
       RGLB=NA \
       RGPL=NA \
       RGPU=NA \
-      RGSM=${meta.id}
+      RGSM=${meta.ID}
     """
 }
