@@ -1,24 +1,5 @@
 #!/usr/bin/env nextflow
 
-
-/*
-========================================================================================
-    REQUIRED PARAMS IN NEXTFLOW.CONFIG
-========================================================================================
-*/
-
-//   method = 'bcftools'
-//   report_ref_and_alt = false
-//   bcftools_vcf_filter = 'QUAL>=50 & MIN(DP)>=8 & ((ALT!="." & DP4[2]>3 & DP4[3]>3) | (ALT="." & DP4[0]>3 & DP4[1]>3))'
-//   gatk_vcf_filter = 'QUAL>=50 & MIN(FORMAT/DP)>=8 & ((ALT!="." & FORMAT/AD[*:1]>7) | (ALT="." & FORMAT/AD[*:0]>7))'
-//   gatk_haplotypecaller_output_mode = "EMIT_ALL_ACTIVE_SITES"
-//   skip_filtering = false
-//   keep_raw_vcf = false
-//   keep_gatk_bam = false
-//   keep_sorted_bam = false
-//   gatk_java_args = "-Xmx4g"
-//   mapper = bwa
-
 //
 // MODULES
 //

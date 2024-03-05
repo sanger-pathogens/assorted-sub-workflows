@@ -15,7 +15,7 @@ process GATK_REF_DICT {
 
     script:
     """
-    gatk --java-options "${params.gatk_java_args}" CreateSequenceDictionary \
+    gatk --java-options ${params.gatk_java_args} CreateSequenceDictionary \
      --REFERENCE ${reference} \
      --OUTPUT ${reference.baseName}.dict
     """
@@ -95,7 +95,7 @@ process GATK_RAW_VCF {
 
     script:
     out_vcf = "${meta.ID}.vcf.gz"
-    if (!params.report_ref_and_alt)
+    if (params.only_report_alts)
         """
         bcftools view -o ${out_vcf} \
             -O 'z' \
@@ -128,7 +128,7 @@ process GATK_FINAL_VCF {
 
     script:
     out_vcf = "${meta.ID}.vcf.gz"
-    if (!params.report_ref_and_alt)
+    if (params.only_report_alts)
         """
         bcftools view -o ${out_vcf} \
             -O 'z' \
