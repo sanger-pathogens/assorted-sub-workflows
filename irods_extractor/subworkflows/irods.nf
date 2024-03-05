@@ -103,7 +103,7 @@ workflow CRAM_EXTRACT_MERGE {
     */
 
     meta_cram_ch.multiMap{ metaTuple, cram ->
-        def clean_id = "${metadata.id_run}_${metadata.lane}#${metadata.tag_index}"
+        def clean_id = "${metaTuple.id_run}_${metaTuple.lane}#${metaTuple.tag_index}"
         metadata: tuple(clean_id, metaTuple) //no cram for now as it will be grabbed out of the pile later
 
         crams: tuple(clean_id, cram)
@@ -122,13 +122,13 @@ workflow CRAM_EXTRACT_MERGE {
     | map { it[0,1] }
     | set{ do_not_exist }
 
-    RETRIEVE_CRAM(do_not_exist).map{ metatuple, cram -> tuple(metatuple.ID, metatuple, cram)}.set { downloaded_crams }
+    RETRIEVE_CRAM(do_not_exist).map{ metatuple, cram -> tuple(metatuple.ID, cram)}.set { downloaded_crams }
 
     /*
-    now we have crams in the form of [ meta.ID, all_crams ]
+    now we have crams in the form of [ metatuple.ID, metatuple, all_crams ]
     */
 
-    seperated.metadata.join(downloaded_crams).groupTuple().map{ clean_id, metaMap, grouping_ID, cramList ->
+    seperated.metadata.join(downloaded_crams).groupTuple().map{ clean_id, metaMap, cramList ->
             tuple(metaMap, cramList)
     }.set{ ready_to_sort_ch }
     
@@ -142,7 +142,7 @@ workflow CRAM_EXTRACT_MERGE {
 
     COMBINE_CRAMS(sorted_ch.total)
 
-    COMBINE_CRAMS.out.merged_cram_ch.mix(sorted_ch.single)set{ crams_ready_to_collate }
+    COMBINE_CRAMS.out.merged_cram_ch.mix(sorted_ch.single).set{ crams_ready_to_collate }
     
     COLLATE_FASTQ(crams_ready_to_collate)
 
@@ -151,6 +151,7 @@ workflow CRAM_EXTRACT_MERGE {
                 .filter(Path)
                 .map { it.delete() }
     }
+
     emit:
     reads_ch = COLLATE_FASTQ.out.fastq_channel // tuple val(meta), path(forward_fastq), path(reverse_fastq
 }
@@ -163,21 +164,13 @@ workflow IRODS_EXTRACTOR {
     main:
 
     IRODS_QUERY(input_irods_ch)
-    | CRAM_EXTRACT
+
+    if (params.combine_same_id_crams) {
+        reads_ch = CRAM_EXTRACT_MERGE(IRODS_QUERY.out.meta_cram_ch)
+    } else {
+        reads_ch = CRAM_EXTRACT(IRODS_QUERY.out.meta_cram_ch)
+    }
 
     emit:
-    reads_ch = CRAM_EXTRACT.out // tuple val(meta), path(forward_fastq), path(reverse_fastq)
-}
-
-workflow IRODS_EXTRACTOR_MERGE_CRAMS{
-    take:
-    input_irods_ch //tuple studyid, runid, laneid, plexid
-
-    main:
-
-    IRODS_QUERY(input_irods_ch)
-    | CRAM_EXTRACT_MERGE
-
-    emit:
-    reads_ch = CRAM_EXTRACT_MERGE.out // tuple val(meta), path(forward_fastq), path(reverse_fastq)
+    reads_ch // tuple val(meta), path(forward_fastq), path(reverse_fastq)
 }
