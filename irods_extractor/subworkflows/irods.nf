@@ -17,7 +17,7 @@ def split_metadata(collection_path, data_obj_name, linked_metadata) {
     return metadata
 }
 
-def map_from_multiple(listOfMaps){
+def meta_map_for_total_reads(listOfMaps){
     def originMap = listOfMaps.find { it.target == '1' } //select the meta with target == 1 as it is the most complete normally
     def resultMap = [:]
     originMap.each { key, value ->
@@ -130,7 +130,7 @@ workflow CRAM_EXTRACT_MERGE {
     }.set{ identifer_fastq_ch }
 
     identifer_fastq_ch.groupTuple().map{ identifier, metadata, read_1, read_2 ->
-        tuple(map_from_multiple(metadata), read_1, read_2) //function that makes an amalgam metamap
+        tuple(meta_map_for_total_reads(metadata), read_1, read_2) //function that makes an amalgam metamap
     }.set{ cleaned_total_reads }
 
     COMBINE_FASTQ(cleaned_total_reads)
