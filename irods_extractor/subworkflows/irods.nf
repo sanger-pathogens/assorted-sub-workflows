@@ -18,7 +18,7 @@ def split_metadata(collection_path, data_obj_name, linked_metadata) {
 }
 
 def map_from_multiple(listOfMaps){
-    def orginMap = listOfMaps.find { it.alignment == '1' } //select the alignment 1 meta as it is the most complete normally
+    def orginMap = listOfMaps.find { it.target == '1' } //select the meta with target == 1 as it is the most complete normally
     def resultMap = [:]
     orginMap.each { key, value ->
         if (key == "ID") {
