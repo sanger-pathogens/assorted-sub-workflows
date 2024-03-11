@@ -15,7 +15,7 @@ process PICARD_MARKDUP {
     tuple val(meta), path("${dedup_reads_bam}"),  emit: dedup_reads
 
     script:
-    dedup_reads = "${meta.ID}_duplicates_removed.bam"
+    dedup_reads_bam = "${meta.ID}_duplicates_removed.bam"
     """
     picard MarkDuplicates \
       -I ${sorted_reads_bam} \
