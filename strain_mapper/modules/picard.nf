@@ -9,7 +9,7 @@ process PICARD_MARKDUP {
     publishDir "${params.outdir}/${meta.ID}/picard", enabled: params.keep_sorted_bam, mode: 'copy', overwrite: true
 
     input:
-    tuple val(meta), path(sorted_reads)
+    tuple val(meta), path(sorted_reads_bam), path(sorted_reads_bai)
 
     output:
     tuple val(meta), path("${dedup_reads}"),  emit: dedup_reads
@@ -18,8 +18,8 @@ process PICARD_MARKDUP {
     dedup_reads = "${meta.ID}_duplicates_removed.bam"
     """
     picard MarkDuplicates \
-      -I $sorted_reads \
-      -O $dedup_reads \
+      -I ${sorted_reads} \
+      -O ${dedup_reads} \
       -M marked_dup_metrics.txt \
       --REMOVE_DUPLICATES
     """

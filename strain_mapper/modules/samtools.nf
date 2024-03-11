@@ -106,7 +106,7 @@ process SAMTOOLS_STATS {
     container 'quay.io/biocontainers/samtools:1.17--hd87286a_2'
 
     input:
-    tuple val(meta), path(mapped_reads_bam)
+    tuple val(meta), path(mapped_reads_bam), path(mapped_reads_bai)
 
     output:
     tuple path(stats_file), path(flagstats_file),  emit: stats_ch
