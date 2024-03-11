@@ -47,7 +47,7 @@ workflow IRODS_QUERY {
         if (params.metadata_only){
             // cancel all downstream processing; only pipeline output will be metadata.csv
             meta_cram_ch
-            .take(0)
+            .filter(".*")
             .set{ meta_cram_channel }
         }else{
             meta_cram_channel = meta_cram_ch
