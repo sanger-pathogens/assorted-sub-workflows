@@ -51,10 +51,7 @@ process INDEX_REF {
     label 'cpu_1'
     label 'mem_1'
     label 'time_1'
-
-    // this publish statement might duplicate output from deeptools bigwig, 
-    // but given the small size of index file and the fact that it's most handy when located in same folder as .bam or .bw, it is best publishing it twice
-    publishDir "${params.outdir}/${meta.ID}/samtools_sort", enabled: params.keep_sorted_bam, mode: 'copy', overwrite: true
+    publishDir "${params.outdir}/sorted_ref", mode: 'copy', overwrite: true
 
     conda 'bioconda::samtools=1.17'
     container 'quay.io/biocontainers/samtools:1.17--hd87286a_2'
@@ -77,7 +74,9 @@ process INDEX_BAM {
     label 'mem_1'
     label 'time_1'
 
-    publishDir "${params.outdir}/sorted_ref", mode: 'copy', overwrite: true
+    // this publish statement might duplicate output from deeptools bigwig, 
+    // but given the small size of index file and the fact that it's most handy when located in same folder as .bam or .bw, it is best publishing it twice
+    publishDir "${params.outdir}/${meta.ID}/samtools_sort", enabled: params.keep_sorted_bam, mode: 'copy', overwrite: true
 
     conda 'bioconda::samtools=1.17'
     container 'quay.io/biocontainers/samtools:1.17--hd87286a_2'
@@ -86,7 +85,7 @@ process INDEX_BAM {
     tuple val(meta), file(mapped_reads_bam)
 
     output:
-    tuple val(meta), file(mapped_reads_bam), file(mapped_reads_bai),  emit: bam_index
+    tuple val(meta), file(mapped_reads_bam), file(mapped_reads_bai),  emit: sorted_indexed_bam
 
     script:
     mapped_reads_prefix = mapped_reads_bam.simpleName
