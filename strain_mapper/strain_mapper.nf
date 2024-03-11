@@ -121,14 +121,13 @@ workflow STRAIN_MAPPER {
     )
     CONVERT_TO_BAM.out.mapped_reads_bam.dump(tag: 'convert_to_bam').set { ch_mapped_reads_bam }
 
-    SAMTOOLS_SORT(
-        ch_mapped_reads_bam
-    )
-    SAMTOOLS_SORT.out.sorted_reads.dump(tag: 'sorted_reads').set { ch_sorted_reads }
+    SAMTOOLS_SORT(ch_mapped_reads_bam)
+    | INDEX_BAM
+
+    INDEX_BAM.out.sorted_indexed_bam.dump(tag: 'sorted_reads').set { ch_sorted_reads }
 
     if (params.bigwig){
-        INDEX_BAM(ch_sorted_reads)
-        | BAM_COVERAGE
+        BAM_COVERAGE(ch_sorted_reads)
     }
     
     if (params.samtools_stats){
