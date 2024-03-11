@@ -13,6 +13,10 @@
             "split_sep_for_ID_from_fastq":{
                 "default": "_1.fastq",
                 "help_text": "separator to recognise sample ID from preexisting file."
+            },
+            "metadata_only":{
+                "default": "false",
+                "help_text": "Should this pipeline only return the metadata CSV table of files matching the query on iRODS i.e. do not download any data.\n            This is useful for prior check of query scope when attempting bold queries based on loose criteria e.g. using the `sample_common_name` (species/taxon name)."
             }
         }
     }

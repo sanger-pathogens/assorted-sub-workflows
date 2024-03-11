@@ -39,9 +39,14 @@ workflow IRODS_QUERY {
         if (params.save_metadata) {
             meta_cram_ch.map{metadata_map, path -> metadata_map}
             | collectFile() { map -> [ "lane_metadata.txt", map.collect{it}.join(', ') + '\n' ] }
-            | set{ metadata_only }
+            | set{ just_metadata }
 
-            METADATA(metadata_only)
+            METADATA(just_metadata)
+        }
+
+        if (params.metadata_only){
+            // cancel all downstream processing; only pipeline output will be metadata.csv
+            Channel.of("none").set{ meta_cram_ch }
         }
 
         emit:
