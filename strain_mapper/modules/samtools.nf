@@ -81,10 +81,10 @@ process INDEX_BAM {
     container 'quay.io/biocontainers/samtools:1.17--hd87286a_2'
 
     input:
-    val(meta), file(mapped_reads_bam)
+    tuple val(meta), file(mapped_reads_bam)
 
     output:
-    val(meta), file(mapped_reads_bam), file(mapped_reads_bai),  emit: bam_index
+    tuple val(meta), file(mapped_reads_bam), file(mapped_reads_bai),  emit: bam_index
 
     script:
     mapped_reads_bai = "${meta.ID}.bai"
@@ -104,10 +104,10 @@ process SAMTOOLS_STATS {
     container 'quay.io/biocontainers/samtools:1.17--hd87286a_2'
 
     input:
-    val(meta), file(mapped_reads_bam)
+    tuple val(meta), file(mapped_reads_bam)
 
     output:
-    file(stats_file), file(flagstats_file),  emit: stats_ch
+    tuple file(stats_file), file(flagstats_file),  emit: stats_ch
 
     script:
     stats_file = "${meta.ID}.stats"
