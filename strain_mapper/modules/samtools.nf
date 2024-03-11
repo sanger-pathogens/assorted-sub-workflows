@@ -7,7 +7,7 @@ process CONVERT_TO_BAM {
     container 'quay.io/biocontainers/samtools:1.17--hd87286a_2'
 
     input:
-    tuple val(meta), file(mapped_reads)
+    tuple val(meta), path(mapped_reads)
 
     output:
     tuple val(meta), path("${mapped_reads_bam}"),  emit: mapped_reads_bam
@@ -33,7 +33,7 @@ process SAMTOOLS_SORT {
     container 'quay.io/biocontainers/samtools:1.17--hd87286a_2'
 
     input:
-    tuple val(meta), file(mapped_reads_bam)
+    tuple val(meta), path(mapped_reads_bam)
 
     output:
     tuple val(meta), path("${sorted_reads}"),  emit: sorted_reads
@@ -82,10 +82,10 @@ process INDEX_BAM {
     container 'quay.io/biocontainers/samtools:1.17--hd87286a_2'
 
     input:
-    tuple val(meta), file(mapped_reads_bam)
+    tuple val(meta), path(mapped_reads_bam)
 
     output:
-    tuple val(meta), file(mapped_reads_bam), file(mapped_reads_bai),  emit: sorted_indexed_bam
+    tuple val(meta), path(mapped_reads_bam), path(mapped_reads_bai),  emit: sorted_indexed_bam
 
     script:
     mapped_reads_prefix = mapped_reads_bam.simpleName
@@ -106,10 +106,10 @@ process SAMTOOLS_STATS {
     container 'quay.io/biocontainers/samtools:1.17--hd87286a_2'
 
     input:
-    tuple val(meta), file(mapped_reads_bam)
+    tuple val(meta), path(mapped_reads_bam)
 
     output:
-    tuple file(stats_file), file(flagstats_file),  emit: stats_ch
+    tuple path(stats_file), path(flagstats_file),  emit: stats_ch
 
     script:
     stats_file = "${meta.ID}.stats"
