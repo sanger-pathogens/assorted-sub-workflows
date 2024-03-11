@@ -18,7 +18,7 @@
 //
 include { BOWTIE2; BOWTIE2_INDEX } from './modules/bowtie2'
 include { BWA; BWA_INDEX } from './modules/bwa'
-include { CONVERT_TO_BAM; SAMTOOLS_SORT; INDEX_REF; INDEX_BAM ; SAMTOOLS_STATS} from './modules/samtools'
+include { CONVERT_TO_BAM; SAMTOOLS_SORT; INDEX_REF; INDEX_BAM as INDEX_SORTED_BAM; INDEX_BAM as INDEX_DEDUP_BAM; SAMTOOLS_STATS} from './modules/samtools'
 include { BCFTOOLS_CALL; BCFTOOLS_MPILEUP; BCFTOOLS_FILTERING; FINAL_VCF; RAW_VCF } from './modules/bcftools'
 include { PICARD_MARKDUP } from './modules/picard'
 include { CURATE_CONSENSUS } from './modules/curate'
@@ -122,9 +122,9 @@ workflow STRAIN_MAPPER {
     CONVERT_TO_BAM.out.mapped_reads_bam.dump(tag: 'convert_to_bam').set { ch_mapped_reads_bam }
 
     SAMTOOLS_SORT(ch_mapped_reads_bam)
-    | INDEX_BAM
+    | INDEX_SORTED_BAM
 
-    INDEX_BAM.out.sorted_indexed_bam.dump(tag: 'sorted_reads').set { ch_sorted_reads }
+    INDEX_SORTED_BAM.out.indexed_bam.dump(tag: 'sorted_reads').set { ch_sorted_reads }
 
     if (params.bigwig){
         BAM_COVERAGE(ch_sorted_reads)
@@ -134,10 +134,10 @@ workflow STRAIN_MAPPER {
         SAMTOOLS_STATS(ch_sorted_reads)
     }
 
-    PICARD_MARKDUP(
-        ch_sorted_reads
-    )
-    PICARD_MARKDUP.out.dedup_reads
+    PICARD_MARKDUP(ch_sorted_reads)
+    | INDEX_DEDUP_BAM
+
+    INDEX_DEDUP_BAM.out.indexed_bam
         .combine(ch_ref_index)
         .dump(tag: 'sorted_reads_and_ref')
         .set { sorted_reads_and_ref }
