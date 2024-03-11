@@ -52,7 +52,9 @@ process INDEX_REF {
     label 'mem_1'
     label 'time_1'
 
-    publishDir "${params.outdir}/sorted_ref", mode: 'copy', overwrite: true
+    // this publish statement might duplicate output from deeptools bigwig, 
+    // but given the small size of index file and the fact that it's most handy when located in same folder as .bam or .bw, it is best publishing it twice
+    publishDir "${params.outdir}/${meta.ID}/samtools_sort", enabled: params.keep_sorted_bam, mode: 'copy', overwrite: true
 
     conda 'bioconda::samtools=1.17'
     container 'quay.io/biocontainers/samtools:1.17--hd87286a_2'
@@ -99,7 +101,7 @@ process SAMTOOLS_STATS {
     label 'mem_1'
     label 'time_1'
 
-    publishDir "${params.outdir}/samtools_stats", enabled: params.samtools_stats, mode: 'copy', overwrite: true
+    publishDir "${params.outdir}/${meta.ID}/samtools_stats", enabled: params.samtools_stats, mode: 'copy', overwrite: true
 
     conda 'bioconda::samtools=1.17'
     container 'quay.io/biocontainers/samtools:1.17--hd87286a_2'
