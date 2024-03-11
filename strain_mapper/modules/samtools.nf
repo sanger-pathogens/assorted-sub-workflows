@@ -111,7 +111,7 @@ process SAMTOOLS_STATS {
 
     script:
     stats_file = "${meta.ID}.stats"
-    stats_file = "${meta.ID}.flagstats"
+    flagstats_file = "${meta.ID}.flagstats"
     """
     samtools stats -@ ${task.cpus} "${mapped_reads_bam}" > "${stats_file}"
     samtools flagstats -@ ${task.cpus} "${mapped_reads_bam}" > "${flagstats_file}"
