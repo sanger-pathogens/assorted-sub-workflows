@@ -48,11 +48,13 @@ workflow IRODS_QUERY {
             // cancel all downstream processing; only pipeline output will be metadata.csv
             meta_cram_ch
             .take(0)
-            .set{ meta_cram_ch }
+            .set{ meta_cram_channel }
+        }else{
+            meta_cram_channel = meta_cram_ch
         }
 
         emit:
-        meta_cram_ch
+        meta_cram_channel
 
 }
 
