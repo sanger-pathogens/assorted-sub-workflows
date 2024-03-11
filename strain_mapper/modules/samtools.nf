@@ -87,7 +87,8 @@ process INDEX_BAM {
     tuple val(meta), file(mapped_reads_bam), file(mapped_reads_bai),  emit: bam_index
 
     script:
-    mapped_reads_bai = "${meta.ID}.bai"
+    mapped_reads_prefix = mapped_reads_bam.simpleName
+    mapped_reads_bai = "${mapped_reads_prefix}.bai"
     """
     samtools index -@ ${task.cpus} "${mapped_reads_bam}" "${mapped_reads_bai}"
     """
