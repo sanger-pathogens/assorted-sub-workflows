@@ -16,7 +16,7 @@
             },
             "metadata_only":{
                 "default": "false",
-                "help_text": "Should this pipeline only return the metadata CSV table of files matching the query on iRODS i.e. do not download any data.\n            This is useful for prior check of query scope when attempting bold queries based on loose criteria e.g. using the `sample_common_name` (species/taxon name)."
+                "help_text": "Should this pipeline only return the metadata CSV table of files matching the query on iRODS i.e. do not download any data.\n            This is useful for prior check of query scope and assessing the size of the returned dataset, notably when attempting bold queries based on loose criteria e.g. using the only `sample_common_name` (species/taxon name)."
             }
         }
     }
