@@ -15,7 +15,7 @@ def split_metadata(collection_name, linked_metadata) {
 
 workflow IRODS_QUERY {
         take:
-        input_irods_ch //tuple studyid, runid, laneid, plexid
+        input_irods_ch // map
 
         main:
         JSON_PREP(input_irods_ch)
@@ -85,7 +85,7 @@ workflow CRAM_EXTRACT {
 workflow IRODS_EXTRACTOR {
 
     take:
-    input_irods_ch //tuple studyid, runid, laneid, plexid
+    input_irods_ch // map
 
     main:
 

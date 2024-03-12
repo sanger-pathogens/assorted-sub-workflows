@@ -19,11 +19,10 @@ def translateKey(in_key) {
 }
 
 def avuIdQuery(meta_query) {
-    def query_list = ["""{"a": "target", "v": "1"}, {"a": "type", "v": "cram"}"""]
+    def query_list = []
     // with validation for numeric id types
     meta_query.each { key, value ->
-        if (value >= 0){
-            // will have to think of a way to catch non-integer values
+        if (value.class.simpleName == 'String' || value >= 0){
             def irods_key = translateKey(key)
             def query_part = """{"a": "${irods_key}", "v": "${value}"}"""
             query_list.add(query_part)
