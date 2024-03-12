@@ -30,7 +30,19 @@
             },
             "keep_sorted_bam": { 
                 "default": "false",
-                "help_text": "Save the mapping file (sorted BAM)"
+                "help_text": "Save the mapping file (sorted BAM) and its index (.bai file)"
+            },
+            "keep_dedup_bam": { 
+                "default": "false",
+                "help_text": "Save the mapping file (sorted, then deduplicated BAM) generated with Picardtools"
+            },
+            "bigwig": { 
+                "default": "false",
+                "help_text": "Produce bigwig genome coverage file from sorted BAM file using Deeptools. Saves the BAM index (.bai) file alongside."
+            },
+            "samtools_stats": { 
+                "default": "false",
+                "help_text": "Produce statistics summary files from sorted BAM using `samtools stats` and `samtools flagstats` commands."
             }
         }
     }

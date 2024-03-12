@@ -8,7 +8,7 @@ process BCFTOOLS_MPILEUP {
     container 'quay.io/biocontainers/bcftools:1.17--h3cc50cf_1'
 
     input:
-    tuple val(meta), path(sorted_reads), path(reference), path(reference_index)
+    tuple val(meta), path(sorted_reads_bam), path(sorted_reads_index), path(reference), path(reference_index)
 
     output:
     tuple val(meta), path("${mpileup_file}"),  emit: mpileup_file
@@ -19,7 +19,7 @@ process BCFTOOLS_MPILEUP {
     bcftools mpileup -o ${mpileup_file} \
                      -O 'u' \
                      -f ${reference} \
-                     ${sorted_reads} 
+                     ${sorted_reads_bam} 
     """
 }
 

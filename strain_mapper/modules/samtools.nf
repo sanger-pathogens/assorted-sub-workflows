@@ -7,7 +7,7 @@ process CONVERT_TO_BAM {
     container 'quay.io/biocontainers/samtools:1.17--hd87286a_2'
 
     input:
-    tuple val(meta), file(mapped_reads)
+    tuple val(meta), path(mapped_reads)
 
     output:
     tuple val(meta), path("${mapped_reads_bam}"),  emit: mapped_reads_bam
@@ -33,7 +33,7 @@ process SAMTOOLS_SORT {
     container 'quay.io/biocontainers/samtools:1.17--hd87286a_2'
 
     input:
-    tuple val(meta), file(mapped_reads_bam)
+    tuple val(meta), path(mapped_reads_bam)
 
     output:
     tuple val(meta), path("${sorted_reads}"),  emit: sorted_reads
@@ -48,10 +48,9 @@ process SAMTOOLS_SORT {
 }
 
 process INDEX_REF {
-    label 'cpu_2'
+    label 'cpu_1'
     label 'mem_1'
     label 'time_1'
-
     publishDir "${params.outdir}/sorted_ref", mode: 'copy', overwrite: true
 
     conda 'bioconda::samtools=1.17'
@@ -69,3 +68,56 @@ process INDEX_REF {
     samtools faidx "${reference}" > "${faidx}"
     """
 }
+
+process INDEX_BAM {
+    label 'cpu_2'
+    label 'mem_1'
+    label 'time_1'
+
+    // the samtools_sort publish statement might duplicate output from deeptools bigwig, 
+    // but given the small size of index file and the fact that it's most handy when located in same folder as .bam or .bw, it is best publishing it twice
+    publishDir "${params.outdir}/${meta.ID}/samtools_sort", enabled: params.keep_sorted_bam, mode: 'copy', overwrite: true, pattern: "*_sorted.ba*" 
+    publishDir "${params.outdir}/${meta.ID}/picard", enabled: params.keep_dedup_bam, mode: 'copy', overwrite: true, pattern: "*_duplicates_removed.ba*"
+
+    conda 'bioconda::samtools=1.17'
+    container 'quay.io/biocontainers/samtools:1.17--hd87286a_2'
+
+    input:
+    tuple val(meta), path(mapped_reads_bam)
+
+    output:
+    tuple val(meta), path(mapped_reads_bam), path(mapped_reads_bai),  emit: indexed_bam
+
+    script:
+    mapped_reads_prefix = mapped_reads_bam.simpleName
+    mapped_reads_bai = "${mapped_reads_prefix}.bai"
+    """
+    samtools index -@ ${task.cpus} "${mapped_reads_bam}" "${mapped_reads_bai}"
+    """
+}
+
+process SAMTOOLS_STATS {
+    label 'cpu_2'
+    label 'mem_1'
+    label 'time_1'
+
+    publishDir "${params.outdir}/${meta.ID}/samtools_stats", enabled: params.samtools_stats, mode: 'copy', overwrite: true
+
+    conda 'bioconda::samtools=1.17'
+    container 'quay.io/biocontainers/samtools:1.17--hd87286a_2'
+
+    input:
+    tuple val(meta), path(mapped_reads_bam), path(mapped_reads_bai)
+
+    output:
+    tuple path(stats_file), path(flagstats_file),  emit: stats_ch
+
+    script:
+    stats_file = "${meta.ID}.stats"
+    flagstats_file = "${meta.ID}.flagstats"
+    """
+    samtools stats -@ ${task.cpus} "${mapped_reads_bam}" > "${stats_file}"
+    samtools flagstats -@ ${task.cpus} "${mapped_reads_bam}" > "${flagstats_file}"
+    """
+}
+
