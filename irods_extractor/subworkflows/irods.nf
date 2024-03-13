@@ -44,15 +44,6 @@ workflow IRODS_QUERY {
             METADATA(just_metadata)
         }
 
-        if (params.metadata_only){
-            // cancel all downstream processing; only pipeline output will be metadata.csv
-            meta_cram_ch
-            .filter(".*")
-            .set{ meta_cram_channel }
-        }else{
-            meta_cram_channel = meta_cram_ch
-        }
-
         emit:
         meta_cram_channel
 
@@ -94,7 +85,11 @@ workflow IRODS_EXTRACTOR {
     main:
 
     IRODS_QUERY(input_irods_ch)
-    | CRAM_EXTRACT
+    | set{ meta_cram_ch }
+
+    if (!params.metadata_only) {
+        CRAM_EXTRACT(meta_cram_ch)
+    }
 
     emit:
     reads_ch = CRAM_EXTRACT.out // tuple val(meta), path(forward_fastq), path(reverse_fastq)
