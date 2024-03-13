@@ -35,7 +35,7 @@ process BCFTOOLS_CALL {
     tuple val(meta), path("${vcf_allpos}"),  emit: vcf_allpos
 
     script:
-    vcf_allpos = "${meta.id}.vcf"
+    vcf_allpos = "${meta.id}_raw.vcf"
     """
     bcftools call -o ${vcf_allpos} \
         -O 'v' \
@@ -68,12 +68,13 @@ process BCFTOOLS_FILTERING {
     """
 }
 
-process BCFTOOLS_RAW_VCF {
+process BCFTOOLS_VIEW {
     label 'cpu_2'
     label 'mem_1'
     label 'time_1'
     
-    publishDir "${params.outdir}/${meta.id}/bcftools/raw_vcf", mode: 'copy', overwrite: true
+    publishDir "${params.outdir}/${meta.id}/bcftools/raw_vcf", mode: 'copy', overwrite: true, pattern: "*_raw.vcf.gz"
+    publishDir "${params.outdir}/${meta.id}/bcftools/final_vcf", mode: 'copy', overwrite: true, pattern: "*_filtered.vcf.gz"
 
     container 'quay.io/biocontainers/bcftools:1.16--haef29d1_2'
 
@@ -85,7 +86,8 @@ process BCFTOOLS_RAW_VCF {
     tuple val(meta), path("${out_vcf}"),  emit: out_vcf
 
     script:
-    out_vcf = "${meta.id}.vcf.gz"
+    vcf_prefix = bcf_allpos.simpleName
+    out_vcf = "${vcf_prefix}.vcf.gz"
     if (!params.report_ref_and_alt)
         """
         bcftools view -o ${out_vcf} \
@@ -98,38 +100,5 @@ process BCFTOOLS_RAW_VCF {
         bcftools view -o ${out_vcf} \
             -O 'z' \
             '${bcf_allpos}'
-        """
-}
-
-process BCFTOOLS_FINAL_VCF {
-    label 'cpu_2'
-    label 'mem_1'
-    label 'time_1'
-    
-    publishDir "${params.outdir}/${meta.id}/bcftools/final_vcf", mode: 'copy', overwrite: true
-
-    container 'quay.io/biocontainers/bcftools:1.16--haef29d1_2'
-
-    // input file can be VCF or BCF as is handled equally by bcftools
-    input:
-    tuple val(meta), file(vcf_allpos)
-
-    output:
-    tuple val(meta), path("${out_vcf}"),  emit: out_vcf
-
-    script:
-    out_vcf = "${meta.id}.vcf.gz"
-    if (!params.report_ref_and_alt)
-        """
-        bcftools view -o ${out_vcf} \
-            -O 'z' \
-            -i 'GT="alt"' \
-            '${vcf_allpos}'
-        """
-    else
-        """
-        bcftools view -o ${out_vcf} \
-            -O 'z' \
-            '${vcf_allpos}'
         """
 }

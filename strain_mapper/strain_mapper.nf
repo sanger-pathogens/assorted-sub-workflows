@@ -32,8 +32,8 @@ include {
     BCFTOOLS_CALL;
     BCFTOOLS_MPILEUP;
     BCFTOOLS_FILTERING;
-    BCFTOOLS_RAW_VCF;
-    BCFTOOLS_FINAL_VCF;
+    BCFTOOLS_VIEW as BCFTOOLS_RAW_VCF;
+    BCFTOOLS_VIEW as BCFTOOLS_FINAL_VCF;
 } from './modules/bcftools'
 include { PICARD_MARKDUP; PICARD_ADD_READGROUP } from './modules/picard'
 include {
