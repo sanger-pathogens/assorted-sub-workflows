@@ -15,7 +15,7 @@ process GATK_REF_DICT {
 
     script:
     """
-    gatk --java-options "${params.gatk_java_args}" CreateSequenceDictionary \
+    gatk --java-options ${params.gatk_java_args} CreateSequenceDictionary \
      --REFERENCE ${reference} \
      --OUTPUT ${reference.baseName}.dict
     """
@@ -28,7 +28,7 @@ process GATK_HAPLOTYPECALLER {
 
     container 'broadinstitute/gatk:4.5.0.0'
 
-    publishDir "${params.outdir}/${meta.id}/gatk", pattern:"*_bamout.*", enabled: params.keep_gatk_bam, mode: 'copy', overwrite: true
+    publishDir "${params.outdir}/${meta.ID}/gatk", pattern:"*_bamout.*", enabled: params.keep_gatk_bam, mode: 'copy', overwrite: true
 
     input:
     tuple val(meta), path(sorted_reads), path(sorted_reads_index), path(reference), path(reference_index), path(reference_dict)
@@ -38,9 +38,9 @@ process GATK_HAPLOTYPECALLER {
     tuple val(meta), path("${output_bam}"), path("${output_bai}"),  emit: bamout
 
     script:
-    output_vcf="${meta.id}.vcf"
-    output_bam="${meta.id}_bamout.bam"
-    output_bai="${meta.id}_bamout.bai"
+    output_vcf="${meta.ID}.vcf"
+    output_bam="${meta.ID}_bamout.bam"
+    output_bai="${meta.ID}_bamout.bai"
     """
     gatk --java-options "${params.gatk_java_args}" HaplotypeCaller  \
       -R ${reference} \
@@ -66,7 +66,7 @@ process GATK_FILTERING {
     tuple val(meta), path("${filtered_vcf_allpos}"),  emit: filtered_vcf_allpos
 
     script:
-    filtered_vcf_allpos = "${meta.id}_filtered.vcf"
+    filtered_vcf_allpos = "${meta.ID}_filtered.vcf"
     """
     bcftools view -o ${filtered_vcf_allpos} \
                   -O 'v' \
@@ -82,7 +82,7 @@ process GATK_RAW_VCF {
     label 'mem_1'
     label 'time_1'
     
-    publishDir "${params.outdir}/${meta.id}/gatk/raw_vcf", mode: 'copy', overwrite: true
+    publishDir "${params.outdir}/${meta.ID}/gatk/raw_vcf", mode: 'copy', overwrite: true
 
     container 'quay.io/biocontainers/bcftools:1.16--haef29d1_2'
 
@@ -94,8 +94,8 @@ process GATK_RAW_VCF {
     tuple val(meta), path("${out_vcf}"),  emit: out_vcf
 
     script:
-    out_vcf = "${meta.id}.vcf.gz"
-    if (!params.report_ref_and_alt)
+    out_vcf = "${meta.ID}.vcf.gz"
+    if (params.only_report_alts)
         """
         bcftools view -o ${out_vcf} \
             -O 'z' \
@@ -115,7 +115,7 @@ process GATK_FINAL_VCF {
     label 'mem_1'
     label 'time_1'
     
-    publishDir "${params.outdir}/${meta.id}/gatk/final_vcf", mode: 'copy', overwrite: true
+    publishDir "${params.outdir}/${meta.ID}/gatk/final_vcf", mode: 'copy', overwrite: true
 
     container 'quay.io/biocontainers/bcftools:1.16--haef29d1_2'
 
@@ -127,8 +127,8 @@ process GATK_FINAL_VCF {
     tuple val(meta), path("${out_vcf}"),  emit: out_vcf
 
     script:
-    out_vcf = "${meta.id}.vcf.gz"
-    if (!params.report_ref_and_alt)
+    out_vcf = "${meta.ID}.vcf.gz"
+    if (params.only_report_alts)
         """
         bcftools view -o ${out_vcf} \
             -O 'z' \

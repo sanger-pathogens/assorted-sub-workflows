@@ -1,7 +1,8 @@
-include { COLLATE_CRAM; FASTQ_FROM_COLLATED_BAM } from '../modules/samtools.nf'
-include { BATON } from '../modules/baton.nf'
-include { JSON_PREP; JSON_PARSE } from '../modules/jq.nf'
-include { RETRIEVE_CRAM } from '../modules/retrieve.nf'
+include { COLLATE_FASTQ            } from '../modules/samtools.nf'
+include { BATON                    } from '../modules/baton.nf'
+include { JSON_PREP; JSON_PARSE    } from '../modules/jq.nf'
+include { RETRIEVE_CRAM            } from '../modules/retrieve.nf'
+include { METADATA                 } from '../modules/metadata_save.nf'
 
 def split_metadata(collection_name, linked_metadata) {
     metadata = [:]
@@ -40,6 +41,14 @@ workflow IRODS_QUERY {
             [metamap, path]
         }.set{ meta_cram_ch }
 
+        if (params.save_metadata) {
+            meta_cram_ch.map{metadata_map, path -> metadata_map}
+            | collectFile() { map -> [ "lane_metadata.txt", map.collect{it}.join(', ') + '\n' ] }
+            | set{ metadata_only }
+
+            METADATA(metadata_only)
+        }
+
         emit:
         meta_cram_ch
 
@@ -52,8 +61,8 @@ workflow CRAM_EXTRACT {
 
     main:
 
-    Channel.fromPath("${params.outdir}/*#*/raw_fastq/*_1.fastq.gz").map{ raw_fastq_path ->
-        ID = raw_fastq_path.simpleName.split("_1")[0]
+    Channel.fromPath("${params.outdir}/*/${params.preexisting_fastq_tag}/*_1.fastq.gz").map{ preexisting_fastq_path ->
+        ID = preexisting_fastq_path.Name.split("${params.split_sep_for_ID_from_fastq}")[0]
     }.ifEmpty("fresh_run").set{ existing_id }
 
     meta_cram_ch.combine( existing_id | collect | map{ [it] })
@@ -62,15 +71,15 @@ workflow CRAM_EXTRACT {
     | set{ do_not_exist }
 
     RETRIEVE_CRAM(do_not_exist)
-    | COLLATE_CRAM
-    | FASTQ_FROM_COLLATED_BAM
+    | COLLATE_FASTQ
 
-    FASTQ_FROM_COLLATED_BAM.out.remove_channel.flatten()
-            .filter(Path)
-            .map { it.delete() }
-
+    if (params.cleanup_intermediate_files_irods_extractor) {
+        COLLATE_FASTQ.out.remove_channel.flatten()
+                .filter(Path)
+                .map { it.delete() }
+    }
     emit:
-    reads_ch = FASTQ_FROM_COLLATED_BAM.out.fastq_channel
+    reads_ch = COLLATE_FASTQ.out.fastq_channel // tuple val(meta), path(forward_fastq), path(reverse_fastq)
 }
 
 workflow IRODS_EXTRACTOR {
@@ -80,10 +89,9 @@ workflow IRODS_EXTRACTOR {
 
     main:
 
-    IRODS_QUERY(input_irods_ch).set{ meta_cram_ch }
-
-    CRAM_EXTRACT(meta_cram_ch)
+    IRODS_QUERY(input_irods_ch)
+    | CRAM_EXTRACT
 
     emit:
-    reads_ch = CRAM_EXTRACT.out
+    reads_ch = CRAM_EXTRACT.out // tuple val(meta), path(forward_fastq), path(reverse_fastq)
 }

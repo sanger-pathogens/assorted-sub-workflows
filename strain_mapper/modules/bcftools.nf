@@ -3,7 +3,9 @@ process BCFTOOLS_MPILEUP {
     label 'mem_1'
     label 'time_1'
 
-    container 'quay.io/biocontainers/bcftools:1.16--haef29d1_2'
+    // using package from conda-forge not bioconda (thus different from what underlies the biocontainers container) as there is a problem with lbgsl see https://github.com/samtools/bcftools/issues/1965
+    conda 'conda-forge::gsl=2.7 bioconda::bcftools=1.17' 
+    container 'quay.io/biocontainers/bcftools:1.17--h3cc50cf_1'
 
     input:
     tuple val(meta), path(sorted_reads), path(reference), path(reference_index)
@@ -12,7 +14,7 @@ process BCFTOOLS_MPILEUP {
     tuple val(meta), path("${mpileup_file}"),  emit: mpileup_file
 
     script:
-    mpileup_file = "${meta.id}.mpileup"
+    mpileup_file = "${meta.ID}.mpileup"
     """
     bcftools mpileup -o ${mpileup_file} \
                      -O 'u' \
@@ -26,7 +28,9 @@ process BCFTOOLS_CALL {
     label 'mem_1'
     label 'time_1'
 
-    container 'quay.io/biocontainers/bcftools:1.16--haef29d1_2'
+    // using package from conda-forge not bioconda (thus different from what underlies the biocontainers container) as there is a problem with lbgsl see https://github.com/samtools/bcftools/issues/1965
+    conda 'conda-forge::gsl=2.7 bioconda::bcftools=1.17' 
+    container 'quay.io/biocontainers/bcftools:1.17--h3cc50cf_1'
 
     input:
     tuple val(meta), file(mpileup_file)
@@ -50,7 +54,9 @@ process BCFTOOLS_FILTERING {
     label 'mem_1'
     label 'time_1'
 
-    container 'quay.io/biocontainers/bcftools:1.16--haef29d1_2'
+    // using package from conda-forge not bioconda (thus different from what underlies the biocontainers container) as there is a problem with lbgsl see https://github.com/samtools/bcftools/issues/1965
+    conda 'conda-forge::gsl=2.7 bioconda::bcftools=1.17' 
+    container 'quay.io/biocontainers/bcftools:1.17--h3cc50cf_1'
 
     input:
     tuple val(meta), file(vcf_allpos)
@@ -59,7 +65,7 @@ process BCFTOOLS_FILTERING {
     tuple val(meta), path("${filtered_vcf_allpos}"),  emit: filtered_vcf_allpos
 
     script:
-    filtered_vcf_allpos = "${meta.id}_filtered.vcf"
+    filtered_vcf_allpos = "${meta.ID}_filtered.vcf"
     """
     bcftools view -o ${filtered_vcf_allpos} \
                   -O 'v' \
@@ -76,7 +82,9 @@ process BCFTOOLS_VIEW {
     publishDir "${params.outdir}/${meta.id}/bcftools/raw_vcf", mode: 'copy', overwrite: true, pattern: "*_raw.vcf.gz"
     publishDir "${params.outdir}/${meta.id}/bcftools/final_vcf", mode: 'copy', overwrite: true, pattern: "*_filtered.vcf.gz"
 
-    container 'quay.io/biocontainers/bcftools:1.16--haef29d1_2'
+    // using package from conda-forge not bioconda (thus different from what underlies the biocontainers container) as there is a problem with lbgsl see https://github.com/samtools/bcftools/issues/1965
+    conda 'conda-forge::gsl=2.7 bioconda::bcftools=1.17' 
+    container 'quay.io/biocontainers/bcftools:1.17--h3cc50cf_1'
 
     // input file can be VCF or BCF as is handled equally by bcftools
     input:
