@@ -14,17 +14,17 @@ include {
 include {
     BCFTOOLS_CALL;
     BCFTOOLS_MPILEUP;
-    BCFTOOLS_FILTERING;
+    BCFTOOLS_FILTERING as BCFTOOLS_CALLED_FILTERING;
+    BCFTOOLS_FILTERING as GATK_CALLED_FILTERING;
     BCFTOOLS_VIEW as BCFTOOLS_RAW_VCF;
     BCFTOOLS_VIEW as BCFTOOLS_FINAL_VCF;
+    BCFTOOLS_VIEW as GATK_RAW_VCF;
+    BCFTOOLS_VIEW as GATK_FINAL_VCF;
 } from './modules/bcftools'
 include { PICARD_MARKDUP; PICARD_ADD_READGROUP } from './modules/picard'
 include {
     GATK_REF_DICT;
     GATK_HAPLOTYPECALLER;
-    GATK_FILTERING;
-    GATK_RAW_VCF;
-    GATK_FINAL_VCF;
 } from './modules/gatk'
 include { CURATE_CONSENSUS } from './modules/curate'
 
@@ -80,8 +80,10 @@ workflow GATK_WORKFLOW {
     }
 
     if (!params.skip_filtering) {
-        GATK_FILTERING(
+        vcf_filter_ch = Channel.value("${params.gatk_vcf_filter}")
+        GATK_CALLED_FILTERING(
             ch_vcf_allpos
+            .combine(vcf_filter_ch)
         )
         GATK_FILTERING.out.set { ch_filtered_vcf }
     } else {
@@ -118,7 +120,7 @@ workflow BCFTOOLS_WORKFLOW {
         ch_mpileup_file
     )
     BCFTOOLS_CALL.out.vcf_allpos
-        .dump(tag: 'vcf_allpos')
+        .dump(tag: 'bcftools_vcf_allpos')
         .set { ch_vcf_allpos }
 
     if (params.keep_raw_vcf && !params.skip_filtering){
@@ -128,8 +130,10 @@ workflow BCFTOOLS_WORKFLOW {
     }
 
     if (!params.skip_filtering) {
-        BCFTOOLS_FILTERING(
+        vcf_filter_ch = Channel.value("${params.bcftools_vcf_filter}")
+        BCFTOOLS_CALLED_FILTERING(
             ch_vcf_allpos
+            .combine(vcf_filter_ch)
         )
         BCFTOOLS_FILTERING.out.set { ch_filtered_vcf }
     } else {

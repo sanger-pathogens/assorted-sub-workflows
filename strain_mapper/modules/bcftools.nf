@@ -39,7 +39,7 @@ process BCFTOOLS_CALL {
     tuple val(meta), path("${vcf_allpos}"),  emit: vcf_allpos
 
     script:
-    vcf_allpos = "${meta.id}_raw.vcf"
+    vcf_allpos = "${meta.id}_bcftools_call_raw.vcf"
     """
     bcftools call -o ${vcf_allpos} \
         -O 'v' \
@@ -59,17 +59,18 @@ process BCFTOOLS_FILTERING {
     container 'quay.io/biocontainers/bcftools:1.17--h3cc50cf_1'
 
     input:
-    tuple val(meta), file(vcf_allpos)
+    tuple val(meta), path(vcf_allpos), value(vcf_filter)
 
     output:
     tuple val(meta), path("${filtered_vcf_allpos}"),  emit: filtered_vcf_allpos
 
     script:
-    filtered_vcf_allpos = "${meta.ID}_filtered.vcf"
+    vcf_allpos_prefix = vcf_allpos.split("_raw.vcf")[0]
+    filtered_vcf_allpos = "${vcf_allpos_prefix}_filtered.vcf"
     """
     bcftools view -o ${filtered_vcf_allpos} \
                   -O 'v' \
-                  -i '${params.bcftools_vcf_filter}' \
+                  -i '${vcf_filter}' \
                   '${vcf_allpos}'
     """
 }
@@ -79,8 +80,11 @@ process BCFTOOLS_VIEW {
     label 'mem_1'
     label 'time_1'
     
-    publishDir "${params.outdir}/${meta.id}/bcftools/raw_vcf", mode: 'copy', overwrite: true, pattern: "*_raw.vcf.gz"
-    publishDir "${params.outdir}/${meta.id}/bcftools/final_vcf", mode: 'copy', overwrite: true, pattern: "*_filtered.vcf.gz"
+    publishDir "${params.outdir}/${meta.id}/bcftools/raw_vcf", mode: 'copy', overwrite: true, pattern: "*_bcftools_call_raw.vcf.gz"
+    publishDir "${params.outdir}/${meta.id}/bcftools/final_vcf", mode: 'copy', overwrite: true, pattern: "*_bcftools_call_filtered.vcf.gz"
+    publishDir "${params.outdir}/${meta.id}/gatk/raw_vcf", mode: 'copy', overwrite: true, pattern: "*_gatk_haplocall_raw.vcf.gz"
+    publishDir "${params.outdir}/${meta.id}/gatk/final_vcf", mode: 'copy', overwrite: true, pattern: "*_gatk_haplocall_filtered.vcf.gz"
+
 
     // using package from conda-forge not bioconda (thus different from what underlies the biocontainers container) as there is a problem with lbgsl see https://github.com/samtools/bcftools/issues/1965
     conda 'conda-forge::gsl=2.7 bioconda::bcftools=1.17' 
