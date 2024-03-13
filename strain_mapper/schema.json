@@ -12,7 +12,7 @@
                 "default": "bowtie2",
                 "help_text": "Mapping tool to use. Options: [bwa, bowtie2]"
             },
-            "method": {
+            "variant_caller": {
                 "default": "bcftools",
                 "help_text": "Variant calling method to use. Options: [bcftools, gatk]"
             }
