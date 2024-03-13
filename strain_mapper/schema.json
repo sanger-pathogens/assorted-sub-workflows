@@ -32,9 +32,9 @@
             }
         },
         "Read mapping variant filtering options": {
-            "only_report_alts": {
-                "default": "true",
-                "help_text": "When included this flag reports only ALT variants in the VCF output"
+            "report_ref_and_alt": {
+                "default": "false",
+                "help_text": "When specifying this flag, the pipeline will report REF positions in addition to ALT variants in the VCF output; default: only report ALT variants."
             },
             "bcftools_vcf_filter": {
                 "default": "QUAL>=50 & MIN(DP)>=8 & ((ALT!=\".\" & DP4[2]>3 & DP4[3]>3) | (ALT=\".\" & DP4[0]>3 & DP4[1]>3))",
