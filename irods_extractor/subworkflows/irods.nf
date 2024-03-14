@@ -4,13 +4,21 @@ include { JSON_PREP; JSON_PARSE    } from '../modules/jq.nf'
 include { RETRIEVE_CRAM            } from '../modules/retrieve.nf'
 include { METADATA                 } from '../modules/metadata_save.nf'
 
-def split_metadata(collection_name, linked_metadata) {
+def dataObj_path_to_ID(dataObj_path) {
+    split_dataObj_dir = dataObj_path.split("/")
+    dataObj_simplename = split_dataObj_dir[-1].split(".")[0]
+    // output file renaming logic relies on the iRODS folder structure, which is not perfect, but can't think of anything else there
+    ID = { split_dataObj_dir[-2].startsWith('plex') ? dataObj_simplename : "${split_dataObj_dir[-2]}_${dataObj_simplename}" }
+    return ID
+}
+
+def split_metadata(irodsdatapath, linked_metadata) {
     metadata = [:]
-    metadata.ID = collection_name.split("/")[-1].split(".cram")[0]
+    metadata.ID = dataObj_path_to_ID(irodsdatapath)
     linked_metadata.each { item ->
         metadata[item.attribute] = item.value
         }
-    metadata
+    return metadata
 }
 
 workflow IRODS_QUERY {
@@ -33,8 +41,8 @@ workflow IRODS_QUERY {
 
 
         JSON_PARSE.out.paths.splitText().map{ cram_path ->
-        ID = cram_path.split("/")[-1].split(".cram")[0]
-        [ ID, cram_path ]
+            ID = dataObj_path_to_ID(cram_path)
+            [ ID, cram_path ]
         }.set{ cram_ch }
 
         cram_ch.join(lane_metadata).map{join_identifier, path, metamap ->
