@@ -19,7 +19,7 @@ def element_in_list_to_dict(input_list: list):
     output_list = []
     for i in input_list:
         metadata = {}
-        pairs = i.split(', ')
+        pairs = i.rstrip().split(', ')
         for pair in pairs:
             full_data= pair.split('=')
             key = full_data[0]
