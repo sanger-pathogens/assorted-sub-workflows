@@ -10,10 +10,11 @@ process RETRIEVE_CRAM {
 
     // output file renaming logic relies on the iRODS folder structure, which is not perfect, but can't think of anything else there
     script:
-    headcramdir = file("${cram_path}".strip()).parent.name
-    irodscram = file("${cram_path}".strip()).name
+    stripcrampath = "${cram_path}".strip()
+    headcramdir = file(stripcrampath).parent.name
+    irodscram = file(stripcrampath).name
     """
-    iget -K ${cram_path} && \
+    iget -K ${stripcrampath} && \
     if [[ "${headcramdir}" =~ 'plex' ]] ; then 
       mv ${irodscram} ${headcramdir}_${irodscram}
     fi
