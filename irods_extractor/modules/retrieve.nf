@@ -3,7 +3,7 @@ process RETRIEVE_CRAM {
     label 'mem_1'
     label 'time_30m'
     input:
-    tuple val(meta), val(cram_path)
+    tuple val(meta), path(cram_path)
 
     output:
     tuple val(meta), path("*.cram"), emit: path_channel
