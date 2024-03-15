@@ -6,7 +6,7 @@ include { METADATA                 } from '../modules/metadata_save.nf'
 
 def split_metadata(collectionPath, dataObj_name, linked_metadata) {
     metadata = [:]
-    metadata.ID = dataObj_name.split(".")[0]
+    metadata.ID = dataObj_name.split(".cram")[0]
     metadata.irods_path = "${collectionPath}/${dataObj_name}"
     linked_metadata.each { item ->
         metadata[item.attribute] = item.value
