@@ -4,20 +4,16 @@ include { JSON_PREP; JSON_PARSE    } from '../modules/jq.nf'
 include { RETRIEVE_CRAM            } from '../modules/retrieve.nf'
 include { METADATA                 } from '../modules/metadata_save.nf'
 
-def dataObj_path_to_ID(dataObj_path) {
-    split_dataObj_dir = dataObj_path.split("/")
-    dataObj_simplename = split_dataObj_dir[-1].split(".")[0]
-    // output file renaming logic relies on the iRODS folder structure, which is not perfect, but can't think of anything else there
-    ID = { split_dataObj_dir[-2].startsWith('plex') ? dataObj_simplename : "${split_dataObj_dir[-2]}_${dataObj_simplename}" }
-    return ID
-}
-
-def split_metadata(irodsdatapath, linked_metadata) {
+def split_metadata(collectionPath, dataObj_name, linked_metadata) {
     metadata = [:]
-    metadata.ID = dataObj_path_to_ID(irodsdatapath)
+    metadata.ID = dataObj_name.split(".")[0]
+    metadata.irods_path = "${collectionPath}/${dataObj_name}"
     linked_metadata.each { item ->
         metadata[item.attribute] = item.value
-        }
+    }
+    if (metadata.alt_process){
+        metadata.ID = ${metadata.ID}_${metadata.alt_process}
+    }
     return metadata
 }
 
@@ -33,20 +29,15 @@ workflow IRODS_QUERY {
         JSON_PARSE.out.json_file
         .filter{ it.text.contains('"attribute": "alignment"') }
         .splitJson(path: "result")
-        .map{collection ->
+        .map{irods_item ->
             metaparse = [:]
-            metaparse = split_metadata(collection.data_object, collection.avus)
+            metaparse = split_metadata(irods_item.collection, irods_item.data_object, irods_item.avus)
             [metaparse.ID, metaparse]
         }.set{ lane_metadata }
 
-
-        JSON_PARSE.out.paths.splitText().map{ cram_path ->
-            ID = dataObj_path_to_ID(cram_path)
-            [ ID, cram_path ]
-        }.set{ cram_ch }
-
-        cram_ch.join(lane_metadata).map{join_identifier, path, metamap ->
-            [metamap, path]
+        lane_metadata.map{ id, metamap ->
+            cram_path = metamap.irods_path
+            [metamap, cram_path]
         }.set{ meta_cram_ch }
 
         if (params.save_metadata) {
