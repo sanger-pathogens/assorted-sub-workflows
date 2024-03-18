@@ -4,13 +4,17 @@ include { JSON_PREP; JSON_PARSE    } from '../modules/jq.nf'
 include { RETRIEVE_CRAM            } from '../modules/retrieve.nf'
 include { METADATA                 } from '../modules/metadata_save.nf'
 
-def split_metadata(collection_name, linked_metadata) {
+def split_metadata(collection_path, data_obj_name, linked_metadata) {
     metadata = [:]
-    metadata.ID = collection_name.split("/")[-1].split(".cram")[0]
+    metadata.ID = data_obj_name.split("\\.")[0]
+    metadata.irods_path = "${collection_path}/${data_obj_name}"
     linked_metadata.each { item ->
         metadata[item.attribute] = item.value
-        }
-    metadata
+    }
+    if (metadata.alt_process){
+        metadata.ID = "${metadata.ID}_${metadata.alt_process}"
+    }
+    return metadata
 }
 
 workflow IRODS_QUERY {
@@ -25,20 +29,11 @@ workflow IRODS_QUERY {
         JSON_PARSE.out.json_file
         .filter{ it.text.contains('"attribute": "alignment"') }
         .splitJson(path: "result")
-        .map{collection ->
-            metaparse = [:]
-            metaparse = split_metadata(collection.data_object, collection.avus)
-            [metaparse.ID, metaparse]
-        }.set{ lane_metadata }
-
-
-        JSON_PARSE.out.paths.splitText().map{ cram_path ->
-        ID = cram_path.split("/")[-1].split(".cram")[0]
-        [ ID, cram_path ]
-        }.set{ cram_ch }
-
-        cram_ch.join(lane_metadata).map{join_identifier, path, metamap ->
-            [metamap, path]
+        .map{irods_item ->
+            metamap = [:]
+            metamap = split_metadata(irods_item.collection, irods_item.data_object, irods_item.avus)
+            cram_path = metamap.irods_path
+            [metamap, cram_path]
         }.set{ meta_cram_ch }
 
         if (params.save_metadata) {
