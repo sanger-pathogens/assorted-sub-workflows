@@ -37,7 +37,7 @@
                 "default": "cram",
                 "help_text": "File type"
             },
-            "headheader_combined_input_3": {
+            "header_combined_input_3": {
                 "subtext": "\nAlternatively, the user can provide a CSV-format manifest listing a batch of such combinations."
             },
             "manifest_of_lanes": {
