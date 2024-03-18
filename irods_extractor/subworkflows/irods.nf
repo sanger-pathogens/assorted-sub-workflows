@@ -77,6 +77,16 @@ workflow CRAM_EXTRACT {
     reads_ch = COLLATE_FASTQ.out.fastq_channel // tuple val(meta), path(forward_fastq), path(reverse_fastq)
 }
 
+workflow COMBINE_SPLIT_READSETS {
+    
+    take:
+    split_readsets
+
+
+    emit:
+    combined_readsets
+}
+
 workflow IRODS_EXTRACTOR {
 
     take:
@@ -87,6 +97,13 @@ workflow IRODS_EXTRACTOR {
     IRODS_QUERY(input_irods_ch)
     | CRAM_EXTRACT
 
+    if (params.combine_filtered_reads){
+        COMBINE_SPLIT_READSETS(CRAM_EXTRACT.out)
+        .set{ reads_ch }
+    }else{
+        reads_ch = CRAM_EXTRACT.out
+    }
+
     emit:
-    reads_ch = CRAM_EXTRACT.out // tuple val(meta), path(forward_fastq), path(reverse_fastq)
+    reads_ch // tuple val(meta), path(forward_fastq), path(reverse_fastq)
 }
