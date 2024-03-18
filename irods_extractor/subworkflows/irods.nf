@@ -4,10 +4,10 @@ include { JSON_PREP; JSON_PARSE    } from '../modules/jq.nf'
 include { RETRIEVE_CRAM            } from '../modules/retrieve.nf'
 include { METADATA                 } from '../modules/metadata_save.nf'
 
-def split_metadata(collectionPath, dataObj_name, linked_metadata) {
+def split_metadata(collection_path, data_obj_name, linked_metadata) {
     metadata = [:]
-    metadata.ID = dataObj_name.split("\\.")[0]
-    metadata.irods_path = "${collectionPath}/${dataObj_name}"
+    metadata.ID = data_obj_name.split("\\.")[0]
+    metadata.irods_path = "${collection_path}/${data_obj_name}"
     linked_metadata.each { item ->
         metadata[item.attribute] = item.value
     }
