@@ -18,13 +18,13 @@ def split_metadata(collection_path, data_obj_name, linked_metadata) {
 }
 
 def meta_map_for_total_reads(listOfMaps){
-    def originMap = listOfMaps.find { it.target == '1' } //select the meta with target == 1 as it is the most complete normally
+    def originMap = listOfMaps.find { it.target == '1' } //select the meta with target == 1 as it is the most complete normally and file name is simple. however target == 1 might not have been retrieved!
     def resultMap = [:]
     originMap.each { key, value ->
         if (key == "ID") {
             resultMap[key] = "${value}_total"
-        } else if (key == "alignment") {
-            resultMap[key] = "Combined"
+        } else if (key == "alt_process") {
+            resultMap[key] = "combined"
         } else{
             resultMap[key] = value
         }
