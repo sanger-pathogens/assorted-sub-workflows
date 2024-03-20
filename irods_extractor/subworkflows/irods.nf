@@ -18,13 +18,16 @@ def split_metadata(collection_path, data_obj_name, linked_metadata) {
 }
 
 def meta_map_for_total_reads(listOfMaps){
-    def originMap = listOfMaps.find { it.target == '1' } //select the meta with target == 1 as it is the most complete normally and file name is simple. however target == 1 might not have been retrieved!
+    //def originMap = listOfMaps.find { !it.alt_process } //select the meta with target == 1 as it is the most complete normally and file name is simple. however target == 1 might not have been retrieved!
+    originMap = listOfMaps[0] // if using ID it does not seem to matter as the same across all files. most other fileds should be the same except read count
+    // TO DO need to sum reads counts over entries of listOfMaps
     def resultMap = [:]
     originMap.each { key, value ->
         if (key == "ID") {
             resultMap[key] = "${value}_total"
         } else if (key == "alt_process") {
             resultMap[key] = "combined"
+
         } else{
             resultMap[key] = value
         }
@@ -117,11 +120,11 @@ workflow CRAM_EXTRACT_MERGE {
     */
     
     COLLATE_FASTQ.out.fastq_channel
-    | filter{ metadata, read_1, read_2 -> (metadata.alignment == '1') }
+    | filter{ metadata, read_1, read_2 -> (metadata.alignment == '1') } // really not sure what that filters
     | set{ single_channel }
 
     /*
-    We now split out an identifier from the IRODS metadata in the map and append it as a key to use to group
+    We now build an identifier from the IRODS metadata in the map and append it as a key to use to group
     */
 
     COLLATE_FASTQ.out.fastq_channel.map{ metaMap, read_1, read_2 ->
@@ -129,6 +132,7 @@ workflow CRAM_EXTRACT_MERGE {
         tuple(joinID, metaMap, read_1, read_2)
     }.set{ identifer_fastq_ch }
 
+    // TO DO: need to join on 'alt_process' as well, otherwise will combine reads from 3 different alternative processing options = 3x the raw read set
     identifer_fastq_ch.groupTuple().map{ identifier, metadata, read_1, read_2 ->
         tuple(meta_map_for_total_reads(metadata), read_1, read_2) //function that makes an amalgam metamap
     }.set{ cleaned_total_reads }
