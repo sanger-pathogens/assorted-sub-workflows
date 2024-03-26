@@ -69,6 +69,23 @@ workflow IRODS_QUERY {
 
 workflow CRAM_EXTRACT {
 
+    take:
+    meta_cram_ch //tuple meta, cram_path
+
+    main:
+
+    Channel.fromPath("${params.outdir}/*/${params.preexisting_fastq_tag}/*_1.fastq.gz").map{ preexisting_fastq_path ->
+        ID = preexisting_fastq_path.Name.split("${params.split_sep_for_ID_from_fastq}")[0]
+    }.ifEmpty("fresh_run").set{ existing_id }
+
+    meta_cram_ch.combine( existing_id | collect | map{ [it] })
+    | filter { metadata, cram_path, existing -> !(metadata.ID in existing)}
+    | map { it[0,1] }
+    | set{ do_not_exist }
+
+    RETRIEVE_CRAM(do_not_exist)
+    | COLLATE_FASTQ
+
     if (params.combine_same_id_crams) {
         COLLATE_FASTQ.out.fastq_channel.map{ metaMap, read_1, read_2 ->
             tuple(metaMap.ID, metaMap, read_1, read_2)
