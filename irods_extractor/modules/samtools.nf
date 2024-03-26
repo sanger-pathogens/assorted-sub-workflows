@@ -54,8 +54,8 @@ process COMBINE_FASTQ {
     forward_fastq = "${meta.ID}_1.fastq"
     reverse_fastq = "${meta.ID}_2.fastq"
     """
-    zcat ${read_1} > ${forward_fastq}
-    zcat ${read_2} > ${reverse_fastq}
+    zcat ${read_1_paths} > ${forward_fastq}
+    zcat ${read_2_paths} > ${reverse_fastq}
     gzip ${forward_fastq}
     gzip ${reverse_fastq}
     """

@@ -90,7 +90,7 @@ workflow CRAM_EXTRACT {
         COLLATE_FASTQ.out.fastq_channel.map{ metaMap, read_1, read_2 ->
             tuple(metaMap.ID, metaMap, read_1, read_2)
         }.groupTuple().map{ common_id, metadata_list, read_1_list, read_2_list ->
-            tuple(meta_map_for_total_reads(metadata_list), read_1_list.join(' '), read_2_list.join(' ')) // function that makes an amalgam metamap + concatenated path of read files
+            tuple(meta_map_for_total_reads(metadata_list), read_1_list.join(' '), read_2_list.join(' ')) // amalgam metamap + concatenated path of read files
         }.set{ gathered_total_reads }
 
         COMBINE_FASTQ(gathered_total_reads)
