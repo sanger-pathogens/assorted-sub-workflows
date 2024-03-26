@@ -32,6 +32,7 @@ def meta_map_for_total_reads(listOfMaps){
             resultMap[key] = value
         }
     }
+    println resultMap
     return resultMap
 }
 
@@ -91,7 +92,8 @@ workflow CRAM_EXTRACT {
             tuple(metaMap.ID, metaMap, read_1, read_2)
         }.groupTuple().map{ common_id, metadata_list, read_1_list, read_2_list ->
             tuple(meta_map_for_total_reads(metadata_list), read_1_list.join(' '), read_2_list.join(' ')) // amalgam metamap + concatenated path of read files
-        }.set{ gathered_total_reads }
+        }.view()
+        .set{ gathered_total_reads }
 
         COMBINE_FASTQ(gathered_total_reads)
         
