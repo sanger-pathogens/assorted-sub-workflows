@@ -11,11 +11,8 @@ def set_metadata(collection_path, data_obj_name, linked_metadata) {
         metadata[item.attribute] = item.value
     }
     // metadata.ID = data_obj_name.split("\\.")[0]
-    metadata.ID = "${metaMap.id_run}_${metaMap.lane}${params.lane_plex_sep}${metaMap.tag_index}"
+    metadata.ID = "${metadata.id_run}_${metadata.lane}${params.lane_plex_sep}${metadata.tag_index}"
     // need to join on 'alt_process' as well, otherwise will combine reads from n different alternative processing options = n x the raw read set
-    // if (metadata.alt_process){
-    //     metadata.ID = "${metadata.ID}_${metadata.alt_process}"
-    // }
     metadata.ID = { !metadata.alt_process ? "${metadata.ID}" : "${metadata.ID}_${metadata.alt_process}" }
     return metadata
 }
