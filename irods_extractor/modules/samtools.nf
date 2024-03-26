@@ -45,7 +45,7 @@ process COMBINE_FASTQ {
     publishDir path: { if ("${params.save_method}" == "nested") "${params.outdir}/${meta.ID}/${params.raw_reads_prefix}fastqs/" else "${params.outdir}/fastqs/" } , enabled: params.save_fastqs, mode: 'copy', overwrite: true, pattern: "*_2.fastq.gz", saveAs: { filename -> "${params.raw_reads_prefix}${reverse_fastq}" }
     
     input:
-        tuple val(meta), path(read_1), path(read_2)
+        tuple val(meta), val(read_1_paths), val(read_2_paths) // read_*_paths are strings containing multiple read file paths separated by a single space character
 
     output:
         tuple val(meta), path("${forward_fastq}.gz"), path("${reverse_fastq}.gz"), emit: fastq_channel

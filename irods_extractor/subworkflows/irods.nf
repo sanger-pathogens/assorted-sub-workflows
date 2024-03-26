@@ -4,16 +4,19 @@ include { JSON_PREP; JSON_PARSE      } from '../modules/jq.nf'
 include { RETRIEVE_CRAM              } from '../modules/retrieve.nf'
 include { METADATA                   } from '../modules/metadata_save.nf'
 
-def split_metadata(collection_path, data_obj_name, linked_metadata) {
+def set_metadata(collection_path, data_obj_name, linked_metadata) {
     metadata = [:]
-    metadata.ID = data_obj_name.split("\\.")[0]
     metadata.irods_path = "${collection_path}/${data_obj_name}"
     linked_metadata.each { item ->
         metadata[item.attribute] = item.value
     }
-    if (metadata.alt_process){
-        metadata.ID = "${metadata.ID}_${metadata.alt_process}"
-    }
+    // metadata.ID = data_obj_name.split("\\.")[0]
+    metadata.ID = "${metaMap.id_run}_${metaMap.lane}#${metaMap.tag_index}"
+    // need to join on 'alt_process' as well, otherwise will combine reads from n different alternative processing options = n x the raw read set
+    // if (metadata.alt_process){
+    //     metadata.ID = "${metadata.ID}_${metadata.alt_process}"
+    // }
+    metadata.ID = { !metadata.alt_process ? "${metadata.ID}" : "${metadata.ID}_${metadata.alt_process}" }
     return metadata
 }
 
@@ -49,7 +52,7 @@ workflow IRODS_QUERY {
         .splitJson(path: "result")
         .map{irods_item ->
             metamap = [:]
-            metamap = split_metadata(irods_item.collection, irods_item.data_object, irods_item.avus)
+            metamap = set_metadata(irods_item.collection, irods_item.data_object, irods_item.avus)
             cram_path = metamap.irods_path
             [metamap, cram_path]
         }.set{ meta_cram_ch }
@@ -65,79 +68,23 @@ workflow IRODS_QUERY {
 
         emit:
         meta_cram_ch
-
 }
 
 workflow CRAM_EXTRACT {
-    
-    take:
-    meta_cram_ch //tuple meta, cram_path
 
-    main:
+    if (params.combine_same_id_crams) {
+        COLLATE_FASTQ.out.fastq_channel.map{ metaMap, read_1, read_2 ->
+            tuple(metaMap.ID, metaMap, read_1, read_2)
+        }.groupTuple().map{ common_id, metadata_list, read_1_list, read_2_list ->
+            tuple(meta_map_for_total_reads(metadata_list), read_1_list.join(' '), read_2_list.join(' ')) // function that makes an amalgam metamap + concatenated path of read files
+        }.set{ gathered_total_reads }
 
-    Channel.fromPath("${params.outdir}/*/${params.preexisting_fastq_tag}/*_1.fastq.gz").map{ preexisting_fastq_path ->
-        ID = preexisting_fastq_path.Name.split("${params.split_sep_for_ID_from_fastq}")[0]
-    }.ifEmpty("fresh_run").set{ existing_id }
-
-    meta_cram_ch.combine( existing_id | collect | map{ [it] })
-    | filter { metadata, cram_path, existing -> !(metadata.ID in existing)}
-    | map { it[0,1] }
-    | set{ do_not_exist }
-
-    RETRIEVE_CRAM(do_not_exist)
-    | COLLATE_FASTQ
-
-    if (params.cleanup_intermediate_files_irods_extractor) {
-        COLLATE_FASTQ.out.remove_channel.flatten()
-                .filter(Path)
-                .map { it.delete() }
+        COMBINE_FASTQ(gathered_total_reads)
+        
+        COMBINE_FASTQ.out.fastq_channel.mix(COLLATE_FASTQ.out.fastq_channel).set{ reads_ch }
+    }else{
+        COLLATE_FASTQ.out.fastq_channel.set{ reads_ch }
     }
-    emit:
-    reads_ch = COLLATE_FASTQ.out.fastq_channel // tuple val(meta), path(forward_fastq), path(reverse_fastq)
-}
-
-workflow CRAM_EXTRACT_MERGE {
-    
-    take:
-    meta_cram_ch //tuple meta, cram_path
-
-    main:
-
-    Channel.fromPath("${params.outdir}/*/${params.preexisting_fastq_tag}/*_1.fastq.gz").map{ preexisting_fastq_path ->
-        ID = preexisting_fastq_path.Name.split("${params.split_sep_for_ID_from_fastq}")[0]
-    }.ifEmpty("fresh_run").set{ existing_id }
-
-    meta_cram_ch.combine( existing_id | collect | map{ [it] })
-    | filter { metadata, cram_path, existing -> !(metadata.ID in existing)}
-    | map { it[0,1] }
-    | set{ do_not_exist }
-
-    RETRIEVE_CRAM(do_not_exist)
-    | COLLATE_FASTQ
-
-    /*
-    now we differ from the normal cram extract first we filter out a clean and easy 1 aligned read pair - the golden child
-    */
-    
-    COLLATE_FASTQ.out.fastq_channel
-    | filter{ metadata, read_1, read_2 -> (metadata.alignment == '1') } // really not sure what that filters
-    | set{ single_channel }
-
-    /*
-    We now build an identifier from the IRODS metadata in the map and append it as a key to use to group
-    */
-
-    COLLATE_FASTQ.out.fastq_channel.map{ metaMap, read_1, read_2 ->
-        def joinID = "${metaMap.id_run}_${metaMap.lane}#${metaMap.tag_index}"
-        tuple(joinID, metaMap, read_1, read_2)
-    }.set{ identifer_fastq_ch }
-
-    // TO DO: need to join on 'alt_process' as well, otherwise will combine reads from 3 different alternative processing options = 3x the raw read set
-    identifer_fastq_ch.groupTuple().map{ identifier, metadata, read_1, read_2 ->
-        tuple(meta_map_for_total_reads(metadata), read_1, read_2) //function that makes an amalgam metamap
-    }.set{ cleaned_total_reads }
-
-    COMBINE_FASTQ(cleaned_total_reads)
 
     if (params.cleanup_intermediate_files_irods_extractor) {
         COLLATE_FASTQ.out.remove_channel.flatten()
@@ -145,8 +92,7 @@ workflow CRAM_EXTRACT_MERGE {
                 .map { it.delete() }
     }
 
-    emit:
-    reads_ch = single_channel.mix(COMBINE_FASTQ.out.fastq_channel) // tuple val(meta), path(forward_fastq), path(reverse_fastq
+    emit: reads_ch // tuple val(meta), path(forward_fastq), path(reverse_fastq
 }
 
 workflow IRODS_EXTRACTOR {
@@ -157,19 +103,8 @@ workflow IRODS_EXTRACTOR {
     main:
 
     IRODS_QUERY(input_irods_ch)
-
-    if (params.combine_same_id_crams) {
-        /*
-        choose your flavor of crams as there are a nice selection
-        */
-        IRODS_QUERY.out.meta_cram_ch.filter{meta, cram_path -> (meta.ID.endsWith("_human") && meta.alt_process == params.dehumanising_method) || meta.ID.endsWith("_phix") || meta.alignment == '1'}
-        .set{ filtered_crams }
-
-        reads_ch = CRAM_EXTRACT_MERGE(filtered_crams)
-    } else {
-        reads_ch = CRAM_EXTRACT(IRODS_QUERY.out.meta_cram_ch)
-    }
+    | CRAM_EXTRACT
 
     emit:
-    reads_ch // tuple val(meta), path(forward_fastq), path(reverse_fastq)
+    reads_ch = CRAM_EXTRACT.out.reads_ch // tuple val(meta), path(forward_fastq), path(reverse_fastq)
 }
