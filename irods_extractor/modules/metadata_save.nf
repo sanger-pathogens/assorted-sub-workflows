@@ -4,7 +4,6 @@ process METADATA {
     label 'time_30m'
     
     conda 'anaconda::pandas=2.1.4'
-    // NOTE v2.1.4 not avialable publicly AFAIK so prefering custom image with v2.2.1 vs. quay.io/biocontainers/pandas:1.5.2
     container 'quay.io/sangerpathogens/pandas:2.2.1
 
     publishDir "${params.outdir}/", mode: 'copy', overwrite: true, pattern: "${timestampout}"
