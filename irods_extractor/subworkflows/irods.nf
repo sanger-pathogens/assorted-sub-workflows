@@ -5,17 +5,14 @@ include { RETRIEVE_CRAM              } from '../modules/retrieve.nf'
 include { METADATA                   } from '../modules/metadata_save.nf'
 
 def set_metadata(collection_path, data_obj_name, linked_metadata) {
-    metadata = [:]
+    def metadata = [:]
     metadata.irods_path = "${collection_path}/${data_obj_name}"
     linked_metadata.each { item ->
         metadata[item.attribute] = item.value
     }
-    println metadata["component"]
     def slurper = new groovy.json.JsonSlurper()
     def component = slurper.parseText(metadata["component"])
-    println component
-    println component["subset"]
-    // metadata.ID = "${metadata.id_run}_${metadata.lane}${params.lane_plex_sep}${metadata.tag_index}" // does not catch data subset present in file name
+    metadata.subset = ( component.subset ) ? component.subset : "target"
     metadata.ID = data_obj_name.split("\\.")[0]
     metadata.ID = ( "${params.lane_plex_sep}" != "#" ) ? "${metadata.ID}".replace("#", "${params.lane_plex_sep}") : "${metadata.ID}"
     // need to join on 'alt_process' as well, otherwise will combine reads from n different alternative processing options = n x the raw read set
@@ -24,18 +21,18 @@ def set_metadata(collection_path, data_obj_name, linked_metadata) {
 }
 
 def meta_map_for_total_reads(listOfMaps){
-    def originMap = listOfMaps.find { !it.subset } //select the meta with no subset field target == 1 as it is the most complete normally and file name is simple. however target == 1 might not have been retrieved!
+    def originMap = listOfMaps.find { it.subset  == "target" } //select the meta with subset field == 'target' as it is the most complete normally and file name is simple.
     originMap = listOfMaps[0] // if using ID it does not seem to matter as the same across all files. most other fileds should be the same except read count
     // TO DO need to sum reads counts over entries of listOfMaps
     def resultMap = [:]
     originMap.each { key, value ->
         if (key == "ID") {
-            resultMap[key] = "${value}_total"
+            resultMap[key] = "${originMap.id_run}_${originMap.lane}${params.lane_plex_sep}${originMap.tag_index}_total"
         } else{
             resultMap[key] = value
         }
     }
-    resultMap["subset"] = "combined"
+    resultMap["subset"] = "total"
     return resultMap
 }
 
