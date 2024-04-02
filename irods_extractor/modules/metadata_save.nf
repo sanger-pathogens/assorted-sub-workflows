@@ -3,7 +3,7 @@ process METADATA {
     label 'mem_1'
     label 'time_30m'
     
-    conda 'anaconda::pandas=2.1.4'
+    conda 'anaconda::pandas=2.2.1'
     container 'quay.io/sangerpathogens/pandas:2.2.1
 
     publishDir "${params.outdir}/", mode: 'copy', overwrite: true, pattern: "${timestampout}"
