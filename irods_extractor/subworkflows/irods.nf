@@ -10,24 +10,28 @@ def set_metadata(collection_path, data_obj_name, linked_metadata) {
     linked_metadata.each { item ->
         metadata[item.attribute] = item.value
     }
-    def slurper = new groovy.json.JsonSlurper()
-    def component = slurper.parseText(metadata["component"])
-    metadata.subset = ( component.subset ) ? component.subset : "target"
-    metadata.ID = data_obj_name.split("\\.")[0]
-    metadata.ID = ( "${params.lane_plex_sep}" != "#" ) ? "${metadata.ID}".replace("#", "${params.lane_plex_sep}") : "${metadata.ID}"
+    metadata.ID = "${originMap.id_run}_${originMap.lane}${params.lane_plex_sep}${originMap.tag_index}"
     // need to join on 'alt_process' as well, otherwise will combine reads from n different alternative processing options = n x the raw read set
     metadata.ID = !metadata.alt_process ? "${metadata.ID}" : "${metadata.ID}_${metadata.alt_process}"
+    def slurper = new groovy.json.JsonSlurper()
+    def component = slurper.parseText(metadata["component"])
+    if ( component.subset ){
+        metadata.ID = "${metadata.ID}_${component.subset}"
+        metadata.subset = component.subset
+    }else{
+        metadata.subset = "target"
+        // target subset remains implicit in ID and file names
+    }
     return metadata
 }
 
 def meta_map_for_total_reads(listOfMaps){
     def originMap = listOfMaps.find { it.subset  == "target" } //select the meta with subset field == 'target' as it is the most complete normally and file name is simple.
-    originMap = listOfMaps[0] // if using ID it does not seem to matter as the same across all files. most other fileds should be the same except read count
     // TO DO need to sum reads counts over entries of listOfMaps
     def resultMap = [:]
     originMap.each { key, value ->
         if (key == "ID") {
-            resultMap[key] = "${originMap.id_run}_${originMap.lane}${params.lane_plex_sep}${originMap.tag_index}_total"
+            resultMap[key] = "${value}_total"
         } else{
             resultMap[key] = value
         }
