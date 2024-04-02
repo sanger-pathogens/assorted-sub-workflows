@@ -3,9 +3,8 @@ process METADATA {
     label 'mem_1'
     label 'time_30m'
     
-    conda 'anaconda::pandas=2.1.4'
-    // NOTE v2.1.4 not avialable publicly AFAIK so prefering custom image on farm with v2.1.4 vs. quay.io/biocontainers/pandas:1.5.2
-    container '/software/pathogen/images/python-pandas.simg'
+    conda 'anaconda::pandas=2.2.1'
+    container 'quay.io/sangerpathogens/pandas:2.2.1
 
     publishDir "${params.outdir}/", mode: 'copy', overwrite: true, pattern: "${timestampout}"
 
