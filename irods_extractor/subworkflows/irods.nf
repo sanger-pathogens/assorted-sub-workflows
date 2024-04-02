@@ -10,6 +10,7 @@ def set_metadata(collection_path, data_obj_name, linked_metadata) {
     linked_metadata.each { item ->
         metadata[item.attribute] = item.value
     }
+    println resultMap["component"]
     // metadata.ID = "${metadata.id_run}_${metadata.lane}${params.lane_plex_sep}${metadata.tag_index}" // does not catch data subset present in file name
     metadata.ID = data_obj_name.split("\\.")[0]
     metadata.ID = ( "${params.lane_plex_sep}" != "#" ) ? "${metadata.ID}".replace("#", "${params.lane_plex_sep}") : "${metadata.ID}"
@@ -26,14 +27,11 @@ def meta_map_for_total_reads(listOfMaps){
     originMap.each { key, value ->
         if (key == "ID") {
             resultMap[key] = "${value}_total"
-        } else if (key == "alt_process") {
-            resultMap[key] = "combined"
-
         } else{
             resultMap[key] = value
         }
     }
-    println resultMap
+    resultMap["subset"] = "combined"
     return resultMap
 }
 
@@ -90,7 +88,8 @@ workflow CRAM_EXTRACT {
 
     if (params.combine_same_id_crams) {
         COLLATE_FASTQ.out.fastq_channel.map{ metaMap, read_1, read_2 ->
-            tuple(metaMap.ID, metaMap, read_1, read_2)
+            commonid = "${metaMap.id_run}_${metaMap.lane}${params.lane_plex_sep}${metaMap.tag_index}"
+            tuple(commonid, metaMap, read_1, read_2)
         }.groupTuple().map{ common_id, metadata_list, read_1_list, read_2_list ->
             tuple(meta_map_for_total_reads(metadata_list), read_1_list.join(' '), read_2_list.join(' ')) // amalgam metamap + concatenated path of read files
         }.view()
