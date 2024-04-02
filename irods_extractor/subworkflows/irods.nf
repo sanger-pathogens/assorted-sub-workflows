@@ -10,7 +10,7 @@ def set_metadata(collection_path, data_obj_name, linked_metadata) {
     linked_metadata.each { item ->
         metadata[item.attribute] = item.value
     }
-    println resultMap["component"]
+    println metadata["component"]
     // metadata.ID = "${metadata.id_run}_${metadata.lane}${params.lane_plex_sep}${metadata.tag_index}" // does not catch data subset present in file name
     metadata.ID = data_obj_name.split("\\.")[0]
     metadata.ID = ( "${params.lane_plex_sep}" != "#" ) ? "${metadata.ID}".replace("#", "${params.lane_plex_sep}") : "${metadata.ID}"
