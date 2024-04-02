@@ -11,6 +11,10 @@ def set_metadata(collection_path, data_obj_name, linked_metadata) {
         metadata[item.attribute] = item.value
     }
     println metadata["component"]
+    def slurper = new groovy.json.JsonSlurper()
+    def component = slurper.parseText(metadata["component"])
+    println component
+    println component["subset"]
     // metadata.ID = "${metadata.id_run}_${metadata.lane}${params.lane_plex_sep}${metadata.tag_index}" // does not catch data subset present in file name
     metadata.ID = data_obj_name.split("\\.")[0]
     metadata.ID = ( "${params.lane_plex_sep}" != "#" ) ? "${metadata.ID}".replace("#", "${params.lane_plex_sep}") : "${metadata.ID}"
@@ -20,7 +24,7 @@ def set_metadata(collection_path, data_obj_name, linked_metadata) {
 }
 
 def meta_map_for_total_reads(listOfMaps){
-    //def originMap = listOfMaps.find { !it.alt_process } //select the meta with target == 1 as it is the most complete normally and file name is simple. however target == 1 might not have been retrieved!
+    def originMap = listOfMaps.find { !it.subset } //select the meta with no subset field target == 1 as it is the most complete normally and file name is simple. however target == 1 might not have been retrieved!
     originMap = listOfMaps[0] // if using ID it does not seem to matter as the same across all files. most other fileds should be the same except read count
     // TO DO need to sum reads counts over entries of listOfMaps
     def resultMap = [:]
