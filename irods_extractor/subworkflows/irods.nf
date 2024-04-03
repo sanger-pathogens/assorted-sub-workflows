@@ -27,7 +27,6 @@ def set_metadata(collection_path, data_obj_name, linked_metadata) {
 
 def meta_map_for_total_reads(listOfMaps){
     def originMap = listOfMaps.find { it.subset  == "target" } //select the meta with subset field == 'target' as it is the most complete normally and file name is simple.
-    // TO DO need to sum reads counts over entries of listOfMaps
     def resultMap = [:]
     originMap.each { key, value ->
         if (key == "ID") {
