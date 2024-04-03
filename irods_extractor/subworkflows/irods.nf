@@ -96,6 +96,7 @@ workflow CRAM_EXTRACT {
     if (params.combine_same_id_crams) {
         COLLATE_FASTQ.out.fastq_channel.map{ metaMap, read_1, read_2 ->
             commonid = "${metaMap.id_run}_${metaMap.lane}${params.lane_plex_sep}${metaMap.tag_index}"
+            commonid = !metaMap.alt_process ? "${commonid}" : "${commonid}_${metaMap.alt_process}"
             tuple(commonid, metaMap, read_1, read_2)
         }.groupTuple().map{ common_id, metadata_list, read_1_list, read_2_list ->
             tuple(meta_map_for_total_reads(metadata_list), read_1_list.join(' '), read_2_list.join(' ')) // amalgam metamap + concatenated path of read files
