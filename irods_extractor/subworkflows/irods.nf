@@ -35,7 +35,7 @@ def meta_map_for_total_reads(listOfMaps){
     originMap.each { key, value ->
         if (key == "ID") {
             resultMap[key] = "${value}_total"
-        } else{
+        } else {
             resultMap[key] = value
         }
     }
@@ -43,6 +43,7 @@ def meta_map_for_total_reads(listOfMaps){
     resultMap.total_reads = listOfMaps.each{ mmap ->
         mmap.total_reads.toInteger()
     }.sum()
+    println resultMap.total_reads
     return resultMap
 }
 
