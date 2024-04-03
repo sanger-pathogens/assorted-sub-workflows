@@ -103,7 +103,6 @@ workflow CRAM_EXTRACT {
         }.groupTuple().map{ common_id, metadata_list, read_1_list, read_2_list ->
             tuple(meta_map_for_total_reads(metadata_list), read_1_list.join(' '), read_2_list.join(' ')) // amalgam metamap + concatenated path of read files
         }.filter { it[0] != "none" }
-        .view()
         .set{ gathered_total_reads }
 
         COMBINE_FASTQ(gathered_total_reads)
