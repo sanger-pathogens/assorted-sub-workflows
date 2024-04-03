@@ -9,7 +9,7 @@ def split_metadata(collection_path, data_obj_name, linked_metadata) {
     metadata.ID = data_obj_name.split("\\.")[0]
     metadata.irods_path = "${collection_path}/${data_obj_name}"
     linked_metadata.each { item ->
-        metadata[item.attribute.replaceAll("\\n|\\r", "")] = item.value
+        metadata[item.attribute.replaceAll("\\n|\\r", " ")] = item.value
     }
     if (metadata.alt_process){
         metadata.ID = "${metadata.ID}_${metadata.alt_process}"
