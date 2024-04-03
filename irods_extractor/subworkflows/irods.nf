@@ -27,6 +27,10 @@ def set_metadata(collection_path, data_obj_name, linked_metadata) {
 
 def meta_map_for_total_reads(listOfMaps){
     def originMap = listOfMaps.find { it.subset  == "target" } //select the meta with subset field == 'target' as it is the most complete normally and file name is simple.
+    if (!originMap){
+        // for when no subset in the group is target, e.g. phix subset will be grouped on its own
+        return "none"
+    }
     def resultMap = [:]
     originMap.each { key, value ->
         if (key == "ID") {
@@ -100,7 +104,8 @@ workflow CRAM_EXTRACT {
             tuple(commonid, metaMap, read_1, read_2)
         }.groupTuple().map{ common_id, metadata_list, read_1_list, read_2_list ->
             tuple(meta_map_for_total_reads(metadata_list), read_1_list.join(' '), read_2_list.join(' ')) // amalgam metamap + concatenated path of read files
-        }.view()
+        }.filter { it[0] == "none" }
+        .view()
         .set{ gathered_total_reads }
 
         COMBINE_FASTQ(gathered_total_reads)
