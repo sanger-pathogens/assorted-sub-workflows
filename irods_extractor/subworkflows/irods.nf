@@ -27,7 +27,6 @@ def set_metadata(collection_path, data_obj_name, linked_metadata) {
 
 def meta_map_for_total_reads(listOfMaps){
     def originMap = listOfMaps.find { it.subset  == "target" } //select the meta with subset field == 'target' as it is the most complete normally and file name is simple.
-    println originMap
     if (!originMap){
         // for when no subset in the group is target, e.g. phix subset will be grouped on its own
         return "none"
@@ -42,7 +41,6 @@ def meta_map_for_total_reads(listOfMaps){
     }
     resultMap.subset = "total"
     resultMap.total_reads = listOfMaps.collect{ it.total_reads.toInteger() }.sum()
-    println resultMap.total_reads
     return resultMap
 }
 
