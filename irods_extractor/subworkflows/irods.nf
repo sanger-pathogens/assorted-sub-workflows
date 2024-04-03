@@ -37,8 +37,8 @@ def meta_map_for_total_reads(listOfMaps){
     }
     resultMap.subset = "total"
     resultMap.total_reads = listOfMaps.each{ mmap ->
-        mmap.total_reads.sum()
-    }
+        mmap.total_reads.toInteger()
+    }.sum()
     return resultMap
 }
 
