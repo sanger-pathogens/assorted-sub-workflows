@@ -13,6 +13,10 @@
             "split_sep_for_ID_from_fastq":{
                 "default": "_1.fastq",
                 "help_text": "separator to recognise sample ID from preexisting file."
+            },
+            "lane_plex_sep":{
+                "default": "#",
+                "help_text": "separator to build sample ID from runid, laneid and plexid. Defaults to '#', which is the iRODS-native syntax."
             }
         }
     }
