@@ -17,6 +17,10 @@
             "lane_plex_sep":{
                 "default": "#",
                 "help_text": "separator to build sample ID from runid, laneid and plexid. Defaults to '#', which is the iRODS-native syntax."
+            },
+            "save_method":{
+                "default": "nested",
+                "help_text": "save output files in per sample folders (nested) or in one folder (flat)"
             }
         }
     }
