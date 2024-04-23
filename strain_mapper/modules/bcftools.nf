@@ -16,11 +16,9 @@ process BCFTOOLS_MPILEUP {
     script:
     mpileup_file = "${meta.ID}.mpileup"
     """
-    bcftools mpileup -o ${mpileup_file} \\
-                     -O u \\
-                     -f ${reference} \\
-                     --min-BQ 20 \\
-                     --annotate AD \\
+    bcftools mpileup -o ${mpileup_file} \
+                     -O 'u' \
+                     -f ${reference} \
                      ${sorted_reads_bam} 
     """
 }
@@ -43,15 +41,11 @@ process BCFTOOLS_CALL {
     script:
     vcf_allpos = "${meta.ID}.vcf"
     """
-    echo "${meta.ID}" > sample_name.txt
-    bcftools call \\
-        --output-type v \\
-        -V indels \\
-        -m \\
-        --ploidy 1 \\
-        ${mpileup_file} \\
-        | bcftools reheader --samples sample_name.txt \\
-        | bcftools view --output-file ${vcf_allpos} --output-type v
+    bcftools call -o ${vcf_allpos} \
+        -O 'v' \
+        -V indels \
+        -m \
+        '${mpileup_file}'
     """
 }
 
@@ -73,10 +67,10 @@ process BCFTOOLS_FILTERING {
     script:
     filtered_vcf_allpos = "${meta.ID}_filtered.vcf"
     """
-    bcftools filter -o ${filtered_vcf_allpos} \\
-                  ${params.VCF_filters} \\
-                  --output-type v \\
-                  ${vcf_allpos}
+    bcftools view -o ${filtered_vcf_allpos} \
+                  -O 'v' \
+                  -i '${params.VCF_filters}' \
+                  '${vcf_allpos}'
     """
 }
 process RAW_VCF {
