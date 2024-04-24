@@ -16,9 +16,10 @@ process BCFTOOLS_MPILEUP {
     script:
     mpileup_file = "${meta.ID}.mpileup"
     """
-    bcftools mpileup -o ${mpileup_file} \
-                     -O 'u' \
-                     -f ${reference} \
+    bcftools mpileup -o ${mpileup_file} \\
+                     -O 'u' \\
+                     --min-BQ ${params.minimum_mapping_quality} \\
+                     -f ${reference} \\
                      ${sorted_reads_bam} 
     """
 }
