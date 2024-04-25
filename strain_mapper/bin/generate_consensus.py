@@ -5,13 +5,17 @@ import csv
 import logging
 from pathlib import Path
 from typing import TextIO
+from collections import OrderedDict
 
 DEFAULTSEQCHAR = 'N'
 
-def get_chrom_id_and_size(ref_index: Path):
+def get_chrom_id_and_size(ref_index: Path) -> dict[str, int]:
+    chrom_id_size = OrderedDict()
     with open(ref_index, "r") as f:
-        seq_id, size, _ = f.readline().split(maxsplit=2)
-    return seq_id, int(size)
+        for line in f:
+            seq_id, size, _ = line.split(maxsplit=2)
+            chrom_id_size[seq_id] = int(size)
+    return chrom_id_size
 
 
 def initialise_seq(chrom_size: int):
@@ -74,8 +78,11 @@ def get_nt_to_add(ref: str, alt: str):
 def get_seq(
     vcf: Path, ref_index: Path, qual_threshold: float=10
 ):
-    chrom_id, chrom_size = get_chrom_id_and_size(ref_index)
-    seq = initialise_seq(chrom_size)
+    chrom_id_size = get_chrom_id_and_size(ref_index)
+    seq = {}
+    for chrom_id, chrom_size in chrom_id_size.items():
+        seq[chrom_id] = initialise_seq(chrom_size)
+    
     with open(vcf, "r", newline="") as f:
         parsed_lines = parse_lines(f)
         for line in parsed_lines:
@@ -84,7 +91,7 @@ def get_seq(
             alt = line["ALT"]  # alternative base
             pos = parse_position(line["POS"])
             qual = parse_quality(line["QUAL"])
-            if seq_id == chrom_id:
+            if seq_id in seq:
                 if qual is None:
                     logging.warning(
                         f"The following line had an unexpected quality value: {line}"
@@ -92,15 +99,20 @@ def get_seq(
                 if is_acceptable_quality(
                     qual, pos, qual_threshold
                 ):
-                    seq[pos - 1] = get_nt_to_add(ref, alt)
-    assert len(seq) == chrom_size
-    return "".join(seq)
+                    seq[seq_id][pos - 1] = get_nt_to_add(ref, alt)
+    
+    for chrom_id, chrom_seq in seq.items():
+        assert len(chrom_seq) == chrom_id_size[chrom_id]
+        seq[chrom_id] = "".join(chrom_seq)
+    
+    return seq
 
 
-def write_seq(seq: str, seq_id: str, output_fasta: str="out.fa"):
+def write_seq(seq: dict, seq_id: str, output_fasta: str="out.fa") -> None:
     with open(output_fasta, "w") as f:
-        seq_header = f">{seq_id}"
-        f.write(f"{seq_header}\n{seq}\n")
+        for chrom_id, sequence in seq.items():
+            seq_header = f">{seq_id}_{chrom_id}"
+            f.write(f"{seq_header}\n{sequence}\n")
 
 
 def parse_args():
