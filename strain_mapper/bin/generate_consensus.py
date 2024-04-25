@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import TextIO
 from collections import OrderedDict
 
+
 def get_chrom_id_and_size(ref_index: Path) -> dict[str, int]:
     """
     Extracts chromosome IDs and their corresponding sizes from a reference index file.
@@ -49,7 +50,40 @@ def initialise_seq(chrom_size: int, default_seq_character) -> list[str]:
     return [default_seq_character] * chrom_size
 
 
-def parse_lines(fh: TextIO):
+def parse_lines(fh: TextIO) -> csv.DictReader:
+    """
+    Parses lines from a Variant Call Format (VCF) file handle and returns a CSV DictReader.
+
+    Parameters:
+    fh (TextIO): A file handle to read lines from.
+
+    Returns:
+    csv.DictReader: A DictReader object for the parsed CSV data.
+
+    This function reads lines from the provided VCF file handle. It ignores lines starting
+    with '##'.
+
+    It extracts the header from the first non-comment line of the VCF file, which
+    typically contains column names such as 'POS', 'QUAL', etc.
+
+    It then creates a DictReader object using the remaining lines in the file handle, treating
+    them as tab-separated data, and returns it.
+
+    Example:
+    Suppose the VCF file handle contains:
+    ```
+    ##fileformat=VCFv4.3
+    ##INFO=<ID=AF,Number=A,Type=Float,Description="Allele Frequency">
+    #CHROM  POS ID  REF ALT QUAL    FILTER  INFO
+    chr1    1000    .   T   A   10.5    PASS    AF=0.3
+    chr2    2000    .   G   C   20.7    PASS    AF=0.1
+    ```
+    The function will return a DictReader object configured to read CSV data with the
+    specified header ('CHROM', 'POS', 'ID', 'REF', 'ALT', 'QUAL', 'FILTER', 'INFO'):
+    ```
+    <csv.DictReader object at 0x7f84b31aa310>
+    ```
+    """
     for line in fh:
         if not line.startswith("##"):
             header = line.lstrip("#").split()
@@ -57,7 +91,24 @@ def parse_lines(fh: TextIO):
     return csv.DictReader(fh, delimiter="\t", fieldnames=header)
 
 
-def parse_position(pos: str):
+def parse_position(pos: str) -> int:
+    """
+    Parses a string representing a nucleotide position and returns an integer.
+
+    Parameters:
+    pos (str): A string representing a nucleotide position.
+
+    Returns:
+    An integer representing the parsed nucleotide position,
+    or None if the input string cannot be converted to an integer.
+
+    Example:
+    If pos is '123', the function will return:
+    123
+
+    If pos is 'abc', the function will log a warning and return:
+    None
+    """
     try:
         pos = int(pos)  # reference nucleotide position converted to int
     except ValueError:
@@ -69,7 +120,26 @@ def parse_position(pos: str):
         return pos
 
 
-def parse_quality(qual: str):
+def parse_quality(qual: str) -> int:
+    """
+    Parses a string representing quality score and returns a floating-point number.
+
+    Parameters:
+    A string representing the quality score.
+
+    Returns:
+    A float representing the parsed quality score,
+    or None if the input string is '.' or cannot be converted to a float.
+
+    Example:
+    If qual is '10.5', the function will return:
+    10.5
+
+    If qual is '.', the function will return:
+    None
+
+    If qual is 'abc', the function will raise a ValueError.
+    """
     try:
         qual = float(qual)
     except ValueError:
@@ -81,9 +151,34 @@ def parse_quality(qual: str):
         return qual
 
 
-def is_acceptable_quality(qual: float, pos: int, threshold: int=10, alt_quality: dict=None):
+def is_acceptable_quality(
+    qual: float, pos: int, threshold: int = 10, alt_quality: dict = None
+) -> bool:
+    """
+    Checks if the quality of a variant call is acceptable based on a given threshold.
+
+    Parameters:
+    qual (float): The quality score of the variant call.
+    pos (int): The position of the variant call.
+    threshold (int, optional): The threshold quality score. Defaults to 10.
+    alt_quality (dict, optional): A dictionary containing alternative quality scores
+        for specific positions. Defaults to None.
+
+    Returns:
+    bool: True if the quality is acceptable, False otherwise.
+
+    Example:
+    If qual is 15, pos is 100, and threshold is 10, the function will return:
+    True
+
+    If qual is None, the function will return:
+    False
+
+    If qual is 8, pos is 150, and alt_quality is {150: 12}, the function will return:
+    True
+    """
     if alt_quality is None:
-         alt_quality = {}
+        alt_quality = {}
     if qual is None:
         return False
     if qual > threshold or (pos in alt_quality and qual > alt_quality[pos]):
@@ -92,6 +187,34 @@ def is_acceptable_quality(qual: float, pos: int, threshold: int=10, alt_quality:
 
 
 def get_nt_to_add(ref: str, alt: str, default_seq_character):
+    """
+    Determines the nucleotide to add to the sequence based on the reference and alternative alleles.
+
+    Parameters:
+    ref (str): The reference allele.
+    alt (str): The alternative allele.
+    default_seq_character (str): The default nucleotide character to use. (N)
+
+    Returns:
+    str: The nucleotide character to add to the sequence.
+
+    This function determines the nucleotide to add to the sequence based on the reference allele 'ref',
+    the alternative allele 'alt', and the default nucleotide character 'default_seq_character'.
+    If the length of 'alt' is greater than 1, indicating multiple bases called at a position,
+    it returns the default nucleotide character.
+    If 'alt' is '.', indicating that the mapped strain is the same as the query, it returns 'ref'.
+    Otherwise, for single nucleotide polymorphisms (SNPs), it returns 'alt'.
+
+    Example:
+    If ref is 'A', alt is 'T', and default_seq_character is 'N', the function will return:
+    'T'
+
+    If ref is 'C', alt is '.', and default_seq_character is 'N', the function will return:
+    'C'
+
+    If ref is 'G', alt is 'CG', and default_seq_character is 'N', the function will return:
+    'N'
+    """
     if len(alt) > 1:
         # if mutiple bases called at a position
         return default_seq_character
@@ -103,13 +226,13 @@ def get_nt_to_add(ref: str, alt: str, default_seq_character):
 
 
 def get_seq(
-    vcf: Path, ref_index: Path, default_seq_character, qual_threshold: float=10
+    vcf: Path, ref_index: Path, default_seq_character, qual_threshold: float = 10
 ):
     chrom_id_size = get_chrom_id_and_size(ref_index)
     seq = {}
     for chrom_id, chrom_size in chrom_id_size.items():
         seq[chrom_id] = initialise_seq(chrom_size, default_seq_character)
-    
+
     with open(vcf, "r", newline="") as f:
         parsed_lines = parse_lines(f)
         for line in parsed_lines:
@@ -123,19 +246,46 @@ def get_seq(
                     logging.warning(
                         f"The following line had an unexpected quality value: {line}"
                     )
-                if is_acceptable_quality(
-                    qual, pos, qual_threshold
-                ):
-                    seq[seq_id][pos - 1] = get_nt_to_add(ref, alt, default_seq_character)
-    
+                if is_acceptable_quality(qual, pos, qual_threshold):
+                    seq[seq_id][pos - 1] = get_nt_to_add(
+                        ref, alt, default_seq_character
+                    )
+
     for chrom_id, chrom_seq in seq.items():
         assert len(chrom_seq) == chrom_id_size[chrom_id]
         seq[chrom_id] = "".join(chrom_seq)
-    
+
     return seq
 
 
-def write_seq(seq: dict, seq_id: str, output_fasta: str="out.fa") -> None:
+def write_seq(seq: dict, seq_id: str, output_fasta: str = "out.fa") -> None:
+    """
+    Writes sequences to a FASTA file.
+
+    Parameters:
+    seq (dict): A dictionary containing sequence data, where keys are chromosome IDs
+        and values are the corresponding sequences.
+    seq_id (str): Identifier for the sequence data.
+    output_fasta (str, optional): Path to the output FASTA file. Defaults to "out.fa".
+
+    Returns:
+    None
+
+    This function writes the sequences from the input dictionary 'seq' to a FASTA file
+    specified by 'output_fasta'. Each sequence is written with its corresponding
+    chromosome ID as the header, preceded by the 'seq_id'. Sequences are written in the format:
+
+    >{seq_id}_{chrom_id}
+    {sequence}
+
+    Example:
+    If seq is {'chr1': 'ATCG', 'chr2': 'GCTA'}, seq_id is 'sample', and output_fasta
+    is 'output.fasta', the function will write the following content to 'output.fasta':
+    >sample_chr1
+    ATCG
+    >sample_chr2
+    GCTA
+    """
     with open(output_fasta, "w") as f:
         for chrom_id, sequence in seq.items():
             seq_header = f">{seq_id}_{chrom_id}"
