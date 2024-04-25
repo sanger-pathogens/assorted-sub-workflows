@@ -18,15 +18,17 @@ def get_chrom_id_and_size(ref_index: Path) -> dict[str, int]:
     Returns:
     dict[str, int]: A dictionary containing chromosome IDs as keys and their corresponding sizes as values.
 
+    This function only consideres the two first elements in the split which are name and length
+
     Example:
     If the reference index file contains:
     ```
-    chr1 248956422
-    chr2 242193529
+    NZ_CP012480_1_1	2074179	
+    NZ_CP012742_1_2	4944	
     ```
     The function will return:
     ```
-    {'chr1': 248956422, 'chr2': 242193529}
+    {'NZ_CP012480_1_1': 2074179, 'NZ_CP012742_1_2':	4944}
     """
     chrom_id_size = OrderedDict()
     with open(ref_index, "r") as f:
