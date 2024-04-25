@@ -91,10 +91,10 @@ def is_acceptable_quality(qual: float, pos: int, threshold: int=10, alt_quality:
     return False
 
 
-def get_nt_to_add(ref: str, alt: str):
+def get_nt_to_add(ref: str, alt: str, default_seq_character):
     if len(alt) > 1:
         # if mutiple bases called at a position
-        return DEFAULTSEQCHAR
+        return default_seq_character
     if alt == ".":
         # if the mapped strain is the same as the query, then it is reported as a '.'
         return ref
@@ -126,7 +126,7 @@ def get_seq(
                 if is_acceptable_quality(
                     qual, pos, qual_threshold
                 ):
-                    seq[seq_id][pos - 1] = get_nt_to_add(ref, alt)
+                    seq[seq_id][pos - 1] = get_nt_to_add(ref, alt, default_seq_character)
     
     for chrom_id, chrom_seq in seq.items():
         assert len(chrom_seq) == chrom_id_size[chrom_id]
