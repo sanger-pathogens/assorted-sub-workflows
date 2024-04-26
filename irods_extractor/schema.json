@@ -24,7 +24,7 @@
             },
             "irods_subset_to_skip": {
                 "default": "phix",
-                "help_text": "skip data items which metadata field 'subset' is set to this value"
+                "help_text": "skip data items for which metadata field 'subset' is set to this value"
             }
         }
     }
