@@ -22,9 +22,9 @@
                 "default": "nested",
                 "help_text": "save output files in per sample folders (nested) or in one folder (flat)"
             },
-            "irods_component_to_skip": {
+            "irods_subset_to_skip": {
             "default": "phix",
-            "help_text": "skip data items which metadata field 'component' is set to this value"
+            "help_text": "skip data items which metadata field 'subset' is set to this value"
         
             }
         }
