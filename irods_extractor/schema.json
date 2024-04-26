@@ -21,6 +21,10 @@
             "save_method":{
                 "default": "nested",
                 "help_text": "save output files in per sample folders (nested) or in one folder (flat)"
+            },
+            "irods_subset_to_skip": {
+                "default": "phix",
+                "help_text": "skip data items for which metadata field 'subset' is set to this value"
             }
         }
     }
