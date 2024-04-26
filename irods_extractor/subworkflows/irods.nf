@@ -61,6 +61,7 @@ workflow IRODS_QUERY {
             metamap = set_metadata(irods_item.collection, irods_item.data_object, irods_item.avus)
             cram_path = metamap.irods_path
             [metamap, cram_path]
+        .filter{ it[0]["component"] != "${params.irods_component_to_skip}") }
         }.set{ meta_cram_ch }
         
 
