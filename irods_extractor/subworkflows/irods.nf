@@ -60,9 +60,9 @@ workflow IRODS_QUERY {
             metamap = [:]
             metamap = set_metadata(irods_item.collection, irods_item.data_object, irods_item.avus)
             cram_path = metamap.irods_path
-            [metamap, cram_path]
-        }.filter{ it[0]["subset"] != "${params.irods_subset_to_skip}" }
-        }.set{ meta_cram_ch }
+            [metamap, cram_path]  }
+        .filter{ it[0]["subset"] != "${params.irods_subset_to_skip}" }
+        .set{ meta_cram_ch }
         
 
         if (params.save_metadata) {
