@@ -101,7 +101,9 @@ workflow CRAM_EXTRACT {
             commonid = "${metaMap.id_run}_${metaMap.lane}${params.lane_plex_sep}${metaMap.tag_index}"
             commonid = !metaMap.alt_process ? "${commonid}" : "${commonid}_${metaMap.alt_process}"
             tuple(commonid, metaMap, read_1, read_2)
-        }.groupTuple().map{ common_id, metadata_list, read_1_list, read_2_list ->
+        }.groupTuple()
+        .filter( it[1].size >= 2 ) // only combine datasets into 'total' subset if more than one subset to start with
+        .map{ common_id, metadata_list, read_1_list, read_2_list ->
             tuple(meta_map_for_total_reads(metadata_list), read_1_list.join(' '), read_2_list.join(' ')) // amalgam metamap + concatenated path of read files
         }.filter { it[0] != "none" }
         .set{ gathered_total_reads }
