@@ -25,6 +25,10 @@
             "irods_subset_to_skip": {
                 "default": "phix",
                 "help_text": "skip data items for which metadata field 'subset' is set to this value"
+            },
+            "combine_same_id_crams": {
+                "default": "false",
+                "help_text": "if retrieving read files representing subsets of the same source (files will share the same run, lane and plex IDs), should these files be combined into a 'total' subset i.e. reforming the source read file before subsetting by NPG processing."
             }
         }
     }
