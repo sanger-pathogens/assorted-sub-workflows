@@ -10,13 +10,14 @@ process METADATA {
 
     input:
     path(metadata)
+    val(metadata_tag)
 
     output:
     path("${timestampout}")
     
     script:
     maptocsv = "${projectDir}/assorted-sub-workflows/irods_extractor/bin/map_to_csv.py"
-    timestampout = "${workflow.start}_metadata.csv"
+    timestampout = "metadata_${metadata_tag}_${workflow.start}.csv"
     """
     ${maptocsv} --input_map_list ${metadata}
     mv metadata.csv ${timestampout}

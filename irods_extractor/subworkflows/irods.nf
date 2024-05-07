@@ -1,8 +1,9 @@
-include { COLLATE_FASTQ; COMBINE_FASTQ } from '../modules/samtools.nf'
-include { BATON                      } from '../modules/baton.nf'
-include { JSON_PREP; JSON_PARSE      } from '../modules/jq.nf'
-include { RETRIEVE_CRAM              } from '../modules/retrieve.nf'
-include { METADATA                   } from '../modules/metadata_save.nf'
+include { COLLATE_FASTQ; COMBINE_FASTQ  } from '../modules/samtools.nf'
+include { BATON                         } from '../modules/baton.nf'
+include { JSON_PREP; JSON_PARSE         } from '../modules/jq.nf'
+include { RETRIEVE_CRAM                 } from '../modules/retrieve.nf'
+include { METADATA as METADATA_QUERIED  } from '../modules/metadata_save.nf'
+include { METADATA as METADATA_COMBINED } from '../modules/metadata_save.nf'
 
 def set_metadata(collection_path, data_obj_name, linked_metadata) {
     def metadata = [:]
@@ -70,7 +71,8 @@ workflow IRODS_QUERY {
             | collectFile() { map -> [ "lane_metadata.txt", map.collect{it}.join(', ') + '\n' ] }
             | set{ metadata_only }
 
-            METADATA(metadata_only)
+            metadata_tag = channel.value("irods_queried")
+            METADATA_QUERIED(metadata_only, metadata_tag)
         }
 
         emit:
@@ -111,6 +113,15 @@ workflow CRAM_EXTRACT {
         COMBINE_FASTQ(gathered_total_reads)
         
         COMBINE_FASTQ.out.fastq_channel.mix(COLLATE_FASTQ.out.fastq_channel).set{ reads_ch }
+
+        if (params.save_metadata) {
+            COMBINE_FASTQ.out.fastq_channel.map{mdata_map, read1_path, read2_path -> mdata_map}
+            | collectFile() { map -> [ "lane_metadata.txt", map.collect{it}.join(', ') + '\n' ] }
+            | set{ mdata_only }
+
+            mdata_tag = channel.value("combined_readsets")
+            METADATA_COMBINED(mdata_only, mdata_tag)
+        }
     }else{
         COLLATE_FASTQ.out.fastq_channel.set{ reads_ch }
     }
