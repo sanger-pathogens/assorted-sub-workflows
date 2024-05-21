@@ -3,6 +3,7 @@ process BAM_COVERAGE {
     label 'mem_16'
     label 'time_30m'
 
+    conda "bioconda::deeptools=3.5.2"
     container "quay.io/biocontainers/deeptools:3.5.2--pyhdfd78af_1"
     
     publishDir "${params.outdir}/${meta.ID}/deeptools_bigwigs/", mode: 'copy', overwrite: true, pattern: "${bigwig}"
