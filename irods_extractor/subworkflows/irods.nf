@@ -86,7 +86,18 @@ workflow CRAM_EXTRACT {
 
     main:
 
-    Channel.fromPath("${params.outdir}/*/${params.preexisting_fastq_tag}/*_1.fastq.gz").map{ preexisting_fastq_path ->
+    if ("${params.save_method}" == "nested"){
+        Channel.fromPath("${params.outdir}/*/${params.preexisting_fastq_tag}/*_1.fastq.gz")
+        .set{ preexisting_fastq_path_ch }
+    }else{
+        Channel.fromPath("${params.outdir}/${params.preexisting_fastq_tag}/*_1.fastq.gz")
+        .set{ preexisting_fastq_path_ch }
+    }
+    preexisting_fastq_path_ch.toList().map{ preexisting_fastq_path_list -> 
+       new_downloads = ${preexisting_fastq_path_list}.size()
+       log info "irods_extractor: ${new_downloads} data items will be downloaded."
+    }
+    preexisting_fastq_path_ch.map{ preexisting_fastq_path ->
         ID = preexisting_fastq_path.Name.split("${params.split_sep_for_ID_from_fastq}")[0]
     }.ifEmpty("fresh_run").set{ existing_id }
 
