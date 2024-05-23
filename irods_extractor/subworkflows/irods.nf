@@ -106,9 +106,9 @@ workflow CRAM_EXTRACT {
     meta_cram_ch.combine( existing_id | collect | map{ [it] })
     .filter { metadata, cram_path, existing -> !(metadata.ID in existing)}
     .map { it[0,1] }
-    .set{ do_not_exist }
     .view()
-    
+    .set{ do_not_exist }
+
     do_not_exist.toList().map{ do_not_exist_list -> 
        new_downloads = do_not_exist_list.size()
        log.info "irods_extractor: ${new_downloads} data items will be downloaded."
