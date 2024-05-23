@@ -95,7 +95,7 @@ workflow CRAM_EXTRACT {
     }
     preexisting_fastq_path_ch.toList().map{ preexisting_fastq_path_list -> 
        new_downloads = preexisting_fastq_path_list.size()
-       log info "irods_extractor: ${new_downloads} data items will be downloaded."
+       log.info "irods_extractor: ${new_downloads} data items will be downloaded."
     }
     preexisting_fastq_path_ch.map{ preexisting_fastq_path ->
         ID = preexisting_fastq_path.Name.split("${params.split_sep_for_ID_from_fastq}")[0]
