@@ -96,12 +96,14 @@ workflow CRAM_EXTRACT {
     preexisting_fastq_path_ch.toList().map{ preexisting_fastq_path_list -> 
        no_download = preexisting_fastq_path_list.size()
        log.info "irods_extractor: ${no_download} data items already exist and won't be downloaded."
+
     }
 
     preexisting_fastq_path_ch.map{ preexisting_fastq_path ->
-        ID = preexisting_fastq_path.Name.split("${params.split_sep_for_ID_from_fastq}")[0]
-        println "existing: $ID"
-    }.ifEmpty("fresh_run").set{ existing_id }
+        preexisting_fastq_path.Name.split("${params.split_sep_for_ID_from_fastq}")[0]
+    }.ifEmpty("fresh_run")
+    .view()
+    .set{ existing_id }
 
     meta_cram_ch.combine( existing_id | collect | map{ [it] })
     .filter { metadata, cram_path, existing -> !(metadata.ID in existing)}
