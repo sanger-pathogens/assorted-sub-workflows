@@ -1,0 +1,1 @@
+# Assorted Sub-Workflows: a compendium of Nextflow modules for PaM Informatics bioinformatics pipelines
