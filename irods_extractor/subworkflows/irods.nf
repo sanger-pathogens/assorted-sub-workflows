@@ -107,9 +107,9 @@ workflow CRAM_EXTRACT {
     .set{ existing_id }
 
     meta_cram_ch.combine( existing_id )
-    .filter { metadata, cram_path, existing -> !(metadata.ID in existing)}
-    .map { it[0,1] }
     .view()
+    .filter { metadata, cram_path, existing -> !(metadata.ID in existing) }
+    .map { it[0,1] }
     .set{ do_not_exist }
 
     do_not_exist.toList().map{ do_not_exist_list -> 
