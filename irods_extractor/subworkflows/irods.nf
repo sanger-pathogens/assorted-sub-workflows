@@ -101,7 +101,7 @@ workflow CRAM_EXTRACT {
     preexisting_fastq_path_ch.map{ preexisting_fastq_path ->
         preexisting_fastq_path.Name.split("${params.split_sep_for_ID_from_fastq}")[0]
     }
-    .collect()
+    .collect().map{ [it] }
     .ifEmpty("fresh_run")
     .view()
     .set{ existing_id }
