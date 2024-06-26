@@ -106,7 +106,7 @@ workflow CRAM_EXTRACT {
     .view()
     .set{ existing_id }
 
-    meta_cram_ch.combine( existing_id | collect | map{ [it] })
+    meta_cram_ch.combine( existing_id )
     .filter { metadata, cram_path, existing -> !(metadata.ID in existing)}
     .map { it[0,1] }
     .view()
