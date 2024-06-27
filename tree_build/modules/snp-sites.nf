@@ -3,7 +3,7 @@ process SNP_SITES{
     label 'mem_100M'
     label 'time_12'
 
-    conda 'bioconda::snp-sites=2.5.1'
+    //conda 'bioconda::snp-sites=2.5.1'
     container 'quay.io/biocontainers/snp-sites:2.5.1--he4a0461_4'
 
     publishDir "${params.outdir}/snp_aln", mode: 'copy', overwrite: true, pattern: "*.snp.aln"
