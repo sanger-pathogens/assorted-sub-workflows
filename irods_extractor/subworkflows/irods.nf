@@ -99,7 +99,7 @@ workflow CRAM_EXTRACT {
     }
 
     preexisting_fastq_path_ch.map{ preexisting_fastq_path ->
-        preexisting_fastq_path.Name.split("${params.split_sep_for_ID_from_fastq}")[0]
+        preexisting_fastq_path.Name.split("${params.split_sep_for_ID_from_fastq}")[0].toString()
     }
     .collect().map{ [it] }
     .ifEmpty("fresh_run")
@@ -108,7 +108,7 @@ workflow CRAM_EXTRACT {
 
     meta_cram_ch.combine( existing_id )
     .view()
-    .filter { metadata, cram_path, existing -> !(metadata.ID in existing) }
+    .filter { metadata, cram_path, existing -> !(metadata.ID.toString() in existing) }
     .map { it[0,1] }
     .set{ do_not_exist }
 
