@@ -18,7 +18,7 @@ process BCFTOOLS_MPILEUP {
     """
     bcftools mpileup -o ${mpileup_file} \\
                      -O 'u' \\
-                     --min-BQ ${params.minimum_mapping_quality} \\
+                     --min-BQ ${params.minimum_base_quality} \\
                      -f ${reference} \\
                      ${sorted_reads_bam} 
     """

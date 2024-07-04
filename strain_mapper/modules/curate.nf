@@ -13,6 +13,7 @@ process CURATE_CONSENSUS {
 
     output:
     tuple val(meta), path("*.fa"),  emit: curated_consensus
+    tuple val(meta), val("workflow_finished"), emit: finished_ch
 
     script:
     ref_basename = reference.baseName
