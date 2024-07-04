@@ -43,6 +43,10 @@
             "samtools_stats": { 
                 "default": "false",
                 "help_text": "Produce statistics summary files from sorted BAM using `samtools stats` and `samtools flagstats` commands."
+            },
+            "skip_cleanup": { 
+                "default": "false",
+                "help_text": "by default most intermediate files are deleted on successful completion of the pipeline add this flag to keep intermediates"
             }
         }
     }
