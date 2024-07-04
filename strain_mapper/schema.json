@@ -50,7 +50,7 @@
             },
             "skip_cleanup": { 
                 "default": "false",
-                "help_text": "by default most intermediate files are deleted on successful completion of the pipeline add this flag to keep intermediates"
+                "help_text": "by default most intermediate files are deleted on successful completion of the pipeline, add this flag to keep intermediates"
             }
         }
     }
