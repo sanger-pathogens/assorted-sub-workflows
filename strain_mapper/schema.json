@@ -12,6 +12,10 @@
                 "default": "bowtie2",
                 "help_text": "mapping tool to use options [bwa, bowtie2]"
             },
+            "minimum_base_quality": {
+                "default": "20",
+                "help_text": "minium quality of a base for it to be carried forwards into the pileup and downstream to variant calling"
+            },
             "only_report_alts": {
                 "default": "true",
                 "help_text": "When included this flag reports only ALT variants in the VCF output"
