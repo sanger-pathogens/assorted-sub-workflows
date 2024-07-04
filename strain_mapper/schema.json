@@ -14,7 +14,7 @@
             },
             "minimum_base_quality": {
                 "default": "20",
-                "help_text": "minium quality of a base for it to be carried forwards into the pileup and downstream to variant calling"
+                "help_text": "minimum quality of a base for it to be carried forwards into the pileup and downstream to variant calling"
             },
             "only_report_alts": {
                 "default": "true",
