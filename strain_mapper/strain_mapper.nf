@@ -181,6 +181,13 @@ workflow STRAIN_MAPPER {
     )
     CURATE_CONSENSUS.out.curated_consensus.dump(tag: 'curated_consensus').set { ch_curated }
 
+    if (!params.skip_cleanup) {
+        ch_mapped.join(ch_mapped_reads_bam).join(ch_sorted_reads).join(sorted_reads_and_ref).join(ch_mpileup_file).join(ch_vcf_final).join(CURATE_CONSENSUS.out.finished_ch)
+        | flatten
+        | filter(Path)
+        | map { it.delete() }
+    }
+
     emit: 
     ch_curated
 }
