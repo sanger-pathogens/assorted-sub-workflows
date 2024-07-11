@@ -1,7 +1,7 @@
 process BWA {
     label 'cpu_1'
     label 'mem_8'
-    label 'time_12'
+    label 'time_1'
 
     container 'quay.io/biocontainers/bwa:0.7.17--he4a0461_11'
 
@@ -23,7 +23,7 @@ process BWA {
 process BWA_INDEX {
     label 'cpu_4'
     label 'mem_8'
-    label 'time_12'
+    label 'time_30m'
 
     publishDir "${params.outdir}/bwa", mode: 'copy', overwrite: true
 

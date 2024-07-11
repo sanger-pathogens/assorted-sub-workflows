@@ -40,6 +40,10 @@
                 "default": "false",
                 "help_text": "Save the mapping file (sorted, then deduplicated BAM) generated with Picardtools"
             },
+            "skip_read_deduplication": { 
+                "default": "false",
+                "help_text": "Skip removal of duplicate reads using Picard."
+            },
             "bigwig": { 
                 "default": "false",
                 "help_text": "Produce bigwig genome coverage file from sorted BAM file using Deeptools. Saves the BAM index (.bai) file alongside."

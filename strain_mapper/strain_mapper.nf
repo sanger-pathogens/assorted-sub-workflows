@@ -1,18 +1,5 @@
 #!/usr/bin/env nextflow
 
-
-/*
-========================================================================================
-    REQUIRED PARAMS IN NEXTFLOW.CONFIG
-========================================================================================
-*/
-
-//   only_report_alts = true
-//   VCF_filters = 'QUAL>=50 & MIN(DP)>=8 & ((ALT!="." & DP4[2]>3 & DP4[3]>3) | (ALT="." & DP4[0]>3 & DP4[1]>3))'
-//   skip_filtering = false
-//   keep_raw_vcf = false
-//   mapper = bwa
-
 //
 // MODULES
 //
@@ -37,65 +24,52 @@ workflow STRAIN_MAPPER {
     reference       // file: given reference
 
     main:
+
     //
     //BOWTIE2 WORKFLOW
     //
 
     if (params.mapper == "bowtie2") {
-
-        // BOWTIE2 INDEX
-
-        ref_without_extension = "${reference.parent}/${reference.baseName}"
-        bt2_index_files = file("${ref_without_extension}*.bt2")
-        if (bt2_index_files) {
+        //BOWTIE2 INDEX
+        bt2_index_files = file("${reference}.bt2")
+        if (bt2_index_files.isFile()) {
             Channel.fromPath(bt2_index_files)
-                .collect()
-                .dump(tag: 'bt2_index')
-                .set { ch_bt2_index }
+            | collect
+            | set { ch_bt2_index }
+
         } else {
-            BOWTIE2_INDEX(
-                reference
-            )
-            BOWTIE2_INDEX.out.bt2_index.dump(tag: 'bt2_index').set { ch_bt2_index }
+            BOWTIE2_INDEX( reference )
+            | set { ch_bt2_index }
         }
 
         //
         // MAPPING: Bowtie2
         //
-        BOWTIE2 (
-            ch_reads,
-            ch_bt2_index 
-        )
-        BOWTIE2.out.mapped_reads.dump(tag: 'bowtie2').set { ch_mapped }
-    } else if (params.mapper == "bwa") {
+        BOWTIE2 ( ch_reads, ch_bt2_index )
+        | set { ch_mapped }
 
+    } else if (params.mapper == "bwa") {
         //
         //BWA WORKFLOW
         //
-
 
         // BWA INDEX
         bwa_index_files = file("${reference}.amb")
         if (bwa_index_files.isFile()) {
             Channel.fromPath(reference, "${reference}.{amb,ann,bwt,pac,sa}")
-                .collect()
-                .dump(tag: 'bwa_index')
-                .set { ch_bwa_index }
+            | collect
+            | set { ch_bwa_index }
+
         } else {
-            BWA_INDEX(
-                reference
-            )
-            BWA_INDEX.out.bwa_index.dump(tag: 'bwa_index').set { ch_bwa_index }
+            BWA_INDEX(reference)
+            | set { ch_bwa_index }
         }
 
         //
         // MAPPING: Bwa
         //
-        BWA(
-            ch_reads,
-            ch_bwa_index 
-        )
-        BWA.out.mapped_reads.dump(tag: 'bwa').set { ch_mapped }
+        BWA( ch_reads, ch_bwa_index )
+        | set { ch_mapped }
 
     } else {
         error "supplied mapper: ${params.mapper} is not currently supported"
@@ -105,26 +79,22 @@ workflow STRAIN_MAPPER {
     // INDEX REF FASTA FOR DOWNSTREAM PROCESSES
     faidx_file = file("${reference}.fai")
     if (faidx_file.isFile()) {
-        Channel.of( [reference, faidx_file] ).dump(tag: 'ref_index').set { ch_ref_index }
+        Channel.of( [reference, faidx_file] )
+        | set { ch_ref_index }
+
     } else {
-        INDEX_REF(
-            reference
-        )
-        INDEX_REF.out.ref_index.dump(tag: 'ref_index').set { ch_ref_index }
+        INDEX_REF(reference)
+        | set { ch_ref_index }
     }
 
     //
     // POST-PROCESSING
     //
-    CONVERT_TO_BAM(
-        ch_mapped
-    )
-    CONVERT_TO_BAM.out.mapped_reads_bam.dump(tag: 'convert_to_bam').set { ch_mapped_reads_bam }
 
-    SAMTOOLS_SORT(ch_mapped_reads_bam)
+    CONVERT_TO_BAM( ch_mapped )
+    | SAMTOOLS_SORT
     | INDEX_SORTED_BAM
-
-    INDEX_SORTED_BAM.out.indexed_bam.dump(tag: 'sorted_reads').set { ch_sorted_reads }
+    | set { ch_sorted_reads }
 
     if (params.bigwig){
         BAM_COVERAGE(ch_sorted_reads)
@@ -134,62 +104,64 @@ workflow STRAIN_MAPPER {
         SAMTOOLS_STATS(ch_sorted_reads)
     }
 
-    PICARD_MARKDUP(ch_sorted_reads)
-    | INDEX_DEDUP_BAM
+    if (params.skip_read_deduplication){
+        ch_sorted_reads
+        | set { bam_index }
 
-    INDEX_DEDUP_BAM.out.indexed_bam
-        .combine(ch_ref_index)
-        .dump(tag: 'sorted_reads_and_ref')
-        .set { sorted_reads_and_ref }
+    } else {
+        PICARD_MARKDUP(ch_sorted_reads)
+        | INDEX_DEDUP_BAM
+        | set { bam_index }
 
-    BCFTOOLS_MPILEUP(
-        sorted_reads_and_ref
-    )
-    BCFTOOLS_MPILEUP.out.mpileup_file.dump(tag: 'mpileup_file').set { ch_mpileup_file }
+    }
 
-    BCFTOOLS_CALL(
-        ch_mpileup_file
-    )
-    BCFTOOLS_CALL.out.vcf_allpos.dump(tag: 'vcf_allpos').set { ch_vcf_allpos }
+    bam_index
+    | combine(ch_ref_index)
+    | BCFTOOLS_MPILEUP
+    | BCFTOOLS_CALL
+    | set { ch_vcf_allpos }
 
     if (params.keep_raw_vcf && !params.skip_filtering){
-        RAW_VCF(
-            ch_vcf_allpos
-        )
+        RAW_VCF( ch_vcf_allpos )
     }
 
     if (!params.skip_filtering) {
-        BCFTOOLS_FILTERING(
-            ch_vcf_allpos
-        )
-        BCFTOOLS_FILTERING.out.set { ch_vcf_final }
-    }else{
+        BCFTOOLS_FILTERING(ch_vcf_allpos )
+        | set { ch_vcf_final }
+    } else{
         ch_vcf_allpos.set { ch_vcf_final }
     }
 
-    FINAL_VCF(
-        ch_vcf_final
-    )
+    FINAL_VCF( ch_vcf_final )
     
     ch_vcf_final
-        .combine(ch_ref_index)
-        .dump(tag: 'vcf_and_ref')
-        .set { ch_vcf_and_ref }
+    | combine(ch_ref_index)
+    | set { ch_vcf_and_ref }
 
-    CURATE_CONSENSUS(
-        ch_vcf_and_ref
-    )
-    CURATE_CONSENSUS.out.curated_consensus.dump(tag: 'curated_consensus').set { ch_curated }
+    CURATE_CONSENSUS( ch_vcf_and_ref )
 
     if (!params.skip_cleanup) {
-        ch_mapped.join(ch_mapped_reads_bam).join(ch_sorted_reads).join(sorted_reads_and_ref).join(ch_mpileup_file).join(ch_vcf_final).join(CURATE_CONSENSUS.out.finished_ch)
+        ch_mapped.join(CONVERT_TO_BAM.out.mapped_reads_bam)
+        | join(SAMTOOLS_SORT.out.sorted_reads)
+        | join(INDEX_SORTED_BAM.out.indexed_bam)
+        | join(BCFTOOLS_MPILEUP.out.mpileup_file)
+        | join(BCFTOOLS_CALL.out.vcf_allpos)
+        | join(CURATE_CONSENSUS.out.finished_ch) //join all of a single "channel" together and delete
         | flatten
         | filter(Path)
         | map { it.delete() }
+
+        if (!params.skip_read_deduplication) {
+            PICARD_MARKDUP.out.dedup_reads
+            | join( CURATE_CONSENSUS.out.finished_ch )
+            | flatten
+            | filter(Path)
+            | map { it.delete() }
+        }
     }
 
     emit: 
-    ch_curated
+    CURATE_CONSENSUS.out.curated_consensus
 }
 
 /*

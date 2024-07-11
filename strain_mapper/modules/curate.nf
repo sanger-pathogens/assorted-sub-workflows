@@ -1,7 +1,7 @@
 process CURATE_CONSENSUS {
     label 'cpu_2'
     label 'mem_1'
-    label 'time_1'
+    label 'time_30m'
 
     publishDir "${params.outdir}/${meta.ID}/curated_consensus", mode: 'copy', overwrite: true
 
