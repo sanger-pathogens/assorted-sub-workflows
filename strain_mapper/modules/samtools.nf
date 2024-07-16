@@ -1,7 +1,7 @@
 process CONVERT_TO_BAM {
     label 'cpu_2'
     label 'mem_1'
-    label 'time_1'
+    label 'time_30m'
     
     conda 'bioconda::samtools=1.17'
     container 'quay.io/biocontainers/samtools:1.17--hd87286a_2'
@@ -25,7 +25,7 @@ process CONVERT_TO_BAM {
 process SAMTOOLS_SORT {
     label 'cpu_4'
     label 'mem_8'
-    label 'time_12'
+    label 'time_1'
 
     publishDir "${params.outdir}/${meta.ID}/samtools_sort", enabled: params.keep_sorted_bam, mode: 'copy', overwrite: true
 
@@ -50,7 +50,7 @@ process SAMTOOLS_SORT {
 process INDEX_REF {
     label 'cpu_1'
     label 'mem_1'
-    label 'time_1'
+    label 'time_30m'
     publishDir "${params.outdir}/sorted_ref", mode: 'copy', overwrite: true
 
     conda 'bioconda::samtools=1.17'
@@ -72,7 +72,7 @@ process INDEX_REF {
 process INDEX_BAM {
     label 'cpu_2'
     label 'mem_1'
-    label 'time_1'
+    label 'time_30m'
 
     // the samtools_sort publish statement might duplicate output from deeptools bigwig, 
     // but given the small size of index file and the fact that it's most handy when located in same folder as .bam or .bw, it is best publishing it twice
@@ -99,7 +99,7 @@ process INDEX_BAM {
 process SAMTOOLS_STATS {
     label 'cpu_2'
     label 'mem_1'
-    label 'time_1'
+    label 'time_30m'
 
     publishDir "${params.outdir}/${meta.ID}/samtools_stats", enabled: params.samtools_stats, mode: 'copy', overwrite: true
 

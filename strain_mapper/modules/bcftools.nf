@@ -15,10 +15,11 @@ process BCFTOOLS_MPILEUP {
 
     script:
     mpileup_file = "${meta.ID}.mpileup"
+    minimum_base_quality = "${params.minimum_base_quality == "default" ? "" : "--min-BQ ${params.minimum_base_quality}"}"
     """
     bcftools mpileup -o ${mpileup_file} \\
                      -O 'u' \\
-                     --min-BQ ${params.minimum_base_quality} \\
+                     ${minimum_base_quality} \\
                      -f ${reference} \\
                      ${sorted_reads_bam} 
     """
@@ -77,7 +78,7 @@ process BCFTOOLS_FILTERING {
 process RAW_VCF {
     label 'cpu_2'
     label 'mem_1'
-    label 'time_1'
+    label 'time_30m'
     
     publishDir "${params.outdir}/${meta.ID}/raw_vcf", mode: 'copy', overwrite: true
 
@@ -112,7 +113,7 @@ process RAW_VCF {
 process FINAL_VCF {
     label 'cpu_2'
     label 'mem_1'
-    label 'time_1'
+    label 'time_30m'
     
     publishDir "${params.outdir}/${meta.ID}/final_vcf", mode: 'copy', overwrite: true
 

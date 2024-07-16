@@ -1,7 +1,7 @@
 process BOWTIE2 {
     label 'cpu_4'
     label 'mem_8'
-    label 'time_12'
+    label 'time_1'
 
     conda 'bioconda::bowtie2=2.5.1'
     container 'quay.io/biocontainers/bowtie2:2.5.1--py310h8d7afc0_0'
@@ -28,7 +28,7 @@ process BOWTIE2 {
 process BOWTIE2_INDEX {
     label 'cpu_4'
     label 'mem_8'
-    label 'time_12'
+    label 'time_30m'
 
     publishDir "${params.outdir}/bowtie2", mode: 'copy', overwrite: true
 

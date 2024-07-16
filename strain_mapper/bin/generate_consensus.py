@@ -154,7 +154,7 @@ def parse_quality(qual: str) -> int:
 
 
 def is_acceptable_quality(
-    qual: float, pos: int, threshold: int = 10, alt_quality: dict = None
+    qual: float, pos: int, threshold: int = 10, alt_quality: dict = {}
 ) -> bool:
     """
     Checks if the quality of a variant call is acceptable based on a given threshold.
@@ -179,8 +179,6 @@ def is_acceptable_quality(
     If qual is 8, pos is 150, and alt_quality is {150: 12}, the function will return:
     True
     """
-    if alt_quality is None:
-        alt_quality = {}
     if qual is None:
         return False
     if qual > threshold or (pos in alt_quality and qual > alt_quality[pos]):
