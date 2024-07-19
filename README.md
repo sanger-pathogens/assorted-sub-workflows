@@ -99,15 +99,44 @@ Note that in the case where you indeed desire to re-download the whole dataset a
 
 The `STRAIN_MAPPER` workflow maps short read sequences to a given reference genome using a choice of mapping tools including **Bowtie2** and **BWA-MEM**. It also calls genotypes with **bcftools** (**GATK** will soon be supported as an alternative calling method) and thus generates a VCF file containing genotype  information, which is then used to create a consensus sequence (or "pseudo-genome") in Fasta format amalgamating variants to the reference sequence.
 
- for both REF and ALT alleles - or only variants if the `only_report_alts` arameter is set to `true`
+### Workflow details
 
-The pipeline will build reference and bowtie2 indexes if it doesn't find them in the same directory as the supplied `--reference`.
+#### Read mapping
+
+Mapping can be done using Bowtie2 or BWA-MEM
+
+#### Genotype calling
+
+The final VCF file will include both REF and ALT alleles, or only variants if setting `only_report_alts = true`. By default, genotype calling is done using `bcftool mpileup` followed by `bcftools call`. A critical option is `minimum_base_quality` (default: 20), which will determine what bases are included at the pileup stage based on the basecalling quality (BQ); this has a significant impact in downstream genotype mapping quality and as a result, of how many sites are reported with a supported genotype, or represented with an `N` in the consensus sequence (see below).
+
+Work in progress: inclusion of GATK as an alternative genotype caller is, enabling precise resolution of indels (see dev branch `PAT-1857_update_to_include_gatk_haplotypecaller`; MR [here](https://gitlab.internal.sanger.ac.uk/sanger-pathogens/pipelines/assorted-sub-workflows/-/merge_requests/14)).
+
+#### Consensus sequence generation
+
+a Python script is used to parse the VCF file and to report well-supported gentype calls into the context of the reference sequence, using `N` characters to represent sites where the genotype is uncertain due to too low mapping quality of read coverage.
+
+#### Genotype/Variant filtering
+
+By default, filtering using `bcftools view` removes genotype records (ALT and REF) with a mapping quality (MQ) score below 50 and ensures that they are represented on at least 3 forward and reverse reads. In addition there must be more than 8 reads in total supporting this variant call.
+
+To edit these please follow the BCFTOOLS documentation as seen on the`bcftools view` page under "expressions": https://samtools.github.io/bcftools/bcftools.html#expressions
+
+
+### Output 
+
+The main output files are the following:
+
+- the final VCF file (with filtered high-quality variants, or all variants if filtering as disabled), written into the folder `final_vcf/`
+- the consesnsus sequence in Fasta format, written into the folder `curated_consensus/`
 
 By default, most intermediate files are not published; when chosen to be published, they will be written in process-specific sub-folders under the sample-specific folder under the `results/` folder (or what was the supplied to the `--output` option). This includes:
 
-- 
+- the raw VCF file from `bcftools call` before filtering low-quality variants. Use `keep_raw_vcf = true` to keep write it into `raw_vcf/` folder.
+- the BAM alignment files produced by sorting with `samtools sort` and after deduplication with `picard MarkDuplicates` are discarded, unless setting `keep_sorted_bam = true` and `keep_dedup_bam = true` so that they are written to `samtools_sort/` and `picard/`, respectively.
 
-In addition, optional analyses can be run and written alongside the above results file 
-
+In addition, optional analyses can be run and written alongside the above results file:
+- `samtools stats` and `samtools flagstats` are run if `samtools_stats = true` (default) and results are saved in the `samtools_stats/` folder
+- DeepTools `bamCoverage` is run to generate Bigwig coverage files, saved in the `bigwig/` folder
+- The pipeline will automatically build reference and alignment indexes if it doesn't find them in the same directory as the supplied `--reference`, written into the folders `bowtie2/` or `bwa/` depending if the alignment of reads is made using Bowtie2 or BWA-MEM.
 
 ## Phylogenetic tree building
