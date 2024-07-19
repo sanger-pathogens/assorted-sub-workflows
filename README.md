@@ -4,7 +4,7 @@ the following workflows are included, and can be integrated to any pipeline, in 
 
 Usage and default parameters of each workflow is documented separately in their respective schema and config files.
 
-## Combined input
+## Combined short read input
 
 the `COMBINED_INPUT` workflow enables to input short sequencing reads to your pipeline in multiple ways, which may be combined.
 
@@ -93,3 +93,21 @@ Once it has processed the iRODS query and identified the set of files to be down
 Note that in the case where you indeed desire to re-download the whole dataset and re-run the downstream analyses - for instance because a fix or new features were introduced in a new version of the pipeline - then you will want to turn this behaviour off, or to choose another destination for the results.
 
 ### Metadata search only
+
+
+## Strain Mapper: short read mapping to a reference genome and variant genotype calling
+
+The `STRAIN_MAPPER` workflow maps short read sequences to a given reference genome using a choice of mapping tools including **Bowtie2** and **BWA-MEM**. It also calls genotypes with **bcftools** (**GATK** will soon be supported as an alternative calling method) and thus generates a VCF file containing genotype  information, which is then used to create a consensus sequence (or "pseudo-genome") in Fasta format amalgamating variants to the reference sequence.
+
+ for both REF and ALT alleles - or only variants if the `only_report_alts` arameter is set to `true`
+
+The pipeline will build reference and bowtie2 indexes if it doesn't find them in the same directory as the supplied `--reference`.
+
+By default, most intermediate files are not published; when chosen to be published, they will be written in process-specific sub-folders under the sample-specific folder under the `results/` folder (or what was the supplied to the `--output` option). This includes:
+
+- 
+
+In addition, optional analyses can be run and written alongside the above results file 
+
+
+## Phylogenetic tree building
