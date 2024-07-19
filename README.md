@@ -79,6 +79,17 @@ Note that, due to the large number of possible search terms used, no restriction
 
 The workflow should issue a notice of how many files are considered for download, which may allow you to stop it in time if you get scared of the numbers.
 
-### Updating the result folder for Fastq files
+### Saving (or not saving) Fastq files
+
+When retrieving data from iRODS, one of the steps - enabled by the `IRODS_EXTRACTOR` subworkflow - is to download sequencing read files from iRODS (most often in CRAM format) and to convert them to the Fastq format. In most pipeline applications, the only purpose of these fastq files are to be passed on to further processing steps, and permanently saving fastq files on disk is not required. In fact, in most cases, it is not advisable as these files can be very large and will soon eat up all your disk space; this is why the workflow parameter `save_fastqs` defaults to `false`.  
+It is the `irods_extractor` standalone pipeline use case, however, downlaoding fastqs is the purpose of the pipeline; see [the irods_extractor pipeline repo](https://gitlab.internal.sanger.ac.uk/sanger-pathogens/pipelines/irods_extractor).  
+In that use case, or when using `IRODS_EXTRACTOR` subworkflow as part of another pipeline where you may want to retain the reads, you may consider the behaviour described below.
+
+#### Updating the result folder for Fastq files
+
+When attemting to download files from iRODS, the `IRODS_EXTRACTOR` subworkflow checks if the expected ouput fastq files exist in the `raw_fastq/` folder (default parameter value, folder name can be changed) under the main `results/` folder for each sample e.g. in `results/12345_1#67/raw_fastq/12345_1#67_1.fastq.gz`. If matching files are present, it then skips download and any further processing for this sample.  
+The idea behind this mechanism is that when pulling reads from iRODS using a given set of quey terms, the contents of the patform may evolve i.e. every so often new data files may become available that match the query, typically as new sequencing runs are completed as part of an ongoing study. To access those reads and generate any downstream analysis, there is no need to know the specifics of the new data to selctively download them. Instead, the whole study/dataset can be requested again and `IRODS_EXTRACTOR` will know to only update the results folder rather than re-downloading and re-processing everything - that is if you keep the same results folder and have the right values set for the relevant parameters: `preexisting_fastq_tag` and `split_sep_for_ID_from_fastq`, see help message for details; default behaviour is to update.  
+Once it has processed the iRODS query and identified the set of files to be downloaded, the workflow will print the expected fastq file pair number to the screen (or standard output stream). It will then compare it the set of files already occurring under the `results/` folder and compute the difference, and will then print again how many files will actually be downloaded, which it will then proceed to do. You may have a look at these messages to make sure expected contents are downloaded. 
+Note that in the case where you indeed desire to re-download the whole dataset and re-run the downstream analyses - for instance because a fix or new features were introduced in a new version of the pipeline - then you will want to turn this behaviour off, or to choose another destination for the results.
 
 ### Metadata search only
