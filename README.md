@@ -58,12 +58,19 @@ Each row will result into a separate query to IRODS server.
 Note that some of these rows result in overlapping queries; while some files might be requested several times, but the irods extractor workflow should only output one iteration of each file.  
 Also, it is worth noting that iRODS querying can be some slow, and that it is more efficient to do fewer queries that match several files instead of many queies , one for each read file set.
 
-The order of parameters fields in the CSV is not relevant, but the user needs to specify at least one of the `studyid` or `runid` fields; leaving a parameter field blank means data matching all possible values will be selected. Again, `laneid`, `plexid`, `target` and `type` can only be used in combination with `runid` - this is a rule we introduce to prevent accidental mass download that would ensue from not specifying the run.   
+The order of parameters fields in the CSV is not relevant, but the user needs to specify at least one of the `studyid` or `runid` fields; leaving a parameter field blank means data matching all possible values will be selected. Again, `laneid` and `plexid` can only be used in combination with `studyid` or `runid`, or other fields - this is a rule we introduce to prevent accidental mass download that would ensue from not specifying the run.   
+Similarly, one cannot submit an iRODS query solely based on `target` or `type` metadata tags, as this query would catch too many file objects.
 For instance, these parameter combinations are invalid (run id not specified where lane or plex ids were) and will be ignored (no data or metadata download) with a warning:
 ```
-studyid,runid,laneid,plexid 
-7289,,1,36
-,,1,36
+studyid,runid,laneid,plexid,type,target
+,,1,36,,
+,,1,36,,0
+,,,,bam,
 ```
 
-Finally, using a manifest enables the saerch of a wider set of metadata fields, namely all metadata fields featured in the iRODS database system.
+Finally, using a manifest enables the saerch of a wider set of metadata fields, namely all metadata fields featured in the iRODS database system, as defined under the Dublin Core standard; see [here](https://github.com/wtsi-npg/irods-metadata/blob/master/irods_sample_metadata.md).
+
+in parctice, you can thus query samples based on attributes such as the organism they were collected from; this would be using the `sample_common_name` field, e.g.:  
+```
+sample_common_name,type
+Romboutsia lituseburensis,cram
