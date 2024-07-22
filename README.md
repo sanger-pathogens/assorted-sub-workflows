@@ -135,6 +135,6 @@ By default, most intermediate files are not published; when chosen to be publish
 In addition, optional analyses can be run and written alongside the above results file:
 - `samtools stats` and `samtools flagstats` are run if `samtools_stats = true` (default) and results are saved in the `samtools_stats/` folder
 - DeepTools `bamCoverage` is run to generate Bigwig coverage files, saved in the `bigwig/` folder
-- The pipeline will automatically build reference and alignment indexes if it doesn't find them in the same directory as the supplied `--reference`, written into the folders `bowtie2/` or `bwa/` depending if the alignment of reads is made using Bowtie2 or BWA-MEM.
+- The pipeline will automatically build reference and alignment indexes if it doesn't find them in the same directory as the supplied `--reference`, written into the folders `bowtie2/` or `bwa/` depending on whether the alignment of reads is made using Bowtie2 or BWA-MEM.
 
 ## Phylogenetic tree building
