@@ -124,7 +124,7 @@ To edit these please follow the BCFTOOLS documentation as seen on the`bcftools v
 
 The main output files are the following:
 
-- the final VCF file (with filtered high-quality variants, or all variants if filtering as disabled), written into the folder `final_vcf/`
+- the final VCF file (with filtered high-quality variants, or all variants if filtering is disabled), written into the folder `final_vcf/`
 - the consesnsus sequence in Fasta format, written into the folder `curated_consensus/`
 
 By default, most intermediate files are not published; when chosen to be published, they will be written in process-specific sub-folders under the sample-specific folder under the `results/` folder (or what was the supplied to the `--output` option). This includes:
