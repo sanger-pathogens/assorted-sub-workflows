@@ -111,7 +111,7 @@ Work in progress: inclusion of GATK as an alternative genotype caller is, enabli
 
 #### Consensus sequence generation
 
-a Python script is used to parse the VCF file and to report well-supported gentype calls into the context of the reference sequence, using `N` characters to represent sites where the genotype is uncertain due to too low mapping quality of read coverage.
+A Python script is used to parse the VCF file and to report well-supported genotype calls into the context of the reference sequence, using `N` characters to represent sites where the genotype is uncertain due to too low mapping quality or read coverage.
 
 #### Genotype/Variant filtering
 
