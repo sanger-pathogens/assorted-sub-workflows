@@ -80,7 +80,7 @@ The workflow should issue a notice of how many files are considered for download
 ### Saving (or not saving) Fastq files
 
 When retrieving data from iRODS, one of the steps - enabled by the `IRODS_EXTRACTOR` subworkflow - is to download sequencing read files from iRODS (most often in CRAM format) and to convert them to the Fastq format. In most pipeline applications, the only purpose of these fastq files are to be passed on to further processing steps, and permanently saving fastq files on disk is not required. In fact, in most cases, it is not advisable as these files can be very large and will soon eat up all your disk space; this is why the workflow parameter `save_fastqs` defaults to `false`.  
-It is the `irods_extractor` standalone pipeline use case, however, downlaoding fastqs is the purpose of the pipeline; see [the irods_extractor pipeline repo](https://gitlab.internal.sanger.ac.uk/sanger-pathogens/pipelines/irods_extractor).  
+For the `irods_extractor` standalone pipeline use case, however, downlaoding fastqs is the purpose of the pipeline; see [the irods_extractor pipeline repo](https://gitlab.internal.sanger.ac.uk/sanger-pathogens/pipelines/irods_extractor).  
 In that use case, or when using `IRODS_EXTRACTOR` subworkflow as part of another pipeline where you may want to retain the reads, you may consider the behaviour described below.
 
 #### Updating the result folder for Fastq files
