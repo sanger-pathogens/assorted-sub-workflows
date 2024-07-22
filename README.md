@@ -73,7 +73,7 @@ In practice, you can thus query samples based on attributes such as the organism
 sample_common_name,type
 Romboutsia lituseburensis,cram
 ```
-Note that, due to the large number of possible search terms used, no restriction rule is applied when using native iRODS search terms, so please be cautious when using this as it could result in very many file output (which might be what you desire!).
+Note that, due to the large number of possible search terms used, no restriction rule is applied when using native iRODS search terms, so please be cautious when using this as it could result in very many files output (which might be what you desire!).
 
 The workflow should issue a notice of how many files are considered for download, which may allow you to stop it in time if you get scared of the numbers.
 
