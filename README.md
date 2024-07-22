@@ -53,8 +53,8 @@ studyid,runid,laneid,plexid
 ```
 
 Each row will result into a separate query to IRODS server.  
-Note that some of these rows result in overlapping queries; while some files might be requested several times, but the irods extractor workflow should only output one iteration of each file.  
-Also, it is worth noting that iRODS querying can be some slow, and that it is more efficient to do fewer queries that match several files instead of many queies , one for each read file set.
+Note that some of these rows result in overlapping queries; while some files might be requested several times, the irods extractor workflow should only output one iteration of each file.  
+Also, it is worth noting that iRODS querying can be slow, and that it is more efficient to do fewer queries that match several files instead of many queries, one for each read file set.
 
 The order of parameters fields in the CSV is not relevant, but the user needs to specify at least one of the `studyid` or `runid` fields; leaving a parameter field blank means data matching all possible values will be selected. Again, `laneid` and `plexid` can only be used in combination with `studyid` or `runid`, or other fields - this is a rule we introduce to prevent accidental mass download that would ensue from not specifying the run.   
 Similarly, one cannot submit an iRODS query solely based on `target` or `type` metadata tags, as this query would catch too many file objects.
