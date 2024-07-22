@@ -70,7 +70,7 @@ studyid,runid,laneid,plexid,type,target
 
 Finally, using a manifest enables the saerch of a wider set of metadata fields, namely all metadata fields featured in the iRODS database system, as defined under the Dublin Core standard; see [here](https://github.com/wtsi-npg/irods-metadata/blob/master/irods_sample_metadata.md).
 
-in parctice, you can thus query samples based on attributes such as the organism they were collected from; this would be using the `sample_common_name` field, e.g.:  
+In practice, you can thus query samples based on attributes such as the organism they were collected from; this would be using the `sample_common_name` field, e.g.:  
 ```
 sample_common_name,type
 Romboutsia lituseburensis,cram
