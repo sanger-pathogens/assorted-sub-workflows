@@ -138,3 +138,12 @@ In addition, optional analyses can be run and written alongside the above result
 - The pipeline will automatically build reference and alignment indexes if it doesn't find them in the same directory as the supplied `--reference`, written into the folders `bowtie2/` or `bwa/` depending on whether the alignment of reads is made using Bowtie2 or BWA-MEM.
 
 ## Phylogenetic tree building
+
+
+## Credit and Contact
+
+THis software is actively developed by the PaM Informatics team of the Parasites and Microbe Programme at the Wellcome Sanger Institute (Hinxton, UK).
+
+For any queries, use our helpdesk [request portal](https://jira.sanger.ac.uk/servicedesk/customer/portal/16) (for Sanger staff) or contact us at pam-informatics@sanger.ac.uk.
+
+Copyright (C) 2023,2024 Genome Research Ltd.
