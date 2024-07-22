@@ -2,7 +2,7 @@
 
 The following workflows are included, and can be integrated into any pipeline, in particular those maintained by the PaM Informatics team at the Wellcome Sanger Institute.
 
-Usage and default parameters of each workflow is documented separately in their respective schema and config files.
+Usage and default parameters of each workflow are documented separately in their respective schema and config files.
 
 ## Combined short read input
 
