@@ -1,6 +1,6 @@
 # Assorted Sub-Workflows: a compendium of Nextflow modules for PaM Informatics bioinformatics pipelines
 
-the following workflows are included, and can be integrated to any pipeline, in particular those maintained by the PaM Informatics team at the Wellcome Sanger Institute.
+The following workflows are included, and can be integrated into any pipeline, in particular those maintained by the PaM Informatics team at the Wellcome Sanger Institute.
 
 Usage and default parameters of each workflow is documented separately in their respective schema and config files.
 
