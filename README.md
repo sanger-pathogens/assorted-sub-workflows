@@ -6,7 +6,7 @@ Usage and default parameters of each workflow are documented separately in their
 
 ## Combined short read input
 
-the `COMBINED_INPUT` workflow enables to input short sequencing reads to your pipeline in multiple ways, which may be combined.
+The `COMBINED_INPUT` workflow enables input of short sequencing reads to your pipeline in multiple ways, which may be combined.
 
 
 ### Using read files already on disk
