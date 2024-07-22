@@ -22,7 +22,7 @@ Validation of the input manifest format occurs using the `INPUT_CHECK` subworkfl
 
 ### Retrieving reads from iRODS
 
-Sequencing data that was produced at the Wellcome Sanger Institute is natively stored on the iRODS platform, from where it can be readily obtained using `IRODS_EXTRACTOR` subworkflow and its components `IRODS_QUERY` and `CRAM_EXTRACT`.  
+Sequencing data that was produced at the Wellcome Sanger Institute is natively stored on the iRODS platform, from where it can be readily obtained using the `IRODS_EXTRACTOR` subworkflow and its components `IRODS_QUERY` and `CRAM_EXTRACT`.  
 Data can be queried from iRODS using all sorts of metadata fields that refer to specifics of the sequencing experiment and data to be retrieved.  
 In practice, the user will usually rely on the core fields that define the "lane" id, or more correctly the lanelet id e.g. `48106_1#34`. These key fields are named (in the iRODS context): `study_id`, `id_run`, `lane` and `tag_index`; in the present context these properties were renamed for convenience as `studyid`, `runid`, `laneid` and `plexid`.  
 Other search terms are supported however; see below.  
