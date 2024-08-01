@@ -56,8 +56,11 @@ workflow STRAIN_MAPPER {
         // BWA INDEX
         bwa_index_files = file("${reference}.amb")
         if (bwa_index_files.isFile()) {
-            Channel.fromPath(reference, "${reference}.{amb,ann,bwt,pac,sa}")
+            index_files = Channel.fromPath("${reference}{.amb,.ann,.bwt,.pac,.sa}")
+
+            index_files
             | collect
+            | map { collected_indexes -> [reference, collected_indexes]}
             | set { ch_bwa_index }
 
         } else {
