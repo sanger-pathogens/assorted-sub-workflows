@@ -5,24 +5,28 @@ include { RETRIEVE_CRAM                 } from '../modules/retrieve.nf'
 include { METADATA as METADATA_QUERIED  } from '../modules/metadata_save.nf'
 include { METADATA as METADATA_COMBINED } from '../modules/metadata_save.nf'
 
-def set_metadata(collection_path, data_obj_name, linked_metadata) {
+def set_metadata(collection_path, data_obj_name, linked_metadata, combine_same_id_crams) {
     def metadata = [:]
     metadata.irods_path = "${collection_path}/${data_obj_name}"
     linked_metadata.each { item ->
         metadata[item.attribute.replaceAll("\\n|\\r", " ")] = item.value
     }
+
+    metadata.subset = "target"
+    // target subset remains implicit in ID and file names
+
     metadata.ID = "${metadata.id_run}_${metadata.lane}${params.lane_plex_sep}${metadata.tag_index}"
     // need to join on 'alt_process' as well, otherwise will combine reads from n different alternative processing options = n x the raw read set
     metadata.ID = !metadata.alt_process ? "${metadata.ID}" : "${metadata.ID}_${metadata.alt_process}"
-    def slurper = new groovy.json.JsonSlurper()
-    def component = slurper.parseText(metadata["component"])
-    if ( component.subset ){
-        metadata.ID = "${metadata.ID}_${component.subset}"
-        metadata.subset = component.subset
-    }else{
-        metadata.subset = "target"
-        // target subset remains implicit in ID and file names
+    if ( combine_same_id_crams ) {
+        def slurper = new groovy.json.JsonSlurper()
+        def component = slurper.parseText(metadata["component"])
+        if ( component.subset ){
+            metadata.ID = "${metadata.ID}_${component.subset}"
+            metadata.subset = component.subset
+        }
     }
+
     return metadata
 }
 
@@ -59,7 +63,7 @@ workflow IRODS_QUERY {
         .splitJson(path: "result")
         .map{irods_item ->
             metamap = [:]
-            metamap = set_metadata(irods_item.collection, irods_item.data_object, irods_item.avus)
+            metamap = set_metadata(irods_item.collection, irods_item.data_object, irods_item.avus, params.combine_same_id_crams)
             cram_path = metamap.irods_path
             [metamap, cram_path]  }
         .filter{ it[0]["subset"] != "${params.irods_subset_to_skip}" }
