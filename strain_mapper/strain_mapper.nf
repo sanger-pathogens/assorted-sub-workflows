@@ -99,14 +99,6 @@ workflow STRAIN_MAPPER {
     | INDEX_SORTED_BAM
     | set { ch_sorted_reads }
 
-    if (params.bigwig){
-        BAM_COVERAGE(ch_sorted_reads)
-    }
-    
-    if (params.samtools_stats){
-        SAMTOOLS_STATS(ch_sorted_reads)
-    }
-
     if (params.skip_read_deduplication){
         ch_sorted_reads
         | set { bam_index }
@@ -115,7 +107,14 @@ workflow STRAIN_MAPPER {
         PICARD_MARKDUP(ch_sorted_reads)
         | INDEX_DEDUP_BAM
         | set { bam_index }
+    }
 
+    if (params.bigwig){
+        BAM_COVERAGE(bam_index)
+    }
+
+    if (params.samtools_stats){
+        SAMTOOLS_STATS(bam_index)
     }
 
     bam_index
