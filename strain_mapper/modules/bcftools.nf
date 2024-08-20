@@ -69,10 +69,11 @@ process BCFTOOLS_FILTERING {
     script:
     filtered_vcf_allpos = "${meta.ID}_filtered.vcf"
     """
-    bcftools view -o ${filtered_vcf_allpos} \
-                  -O 'v' \
-                  -i '${params.VCF_filters}' \
-                  '${vcf_allpos}'
+    bcftools filter --output ${filtered_vcf_allpos} \
+                    --output-type 'v' \
+                    --include '${params.VCF_filters}' \
+                    --soft-filter LowQual \
+                    '${vcf_allpos}'
     """
 }
 process RAW_VCF {
