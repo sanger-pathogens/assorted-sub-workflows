@@ -122,70 +122,6 @@ def parse_position(pos: str) -> int:
         return pos
 
 
-def parse_quality(qual: str) -> int:
-    """
-    Parses a string representing quality score and returns a floating-point number.
-
-    Parameters:
-    A string representing the quality score.
-
-    Returns:
-    A float representing the parsed quality score,
-    or None if the input string is '.' or cannot be converted to a float.
-
-    Example:
-    If qual is '10.5', the function will return:
-    10.5
-
-    If qual is '.', the function will return:
-    None
-
-    If qual is 'abc', the function will raise a ValueError.
-    """
-    try:
-        qual = float(qual)
-    except ValueError:
-        if qual == ".":
-            return None
-        else:
-            raise
-    else:
-        return qual
-
-
-def is_acceptable_quality(
-    qual: float, pos: int, threshold: int = 10, alt_quality: dict = {}
-) -> bool:
-    """
-    Checks if the quality of a variant call is acceptable based on a given threshold.
-
-    Parameters:
-    qual (float): The quality score of the variant call.
-    pos (int): The position of the variant call.
-    threshold (int, optional): The threshold quality score. Defaults to 10.
-    alt_quality (dict, optional): A dictionary containing alternative quality scores
-        for specific positions. Defaults to None.
-
-    Returns:
-    bool: True if the quality is acceptable, False otherwise.
-
-    Example:
-    If qual is 15, pos is 100, and threshold is 10, the function will return:
-    True
-
-    If qual is None, the function will return:
-    False
-
-    If qual is 8, pos is 150, and alt_quality is {150: 12}, the function will return:
-    True
-    """
-    if qual is None:
-        return False
-    if qual > threshold or (pos in alt_quality and qual > alt_quality[pos]):
-        return True
-    return False
-
-
 def get_nt_to_add(ref: str, alt: str, default_seq_character):
     """
     Determines the nucleotide to add to the sequence based on the reference and alternative alleles.
@@ -225,9 +161,7 @@ def get_nt_to_add(ref: str, alt: str, default_seq_character):
     return alt
 
 
-def get_seq(
-    vcf: Path, ref_index: Path, default_seq_character, qual_threshold: float = 10
-):
+def get_seq(vcf: Path, ref_index: Path, default_seq_character):
     chrom_id_size = get_chrom_id_and_size(ref_index)
     seq = {}
     for chrom_id, chrom_size in chrom_id_size.items():
@@ -240,13 +174,8 @@ def get_seq(
             ref = line["REF"]  # reference base
             alt = line["ALT"]  # alternative base
             pos = parse_position(line["POS"])
-            qual = parse_quality(line["QUAL"])
             if seq_id in seq:
-                if qual is None:
-                    logging.warning(
-                        f"The following line had an unexpected quality value: {line}"
-                    )
-                if (line["FILTER"] == "PASS") and is_acceptable_quality(qual, pos, qual_threshold):
+                if (line["FILTER"] == "PASS"):
                     seq[seq_id][pos - 1] = get_nt_to_add(
                         ref, alt, default_seq_character
                     )
