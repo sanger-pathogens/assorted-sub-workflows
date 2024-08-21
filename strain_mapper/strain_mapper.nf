@@ -5,8 +5,8 @@
 //
 include { BOWTIE2; BOWTIE2_INDEX } from './modules/bowtie2'
 include { BWA; BWA_INDEX } from './modules/bwa'
-include { CONVERT_TO_BAM; SAMTOOLS_SORT; INDEX_REF; INDEX_BAM as INDEX_SORTED_BAM; INDEX_BAM as INDEX_DEDUP_BAM; SAMTOOLS_STATS} from './modules/samtools'
-include { BCFTOOLS_CALL; BCFTOOLS_MPILEUP; BCFTOOLS_FILTERING; FINAL_VCF; RAW_VCF } from './modules/bcftools'
+include { CONVERT_TO_BAM; SAMTOOLS_SORT; INDEX_REF; INDEX_BAM as INDEX_SORTED_BAM; INDEX_BAM as INDEX_DEDUP_BAM; SAMTOOLS_STATS } from './modules/samtools'
+include { BCFTOOLS_CALL; BCFTOOLS_MPILEUP; BCFTOOLS_FILTERING; PUBLISH_VCF } from './modules/bcftools'
 include { PICARD_MARKDUP } from './modules/picard'
 include { CURATE_CONSENSUS } from './modules/curate'
 include { BAM_COVERAGE } from './modules/deeptools'
@@ -123,10 +123,6 @@ workflow STRAIN_MAPPER {
     | BCFTOOLS_CALL
     | set { ch_vcf_allpos }
 
-    if (params.keep_raw_vcf && !params.skip_filtering){
-        RAW_VCF( ch_vcf_allpos )
-    }
-
     if (!params.skip_filtering) {
         BCFTOOLS_FILTERING(ch_vcf_allpos )
         | set { ch_vcf_final }
@@ -134,7 +130,7 @@ workflow STRAIN_MAPPER {
         ch_vcf_allpos.set { ch_vcf_final }
     }
 
-    FINAL_VCF( ch_vcf_final )
+    PUBLISH_VCF( ch_vcf_final )
     
     ch_vcf_final
     | combine(ch_ref_index)

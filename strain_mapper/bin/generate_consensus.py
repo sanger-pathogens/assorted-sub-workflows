@@ -246,7 +246,7 @@ def get_seq(
                     logging.warning(
                         f"The following line had an unexpected quality value: {line}"
                     )
-                if is_acceptable_quality(qual, pos, qual_threshold):
+                if (line["FILTER"] == "PASS") and is_acceptable_quality(qual, pos, qual_threshold):
                     seq[seq_id][pos - 1] = get_nt_to_add(
                         ref, alt, default_seq_character
                     )
