@@ -43,11 +43,12 @@ process BCFTOOLS_CALL {
     script:
     vcf_allpos = "${meta.ID}.vcf"
     """
-    bcftools call -o ${vcf_allpos} \
-        -O 'v' \
-        -V indels \
-        -m \
-        '${mpileup_file}'
+    bcftools call --output ${vcf_allpos} \
+                  --output-type 'v' \
+                  --skip-variants indels \
+                  --multiallelic-caller \
+                  --ploidy 1 \
+                  '${mpileup_file}'
     """
 }
 
