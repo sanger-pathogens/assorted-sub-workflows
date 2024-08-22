@@ -1,0 +1,18 @@
+{ 
+    "pipeline": "Annotate_bakta (sub-workflow)",
+    "params": {
+        "bakta_args": {
+            "default": "",
+            "help_text": ""
+        },
+        "bakta_db": {
+            "default": "/data/pam/software/bakta/v5.1/",
+            "help_text": ""
+        },
+        "combine_annotations": {
+            "default": "false",
+            "help_text": ""
+        }
+    }
+}
+
