@@ -1,3 +1,5 @@
+#!/usr/bin/python3
+
 import gffutils
 import argparse
 import os
