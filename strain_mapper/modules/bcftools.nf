@@ -47,7 +47,6 @@ process BCFTOOLS_CALL {
                   --output-type 'v' \
                   --skip-variants indels \
                   --multiallelic-caller \
-                  --ploidy 1 \
                   '${mpileup_file}'
     """
 }
@@ -70,11 +69,14 @@ process BCFTOOLS_FILTERING {
     script:
     filtered_vcf_allpos = "${meta.ID}_filtered.vcf"
     """
-    bcftools filter --output ${filtered_vcf_allpos} \
-                    --output-type 'v' \
-                    --include '${params.VCF_filters}' \
-                    --soft-filter LowQual \
-                    '${vcf_allpos}'
+    bcftools filter --output-type 'u' \
+                    --include 'GT!="0/1"' \
+                    --soft-filter 'Het' \
+                    '${vcf_allpos}' \
+    | bcftools filter --output ${filtered_vcf_allpos} \
+                      --output-type 'v' \
+                      --include '${params.VCF_filters}' \
+                      --soft-filter LowQual
     """
 }
 
