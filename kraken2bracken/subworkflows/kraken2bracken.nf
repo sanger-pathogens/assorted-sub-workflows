@@ -101,7 +101,7 @@ workflow KRAKEN2BRACKEN{
     )
 
     emit:
-    BRACKEN.out.kraken_style_bracken_report
+    ch_kraken2_style_bracken_reports = BRACKEN.out.kraken_style_bracken_report
 }
 
 /*
