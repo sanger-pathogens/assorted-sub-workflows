@@ -24,7 +24,7 @@
             },
             "classification_level": {
                 "default": "S",
-                "help_text": "Taxonomic rank to analyze for Bracken2 (Options: 'D', 'P', 'C', 'O', 'F', 'G', 'S')"
+                "help_text": "Taxonomic rank to analyze for Bracken (Options: 'D', 'P', 'C', 'O', 'F', 'G', 'S')"
             },
             "threshold": {
                 "default": 10,

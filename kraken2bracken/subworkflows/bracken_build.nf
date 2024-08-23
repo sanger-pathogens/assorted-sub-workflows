@@ -1,4 +1,4 @@
-include { SEARCH_LIBRARY; KMER2READ_DIST; GENERATE_KMER_DISTRIBUTION } from '../modules/bracken'
+include { SEARCH_LIBRARY; KMER2READ_DIST; GENERATE_KMER_DISTRIBUTION } from '../modules/kraken2bracken/bracken'
 
 workflow BRACKEN_BUILD {
     // Unfortunately, due to checks in bracken_build script, softlinking to the kraken2_db subdirs doesn't work.
