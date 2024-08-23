@@ -31,7 +31,7 @@ def merge_gff_gtf(main_file, additional_files, output, db_dir=':memory:'):
     
 
     # Run in memory mode
-    if db_filename == ':memory:':
+    if db_dir == ':memory:':
         db = gffutils.create_db(main_file, dbfn=db_filename, force=True, keep_order=True, merge_strategy='merge', sort_attribute_values=True)
     
     #or not
@@ -71,8 +71,4 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    # Handle the database directory argument
-    if args.dbdir == ':memory:':
-        merge_gff_gtf(args.main_file, args.additional_files, args.output, db_dir=None)
-    else:
-        merge_gff_gtf(args.main_file, args.additional_files, args.output, db_dir=args.dbdir)
+    merge_gff_gtf(args.main_file, args.additional_files, args.output, db_dir=args.dbdir)
