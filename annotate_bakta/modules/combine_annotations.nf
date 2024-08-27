@@ -4,9 +4,9 @@ process COMBINE_ANNOTATIONS {
     label "mem_16"
     label "time_1"
 
-    publishDir mode: 'copy', pattern: "${meta.ID}.gff3", path: "${params.outdir}/combined"
+    publishDir mode: 'copy', pattern: "${meta.ID}_merged_annotation.gff3", path: "${params.outdir}/gffs"
 
-    container 'quay.io/ssd28/gsoc-experimental/bcf_2_pseudosequence:0.0.2'
+    container 'quay.io/sangerpathogens/pysam:0.0.2'
 
     input:
     tuple val(meta), path(main_annotation), path('annotations???')
