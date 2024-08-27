@@ -3,8 +3,7 @@
     "params": {
         "bakta_args": {
             "default": "",
-            "help_text": "Add any additional bakta args you wish to provide here required to be formatted as bakta expects i.e. --proteins <full path>"
-        },
+            "help_text": "Add any additional bakta args you wish to provide here required to be formatted as bakta expects i.e. --proteins <full path>. default flags are prefix, locus-tag, keep-contig-headers"},
         "bakta_db": {
             "default": "/data/pam/software/bakta/v5.1/",
             "help_text": "Bakta DB used to annotate - Current version is 5.1"
