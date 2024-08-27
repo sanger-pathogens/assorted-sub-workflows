@@ -6,6 +6,8 @@ import os
 from Bio import SeqIO
 from io import StringIO
 
+#inspired from general practices from here: https://biopython.org/DIST/docs/tutorial/Tutorial.html
+
 def convert_genbank_to_gff3(genbank_file):
     gff3_output = StringIO()
     for record in SeqIO.parse(genbank_file, "genbank"):
