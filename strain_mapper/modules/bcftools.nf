@@ -17,11 +17,12 @@ process BCFTOOLS_MPILEUP {
     mpileup_file = "${meta.ID}.mpileup"
     minimum_base_quality = "${params.minimum_base_quality}" == "default" ? "" : "--min-BQ ${params.minimum_base_quality}"
     """
-    bcftools mpileup -o ${mpileup_file} \\
-                     -O 'u' \\
-                     ${minimum_base_quality} \\
-                     -f ${reference} \\
-                     ${sorted_reads_bam} 
+    bcftools mpileup \\
+        --output ${mpileup_file} \\
+        --output-type 'u' \\
+        ${minimum_base_quality} \\
+        -f ${reference} \\
+        ${sorted_reads_bam}
     """
 }
 
@@ -43,11 +44,12 @@ process BCFTOOLS_CALL {
     script:
     vcf_allpos = "${meta.ID}.vcf"
     """
-    bcftools call --output ${vcf_allpos} \
-                  --output-type 'v' \
-                  --skip-variants indels \
-                  --multiallelic-caller \
-                  '${mpileup_file}'
+    bcftools call \\
+        --output ${vcf_allpos} \\
+        --output-type 'v' \\
+        --skip-variants indels \\
+        --multiallelic-caller \\
+        '${mpileup_file}'
     """
 }
 
@@ -69,14 +71,16 @@ process BCFTOOLS_FILTERING {
     script:
     filtered_vcf_allpos = "${meta.ID}_filtered.vcf"
     """
-    bcftools filter --output-type 'u' \
-                    --include 'GT!="0/1"' \
-                    --soft-filter 'Het' \
-                    '${vcf_allpos}' \
-    | bcftools filter --output ${filtered_vcf_allpos} \
-                      --output-type 'v' \
-                      --include '${params.VCF_filters}' \
-                      --soft-filter LowQual
+    bcftools filter \\
+        --output-type 'u' \\
+        --include 'GT!="0/1"' \\
+        --soft-filter 'Het' \\
+        '${vcf_allpos}' \\
+    | bcftools filter \\
+        --output ${filtered_vcf_allpos} \\
+        --output-type 'v' \\
+        --include '${params.VCF_filters}' \\
+        --soft-filter LowQual
     """
 }
 
@@ -102,11 +106,12 @@ process BCFTOOLS_EXTRACT {
     script:
     filtered_vcf = "${meta.ID}_${filter_name}.vcf.gz"
     """
-    bcftools view --output ${filtered_vcf} \\
-                  --output-type 'z' \\
-                  --include '${filter}' \\
-                  --threads "${task.cpus}" \\
-                  '${vcf_allpos}'
+    bcftools view \\
+        --output ${filtered_vcf} \\
+        --output-type 'z' \\
+        --include '${filter}' \\
+        --threads "${task.cpus}" \\
+        '${vcf_allpos}'
     """
 }
 
