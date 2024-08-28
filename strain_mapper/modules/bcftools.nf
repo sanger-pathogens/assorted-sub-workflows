@@ -80,6 +80,33 @@ process BCFTOOLS_FILTERING {
     """
 }
 
+process BCFTOOLS_EXTRACT_HET {
+    label 'cpu_2'
+    label 'mem_1'
+    label 'time_1'
+
+    publishDir "${params.outdir}/${meta.ID}/vcf/heterozygous_sites", mode: 'copy', overwrite: true
+
+    // using package from conda-forge not bioconda (thus different from what underlies the biocontainers container) as there is a problem with lbgsl see https://github.com/samtools/bcftools/issues/1965
+    conda 'conda-forge::gsl=2.7 bioconda::bcftools=1.17' 
+    container 'quay.io/biocontainers/bcftools:1.17--h3cc50cf_1'
+
+    input:
+    tuple val(meta), file(vcf_allpos)
+
+    output:
+    tuple val(meta), path(het_vcf),  emit: het_vcf
+
+    script:
+    het_vcf = "${meta.ID}_het.vcf"
+    """
+    bcftools view --output ${het_vcf} \\
+                  --output-type 'z' \\
+                  --include '%FILTER=het' \\
+                  '${vcf_allpos}'
+    """
+}
+
 process PUBLISH_VCF {
     label 'cpu_2'
     label 'mem_1'

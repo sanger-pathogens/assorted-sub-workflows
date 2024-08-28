@@ -6,7 +6,7 @@
 include { BOWTIE2; BOWTIE2_INDEX } from './modules/bowtie2'
 include { BWA; BWA_INDEX } from './modules/bwa'
 include { CONVERT_TO_BAM; SAMTOOLS_SORT; INDEX_REF; INDEX_BAM as INDEX_SORTED_BAM; INDEX_BAM as INDEX_DEDUP_BAM; SAMTOOLS_STATS } from './modules/samtools'
-include { BCFTOOLS_CALL; BCFTOOLS_MPILEUP; BCFTOOLS_FILTERING; PUBLISH_VCF } from './modules/bcftools'
+include { BCFTOOLS_CALL; BCFTOOLS_MPILEUP; BCFTOOLS_FILTERING; BCFTOOLS_EXTRACT_HET; PUBLISH_VCF } from './modules/bcftools'
 include { PICARD_MARKDUP } from './modules/picard'
 include { CURATE_CONSENSUS } from './modules/curate'
 include { BAM_COVERAGE } from './modules/deeptools'
@@ -129,6 +129,8 @@ workflow STRAIN_MAPPER {
     } else{
         ch_vcf_allpos.set { ch_vcf_final }
     }
+
+    BCFTOOLS_EXTRACT_HET(ch_vcf_final)
 
     PUBLISH_VCF( ch_vcf_final )
     
