@@ -15,7 +15,7 @@ process BCFTOOLS_MPILEUP {
 
     script:
     mpileup_file = "${meta.ID}.mpileup"
-    minimum_base_quality = "${params.minimum_base_quality == "default" ? "" : "--min-BQ ${params.minimum_base_quality}"}"
+    minimum_base_quality = "${params.minimum_base_quality}" == "default" ? "" : "--min-BQ ${params.minimum_base_quality}"
     """
     bcftools mpileup -o ${mpileup_file} \\
                      -O 'u' \\
