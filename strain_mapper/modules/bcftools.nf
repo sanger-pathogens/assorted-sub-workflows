@@ -54,7 +54,7 @@ process BCFTOOLS_CALL {
 }
 
 process BCFTOOLS_FILTERING {
-    label 'cpu_1'
+    label 'cpu_2'
     label 'mem_1'
     label 'time_1'
 
