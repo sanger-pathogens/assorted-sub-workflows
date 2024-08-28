@@ -1,5 +1,5 @@
 process BCFTOOLS_MPILEUP {
-    label 'cpu_2'
+    label 'cpu_1'
     label 'mem_1'
     label 'time_1'
 
@@ -26,7 +26,7 @@ process BCFTOOLS_MPILEUP {
 }
 
 process BCFTOOLS_CALL {
-    label 'cpu_2'
+    label 'cpu_1'
     label 'mem_1'
     label 'time_1'
 
@@ -52,7 +52,7 @@ process BCFTOOLS_CALL {
 }
 
 process BCFTOOLS_FILTERING {
-    label 'cpu_2'
+    label 'cpu_1'
     label 'mem_1'
     label 'time_1'
 
@@ -105,6 +105,7 @@ process BCFTOOLS_EXTRACT {
     bcftools view --output ${filtered_vcf} \\
                   --output-type 'z' \\
                   --include '${filter}' \\
+                  --threads "${task.cpus}" \\
                   '${vcf_allpos}'
     """
 }
@@ -129,17 +130,22 @@ process PUBLISH_VCF {
 
     script:
     out_vcf = "${meta.ID}.vcf.gz"
-    if (params.only_report_alts)
+    if (params.only_report_alts) {
         """
-        bcftools view -o ${out_vcf} \
-            -O 'z' \
-            -i 'GT="alt"' \
+        bcftools view \\
+            --output ${out_vcf} \\
+            --output-type 'z' \\
+            --include 'GT="alt"' \\
+            --threads "${task.cpus}" \\
             '${vcf_allpos}'
         """
-    else
+    } else {
         """
-        bcftools view -o ${out_vcf} \
-            -O 'z' \
+        bcftools view \\
+            --output ${out_vcf} \\
+            --output-type 'z' \\
+            --threads "${task.cpus}" \\
             '${vcf_allpos}'
         """
+    }
 }
