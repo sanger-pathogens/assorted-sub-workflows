@@ -24,8 +24,8 @@ def create_fastq_channels(LinkedHashMap row) {
     def meta = [:]
     meta.ID = row.ID
 
-    Path fastq_1 = null
-    Path fastq_2 = null
+    String fastq_1 = 'NA'
+    String fastq_2 = 'NA'
 
     def array = []
     // check short reads
@@ -34,13 +34,14 @@ def create_fastq_channels(LinkedHashMap row) {
             exit 1, "ERROR: Please check input samplesheet -> Read 1 FastQ file does not exist!\n${row.R1}"
         }
         fastq_1 = file(row.R1)
-    } else { fastq_1 = 'NA' }
+    }
     if ( !(row.R2 == 'NA') ) {
         if ( !file(row.R2).exists() ) {
             exit 1, "ERROR: Please check input samplesheet -> Read 2 FastQ file does not exist!\n${row.R2}"
         }
         fastq_2 = file(row.R2)
-    } else { fastq_2 = 'NA' }
+    }
+    
     array = [ meta, fastq_1, fastq_2 ]
     return array
 }
