@@ -126,11 +126,11 @@ workflow STRAIN_MAPPER {
     if (!params.skip_filtering) {
         BCFTOOLS_FILTERING(ch_vcf_allpos )
         | set { ch_vcf_final }
+        
+        BCFTOOLS_EXTRACT(ch_vcf_final, Channel.value('FILTER="Het"'), Channel.value("heterozygous_sites"))
     } else{
         ch_vcf_allpos.set { ch_vcf_final }
     }
-
-    BCFTOOLS_EXTRACT(ch_vcf_final, Channel.value('FILTER="Het"'), Channel.value("heterozygous_sites"))
 
     PUBLISH_VCF( ch_vcf_final )
     
