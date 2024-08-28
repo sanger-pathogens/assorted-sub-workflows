@@ -80,6 +80,35 @@ process BCFTOOLS_FILTERING {
     """
 }
 
+process BCFTOOLS_EXTRACT {
+    label 'cpu_2'
+    label 'mem_1'
+    label 'time_1'
+
+    publishDir "${params.outdir}/${meta.ID}/vcf/${filter_name}", mode: 'copy', overwrite: true
+
+    // using package from conda-forge not bioconda (thus different from what underlies the biocontainers container) as there is a problem with lbgsl see https://github.com/samtools/bcftools/issues/1965
+    conda 'conda-forge::gsl=2.7 bioconda::bcftools=1.17' 
+    container 'quay.io/biocontainers/bcftools:1.17--h3cc50cf_1'
+
+    input:
+    tuple val(meta), file(vcf_allpos)
+    val(filter)
+    val(filter_name)
+
+    output:
+    tuple val(meta), path(filtered_vcf),  emit: filtered_vcf
+
+    script:
+    filtered_vcf = "${meta.ID}_${filter_name}.vcf.gz"
+    """
+    bcftools view --output ${filtered_vcf} \\
+                  --output-type 'z' \\
+                  --include '${filter}' \\
+                  '${vcf_allpos}'
+    """
+}
+
 process PUBLISH_VCF {
     label 'cpu_2'
     label 'mem_1'
