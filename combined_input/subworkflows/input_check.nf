@@ -24,8 +24,8 @@ def create_fastq_channels(LinkedHashMap row) {
     def meta = [:]
     meta.ID = row.ID
 
-    def fastq_1 = 'NA'
-    def fastq_2 = 'NA'
+    Path fastq_1 = null
+    Path fastq_2 = null
 
     def array = []
     // check short reads
