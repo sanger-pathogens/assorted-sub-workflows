@@ -85,7 +85,7 @@ process BCFTOOLS_FILTERING {
 }
 
 process BCFTOOLS_EXTRACT {
-    label 'cpu_2'
+    label 'cpu_1'
     label 'mem_1'
     label 'time_1'
 
@@ -116,7 +116,7 @@ process BCFTOOLS_EXTRACT {
 }
 
 process PUBLISH_VCF {
-    label 'cpu_2'
+    label 'cpu_1'
     label 'mem_1'
     label 'time_30m'
     
