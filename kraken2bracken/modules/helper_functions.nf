@@ -96,6 +96,7 @@ def validate_parameters() {
     errors += validate_choice_param("--get_classified_reads", params.get_classified_reads, [true, false])
     errors += validate_number_param("--kraken2_threads", params.kraken2_threads)
     errors += validate_number_param("--bracken_threads", params.bracken_threads)
+    errors += validate_choice_param("--enable_building", params.enable_building, [true, false])
     
     if (errors > 0) {
         log.error(String.format("%d errors detected", errors))
