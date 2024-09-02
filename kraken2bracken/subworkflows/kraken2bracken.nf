@@ -77,7 +77,7 @@ workflow KRAKEN2BRACKEN{
     }
     // If building is not enabled and the file doesn't exist, log an error
     else if (!params.enable_building && !required_kmer_distrib.exists()) {
-        error("Required k-mer distribution file does not exist, and building is not enabled. Please provide the file or enable building with --enable_building.")
+        error("Required k-mer distribution file does not exist, and building is not enabled. Please enable building with --enable_building.")
     }
     // If the required file exists, load it into a channel
     else {
