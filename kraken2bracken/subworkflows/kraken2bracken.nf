@@ -62,17 +62,25 @@ workflow KRAKEN2BRACKEN{
     //
     // ABUNDANCE ESTIMATION
     //
+
     kraken2_db_dir = file(params.kraken2_db, checkIfExists: true)
-    // Assume a pre-built bracken database file has been generated from the given kraken2 database and moved into this database directory
+
+    // Define the required k-mer distribution file path
     required_kmer_distrib = file("${kraken2_db_dir}/database${params.read_len}mers.kmer_distrib")
-    if (!required_kmer_distrib.exists()) {
-        BRACKEN_BUILD(
-            ch_kraken2_db
-        )
+
+    // Check if building is enabled and the required file doesn't exist
+    if (params.enable_building && !required_kmer_distrib.exists()) {
+        BRACKEN_BUILD(ch_kraken2_db)
         BRACKEN_BUILD.out.ch_kmer_distrib
             .dump(tag: 'kmer_distrib')
             .set { ch_kmer_distrib }
-    } else {
+    }
+    // If building is not enabled and the file doesn't exist, log an error
+    else if (!params.enable_building && !required_kmer_distrib.exists()) {
+        error("Required k-mer distribution file does not exist, and building is not enabled. Please provide the file or enable building with --enable_building.")
+    }
+    // If the required file exists, load it into a channel
+    else {
         Channel.fromPath(required_kmer_distrib)
             .dump(tag: 'kmer_distrib')
             .set { ch_kmer_distrib }

@@ -33,7 +33,11 @@
             "get_classified_reads": {
                 "default": false,
                 "help_text": "Flag to determine whether to retrieve classified reads"
-            }
+            },
+            "enable_building": {
+                "default": false,
+                "help_text": "Include this flag to enable automatic building of kraken2 db if not found on disc"
+            },
         }
     }
 }
