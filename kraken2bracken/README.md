@@ -12,7 +12,7 @@
 
 **kraken2bracken** takes a Kraken2 database and sample manifest as input. It classifies reads in `.fastq` or `.fastq.gz` files with Kraken2. For each sample, it generates standard a Kraken2 report, sample level Kraken2 report and, optionally, files of classified and unclassified reads. As Kraken2 is run with `--report-minimizer-data` flag, the kraken reports will include additional columns (described [here](https://github.com/DerrickWood/kraken2/blob/master/docs/MANUAL.markdown#distinct-minimizer-count-information)). The pipeline then performs abundance estimation with Bracken, generating a standard Bracken report and a Kraken2 sample-format Bracken report for each sample.
 
-If the given Kraken2 database does not contain a `database<read_len>mers.kmer_distrib` file, it will generate one. This file can be added to the Kraken2 database directory to avoid the pipeline building this file (a reasonably long and memory-intensive step, depending on the database size) in the future.
+If the given Kraken2 database does not contain a `database<read_len>mers.kmer_distrib` file and `--enable_building` is specified, it will generate one. If the file does not exist and `--enable_building` is not specified, the pipeline will fail with an error.
 
 All relevant files are currently published in sample and process-specific directories within the supplied `--output` directory.
 
