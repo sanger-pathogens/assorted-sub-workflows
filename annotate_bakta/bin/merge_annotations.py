@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 
 import gffutils
 import argparse
@@ -64,8 +64,8 @@ def merge_gff_gtf(main_file, additional_files, output, db_dir=':memory:'):
 if __name__ == "__main__":
     # Set up command line argument parsing
     parser = argparse.ArgumentParser(description="Merge multiple GFF/GTF files into a single GFF3 file using a main GFF as the base.")
-    parser.add_argument('main_file', type=str, help='Main GFF file to use as the base for the database')
-    parser.add_argument('additional_files', metavar='F', type=str, nargs='+', help='List of additional GFF/GTF files to merge')
+    parser.add_argument('--main_file', type=str, help='Main GFF file to use as the base for the database')
+    parser.add_argument('--additional_files', metavar='F', type=str, nargs='+', help='List of additional GFF/GTF files to merge')
     parser.add_argument('-o', '--output', required=True, type=str, help='Output merged GFF3 file')
     parser.add_argument('-d', '--dbdir', type=str, help='Directory to save the database file. leave blank for an in-memory database.')
 
