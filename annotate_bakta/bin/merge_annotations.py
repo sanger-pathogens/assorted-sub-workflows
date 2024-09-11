@@ -23,16 +23,6 @@ def convert_genbank_to_gff3(genbank_file):
     return gff3_output
 
 def merge_gff_gtf(main_file, additional_files, output, db_dir=':memory:'):
-    
-    # Make a directory to store the DB
-    if db_dir is not == ':memory:':
-
-        if not os.path.exists(db_dir):
-            os.makedirs(db_dir)
-        # Name the DB after the input file
-        db_filename = os.path.join(db_dir, os.path.splitext(os.path.basename(main_file))[0] + "_db")
-
-    
 
     # Run in memory mode
     if db_dir == ':memory:':
@@ -40,6 +30,12 @@ def merge_gff_gtf(main_file, additional_files, output, db_dir=':memory:'):
     
     #or not
     else:
+        # Make a directory to store the DB
+        if not os.path.exists(db_dir):
+            os.makedirs(db_dir)
+        # Name the DB after the input file
+        db_filename = os.path.join(db_dir, os.path.splitext(os.path.basename(main_file))[0] + "_db")
+
         # add something so it can load if its there (someone else using this)
         if not os.path.exists(db_filename):
             db = gffutils.create_db(main_file, dbfn=db_filename, force=True, keep_order=True, merge_strategy='merge', sort_attribute_values=True)
