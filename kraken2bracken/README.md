@@ -85,7 +85,7 @@ Options:
     --kraken2_threads            Threads to use for kraken2 [Default: 4] (optional)
     --bracken_threads            Threads to use for bracken [Default: 4] (optional)
     --outdir                     Specify output directory [Default: ./results] (optional)
-    --enable_building            allow for the building of new kmer indexs should the requested not exist. default: false
+    --enable_building            allow for the building of new kmer indexes should the requested not exist. default: false
     --help                       Print this help message (optional)
 ```
 
