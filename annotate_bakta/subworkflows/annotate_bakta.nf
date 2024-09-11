@@ -4,7 +4,7 @@ include { COMBINE_ANNOTATIONS } from '../modules/combine_annotations.nf'
 workflow ANNOTATE_BAKTA {
     take:
     assembly_channel //tuple val(meta), path(assembly)
-    //pre_generated_annotation_channel for later
+    pre_generated_annotation_channel
 
     main:
     
