@@ -110,6 +110,7 @@ workflow KRAKEN2BRACKEN{
 
     emit:
     ch_kraken2_style_bracken_reports = BRACKEN.out.kraken_style_bracken_report
+    kraken2_report_for_multiqc = ch_kraken2_report_and_kmer_distrib
 }
 
 /*
