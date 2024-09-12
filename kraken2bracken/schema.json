@@ -1,0 +1,43 @@
+{
+    "pipeline": "Combined input (sub-workflow)",
+    "params": {
+        "Input options": {
+            "kraken2_db": {
+                "default": null,
+                "help_text": "Path to the Kraken2 database"
+            },
+            "kraken2_threads": {
+                "default": 4,
+                "help_text": "Number of threads for Kraken2"
+            },
+            "bracken_threads": {
+                "default": 10,
+                "help_text": "Number of threads for Bracken"
+            },
+            "kmer_len": {
+                "default": 35,
+                "help_text": "K-mer length for Bracken"
+            },
+            "read_len": {
+                "default": null,
+                "help_text": "Ideal length of reads in sample"
+            },
+            "classification_level": {
+                "default": "S",
+                "help_text": "Taxonomic rank to analyze for Bracken (Options: 'D', 'P', 'C', 'O', 'F', 'G', 'S')"
+            },
+            "threshold": {
+                "default": 10,
+                "help_text": "Minimum number of reads required for a classification at the specified rank"
+            },
+            "get_classified_reads": {
+                "default": false,
+                "help_text": "Flag to determine whether to retrieve classified reads"
+            },
+            "enable_building": {
+                "default": false,
+                "help_text": "Include this flag to enable automatic building of kraken2 db if not found on disc"
+            },
+        }
+    }
+}
