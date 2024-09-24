@@ -1,5 +1,5 @@
 process BCFTOOLS_MPILEUP {
-    label 'cpu_2'
+    label 'cpu_1'
     label 'mem_1'
     label 'time_1'
 
@@ -15,18 +15,19 @@ process BCFTOOLS_MPILEUP {
 
     script:
     mpileup_file = "${meta.ID}.mpileup"
-    minimum_base_quality = "${params.minimum_base_quality == "default" ? "" : "--min-BQ ${params.minimum_base_quality}"}"
+    minimum_base_quality = "${params.minimum_base_quality}" == "default" ? "" : "--min-BQ ${params.minimum_base_quality}"
     """
-    bcftools mpileup -o ${mpileup_file} \\
-                     -O 'u' \\
-                     ${minimum_base_quality} \\
-                     -f ${reference} \\
-                     ${sorted_reads_bam} 
+    bcftools mpileup \\
+        --output ${mpileup_file} \\
+        --output-type 'u' \\
+        ${minimum_base_quality} \\
+        -f ${reference} \\
+        ${sorted_reads_bam}
     """
 }
 
 process BCFTOOLS_CALL {
-    label 'cpu_2'
+    label 'cpu_1'
     label 'mem_1'
     label 'time_1'
 
@@ -43,11 +44,12 @@ process BCFTOOLS_CALL {
     script:
     vcf_allpos = "${meta.ID}.vcf"
     """
-    bcftools call --output ${vcf_allpos} \
-                  --output-type 'v' \
-                  --skip-variants indels \
-                  --multiallelic-caller \
-                  '${mpileup_file}'
+    bcftools call \\
+        --output ${vcf_allpos} \\
+        --output-type 'v' \\
+        --skip-variants indels \\
+        --multiallelic-caller \\
+        '${mpileup_file}'
     """
 }
 
@@ -69,19 +71,21 @@ process BCFTOOLS_FILTERING {
     script:
     filtered_vcf_allpos = "${meta.ID}_filtered.vcf"
     """
-    bcftools filter --output-type 'u' \
-                    --include 'GT!="0/1"' \
-                    --soft-filter 'Het' \
-                    '${vcf_allpos}' \
-    | bcftools filter --output ${filtered_vcf_allpos} \
-                      --output-type 'v' \
-                      --include '${params.VCF_filters}' \
-                      --soft-filter LowQual
+    bcftools filter \\
+        --output-type 'u' \\
+        --include 'GT!="0/1"' \\
+        --soft-filter 'Het' \\
+        '${vcf_allpos}' \\
+    | bcftools filter \\
+        --output ${filtered_vcf_allpos} \\
+        --output-type 'v' \\
+        --include '${params.VCF_filters}' \\
+        --soft-filter LowQual
     """
 }
 
 process BCFTOOLS_EXTRACT {
-    label 'cpu_2'
+    label 'cpu_1'
     label 'mem_1'
     label 'time_1'
 
@@ -102,15 +106,17 @@ process BCFTOOLS_EXTRACT {
     script:
     filtered_vcf = "${meta.ID}_${filter_name}.vcf.gz"
     """
-    bcftools view --output ${filtered_vcf} \\
-                  --output-type 'z' \\
-                  --include '${filter}' \\
-                  '${vcf_allpos}'
+    bcftools view \\
+        --output ${filtered_vcf} \\
+        --output-type 'z' \\
+        --include '${filter}' \\
+        --threads "${task.cpus}" \\
+        '${vcf_allpos}'
     """
 }
 
 process PUBLISH_VCF {
-    label 'cpu_2'
+    label 'cpu_1'
     label 'mem_1'
     label 'time_30m'
     
@@ -129,17 +135,22 @@ process PUBLISH_VCF {
 
     script:
     out_vcf = "${meta.ID}.vcf.gz"
-    if (params.only_report_alts)
+    if (params.only_report_alts) {
         """
-        bcftools view -o ${out_vcf} \
-            -O 'z' \
-            -i 'GT="alt"' \
+        bcftools view \\
+            --output ${out_vcf} \\
+            --output-type 'z' \\
+            --include 'GT="alt"' \\
+            --threads "${task.cpus}" \\
             '${vcf_allpos}'
         """
-    else
+    } else {
         """
-        bcftools view -o ${out_vcf} \
-            -O 'z' \
+        bcftools view \\
+            --output ${out_vcf} \\
+            --output-type 'z' \\
+            --threads "${task.cpus}" \\
             '${vcf_allpos}'
         """
+    }
 }
