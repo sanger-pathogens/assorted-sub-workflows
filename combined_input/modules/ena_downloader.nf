@@ -3,7 +3,7 @@ process DOWNLOAD_METADATA {
     label 'mem_1'
     label 'time_1'
 
-    container 'quay.io/sangerpathogens/enadownloader:v2.3.2-fb2c2cca'
+    container 'quay.io/sangerpathogens/enadownloader:v2.3.2-fb2c2cca-bookworm'
 
     input:
     tuple val(meta), path(matches)
