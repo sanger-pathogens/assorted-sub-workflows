@@ -6,13 +6,13 @@ process DOWNLOAD_METADATA {
     container 'quay.io/sangerpathogens/enadownloader:v2.3.2-fb2c2cca-bookworm'
 
     input:
-    tuple val(meta), path(matches)
+    tuple val(meta), path(accessions)
 
     output:
     tuple val(meta), path("metadata.tsv"), emit: metadata_tsv
 
     script:
     """
-    enadownloader --input ${matches} --type sample --write-metadata
+    enadownloader --input ${accessions} --type ${params.accession_type} --write-metadata
     """
 }
