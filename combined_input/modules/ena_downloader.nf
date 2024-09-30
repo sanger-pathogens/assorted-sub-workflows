@@ -5,6 +5,10 @@ process DOWNLOAD_METADATA {
 
     container 'quay.io/sangerpathogens/enadownloader:v2.3.2-fb2c2cca-bookworm'
 
+    if (params.publish_metadata) {
+        publishDir "${params.outdir}/metadata", mode: 'copy', overwrite: true
+    }
+
     input:
     tuple val(meta), path(accessions)
 
