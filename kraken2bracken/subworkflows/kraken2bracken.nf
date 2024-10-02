@@ -27,7 +27,7 @@ include { BRACKEN_BUILD } from './bracken_build.nf'
 workflow KRAKEN2BRACKEN{
 
     take:
-    ch_reads // meta, paired_reads
+    ch_reads // meta, read_1, read_2
 
     main:
 
@@ -41,6 +41,7 @@ workflow KRAKEN2BRACKEN{
         .combine(ch_kraken2_db)
         .dump(tag: 'reads_and_kraken2_db')
         .set { ch_reads_and_kraken2_db }
+    
     if (params.get_classified_reads) {
         KRAKEN2_GET_CLASSIFIED(ch_reads_and_kraken2_db)
 

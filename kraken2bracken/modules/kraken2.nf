@@ -9,7 +9,7 @@ process KRAKEN2 {
     container 'quay.io/biocontainers/kraken2:2.1.3--pl5321hdcf5f25_0'
 
     input:
-    tuple val(meta), path(reads), path(kraken2_db)
+    tuple val(meta), path(read_1), path(read_2), path(kraken2_db)
 
     output:
     tuple val(meta), path("*kraken_report.tsv"),  emit: kraken2_report
@@ -25,7 +25,7 @@ process KRAKEN2 {
             --report "${meta.ID}_kraken_sample_report.tsv" \
             --report-zero-counts \
             --report-minimizer-data \
-            --paired "${reads[0]}" "${reads[1]}"
+            --paired "${read_1}" "${read_2}"
     """
 }
 
@@ -41,7 +41,7 @@ process KRAKEN2_GET_CLASSIFIED {
     container 'quay.io/biocontainers/kraken2:2.1.3--pl5321hdcf5f25_0'
 
     input:
-    tuple val(meta), path(reads), path(kraken2_db)
+    tuple val(meta), path(read_1), path(read_2), path(kraken2_db)
 
     output:
     tuple val(meta), path("*kraken_report.tsv"),  emit: kraken2_report
@@ -60,7 +60,7 @@ process KRAKEN2_GET_CLASSIFIED {
             --report "${meta.ID}_kraken_sample_report.tsv" \
             --report-zero-counts \
             --report-minimizer-data \
-            --paired "${reads[0]}" "${reads[1]}"
+            --paired "${read_1}" "${read_2}"
     """
 }
 
