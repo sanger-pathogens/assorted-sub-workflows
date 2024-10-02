@@ -153,7 +153,7 @@ def parse_filter_manifest(manifest: Path, sep: str = "\t") -> pd.DataFrame:
     return df
 
 
-def validate_headings(headings: set):
+def validate_headings(headings: set) -> tuple[set, set]:
     valid_headings = {"column", "filter", "datatype"}
     missing_headings = valid_headings.difference(headings)
     unrecognized_headings = set(headings).difference(valid_headings)
