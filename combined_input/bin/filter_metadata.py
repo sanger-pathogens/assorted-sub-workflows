@@ -225,9 +225,8 @@ def apply_column_types(
     return df
 
 
-def set_up_logging(log_file) -> None:
-    logfile = Path(".") / log_file
-    fh = logging.FileHandler(logfile, mode="w")
+def set_up_logging(log_file: Path) -> None:
+    fh = logging.FileHandler(log_file, mode="w")
     fh.setLevel(logging.DEBUG)
     sh = logging.StreamHandler()
     sh.setLevel(logging.INFO)
