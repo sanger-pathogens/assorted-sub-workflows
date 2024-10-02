@@ -90,7 +90,9 @@ The idea behind this mechanism is that when pulling reads from iRODS using a giv
 Once it has processed the iRODS query and identified the set of files to be downloaded, the workflow will print the expected fastq file pair number to the screen (or standard output stream). It will then compare it the set of files already occurring under the `results/` folder and compute the difference, and will then print again how many files will actually be downloaded, which it will then proceed to do. You may have a look at these messages to make sure expected contents are downloaded. 
 Note that in the case where you indeed desire to re-download the whole dataset and re-run the downstream analyses - for instance because a fix or new features were introduced in a new version of the pipeline - then you will want to turn this behaviour off, or to choose another destination for the results.
 
-### Metadata search only
+### Downloading ENA metadata
+
+There is an ena_downloader module containing a process that uses the [enadownloader](https://gitlab.internal.sanger.ac.uk/sanger-pathogens/enadownloader) tool to download a TSV of metadata for a file of accessions (one per line) from the ENA. Parameters needed for this process are `--accession_type`, which corresponds to the enadownloader's `--type` parameter and `--publish_metadata`, which if set to `true` puts the metadata TSV in a metadata folder within the specified `outdir`.
 
 
 ## Strain Mapper: short read mapping to a reference genome and variant genotype calling
