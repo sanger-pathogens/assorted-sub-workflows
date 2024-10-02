@@ -18,12 +18,19 @@ def parse_arguments():
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
 
-    parser.add_argument("--input", "-i", type=Path, help="Path to the input TSV file.")
+    parser.add_argument(
+        "--input",
+        "-i",
+        type=Path,
+        required=True,
+        help="Path to the input TSV file."
+    )
     parser.add_argument(
         "--filter_manifest",
         "-f",
         type=Path,
-        help="Path to a TSV manifest specifying the columns in the input TSV to which filter and datatype conversion should be applied. The manifest should contain 3 columns: column, filter, datatype. The column should match a column in the input TSV. Entries in 'column' column should be unique. The filter should match a string that could be supplied to `pd.DataFrame.query()`, e.g. 'age > 30'. The datatype can be int, float, datetime, bool and str.",
+        required=True,
+        help="Path to a TSV manifest specifying the columns in the input TSV to which filter and datatype conversion should be applied. The manifest should contain 3 columns: column, filter, datatype. Entries in the 'column' column should match a column in the input TSV and be unique. The filter should match a string that could be supplied to `pd.DataFrame.query()`, e.g. 'age > 30'. The datatype can be int, float, datetime, bool and str.",
     )
     parser.add_argument(
         "--select",
@@ -55,13 +62,13 @@ def parse_arguments():
         "--output",
         "-o",
         type=str,
-        help="Path to the output file to save the filtered DataFrame.",
+        help="Path to the output file to save the filtered TSV. If not specified, the metadata DataFrame will be printed to stdout.",
     )
     parser.add_argument(
         "--logfile",
         "-l",
         type=str,
-        help="Path to the log file.",
+        help="Path to the log file, defaults to filter_metadata-<timestamp>.log",
         default=f"filter_metadata-{timestamp}.log",
     )
 
