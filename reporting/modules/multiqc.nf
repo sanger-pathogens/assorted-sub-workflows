@@ -8,8 +8,7 @@ process MULTIQC {
     publishDir "${params.outdir}/multiqc/", pattern: "*.html", mode: 'copy', overwrite: true
 
     input:
-    path('*')
-    path('*')
+    path('*') // we will likely need to collect + join into some mega channel unsure what to do here actually
 
     output:
     path("${date}-report.html"), emit: report
