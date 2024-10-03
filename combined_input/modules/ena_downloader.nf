@@ -2,12 +2,11 @@ process DOWNLOAD_METADATA {
     label 'cpu_1'
     label 'mem_1'
     label 'time_1'
+    label 'no_retry'
 
-    container 'quay.io/sangerpathogens/enadownloader:v2.3.2-fb2c2cca-bookworm'
+    container 'quay.io/sangerpathogens/enadownloader:v2.3.3-903be379'
 
-    if (params.publish_metadata) {
-        publishDir "${params.outdir}/metadata", mode: 'copy', overwrite: true
-    }
+    publishDir "${params.outdir}/metadata", mode: 'copy', overwrite: true, enabled: params.publish_metadata
 
     input:
     tuple val(meta), path(accessions)
