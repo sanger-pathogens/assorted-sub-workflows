@@ -44,7 +44,7 @@ def parse_arguments():
         "-m",
         type=str,
         nargs="+",
-        help="Specify values that should be interpreted as missing values.",
+        help="Specify values that should be interpreted as NA (or NaT) by pandas - see https://pandas.pydata.org/pandas-docs/version/2.2/reference/missing_value.html). These values are added to the list of values usually considered as NA (see `na_values` argument of pandas.read_csv - https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.read_csv.html).",
     )
     parser.add_argument(
         "--remove_header",
