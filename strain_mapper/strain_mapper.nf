@@ -141,19 +141,21 @@ workflow STRAIN_MAPPER {
     CURATE_CONSENSUS( ch_vcf_and_ref )
 
     if (!params.skip_cleanup) {
-        ch_mapped.join(CONVERT_TO_BAM.out.mapped_reads_bam)
+        ch_mapped.join(CONVERT_TO_BAM.out.mapped_reads_bam) // join all contents of "channel" together towards deletion
         | join(SAMTOOLS_SORT.out.sorted_reads)
         | join(INDEX_SORTED_BAM.out.indexed_bam)
         | join(BCFTOOLS_MPILEUP.out.mpileup_file)
         | join(BCFTOOLS_CALL.out.vcf_allpos)
-        | join(CURATE_CONSENSUS.out.finished_ch) //join all of a single "channel" together and delete
+        | join(BAM_COVERAGE.out.finished_ch)  // use these finished_ch as a way to ensure waiting on completion of all branches of the workflow
+        | join(CURATE_CONSENSUS.out.finished_ch)
         | flatten
         | filter(Path)
         | map { it.delete() }
 
         if (!params.skip_read_deduplication) {
             PICARD_MARKDUP.out.dedup_reads
-            | join( CURATE_CONSENSUS.out.finished_ch )
+            | join(BAM_COVERAGE.out.finished_ch)
+            | join(CURATE_CONSENSUS.out.finished_ch)
             | flatten
             | filter(Path)
             | map { it.delete() }
