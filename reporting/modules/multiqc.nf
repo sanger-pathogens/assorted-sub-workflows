@@ -11,7 +11,7 @@ process MULTIQC {
     path('*') // we will likely need to collect + join into some mega channel unsure what to do here actually
 
     output:
-    path("${date}-report.html"), emit: report
+    path(out_report), emit: report
     path("*_data"), emit: data
     path("*_plots"), optional:true, emit: plots
 
