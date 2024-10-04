@@ -111,6 +111,7 @@ process SAMTOOLS_STATS {
 
     output:
     tuple path(stats_file), path(flagstats_file),  emit: stats_ch
+    tuple val(meta), val("workflow_finished"), emit: finished_ch
 
     script:
     stats_file = "${meta.ID}.stats"
