@@ -33,7 +33,7 @@ def create_channel(LinkedHashMap row) {
     def extraFields = row.keySet().minus(['studyid', 'runid', 'laneid', 'plexid', 'target', 'type'])
     extraFields.each { key ->
         if ("${row[key]}" != "") {
-            meta[key] = "${row[key]}"
+            meta[key] = row[key].toString()
         }
     }
     if ((meta.studyid != -1) || (meta.runid != -1) || (extraFields.any { "${row[it]}" != "" })) {
