@@ -13,6 +13,7 @@ process BAM_COVERAGE {
 
     output:
     tuple val(meta), path(bam_index), path(bigwig), emit: bigwig_channel
+    tuple val(meta), val("workflow_finished"), emit: finished_ch
 
     script:
     bigwig="${meta.ID}.bw"

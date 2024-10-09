@@ -111,11 +111,20 @@ workflow STRAIN_MAPPER {
 
     if (params.bigwig){
         BAM_COVERAGE(bam_index)
+        BAM_COVERAGE.out.finished_ch
+        | set { coverage_finished }
+    } else {
+        coverage_finished = Channel.value("BAM_COVERAGE not run")
     }
 
     if (params.samtools_stats){
         SAMTOOLS_STATS(bam_index)
+        SAMTOOLS_STATS.out.finished_ch
+        | set { stats_finished }
+    } else {
+        stats_finished = Channel.value("SAMTOOLS_STATS not run")
     }
+
 
     bam_index
     | combine(ch_ref_index)
@@ -139,21 +148,27 @@ workflow STRAIN_MAPPER {
     | set { ch_vcf_and_ref }
 
     CURATE_CONSENSUS( ch_vcf_and_ref )
+    CURATE_CONSENSUS.out.finished_ch
+    | set { consensus_finished }
 
     if (!params.skip_cleanup) {
-        ch_mapped.join(CONVERT_TO_BAM.out.mapped_reads_bam)
+        ch_mapped.join(CONVERT_TO_BAM.out.mapped_reads_bam) // join all contents of "channel" together towards deletion
         | join(SAMTOOLS_SORT.out.sorted_reads)
         | join(INDEX_SORTED_BAM.out.indexed_bam)
         | join(BCFTOOLS_MPILEUP.out.mpileup_file)
         | join(BCFTOOLS_CALL.out.vcf_allpos)
-        | join(CURATE_CONSENSUS.out.finished_ch) //join all of a single "channel" together and delete
+        | join(coverage_finished)  // use these *_finished dummy value channels as a way to ensure waiting on completion of all branches of the workflow
+        | join(stats_finished)  
+        | join(consensus_finished)
         | flatten
         | filter(Path)
         | map { it.delete() }
 
         if (!params.skip_read_deduplication) {
             PICARD_MARKDUP.out.dedup_reads
-            | join( CURATE_CONSENSUS.out.finished_ch )
+            | join(coverage_finished)
+            | join(stats_finished)  
+            | join(consensus_finished)
             | flatten
             | filter(Path)
             | map { it.delete() }
