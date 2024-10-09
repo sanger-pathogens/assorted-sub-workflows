@@ -59,6 +59,13 @@ def parse_arguments():
         help="During type conversion, upon encountering a value in the column that cannot be converted to the given datatype, raise an error. Default behaviour is to remove the row that contains an invalid value.",
     )
     parser.add_argument(
+        "--drop_duplicates_from",
+        "-d",
+        type=str,
+        nargs="+",
+        help="Specify columns that should not have duplicate values. Only the first row with the value will be kept.",
+    )
+    parser.add_argument(
         "--output",
         "-o",
         type=str,
@@ -90,8 +97,7 @@ def apply_filters(df: pd.DataFrame, filters: list[str]) -> pd.DataFrame:
         filtered_df = df.query(query_string)
     except Exception as e:
         logging.error(f"Error while filtering with query '{query_string}': {e}")
-        logging.info(f"Are you sure the columns are of correct dtype?")
-        logging.info("Try forcing column dtype using the -d option.")
+        logging.info(f"Are you sure the columns are of correct datatype?")
         sys.exit(1)
     return filtered_df
 
@@ -267,6 +273,10 @@ def main():
 
     # Filter using conditions
     df = apply_filters(df, filters)
+
+    # Remove duplicates
+    if args.drop_duplicates_from:
+        df = df.drop_duplicates(subset=args.drop_duplicates_from)
 
     # Select output columns
     if args.select:
