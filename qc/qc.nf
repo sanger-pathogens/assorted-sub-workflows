@@ -31,13 +31,13 @@ workflow QC {
     main:
     FASTQC(read_ch)
 
-    | FASTQC.out.zip
+    FASTQC.out.zip
     | PASS_OR_FAIL_FASTQC
     | set { fastqc_results }
 
     KRAKEN2BRACKEN(read_ch)
 
-    | KRAKEN2BRACKEN.out.ch_kraken2_style_bracken_reports
+    KRAKEN2BRACKEN.out.ch_kraken2_style_bracken_reports
     | PASS_OR_FAIL_K2B
     | set { k2b_results }
 
