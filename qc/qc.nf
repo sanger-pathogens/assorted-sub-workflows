@@ -29,13 +29,15 @@ workflow QC {
     read_ch // meta, read_1, read_2
 
     main:
-    read_ch
-    | FASTQC
+    FASTQC(read_ch)
+
+    | FASTQC.out.zip
     | PASS_OR_FAIL_FASTQC
     | set { fastqc_results }
 
-    read_ch
-    | KRAKEN2BRACKEN
+    KRAKEN2BRACKEN(read_ch)
+
+    | KRAKEN2BRACKEN.out.ch_kraken2_style_bracken_reports
     | PASS_OR_FAIL_K2B
     | set { k2b_results }
 
