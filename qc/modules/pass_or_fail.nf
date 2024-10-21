@@ -15,12 +15,7 @@ process PASS_OR_FAIL_FASTQC {
     """
     unzip ${read_1_zip}
     unzip ${read_2_zip}
-    if $(grep 'FAIL' */summary.txt)
-    then
-        pass_or_fail = 'fail'
-    else
-        pass_or_fail = 'pass'
-    fi
+    pass_or_fail=\$(if grep 'FAIL' */summary.txt; then echo 'fail'; else echo 'pass'; fi)
     """
 }
 
