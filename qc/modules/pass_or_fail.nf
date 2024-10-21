@@ -7,7 +7,7 @@ process PASS_OR_FAIL_FASTQC {
     tuple val(meta), path(read_1_zip), path(read_2_zip)
 
     output:
-    tuple val(meta), val(pass_or_fail), emit: pass_or_fail
+    tuple val(meta), env(pass_or_fail), emit: pass_or_fail
 
     script:
     """
@@ -26,7 +26,7 @@ process PASS_OR_FAIL_K2B {
     tuple val(meta), path(report)
 
     output:
-    tuple val(meta), val(pass_or_fail), emit: pass_or_fail
+    tuple val(meta), env(pass_or_fail), emit: pass_or_fail
 
     script:
     """
