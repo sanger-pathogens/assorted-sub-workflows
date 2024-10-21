@@ -26,15 +26,15 @@ include { KRAKEN2BRACKEN } from '../kraken2bracken/subworkflows/kraken2bracken.n
 
 workflow QC {
     take:
-    ch_reads // meta, read_1, read_2
+    read_ch // meta, read_1, read_2
 
     main:
-    reads_ch
+    read_ch
     | FASTQC
     | PASS_OR_FAIL_FASTQC
     | set { fastqc_results }
 
-    reads_ch
+    read_ch
     | KRAKEN2BRACKEN
     | PASS_OR_FAIL_K2B
     | set { k2b_results }
