@@ -34,8 +34,8 @@ process PASS_OR_FAIL_K2B {
 
     script:
     """
-    top_genus_abun=$(grep -P 'G\t' ${report} | cut -f1 | sort -n | tail -1)
-    top_species_abun=$(grep -P 'S\t' ${report} | cut -f1 | sort -n | tail -1)
+    top_genus_abun=\$(grep -P 'G\t' ${report} | cut -f1 | sort -n | tail -1)
+    top_species_abun=\$(grep -P 'S\t' ${report} | cut -f1 | sort -n | tail -1)
     if [ top_genus_abun -lt ${params.genus_abundance_threshold} ] || [ top_species_abun -lt ${params.species_abundance_threshold} ]
     then
         pass_or_fail = 'fail'
