@@ -3,8 +3,6 @@ process PASS_OR_FAIL_FASTQC {
     label 'mem_1'
     label 'time_30m'
 
-    container 'ubuntu:24.04'
-
     input:
     tuple val(meta), path(read_1_zip), path(read_2_zip)
 
@@ -23,8 +21,6 @@ process PASS_OR_FAIL_K2B {
     label 'cpu_1'
     label 'mem_1'
     label 'time_30m'
-
-    container 'ubuntu:24.04'
 
     input:
     tuple val(meta), path(report)
