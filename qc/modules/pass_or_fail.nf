@@ -32,11 +32,8 @@ process PASS_OR_FAIL_K2B {
     """
     top_genus_abun=\$(grep -P 'G\t' ${report} | cut -f1 | sort -n | tail -1)
     top_species_abun=\$(grep -P 'S\t' ${report} | cut -f1 | sort -n | tail -1)
-    if [ top_genus_abun -lt ${params.genus_abundance_threshold} ] || [ top_species_abun -lt ${params.species_abundance_threshold} ]
-    then
-        pass_or_fail = 'fail'
-    else
-        pass_or_fail = 'pass'
-    fi
+    genus_check=\$(echo "\$top_genus_abun < ${params.genus_abundance_threshold}" | bc)
+    species_check=\$(echo "\$top_species_abun < ${params.species_abundance_threshold}" | bc)
+    pass_or_fail=\$(if [ \$genus_check -eq 1 ] || [ \$species_check -eq 1 ]; then echo 'fail'; else echo 'pass'; fi)
     """
 }
