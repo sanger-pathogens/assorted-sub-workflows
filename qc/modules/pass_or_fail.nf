@@ -1,4 +1,5 @@
 process PASS_OR_FAIL_FASTQC {
+    tag "${meta.ID}"
     label 'cpu_1'
     label 'mem_1'
     label 'time_30m'
@@ -18,6 +19,7 @@ process PASS_OR_FAIL_FASTQC {
 }
 
 process PASS_OR_FAIL_K2B {
+    tag "${meta.ID}"
     label 'cpu_1'
     label 'mem_1'
     label 'time_30m'
