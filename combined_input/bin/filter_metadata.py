@@ -185,11 +185,11 @@ def safe_convert_column(
     errors_arg = "raise" if error_on_invalid_type else "coerce"
     try:
         if dtype == "int" or dtype == "float":
-            # Use pd.to_numeric with errors='coerce' for numeric conversion
             df.loc[:, column] = pd.to_numeric(df[column], errors=errors_arg)
         elif dtype == "datetime":
-            # Use pd.to_datetime with errors='coerce' for datetime conversion
-            df[column] = pd.to_datetime(df[column], errors=errors_arg)
+            # "mixed" format will ensure each value in the column is parsed individually
+            # (rather than datetime format being inferred for the whole column based on first parseable value)
+            df[column] = pd.to_datetime(df[column], errors=errors_arg, format="mixed")
         else:
             # For other types, try using astype with errors handling
             df[column] = df[column].dropna().astype(dtype)
