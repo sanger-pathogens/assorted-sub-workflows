@@ -6,7 +6,7 @@ process METADATA {
     conda 'anaconda::pandas=2.2.1'
     container 'quay.io/sangerpathogens/pandas:2.2.1'
 
-    publishDir "${params.outdir}/", mode: 'copy', overwrite: true, pattern: "${timestampout}"
+    publishDir "${params.outdir}/", mode: 'copy', overwrite: false, pattern: "${timestampout}"
 
     input:
     path(metadata)
@@ -17,7 +17,7 @@ process METADATA {
     
     script:
     maptocsv = "${projectDir}/assorted-sub-workflows/irods_extractor/bin/map_to_csv.py"
-    date = "${workflow.start}".split('.')[0] //I would love to use short date not time split on T but will overwrite too much . is miliseconds
+    date = ${ params.short_metacsv_name ? "${workflow.start}".split('T')[0] : "${workflow.start}" }
     timestampout = "metadata_${metadata_tag}_${date}.csv"
     """
     ${maptocsv} --input_map_list ${metadata} --output "${timestampout}"
