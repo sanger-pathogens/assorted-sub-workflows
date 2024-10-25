@@ -17,9 +17,9 @@ process METADATA {
     
     script:
     maptocsv = "${projectDir}/assorted-sub-workflows/irods_extractor/bin/map_to_csv.py"
-    timestampout = "metadata_${metadata_tag}_${workflow.start}.csv"
+    date = "${workflow.start}".split('.')[0] //I would love to use short date not time split on T but will overwrite too much . is miliseconds
+    timestampout = "metadata_${metadata_tag}_${date}.csv"
     """
-    ${maptocsv} --input_map_list ${metadata}
-    mv metadata.csv ${timestampout}
+    ${maptocsv} --input_map_list ${metadata} --output "${timestampout}"
     """
 }

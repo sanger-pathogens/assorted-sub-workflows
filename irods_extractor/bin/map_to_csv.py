@@ -13,6 +13,11 @@ def parse_arguments() -> argparse.Namespace:
     parser.add_argument("--input_map_list",
         help="A collection of maps from nextflow to be written to csv",
     )
+
+    parser.add_argument("--output",
+        default="metadata.csv",
+        help="file to output data to",
+    )
     return parser.parse_args()
 
 def element_in_list_to_dict(input_list: list):
@@ -43,4 +48,4 @@ data_list = element_in_list_to_dict(input_data)
 
 df = dataframe_from_input_list(data_list)
 
-df.to_csv("metadata.csv")
+df.to_csv(args.output)
