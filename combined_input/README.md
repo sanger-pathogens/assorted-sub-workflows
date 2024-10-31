@@ -6,7 +6,13 @@
 
 This script facilitates filtering an input TSV file using a number of per-column filters (while ensuring that columns are correctly interpreted with a given type).
 
-The column, filter and datatype are specified using the path to an input TSV manifest using the `-f` option. Valid filters are any string that can be provided to [`pandas.DataFrame.query()`](https://pandas.pydata.org/pandas-docs/version/2.2/reference/api/pandas.DataFrame.query.html) and datatypes are `int`, `float`, `datetime`, `bool` and `str` (use other types at your peril). Example manifest:
+The column, filter and datatype are specified using the path to an input TSV manifest using the `-f` option:
+
+- **column**: name of the column the filter applies to\; there should only be one row per column
+- **filter**: filter to be applied to the column, which is a string that could be passed to [`pandas.DataFrame.query()`](https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.query.html)
+- **datatype**: expected datatype for values in the column, either `int`, `float`, `datetime`, `bool` or `str` (use other types at your peril i.e. anything you can use as dtype in [`pandas.DataFrame.astype()`](https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.astype.html)) 
+
+Example manifest:
 
 ```
 column	filter	datatype
