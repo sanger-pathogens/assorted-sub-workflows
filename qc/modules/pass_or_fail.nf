@@ -11,13 +11,17 @@ process PASS_OR_FAIL_FASTQC {
     tuple val(meta), env(pass_or_fail), emit: pass_or_fail
 
     passfail_fastqc_script = "${projectDir}/assorted-sub-workflows/qc/bin/pass_or_fail_fastqc.py"
-    passfail_fastqc_criteria = "${projectDir}/assorted-sub-workflows/qc/assets/fastqc_pass_criteria.json"
+    pass_fastqc_criteria = path(params.fastqc_pass_criteria)
+    fail_fastqc_criteria = path(params.fastqc_fail_criteria)
 
     script:
     """
     unzip ${read_1_zip}
     unzip ${read_2_zip}
-    pass_or_fail=\$(${passfail_fastqc_script} -c ${passfail_fastqc_criteria} */summary.txt)
+    pass_or_fail=\$(${passfail_fastqc_script} \
+                    -p ${pass_fastqc_criteria} \
+                    -f ${fail_fastqc_criteria} \
+                    */summary.txt)
     """
 }
 
