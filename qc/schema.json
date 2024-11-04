@@ -1,0 +1,21 @@
+{ 
+    "pipeline": "QC (sub-workflow)",
+    "params": {
+        "FastQC": {
+            "save_fastqc": {
+                "default": false,
+                "help_text": "Flag to publish FastQC output"
+            }
+        },
+        "kraken2bracken": {
+            "genus_abundance_threshold": {
+                "default": 90,
+                "help_text": "Fail the sample if the top genus abundance is lower than this"
+            },
+            "species_abundance_threshold": {
+                "default": 85,
+                "help_text": "Fail the sample if the top species abundance is lower than this"
+            }
+        }
+    }
+}
