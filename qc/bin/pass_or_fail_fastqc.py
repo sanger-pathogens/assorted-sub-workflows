@@ -40,7 +40,7 @@ def main():
             try:
                 fail_criteria = tuple(json.load(ffcriteria))
             except TypeError:
-                raise ValueError("bad formating of the JSON file given to '--pass_criteria' option; items should be listed in a iterable (tuple, list or set)")
+                raise ValueError("bad formating of the JSON file given to '--fail_criteria' option; items should be listed in a iterable (tuple, list or set)")
 
     print( passorfail(args.fastqc_reports, pass_criteria=pass_criteria, fail_criteria=fail_criteria) )
 
