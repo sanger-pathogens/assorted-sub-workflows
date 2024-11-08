@@ -38,9 +38,24 @@ def main():
                         prog='assorted-sub-workflows/qc/bin/pass_or_fail_fastqc.py',
                         description='parse JSON input to define which item of a FastQC report should have what value for the short reads set to be considered \"pass\"')
 
-    parser.add_argument('-p', '--pass_criteria', type=str, help="JSON file containing definition of an array specifying which item of a FastQC report (keys) are required to have the value PASS for the whole report to be considered a pass")
-    parser.add_argument('-f', '--no_fail_criteria', type=str, help="JSON file containing definition of an array specifying which item of a FastQC report (keys) are required to NOT have the value FAIL for the whole report to be considered a pass")
-    parser.add_argument('fastqc_reports', nargs='+', type=str)
+    parser.add_argument(
+        '-p',
+        '--pass_criteria',
+        type=str,
+        help="JSON file containing definition of an array specifying which item of a FastQC report (keys) are required to have the value PASS for the whole report to be considered a pass"
+    )
+    parser.add_argument(
+        '-f',
+        '--no_fail_criteria',
+        type=str,
+        help="JSON file containing definition of an array specifying which item of a FastQC report (keys) are required to NOT have the value FAIL for the whole report to be considered a pass"
+    )
+    parser.add_argument(
+        'fastqc_reports',
+        nargs='+',
+        type=str,
+        help="One or more summary.txt files output from FastQC"
+    )
 
     args = parser.parse_args()
 
