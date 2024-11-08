@@ -4,6 +4,10 @@ import json
 import argparse
 
 
+class PassOrFailFastqcError(Exception):
+    pass
+
+
 def passorfail(fastqc_reports, pass_criteria, no_fail_criteria=[], passvals=['PASS'], failvals=['FAIL']):
     for fastqc_report in fastqc_reports:
         with open(fastqc_report) as report:
@@ -17,6 +21,18 @@ def passorfail(fastqc_reports, pass_criteria, no_fail_criteria=[], passvals=['PA
                         return 'fail'
     return 'pass'    
 
+
+def get_criteria(criteria_filepath, option):
+    with open(criteria_filepath) as criteria_file:
+        try:
+            return tuple(json.load(criteria_file))
+        except json.JSONDecodeError:
+            raise PassOrFailFastqcError(f"File given to '--{option}' option is not valid JSON format")
+        except TypeError:
+            raise PassOrFailFastqcError(f"Bad formatting of the JSON file given to '--{option}' option; items should be listed in an iterable (tuple, list or set)")
+
+
+
 def main():
     parser = argparse.ArgumentParser(
                         prog='assorted-sub-workflows/qc/bin/pass_or_fail_fastqc.py',
@@ -28,18 +44,11 @@ def main():
 
     args = parser.parse_args()
 
-    with open(args.pass_criteria) as pass_criteria_file:
-        try:
-            pass_criteria = tuple(json.load(pass_criteria_file))
-        except TypeError:
-            raise ValueError("bad formating of the JSON file given to '--pass_criteria' option; items should be listed in a iterable (tuple, list or set)")
+    pass_criteria = get_criteria(args.pass_criteria, 'pass_criteria')
     
+    no_fail_criteria = []
     if args.no_fail_criteria:
-        with open(args.no_fail_criteria) as no_fail_criteria_file:
-            try:
-                no_fail_criteria = tuple(json.load(no_fail_criteria_file))
-            except TypeError:
-                raise ValueError("bad formating of the JSON file given to '--no_fail_criteria' option; items should be listed in a iterable (tuple, list or set)")
+        no_fail_criteria = get_criteria(args.no_fail_criteria, 'no_fail_criteria')
 
     print( passorfail(args.fastqc_reports, pass_criteria=pass_criteria, no_fail_criteria=no_fail_criteria) )
 
