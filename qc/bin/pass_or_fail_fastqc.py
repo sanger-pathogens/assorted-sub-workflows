@@ -12,7 +12,10 @@ def passorfail(fastqc_reports, pass_criteria, no_fail_criteria=[], passvals=['PA
     for fastqc_report in fastqc_reports:
         with open(fastqc_report) as report:
             for line in report:
-                val, crit, filename = line.strip('\n').split('\t')
+                try:
+                    val, crit, filename = line.strip('\n').split('\t')
+                except ValueError:
+                    raise PassOrFailFastqcError(f"FastQC report {fastqc_report} not in expected format")
                 if crit in pass_criteria:
                     if val not in passvals:
                         return 'fail'
@@ -66,4 +69,3 @@ def main():
         no_fail_criteria = get_criteria(args.no_fail_criteria, 'no_fail_criteria')
 
     print( passorfail(args.fastqc_reports, pass_criteria=pass_criteria, no_fail_criteria=no_fail_criteria) )
-
