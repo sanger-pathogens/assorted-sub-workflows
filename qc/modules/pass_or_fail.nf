@@ -14,14 +14,13 @@ process PASS_OR_FAIL_FASTQC {
 
     script:
     passfail_fastqc_script = "${projectDir}/assorted-sub-workflows/qc/bin/pass_or_fail_fastqc.py"
-    no_fail_criteria_opt = fastqc_no_fail_criteria.name != "empty_file" ? "-f ${fastqc_no_fail_criteria}" : ""
 
     """
     unzip ${read_1_zip}
     unzip ${read_2_zip}
     pass_or_fail=\$(${passfail_fastqc_script} \
                     -p ${fastqc_pass_criteria} \
-                    ${no_fail_criteria_opt} \
+                    -f ${fastqc_no_fail_criteria} \
                     */summary.txt)
     """
 }
