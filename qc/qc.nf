@@ -34,8 +34,7 @@ workflow QC {
     fastqc_pass_criteria = file(params.fastqc_pass_criteria, checkIfExists: true)
     fastqc_no_fail_criteria = file(params.fastqc_no_fail_criteria, checkIfExists: true)
 
-    FASTQC.out.zip
-    | PASS_OR_FAIL_FASTQC(fastqc_pass_criteria, fastqc_no_fail_criteria)
+    PASS_OR_FAIL_FASTQC(FASTQC.out.zip, fastqc_pass_criteria, fastqc_no_fail_criteria)
     | set { fastqc_results }
 
     KRAKEN2BRACKEN(read_ch)

@@ -5,7 +5,9 @@ process PASS_OR_FAIL_FASTQC {
     label 'time_30m'
 
     input:
-    tuple val(meta), path(read_1_zip), path(read_2_zip), path(fastqc_pass_criteria), path(fastqc_no_fail_criteria)
+    tuple val(meta), path(read_1_zip), path(read_2_zip)
+    path(fastqc_pass_criteria)
+    path(fastqc_no_fail_criteria)
 
     output:
     tuple val(meta), env(pass_or_fail), emit: pass_or_fail
