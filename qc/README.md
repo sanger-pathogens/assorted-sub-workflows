@@ -12,7 +12,7 @@ If the abundance of the top (likely correct) genus or species in the Kraken styl
 ```
  FastQC
       --save_fastqc
-            default: true
+            default: false
             Flag to publish FastQC output
       --fastqc_pass_criteria
             default: path/to/repo/assorted-sub-workflows/qc/assets/fastqc_pass_criteria.json
