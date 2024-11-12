@@ -6,15 +6,22 @@ process PASS_OR_FAIL_FASTQC {
 
     input:
     tuple val(meta), path(read_1_zip), path(read_2_zip)
+    path(fastqc_pass_criteria)
+    path(fastqc_no_fail_criteria)
 
     output:
     tuple val(meta), env(pass_or_fail), emit: pass_or_fail
 
     script:
+    passfail_fastqc_script = "${projectDir}/assorted-sub-workflows/qc/bin/pass_or_fail_fastqc.py"
+
     """
     unzip ${read_1_zip}
     unzip ${read_2_zip}
-    pass_or_fail=\$(if grep 'FAIL' */summary.txt; then echo 'fail'; else echo 'pass'; fi)
+    pass_or_fail=\$(${passfail_fastqc_script} \
+                    -p ${fastqc_pass_criteria} \
+                    -f ${fastqc_no_fail_criteria} \
+                    */summary.txt)
     """
 }
 
