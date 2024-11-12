@@ -57,6 +57,7 @@ def main():
         "-p",
         "--pass_criteria",
         type=str,
+        required=True,
         help="JSON file containing definition of an array specifying which item of a FastQC report (keys) are required to have the value PASS for the whole report to be considered a pass",
     )
     parser.add_argument(
@@ -87,3 +88,7 @@ def main():
             no_fail_criteria=no_fail_criteria,
         )
     )
+
+
+if __name__ == "__main__":
+    main()
