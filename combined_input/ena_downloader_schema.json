@@ -1,7 +1,7 @@
 {
     "pipeline": "ENA Downloader",
     "params": {
-      "Metadata options": {
+      "Output options": {
         "publish_metadata": {
           "default": true,
           "help_text": "Flag to publish metadata TSV downloaded from ENA."
