@@ -15,7 +15,7 @@
                 "help_text": "JSON file containing definition of an array specifying which items in the FastQC summary.txt are required to NOT have the value FAIL for the sample to be considered a pass (i.e. they could have WARN)"
             }
         },
-        "kraken2bracken": {
+        "kraken2bracken QC": {
             "genus_abundance_threshold": {
                 "default": 90,
                 "help_text": "Fail the sample if the top genus abundance is lower than this"
