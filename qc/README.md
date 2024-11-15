@@ -33,22 +33,21 @@ If the abundance of the top (likely correct) genus or species in the Kraken styl
 ```
  FastQC
       --save_fastqc
-            default: false
+            default: true
             Flag to publish FastQC output
       --fastqc_pass_criteria
-            default: path/to/repo/assorted-sub-workflows/qc/assets/fastqc_pass_criteria.json
+            default: assorted-sub-workflows/qc/assets/fastqc_pass_criteria.json
             JSON file containing definition of an array specifying which items in the FastQC summary.txt are required to have the value PASS for the sample to be considered a pass
       --fastqc_no_fail_criteria
-            default: path/to/repo/assorted-sub-workflows/qc/assets/fastqc_no_fail_criteria.json
+            default: assorted-sub-workflows/qc/assets/fastqc_no_fail_criteria.json
             JSON file containing definition of an array specifying which items in the FastQC summary.txt are required to NOT have the value FAIL for the sample to be considered a pass (i.e. they could have WARN)
-
 -----------------------------------------------------------------
- kraken2bracken
+ kraken2bracken QC
       --genus_abundance_threshold
             default: 90
             Fail the sample if the top genus abundance is lower than this
-
       --species_abundance_threshold
             default: 85
             Fail the sample if the top species abundance is lower than this
+-----------------------------------------------------------------
 ```
