@@ -39,7 +39,7 @@ workflow KRAKEN2BRACKEN{
     //
     ch_reads
         .combine(ch_kraken2_db)
-        .dump(tag: 'reads_and_kraken2_db')
+        //.dump(tag: 'reads_and_kraken2_db')
         .set { ch_reads_and_kraken2_db }
     
     if (params.get_classified_reads) {
@@ -57,7 +57,9 @@ workflow KRAKEN2BRACKEN{
         )
     } else {
         KRAKEN2(ch_reads_and_kraken2_db)
-        KRAKEN2.out.kraken2_sample_report.dump(tag: 'kraken2_sample_report').set { ch_kraken2_sample_report }
+        KRAKEN2.out.kraken2_sample_report
+            //.dump(tag: 'kraken2_sample_report')
+            .set { ch_kraken2_sample_report }
     }
 
     //
@@ -73,7 +75,7 @@ workflow KRAKEN2BRACKEN{
     if (params.enable_building && !required_kmer_distrib.exists()) {
         BRACKEN_BUILD(ch_kraken2_db)
         BRACKEN_BUILD.out.ch_kmer_distrib
-            .dump(tag: 'kmer_distrib')
+            //.dump(tag: 'kmer_distrib')
             .set { ch_kmer_distrib }
     }
     // If building is not enabled and the file doesn't exist, log an error
@@ -83,13 +85,13 @@ workflow KRAKEN2BRACKEN{
     // If the required file exists, load it into a channel
     else {
         Channel.fromPath(required_kmer_distrib)
-            .dump(tag: 'kmer_distrib')
+            //.dump(tag: 'kmer_distrib')
             .set { ch_kmer_distrib }
     }
 
     ch_kraken2_sample_report
         .combine(ch_kmer_distrib)
-        .dump(tag: 'kraken2_report_and_kmer_distrib')
+        //.dump(tag: 'kraken2_report_and_kmer_distrib')
         .set { ch_kraken2_report_and_kmer_distrib }
     BRACKEN(
         ch_kraken2_report_and_kmer_distrib
@@ -103,7 +105,8 @@ workflow KRAKEN2BRACKEN{
     KREPORT2MPA.out.mpa_abundance_report
         .map { meta, report -> report }
         .collect()
-        .unique()
+        .dump(tag: 'mpa_abundance_reports_pre_uniq')
+        .unique{ it -> it.name }
         .dump(tag: 'mpa_abundance_reports')
         .set { ch_mpa_abundance_reports }
     GENERATE_ABUNDANCE_SUMMARY(
