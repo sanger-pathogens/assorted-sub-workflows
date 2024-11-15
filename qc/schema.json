@@ -7,11 +7,11 @@
                 "help_text": "Flag to publish FastQC output"
             },
             "fastqc_pass_criteria": {
-                "default": "path/to/repo/assorted-sub-workflows/qc/assets/fastqc_pass_criteria.json",
+                "default": "assorted-sub-workflows/qc/assets/fastqc_pass_criteria.json",
                 "help_text": "JSON file containing definition of an array specifying which items in the FastQC summary.txt are required to have the value PASS for the sample to be considered a pass"
             },
             "fastqc_no_fail_criteria": {
-                "default": "path/to/repo/assorted-sub-workflows/qc/assets/fastqc_no_fail_criteria.json",
+                "default": "assorted-sub-workflows/qc/assets/fastqc_no_fail_criteria.json",
                 "help_text": "JSON file containing definition of an array specifying which items in the FastQC summary.txt are required to NOT have the value FAIL for the sample to be considered a pass (i.e. they could have WARN)"
             }
         },
