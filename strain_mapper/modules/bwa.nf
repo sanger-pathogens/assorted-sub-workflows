@@ -3,6 +3,7 @@ process BWA {
     label 'mem_8'
     label 'time_1'
 
+    conda "bioconda::bwa=0.7.17"
     container 'quay.io/biocontainers/bwa:0.7.17--he4a0461_11'
 
     input:
@@ -27,6 +28,7 @@ process BWA_INDEX {
 
     publishDir "${params.outdir}/bwa", mode: 'copy', overwrite: true
 
+    conda "bioconda::bwa=0.7.17"
     container 'quay.io/biocontainers/bwa:0.7.17--he4a0461_11'
 
     input:
