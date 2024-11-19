@@ -102,6 +102,7 @@ workflow KRAKEN2BRACKEN{
     //
     KREPORT2MPA.out.mpa_abundance_report
         .map { meta, report -> report }
+        .unique{ it -> it.name }
         .collect()
         .dump(tag: 'mpa_abundance_reports')
         .set { ch_mpa_abundance_reports }
