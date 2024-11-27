@@ -14,7 +14,7 @@ process PLOT_TREE {
     tuple val(meta), path("*.png"), emit: plots
 
     script:
-    plot_script = "${projectDir}/assorted-sub-workflows/sketch_tree/bin/plot_tree.py"
+    plot_script = "${projectDir}/assorted-sub-workflows/sketchlib_tree/bin/plot_tree.py"
     """
     ${plot_script} ${newick} final_tree.png
     """
