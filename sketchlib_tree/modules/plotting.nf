@@ -8,10 +8,10 @@ process PLOT_TREE {
     container 'quay.io/sangerpathogens/rapidnj:2.3.2-c1'
 
     input:
-    val(meta), path(newick)
+    tuple val(meta), path(newick)
 
     output:
-    val(meta), path("*.png"), emit: plots
+    tuple val(meta), path("*.png"), emit: plots
 
     script:
     plot_script = "${projectDir}/assorted-sub-workflows/sketch_tree/bin/plot_tree.py"
