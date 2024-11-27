@@ -1,16 +1,14 @@
 # Sketch Tree
 
-Sketch Tree is a workflow that utilizes Sketchlib to estimate the core genome and generate a RapidNJ tree. It is designed to process input from assemblies and produce plots as well as 
+Sketch Tree is a workflow that utilizes Sketchlib to estimate the core genome and generate a RapidNJ tree. It is designed to process input from assemblies and produce plots
 
 A common workflow model would be
-
 ```
 input_fastqs
 | ASSEMBLER
 | collect
 | SKETCHLIB_TREE
 ```
-
 ## Key Features
 - Automatically estimates the core genome from input assemblies.
 - Computes an ANI matrix using Sketchlib.
@@ -36,7 +34,6 @@ The bin directory contains the following scripts:
 3. tree_builder.py
     - Description: Builds trees using RapidNJ, relying on functions from ani_tree_tools.py.
     - Requirements:
-        - Requirements:
         - Executable: RapidNJ.
         - Python dependencies: dendropy
 
