@@ -8,10 +8,10 @@ process RAPIDNJ {
     publishDir "${params.outdir}/tree/", pattern: '*.nwk', mode: 'copy', overwrite: true
 
     input:
-    val(meta), path(total_tsv)
+    tuple val(meta), path(total_tsv)
 
     output:
-    val(meta), path("*.nwk"), emit: tree
+    tuple val(meta), path("*.nwk"), emit: tree
 
     script:
     ani_tree_tools = "${projectDir}/assorted-sub-workflows/sketch_tree/bin/ani_tree_tools.py"
