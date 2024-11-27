@@ -8,14 +8,14 @@ process RAPIDNJ {
     publishDir "${params.outdir}/tree/", pattern: '*.nwk', mode: 'copy', overwrite: true
 
     input:
-    path(total_tsv)
+    val(meta), path(total_tsv)
 
     output:
-    path("*.nwk"), emit: tree
+    val(meta), path("*.nwk"), emit: tree
 
     script:
     ani_tree_tools = "${projectDir}/assorted-sub-workflows/sketch_tree/bin/ani_tree_tools.py"
     """
-    ${ani_tree_tools} --dist_tsv_path ${total_tsv} --meta_ID total_tree --core_accession --build_tree
+    ${ani_tree_tools} --dist_tsv_path ${total_tsv} --meta_ID ${meta.ID} --core_accession --build_tree
     """
 }
