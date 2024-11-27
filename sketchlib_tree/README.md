@@ -36,7 +36,6 @@ The bin directory contains the following scripts:
 3. tree_builder.py
     - Description: Builds trees using RapidNJ, relying on functions from ani_tree_tools.py.
     - Requirements:
-        - Requirements:
         - Executable: RapidNJ.
         - Python dependencies: dendropy
 
