@@ -7,10 +7,10 @@ process SKETCH_ASSEMBLIES {
     container 'quay.io/sangerpathogens/pp-sketchlib-rust:0.1.2_sd28_fix'
 
     input:
-    path(assemblies)
+    tuple val(meta), path(assemblies)
 
     output:
-    tuple path("${sketch_db}.skm"), path("${sketch_db}.skd"), emit: assemblies_sketch
+    tuple val(meta), path("${sketch_db}.skm"), path("${sketch_db}.skd"), emit: assemblies_sketch
 
     script:
     sketch_db = "full_sketch"
@@ -28,10 +28,10 @@ process SKETCH_CORE_ACC_DIST {
     container 'quay.io/sangerpathogens/pp-sketchlib-rust:0.1.2_sd28_fix'
 
     input:
-    tuple path(skm), path(skd)
+    tuple val(meta), path(skm), path(skd)
 
     output:
-    path("total_core_data.tsv"), emit: distances
+    tuple val(meta), path("total_core_data.tsv"), emit: distances
 
     script:
     """
