@@ -15,7 +15,7 @@ include { PLOT_TREE                               } from './modules/plotting.nf'
 
 workflow SKETCHLIB_TREE {
     take:
-    assemblies // [[ID: samples][assembly1, assembly2, ...]] collected channel of all assemblies to make tree from and a meta to name it
+    assemblies // [[ID: samples],[assembly1, assembly2, ...]] collected channel of all assemblies to make tree from and a meta to name it
 
     main:
     SKETCH_ASSEMBLIES(assemblies)
