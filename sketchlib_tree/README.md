@@ -6,9 +6,13 @@ A common workflow model would be
 ```
 input_fastqs
 | ASSEMBLER
-| collect
+| groupTuple
 | SKETCHLIB_TREE
 ```
+SKETCHLIB_TREE expects inputs as 
+
+[[ID: name of tree], [assembly1, assembly2, assembly3, ....]]
+
 ## Key Features
 - Automatically estimates the core genome from input assemblies.
 - Computes an ANI matrix using Sketchlib.
