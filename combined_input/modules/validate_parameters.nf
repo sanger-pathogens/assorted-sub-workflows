@@ -97,20 +97,20 @@ def validate_parameters() {
     // Check for CLI-based inputs
     if (has_studyid || has_runid || has_laneid || has_plexid) {
         // Validate individual parameters
-        if (has_studyid && params.studyid == -1) {
-            log.error("Invalid studyid provided.")
+        if (has_studyid && params.studyid instanceof Int) {
+            log.error("Invalid studyid provided: ${params.studyid}")
             errors += 1
         }
-        if (has_runid && params.runid == -1) {
-            log.error("Invalid runid provided.")
+        if (has_runid && params.runid instanceof Int) {
+            log.error("Invalid runid provided: ${params.runid}")
             errors += 1
         }
-        if (has_laneid && params.laneid == -1) {
-            log.error("Invalid laneid provided.")
+        if (has_laneid && params.laneid instanceof Int) {
+            log.error("Invalid laneid provided: ${params.laneid}")
             errors += 1
         }
-        if (has_plexid && params.plexid == -1) {
-            log.error("Invalid plexid provided.")
+        if (has_plexid && params.plexid instanceof Int) {
+            log.error("Invalid plexid provided: ${params.plexid}")
             errors += 1
         }
         
