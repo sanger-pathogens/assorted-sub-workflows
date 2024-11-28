@@ -31,6 +31,12 @@ def validate_path_param(
 }
 
 def validate_integer(potentialInt) {
+    /*
+    Our param as a -1 is an int however when we give it e.g. 6495 on the command line it becomes a string
+    this function takes a string or int (or any type) and attempts to turn it into a string then back to an int
+
+    if it can it returns true if for any reason it cannot it returns false
+    */
     if (potentialInt == null) return false
     try {
         Integer.parseInt(potentialInt.toString())
