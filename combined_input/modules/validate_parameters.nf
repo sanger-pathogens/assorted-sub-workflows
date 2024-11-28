@@ -74,7 +74,11 @@ def validate_parameters() {
         // If manifest is provided but manifest_of_reads is not, use manifest for reads
         if (!manifest_of_reads_exists) {
             log.info("manifest_of_reads not provided. Using manifest as manifest_of_reads.")
-            params.manifest_of_reads = params.manifest
+            /*
+            You can't actually overwrite the param.manifest_of_lanes at this stage to prevent having
+            to return and pick this up later in the COMBINE_READS stage we do this
+            def manifestToUse = params.manifest_of_reads ? params.manifest_of_reads : params.manifest
+            */
         }
         
         errors += validate_path_param("--manifest", params.manifest)
