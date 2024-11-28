@@ -15,6 +15,8 @@ workflow MIXED_INPUTS {
 
     from the start of IRODS_PIPELINES and allows for smarter and validated use of the params given
     */
+
+    // No inputs
     main:
     def active_workflows = validate_parameters() //ensure all potential inputs are parsed and validated
 
@@ -47,5 +49,5 @@ workflow MIXED_INPUTS {
     | set { all_reads_ready_ch }
 
     emit:
-    all_reads_ready_ch
+    all_reads_ready_ch //channel of [meta, R1, R2] taken from a mixture of IRODS + Given manifest or either
 }
