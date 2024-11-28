@@ -30,6 +30,16 @@ def validate_path_param(
     return 0
 }
 
+def validate_integer(potentialInt) {
+    if (potentialInt == null) return false
+    try {
+        Integer.parseInt(potentialInt.toString())
+        return true
+    } catch (NumberFormatException e) {
+        return false
+    }
+}
+
 def validate_parameters() {
     def errors = 0
     def workflows_to_run = []
@@ -97,19 +107,19 @@ def validate_parameters() {
     // Check for CLI-based inputs
     if (has_studyid || has_runid || has_laneid || has_plexid) {
         // Validate individual parameters
-        if (has_studyid && params.studyid instanceof Int) {
+        if (has_studyid && !validate_integer(params.studyid)) {
             log.error("Invalid studyid provided: ${params.studyid}")
             errors += 1
         }
-        if (has_runid && params.runid instanceof Int) {
+        if (has_runid && !validate_integer(runid)) {
             log.error("Invalid runid provided: ${params.runid}")
             errors += 1
         }
-        if (has_laneid && params.laneid instanceof Int) {
+        if (has_laneid && !validate_integer(params.laneid)) {
             log.error("Invalid laneid provided: ${params.laneid}")
             errors += 1
         }
-        if (has_plexid && params.plexid instanceof Int) {
+        if (has_plexid && !validate_integer(params.plexid)) {
             log.error("Invalid plexid provided: ${params.plexid}")
             errors += 1
         }
