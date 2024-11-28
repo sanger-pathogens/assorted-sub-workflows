@@ -54,16 +54,19 @@ def validate_parameters() {
                           has_plexid
 
     if (!input_specified) {
-        log.error("No input specification provided. Please specify one of the following manfiests:")
-        log.error("- --manifest_of_lanes")
-        log.error("- --manifest_of_reads or --manifest")
-        log.error("Or the following CLI flags:")
-        log.error("- --studyid")
-        log.error("- --runid")
-        log.error("- --laneid")
-        log.error("- --plexid")
-        errors += 1
-    }
+    log.error("""No input specification provided. Please specify one of:
+
+                Manifests:
+                - --manifest_of_lanes
+                - --manifest_of_reads or --manifest
+
+                CLI Identifiers:
+                - --studyid
+                - --runid
+                - --laneid
+                - --plexid""")
+    errors += 1
+}
 
     // Validate manifests if provided
     if (manifest_of_lanes_exists) {
@@ -91,7 +94,7 @@ def validate_parameters() {
     //todo move validation for the CLI methods from the workflow - clear errors if giving plex but nothing else for example
 
     if (errors > 0) {
-        log.error(String.format("%d errors detected", errors))
+        log.error(String.format("%d errors detected please correct and run again", errors))
         System.exit(1)
     }
 
