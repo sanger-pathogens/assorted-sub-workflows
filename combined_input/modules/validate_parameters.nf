@@ -38,13 +38,13 @@ def validate_parameters() {
     def manifest_of_reads_exists = params.manifest_of_reads != null
     def manifest_exists = params.manifest != null
     
-    // Check for individual identifier parameters
+    //and CLI
     def has_studyid = params.studyid != -1
     def has_runid = params.runid != -1
     def has_laneid = params.laneid != -1
     def has_plexid = params.plexid != -1
 
-    // Determine if any input method is provided
+    // anything provided?
     def input_specified = manifest_of_lanes_exists || 
                           manifest_of_reads_exists || 
                           manifest_exists || 
@@ -54,10 +54,10 @@ def validate_parameters() {
                           has_plexid
 
     if (!input_specified) {
-        log.error("No input specification provided. Please specify one of the following:")
+        log.error("No input specification provided. Please specify one of the following manfiests:")
         log.error("- --manifest_of_lanes")
-        log.error("- --manifest_of_reads")
-        log.error("- --manifest")
+        log.error("- --manifest_of_reads or --manifest")
+        log.error("Or the following CLI flags:")
         log.error("- --studyid")
         log.error("- --runid")
         log.error("- --laneid")
@@ -84,34 +84,7 @@ def validate_parameters() {
         errors += validate_path_param("--manifest_of_reads", params.manifest_of_reads)
     }
 
-    // Optional additional validation for identifier parameters
-    if (has_studyid) {
-        if (params.studyid == -1) {
-            log.error("Invalid studyid provided.")
-            errors += 1
-        }
-    }
-
-    if (has_runid) {
-        if (params.runid == -1) {
-            log.error("Invalid runid provided.")
-            errors += 1
-        }
-    }
-
-    if (has_laneid) {
-        if (params.laneid == -1) {
-            log.error("Invalid laneid provided.")
-            errors += 1
-        }
-    }
-
-    if (has_plexid) {
-        if (params.plexid == -1) {
-            log.error("Invalid plexid provided.")
-            errors += 1
-        }
-    }
+    //todo move validation for the CLI methods from the workflow - clear errors if giving plex but nothing else for example
 
     if (errors > 0) {
         log.error(String.format("%d errors detected", errors))
