@@ -54,7 +54,7 @@ def validate_parameters() {
                           has_plexid
 
     if (!input_specified) {
-    log.error("""No input specification provided. Please specify one of:
+    log.error("""No input specification provided. Please specify one or a mix of:
 
                 Manifests:
                 - --manifest_of_lanes
