@@ -32,6 +32,7 @@ def validate_path_param(
 
 def validate_parameters() {
     def errors = 0
+    def workflows_to_run = []
 
     // Determine which input specification method is provided
     def manifest_of_lanes_exists = params.manifest_of_lanes != null
@@ -54,7 +55,7 @@ def validate_parameters() {
                           has_plexid
 
     if (!input_specified) {
-    log.error("""No input specification provided. Please specify one or a mix of:
+    log.error("""No input specification provided. Please specify one of:
 
                 Manifests:
                 - --manifest_of_lanes
@@ -66,38 +67,60 @@ def validate_parameters() {
                 - --laneid
                 - --plexid""")
     errors += 1
-}
+} 
 
-    // Validate manifests if provided
-    if (manifest_of_lanes_exists) {
-        errors += validate_path_param("--manifest_of_lanes", params.manifest_of_lanes)
+    // Validate and route based on input type
+    if (manifest_of_lanes_exists || manifest_of_reads_exists || manifest_exists) {
+        // Validate manifests
+        if (manifest_of_lanes_exists) {
+            errors += validate_path_param("--manifest_of_lanes", params.manifest_of_lanes)
+            workflows_to_run << 'IRODS'
+        }
+
+        if (manifest_exists) {
+            // If manifest is provided but manifest_of_reads is not, use manifest for reads
+            if (!manifest_of_reads_exists) {
+                log.info("manifest_of_reads not provided. Using manifest as manifest_of_reads.")
+                params.manifest_of_reads = params.manifest
+            }
+            
+            errors += validate_path_param("--manifest", params.manifest)
+            workflows_to_run << 'READS_MANIFEST'
+        }
+
+        if (manifest_of_reads_exists) {
+            errors += validate_path_param("--manifest_of_reads", params.manifest_of_reads)
+            workflows_to_run << 'READS_MANIFEST'
+        }
     }
 
-    if (manifest_exists) {
-        // If manifest is provided but manifest_of_reads is not, use manifest for reads
-        if (!manifest_of_reads_exists) {
-            log.info("manifest_of_reads not provided. Using manifest as manifest_of_reads.")
-            /*
-            You can't actually overwrite the param.manifest_of_lanes at this stage to prevent having
-            to return and pick this up later in the COMBINE_READS stage we do this
-            def manifestToUse = params.manifest_of_reads ? params.manifest_of_reads : params.manifest
-            */
+    // Check for CLI-based inputs
+    if (has_studyid || has_runid || has_laneid || has_plexid) {
+        // Validate individual parameters
+        if (has_studyid && params.studyid == -1) {
+            log.error("Invalid studyid provided.")
+            errors += 1
+        }
+        if (has_runid && params.runid == -1) {
+            log.error("Invalid runid provided.")
+            errors += 1
+        }
+        if (has_laneid && params.laneid == -1) {
+            log.error("Invalid laneid provided.")
+            errors += 1
+        }
+        if (has_plexid && params.plexid == -1) {
+            log.error("Invalid plexid provided.")
+            errors += 1
         }
         
-        errors += validate_path_param("--manifest", params.manifest)
+        workflows_to_run << 'IRODS'
     }
-
-    if (manifest_of_reads_exists) {
-        errors += validate_path_param("--manifest_of_reads", params.manifest_of_reads)
-    }
-
-    //todo move validation for the CLI methods from the workflow - clear errors if giving plex but nothing else for example
 
     if (errors > 0) {
-        log.error(String.format("%d errors detected please correct and run again", errors))
+        log.error(String.format("%d errors detected", errors))
         System.exit(1)
     }
 
-    emit:
-    Channel.of("Input parameters validated")
+    return workflows_to_run
 }

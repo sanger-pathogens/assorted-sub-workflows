@@ -1,15 +1,9 @@
 include { IRODS_MANIFEST_PARSE } from './irods_manifest_parse.nf'
-include { INPUT_CHECK          } from './input_check.nf'
-
-include { validate_parameters  } from '../modules/validate_parameters'
 
 //
 // SUBWORKFLOW: Read in study, run, etc. parameters and pull data from iRODS
 //
 workflow IRODS_CLI {
-    take:
-    passed_validation //dummy value channel to ensure dependancy taking emitted validation from validate_parameters
-
     main:
     param_input = Channel.of(["${params.studyid}", "${params.runid}", "${params.laneid}", "${params.plexid}", "${params.target}", "${params.type}"])
     
@@ -37,9 +31,7 @@ workflow IRODS_CLI {
 
 workflow COMBINE_IRODS {
     main:
-
-    validate_parameters() //ensure all potential inpiuts are parsed and validated
-    | IRODS_CLI // take iRODS dataset specification from CLI options
+    IRODS_CLI // take iRODS dataset specification from CLI options
     | set{ input_irods_from_opt_ch }
 
     // take iRODS dataset specification from manifest of lanes
@@ -59,26 +51,3 @@ workflow COMBINE_IRODS {
     input_irods_ch
 }
 
-workflow COMBINE_READS {
-    take:
-    irods_reads_ch // [meta, read_1, read_2] as from IRODS_EXTRACTOR
-
-    main:
-    
-    def manifestToUse = params.manifest_of_reads ? params.manifest_of_reads : params.manifest
-
-    if (manifestToUse) {
-        input_reads_ch = file(manifestToUse)
-        INPUT_CHECK (input_reads_ch)
-        | set{ ch_reads_from_manifest }
-    } else {
-        Channel.of("none").set{ ch_reads_from_manifest }
-    }  // ch_reads_from_manifest [meta, read_1, read_2]
-
-    // combine reads input channels
-    irods_reads_ch.mix(ch_reads_from_manifest.filter{ it != "none"}).set{ all_reads_ready_to_map_ch }
-
-    emit:
-    all_reads_ready_to_map_ch  // [meta, read_1, read_2]
-
-}
