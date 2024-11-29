@@ -77,7 +77,7 @@ def validate_parameters() {
                 - --manifest_of_lanes
                 - --manifest_of_reads or --manifest
 
-                CLI Identifiers:
+                CLI Arguments:
                 - --studyid
                 - --runid
                 - --laneid
