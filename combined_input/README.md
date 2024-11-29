@@ -13,7 +13,7 @@ There are two ways of specifying input for the pipeline:
 - --manifest_of_lanes: IRODS
 - --manifest_of_reads or --manifest: READS
 
-CLI Identifiers:
+CLI arguments:
 - --studyid: IRODS
 - --runid: IRODS
 - --laneid: IRODS
