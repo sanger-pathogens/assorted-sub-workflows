@@ -23,7 +23,8 @@ CLI arguments:
 
 This list is then used to trigger the correct workflows for the data specified a input to the pipeline: either IRODS (merging of CLI + Manifest input) or parsing the read manifest.
 
-The subworkflows can be accessed directly through direct calling for example in the IRODS example calling either
+The subworkflows can be executed separately through direct reference.  
+For example, to specify the use of data from IRODS, one can call either:
 
 COMBINE_IRODS
 
