@@ -4,7 +4,7 @@
 
 This workflow determines which processes should be called for the incoming parameters.
 
-validate_parameters takes no inputs but uses the params map from the given nextflow runtime enviroment and checks for either IRODS or READ type parameters
+`validate_parameters` takes no input but uses the params map from the Nextflow runtime environment and checks for either IRODS or READ type parameters, as defined below:
 
 
 Manifests:
