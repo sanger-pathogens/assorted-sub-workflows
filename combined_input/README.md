@@ -17,7 +17,7 @@ CLI Identifiers:
 - --laneid: IRODS
 - --plexid: IRODS
 
-This returns a list of active workflows based on the given parameters
+`validate_parameters` returns a list of active workflows based on the runtime parameters
 
 This list is then used to trigger the correct workflows for the data requested by the pipeline either IRODS merging of CLI + Manifest or parsing the read manifest.
 
