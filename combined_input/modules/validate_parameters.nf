@@ -124,7 +124,7 @@ def validate_parameters() {
             throw new Exception("Invalid studyid provided: ${params.studyid}")
             errors += 1
         }
-        if (has_runid && !validate_integer(runid)) {
+        if (has_runid && !validate_integer(params.runid)) {
             throw new Exception("Invalid runid provided: ${params.runid}")
             errors += 1
         }
