@@ -6,7 +6,7 @@ def validate_path_param(
 
     def valid_types = ["file", "directory"]
     if (!valid_types.any { it == type }) {
-        log.error("Invalid type '${type}'. Possibilities are ${valid_types}.")
+        throw new Exception("Invalid type '${type}'. Possibilities are ${valid_types}.")
         return 1
     }
 
@@ -14,17 +14,17 @@ def validate_path_param(
     if (param) {
         def file_param = file(param)
         if (!file_param.exists()) {
-            log.error("The given ${param_name} '${param}' does not exist.")
+            throw new Exception("The given ${param_name} '${param}' does not exist.")
             return 1
         } else if (
             (type == "file" && !file_param.isFile()) ||
             (type == "directory" && !file_param.isDirectory())
         ) {
-            log.error("The given ${param_name} '${param}' is not a ${type}.")
+            throw new Exception("The given ${param_name} '${param}' is not a ${type}.")
             return 1
         }
     } else if (mandatory) {
-        log.error("No ${param_name} specified. Please specify one using the ${param_option} option.")
+        throw new Exception("No ${param_name} specified. Please specify one using the ${param_option} option.")
         return 1
     }
     return 0
@@ -71,7 +71,7 @@ def validate_parameters() {
                           has_plexid
 
     if (!input_specified) {
-    log.error("""No input specification provided. Please specify one or a mix of:
+    throw new Exception("""No input specification provided. Please specify one or a mix of:
 
                 Manifests:
                 - --manifest_of_lanes
@@ -94,10 +94,17 @@ def validate_parameters() {
         }
 
         if (manifest_exists) {
-            // If manifest is provided but manifest_of_reads is not, use manifest for reads
-            if (!manifest_of_reads_exists) {
+            if (manifest_of_reads_exists) {
+                //exit early if you give both
+                throw new Exception("Cannot supply both ${params.manifest_of_reads} and ${params.manifest} as they are alias's of the same manifest")
+            } else {
+                // If manifest is provided but manifest_of_reads is not, use manifest for reads
                 log.info("manifest_of_reads not provided. Using manifest as manifest_of_reads.")
-                params.manifest_of_reads = params.manifest
+                /*
+                The manifest is not replaced at at this stage in reality as that is handled in the mixed_input workflow
+                def manifestToUse = params.manifest_of_reads ? params.manifest_of_reads : params.manifest
+                This is just a good opportunity to throw a error
+                */
             }
             
             errors += validate_path_param("--manifest", params.manifest)
@@ -114,19 +121,19 @@ def validate_parameters() {
     if (has_studyid || has_runid || has_laneid || has_plexid) {
         // Validate individual parameters
         if (has_studyid && !validate_integer(params.studyid)) {
-            log.error("Invalid studyid provided: ${params.studyid}")
+            throw new Exception("Invalid studyid provided: ${params.studyid}")
             errors += 1
         }
         if (has_runid && !validate_integer(runid)) {
-            log.error("Invalid runid provided: ${params.runid}")
+            throw new Exception("Invalid runid provided: ${params.runid}")
             errors += 1
         }
         if (has_laneid && !validate_integer(params.laneid)) {
-            log.error("Invalid laneid provided: ${params.laneid}")
+            throw new Exception("Invalid laneid provided: ${params.laneid}")
             errors += 1
         }
         if (has_plexid && !validate_integer(params.plexid)) {
-            log.error("Invalid plexid provided: ${params.plexid}")
+            throw new Exception("Invalid plexid provided: ${params.plexid}")
             errors += 1
         }
         
@@ -134,8 +141,7 @@ def validate_parameters() {
     }
 
     if (errors > 0) {
-        log.error(String.format("%d errors detected", errors))
-        System.exit(1)
+        throw new Exception(String.format("%d errors detected", errors))
     }
 
     return workflows_to_run
