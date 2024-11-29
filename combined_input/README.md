@@ -19,7 +19,7 @@ CLI Identifiers:
 
 `validate_parameters` returns a list of active workflows based on the runtime parameters
 
-This list is then used to trigger the correct workflows for the data requested by the pipeline either IRODS merging of CLI + Manifest or parsing the read manifest.
+This list is then used to trigger the correct workflows for the data specified a input to the pipeline: either IRODS (merging of CLI + Manifest input) or parsing the read manifest.
 
 The subworkflows can be accessed directly through direct calling for example in the IRODS example calling either
 
