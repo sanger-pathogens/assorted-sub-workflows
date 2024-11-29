@@ -32,7 +32,7 @@ process BAKTA {
         ${params.bakta_args} \\
         --threads ${task.cpus} \\
         --prefix ${meta.ID} \\
-        --locus-tag ${meta.ID} \\
+        --locus-tag ${meta.bakta_id} \\
         --db ${params.bakta_db} \\
         --keep-contig-headers
     """
