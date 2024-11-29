@@ -1,4 +1,4 @@
-process BUILD_TREE {
+process RAXML_NG {
     label 'cpu_2'
     label 'mem_16'
     label 'time_12'
@@ -9,19 +9,22 @@ process BUILD_TREE {
     publishDir "${params.outdir}/tree", mode: 'copy', overwrite: true, pattern: "*.support"
 
     input:
-    tuple path(msa), val(conscount)
+    path(msa), path(constant_sites_freq)
 
     output:
-    path("*.support"), emit: tree_channel
+    path("*.support"), emit: tree
 
     script:
-    conssites = conscount.text.trim()
-    raxml_model="${params.raxml_base_model}+ASC_STAM{${conssites}}"
+    constant_sites_freq_text = constant_sites_freq.text.trim()
+    raxml_model = "${params.raxml_base_model}+ASC_STAM{${constant_sites_freq}}"
     """
     raxml-ng --check --msa ${msa} --model ${raxml_model}
     raxml-ng --parse --msa ${msa} --model ${raxml_model}
-    raxml-ng --all --msa ${msa}.raxml.rba --model ${raxml_model} \
-    --tree pars{10} --bs-trees 200 \
-    --threads ${params.raxml_threads}
+    raxml-ng --all \\
+        --msa ${msa}.raxml.rba \\
+        --model ${raxml_model} \\
+        --tree ${params.tree_search} \\
+        --bs-trees ${params.bootstrap_trees} \\
+        --threads ${task.cpus}
     """
 }
