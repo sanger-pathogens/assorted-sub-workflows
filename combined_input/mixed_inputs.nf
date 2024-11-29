@@ -5,7 +5,7 @@ include { IRODS_EXTRACTOR          } from '../irods_extractor/subworkflows/irods
 
 include { validate_parameters      } from './modules/validate_parameters'
 
-workflow MIXED_INPUTS {
+workflow MIXED_INPUT {
     /*
     This workflow is a handler to call only what is needed from the IRODS workflows
     replaces the common stucture of 
