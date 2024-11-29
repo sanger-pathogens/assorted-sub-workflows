@@ -7,7 +7,9 @@ This workflow determines which processes should be called for the incoming param
 `validate_parameters` takes no input but uses the params map from the Nextflow runtime environment and checks for either IRODS or READ type parameters, as defined below:
 
 
-Manifests:
+There are two ways of specifying input for the pipeline:
+
+- Manifests (batch input files):
 - --manifest_of_lanes: IRODS
 - --manifest_of_reads or --manifest: READS
 
