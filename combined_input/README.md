@@ -30,7 +30,7 @@ COMBINE_IRODS
 
 or directly IRODS_EXTRACTOR
 
-Or in the scenario of reads directly calling
+Or, in the scenario of using only reads files available on disk, one can call directly:
 
 INPUT_CHECK
 
