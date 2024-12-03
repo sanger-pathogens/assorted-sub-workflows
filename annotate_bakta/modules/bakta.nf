@@ -4,7 +4,7 @@ process BAKTA {
     label "mem_16"
     label "time_1"
 
-    publishDir mode: 'copy', pattern: "${meta.ID}.gff3", path: "${params.outdir}/gffs/"
+    publishDir mode: 'copy', pattern: "${amended_id}.gff3", path: "${params.outdir}/gffs/"
 
     container 'quay.io/biocontainers/bakta:1.9.4--pyhdfd78af_0'
 
@@ -12,27 +12,28 @@ process BAKTA {
     tuple val(meta), path(fasta)
 
     output:
-    tuple val(meta), path("${meta.ID}.embl")             , emit: embl
-    tuple val(meta), path("${meta.ID}.faa")              , emit: faa
-    tuple val(meta), path("${meta.ID}.ffn")              , emit: ffn
-    tuple val(meta), path("${meta.ID}.fna")              , emit: fna
-    tuple val(meta), path("${meta.ID}.gbff")             , emit: gbk
-    tuple val(meta), path("${meta.ID}.gff3")             , emit: gff
-    tuple val(meta), path("${meta.ID}.hypotheticals.tsv"), emit: hypotheticals_tsv
-    tuple val(meta), path("${meta.ID}.hypotheticals.faa"), emit: hypotheticals_faa
-    tuple val(meta), path("${meta.ID}.tsv")              , emit: tsv
-    tuple val(meta), path("${meta.ID}.txt")              , emit: txt
-    tuple val(meta), path("${meta.ID}.svg")              , emit: svg
-    tuple val(meta), path("${meta.ID}.png")              , emit: png
+    tuple val(meta), path("${amended_id}.embl")             , emit: embl
+    tuple val(meta), path("${amended_id}.faa")              , emit: faa
+    tuple val(meta), path("${amended_id}.ffn")              , emit: ffn
+    tuple val(meta), path("${amended_id}.fna")              , emit: fna
+    tuple val(meta), path("${amended_id}.gbff")             , emit: gbk
+    tuple val(meta), path("${amended_id}.gff3")             , emit: gff
+    tuple val(meta), path("${amended_id}.hypotheticals.tsv"), emit: hypotheticals_tsv
+    tuple val(meta), path("${amended_id}.hypotheticals.faa"), emit: hypotheticals_faa
+    tuple val(meta), path("${amended_id}.tsv")              , emit: tsv
+    tuple val(meta), path("${amended_id}.txt")              , emit: txt
+    tuple val(meta), path("${amended_id}.svg")              , emit: svg
+    tuple val(meta), path("${amended_id}.png")              , emit: png
 
     script:
+    amended_id = "${meta.ID}".replaceAll(/[^\w.-]/, '_')
     """
     bakta \\
         ${fasta} \\
         ${params.bakta_args} \\
         --threads ${task.cpus} \\
-        --prefix ${meta.ID} \\
-        --locus-tag ${meta.bakta_id} \\
+        --prefix ${amended_id} \\
+        --locus-tag ${amended_id} \\
         --db ${params.bakta_db} \\
         --keep-contig-headers
     """
