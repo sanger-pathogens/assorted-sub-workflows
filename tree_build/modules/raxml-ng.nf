@@ -9,22 +9,23 @@ process RAXML_NG {
     publishDir "${params.outdir}/tree", mode: 'copy', overwrite: true, pattern: "*.support"
 
     input:
-    path(msa), path(constant_sites_freq)
+    tuple path(msa), path(constant_sites_freq)
 
     output:
     path("*.support"), emit: tree
 
     script:
-    constant_sites_freq_text = constant_sites_freq.text.trim()
-    raxml_model = "${params.raxml_base_model}+ASC_STAM{${constant_sites_freq}}"
     """
-    raxml-ng --check --msa ${msa} --model ${raxml_model}
-    raxml-ng --parse --msa ${msa} --model ${raxml_model}
+    constant_sites_freq=\$(cat ${constant_sites_freq})
+    raxml_model="${params.raxml_base_model}+ASC_STAM{\${constant_sites_freq}}"
+    raxml-ng --check --msa ${msa} --model \${raxml_model}
+    raxml-ng --parse --msa ${msa} --model \${raxml_model}
     raxml-ng --all \\
         --msa ${msa}.raxml.rba \\
-        --model ${raxml_model} \\
+        --model \${raxml_model} \\
         --tree ${params.tree_search} \\
         --bs-trees ${params.bootstrap_trees} \\
-        --threads ${task.cpus}
+        --threads ${task.cpus} \\
+        --simd avx
     """
 }
