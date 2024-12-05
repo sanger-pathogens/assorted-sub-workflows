@@ -4,10 +4,10 @@
         "annotate_bakta options": {
             "bakta_args": {
                 "default": "",
-                "help_text": "Add any additional bakta args you wish to provide here required to be formatted as bakta expects i.e. --proteins <full path>. default flags are prefix, locus-tag, keep-contig-headers"},
+                "help_text": "Supply bakta arguments as a string, e.g. '--proteins <full path>'. Avoid the use of --prefix, --locus-tag, --keep-contig-headers, for which values are supplied by the pipeline."},
             "bakta_db": {
                 "default": "/data/pam/software/bakta/v5.1/",
-                "help_text": "Bakta DB used to annotate - Current version is 5.1"
+                "help_text": "Absolute path to the Bakta DB used for annotation."
             },
             "combine_annotations": {
                 "default": "false",
