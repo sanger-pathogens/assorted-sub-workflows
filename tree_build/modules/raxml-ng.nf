@@ -25,7 +25,7 @@ process RAXML_NG {
         --model \${raxml_model} \\
         --tree ${params.tree_search} \\
         --bs-trees ${params.bootstrap_trees} \\
-        --threads ${task.cpus} \\
+        --threads auto{${task.cpus}} \\
         --simd avx
     """
 }
