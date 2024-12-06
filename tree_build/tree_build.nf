@@ -2,6 +2,7 @@ include { GUBBINS; GUBBINS_MASK } from './modules/gubbins.nf'
 include { SNP_SITES } from './modules/snp-sites.nf'
 include { RAXML_NG } from './modules/raxml-ng.nf'
 include { MODEL_FINDER } from './modules/iqtree.nf'
+include { PLOT_TREE } from './modules/plotting.nf'
 
 workflow CONSTRUCT_PHYLO {
     take:
@@ -26,6 +27,7 @@ workflow CONSTRUCT_PHYLO {
     // Extract SNP sites, get constant site frequencies and build tree
     SNP_SITES(msa)
     | RAXML_NG
+    | PLOT_TREE
 
     emit:
     RAXML_NG.out.tree
