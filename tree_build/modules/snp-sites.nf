@@ -19,7 +19,7 @@ process SNP_SITES{
     output_conscount = "${msa.baseName}.conscount"
     """
     snp-sites -o ${output_snpaln} ${msa}
-    snp-sites -C ${msa} | tr ',' '/' > ${msa}.conscount
+    snp-sites -C ${msa} | tr ',' '/' > ${output_conscount}
     """
 
 }
