@@ -15,8 +15,8 @@ process SNP_SITES{
     tuple path(output_snpaln), path(output_conscount), emit: snp_aln_channel
 
     script:
-    output_snpaln="${msa}.snp.aln"
-    output_conscount="${msa}.conscount"
+    output_snpaln = "${msa.baseName}.snp.aln"
+    output_conscount = "${msa.baseName}.conscount"
     """
     snp-sites -o ${output_snpaln} ${msa}
     snp-sites -C ${msa} | tr ',' '/' > ${msa}.conscount
