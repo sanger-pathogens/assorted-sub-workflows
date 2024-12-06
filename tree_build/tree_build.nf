@@ -18,7 +18,7 @@ workflow CONSTRUCT_PHYLO {
         input_msa.set { msa }
     }
 
-    // Infer subsitution model
+    // Infer substitution model
     if (params.check_model) {
         MODEL_FINDER(msa)
     }
