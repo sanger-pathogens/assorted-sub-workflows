@@ -1,0 +1,43 @@
+{ 
+    "pipeline": "Tree build (sub-workflow)",
+    "params": {
+        "Recombination assessment and removal": {
+            "remove_recombination": {
+                "default": "false",
+                "help_text": "Apply recombination masking/removal processes (Gubbins) before building a tree."
+            },
+            "gubbins_filter_percentage": {
+                "default": "95",
+                "help_text": ""
+            }
+        },
+        "Building a tree": {
+            "tree_search": {
+                "default": "pars{10}",
+                "help_text": "Any string acceptable by --tree parameter of raxml-ng."
+            },
+            "bootstrap_trees": {
+                "default": "200",
+                "help_text": "Number of trees to use for the bootstraping stage (in order to estimate support/confidence values for branches)."
+            },
+            "base_model": {
+                "default": "GTR+G4",
+                "help_text": "Specify the evolutionary model that raxml-ng should use to build tree. Default 'GTR+G4' is based on community. For other available compatible models, please consult raxml-ng documentation."
+            },
+            "raxmlng_args": {
+                "default": "--simd avx",
+                "help_text": "Additional arguments to supply to raxml-ng. Incompatible options (reserved for use by this pipeline): --check, --parse, --all, --msa, --model, --tree, --bs-trees, --prefix, --threads."
+            }
+        },
+        "Model inference": {
+            "check_model": {
+                "default": "false",
+                "help_text": "Use IQTree ModelFinder to determine infer models that describe the phylogeny well."
+            },
+            "model_complexity_criterion": {
+                "default": "",
+                "help_text": "Model complexity criterion to be minimized during inference. Possible values: '-AIC', '-AICc' (BIC is default, i.e. empty string)."
+            }
+        }
+    }
+}
