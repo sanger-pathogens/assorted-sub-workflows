@@ -17,7 +17,7 @@ process RAXML_NG {
     script:
     """
     constant_sites_freq=\$(cat ${constant_sites_freq})
-    raxml_model="${params.raxml_base_model}+ASC_STAM{\${constant_sites_freq}}"
+    raxml_model="${params.base_model}+ASC_STAM{\${constant_sites_freq}}"
     raxml-ng --check --msa ${msa} --model \${raxml_model}
     raxml-ng --parse --msa ${msa} --model \${raxml_model}
     raxml-ng --all \\
