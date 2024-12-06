@@ -14,8 +14,8 @@ process MODEL_FINDER {
     path(iqtree_log_liklihood_models), emit: inferred_models
 
     script:
-    iqtree_log_liklihood_models = "${msa}.model"
-    // iqtree_report = "${msa}.iqtree"
+    iqtree_log_liklihood_models = "${msa.baseName}.model"
+    iqtree_report = "${msa.baseName}.iqtree"
     """
     iqtree \\
         -s "${msa}" \\
