@@ -27,6 +27,7 @@ process RAXML_NG {
         --bs-trees ${params.bootstrap_trees} \\
         --prefix ${msa.baseName} \\
         --threads auto{${task.cpus}} \\
+        --seed ${params.seed} \\
         ${params.raxmlng_args}
     """
 }

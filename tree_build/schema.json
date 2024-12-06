@@ -24,9 +24,13 @@
                 "default": "GTR+G4",
                 "help_text": "Specify the evolutionary model that raxml-ng should use to build tree. Default 'GTR+G4' is based on community. For other available compatible models, please consult raxml-ng documentation."
             },
+            "seed": {
+                "default": "1234",
+                "help_text": "Random seed to ensure deterministic raxml-ng output."
+            },
             "raxmlng_args": {
                 "default": "--simd avx",
-                "help_text": "Additional arguments to supply to raxml-ng. Incompatible options (reserved for use by this pipeline): --check, --parse, --all, --msa, --model, --tree, --bs-trees, --prefix, --threads."
+                "help_text": "Additional arguments to supply to raxml-ng. Incompatible options (reserved for use by this pipeline): --check, --parse, --all, --msa, --model, --tree, --bs-trees, --prefix, --threads, --seed."
             }
         },
         "Model inference": {
