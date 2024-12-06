@@ -14,7 +14,8 @@ process PLOT_TREE {
     path("*.png"), emit: plots
 
     script:
+    plotting_script = "${projectDir}/assorted-sub-workflows/tree_build/bin/plot_tree.py"
     """
-    plot_tree.py ${newick} ${newick.baseName}.png
+    ${plotting_script} ${newick} ${newick.baseName}.png
     """
 }
