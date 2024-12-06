@@ -8,10 +8,10 @@
             },
             "gubbins_filter_percentage": {
                 "default": "95",
-                "help_text": ""
+                "help_text": "Remove sequences in the multiple sequence alignment that consist of more than this percentage of gaps."
             }
         },
-        "Building a tree": {
+        "Phylogenetic tree inference": {
             "tree_search": {
                 "default": "pars{10}",
                 "help_text": "Any string acceptable by --tree parameter of raxml-ng."
@@ -33,10 +33,10 @@
                 "help_text": "Additional arguments to supply to raxml-ng. Incompatible options (reserved for use by this pipeline): --check, --parse, --all, --msa, --model, --tree, --bs-trees, --prefix, --threads, --seed."
             }
         },
-        "Model inference": {
+        "Evolutionary model inference": {
             "check_model": {
                 "default": "false",
-                "help_text": "Use IQTree ModelFinder to determine infer models that describe the phylogeny well."
+                "help_text": "Use IQTree ModelFinder to infer evolutionary models that effectively explain sequence differences in the multiple sequence alignment. Output can be used to confirm suitability of, or suggest an alternative model that could be supplied to raxml-ng."
             },
             "model_complexity_criterion": {
                 "default": "",
