@@ -1,7 +1,7 @@
 { 
     "pipeline": "Annotate_bakta (sub-workflow)",
     "params": {
-        "annotate_bakta options": {
+        "Annotation": {
             "bakta_args": {
                 "default": "",
                 "help_text": "Supply bakta arguments as a string, e.g. '--proteins <full path>'. Avoid the use of --prefix, --locus-tag, --keep-contig-headers, for which values are supplied by the pipeline."},
