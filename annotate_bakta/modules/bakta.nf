@@ -27,7 +27,7 @@ process BAKTA {
 
     script:
     amended_id = "${meta.ID}".replaceAll(/[^\w.-]/, '_')
-    gff = "${meta.ID}.gff3"
+    gff = "${amended_id}.gff3"
     """
     bakta \\
         ${fasta} \\
