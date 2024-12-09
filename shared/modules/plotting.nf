@@ -16,6 +16,6 @@ process PLOT_TREE {
     script:
     plot_script = "${projectDir}/assorted-sub-workflows/shared/scripts/plot_tree.py"
     """
-    ${plot_script} ${newick} ${newick.baseName}.png
+    ${plot_script} ${newick} ${meta.ID}.png
     """
 }
