@@ -2,7 +2,7 @@ include { GUBBINS; GUBBINS_MASK } from './modules/gubbins.nf'
 include { SNP_SITES } from './modules/snp-sites.nf'
 include { RAXML_NG } from './modules/raxml-ng.nf'
 include { MODEL_FINDER } from './modules/iqtree.nf'
-include { PLOT_TREE } from './modules/plotting.nf'
+include { PLOT_TREE } from '../shared/modules/plotting.nf'
 
 workflow CONSTRUCT_PHYLO {
     take:
