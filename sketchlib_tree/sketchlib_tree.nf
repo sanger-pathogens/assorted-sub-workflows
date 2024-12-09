@@ -10,7 +10,7 @@
 
 include { SKETCH_ASSEMBLIES; SKETCH_CORE_ACC_DIST } from './modules/sketchlib.nf'
 include { RAPIDNJ                                 } from './modules/rapidnj.nf'
-include { PLOT_TREE                               } from './modules/plotting.nf'
+include { PLOT_TREE                               } from '../shared/modules/plotting.nf'
 
 
 workflow SKETCHLIB_TREE {
