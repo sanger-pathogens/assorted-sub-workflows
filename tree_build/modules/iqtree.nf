@@ -19,6 +19,7 @@ process MODEL_FINDER {
     """
     iqtree \\
         -s "${msa}" \\
+        -pre "${msa.baseName}" \\
         -m MF \\
         ${params.model_complexity_criterion}
     """
