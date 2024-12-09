@@ -5,7 +5,7 @@ process MODEL_FINDER {
 
     container 'quay.io/biocontainers/iqtree:2.3.6--hdbdd923_0'
 
-    publishDir "${params.outdir}/tree/iqtree", mode: 'copy', overwrite: true, pattern: "${iqtree_log_liklihood_models}"
+    publishDir "${params.outdir}/tree/iqtree", mode: 'copy', overwrite: true
 
     input:
     path(msa)
