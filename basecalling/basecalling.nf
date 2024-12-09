@@ -1,10 +1,10 @@
-include { CONVERT_FAST5_TO_POD5; MERGE_POD5                                     } from '../modules/pod5.nf'
-include { MODEL_DOWNLOAD; BASECALL; DEMUX; DORADO_SUMMARY; UNASSIGNED_SUMMARY   } from '../modules/dorado.nf'
+include { CONVERT_FAST5_TO_POD5; MERGE_POD5                                     } from './modules/pod5.nf'
+include { MODEL_DOWNLOAD; BASECALL; DEMUX; DORADO_SUMMARY; UNASSIGNED_SUMMARY   } from './modules/dorado.nf'
 include { CONVERT_TO_FASTQ; MERGE_BAMS_FOR_SUMMARY; 
         MANAGE_DUPLICATES_FROM_BAMS as REMOVE_DUPLICATES_FROM_BAMS;
-        MANAGE_DUPLICATES_FROM_BAMS as KEEP_DUPLICATES_FROM_BAMS                } from '../modules/samtools.nf'
-include { SUMMARY_DUPLICATES                                                    } from '../modules/summary_duplicates.nf'
-include { PYCOQC                                                                } from '../modules/pycoqc.nf'
+        MANAGE_DUPLICATES_FROM_BAMS as KEEP_DUPLICATES_FROM_BAMS                } from './modules/samtools.nf'
+include { SUMMARY_DUPLICATES                                                    } from './modules/summary_duplicates.nf'
+include { PYCOQC                                                                } from './modules/pycoqc.nf'
 
 def validateSingleFormat(listOfFormats){
     if (listOfFormats.size() != 1) {
