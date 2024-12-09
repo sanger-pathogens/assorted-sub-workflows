@@ -38,14 +38,7 @@ workflow {
             additional_metadata
         )
     }
-
-    INDEX_REF(reference)
-    | set { reference_index_ch }
-
-    PRE_MAP_QC_PRE_TRIM(
-        BASECALLING.out.long_reads_ch
-    )
-    
+  
 workflow.onComplete {
     NextflowTool.summary(workflow, params, log)
 }
