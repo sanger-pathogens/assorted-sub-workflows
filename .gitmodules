@@ -1,6 +1,3 @@
-[submodule "basecalling/nextflowtool"]
-	path = basecalling/nextflowtool
-	url = https://gitlab.internal.sanger.ac.uk/sanger-pathogens/pipelines/nextflowtool.git
 [submodule "nextflowtool"]
 	path = nextflowtool
 	url = https://gitlab.internal.sanger.ac.uk/sanger-pathogens/pipelines/nextflowtool.git

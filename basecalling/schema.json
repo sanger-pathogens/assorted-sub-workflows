@@ -1,5 +1,5 @@
 {
-    "pipeline": "long-read-ampliseq",
+    "pipeline": "Nanopore Basecalling",
     "params": {
         "Basecalling": {
             "basecall": {
@@ -28,30 +28,11 @@
             }
         },
         "Output File Management": {
-            "keep_sorted_bam": {
-                "default": "true",
-                "help_text": "Retain sorted BAM files."
-            },
-            "keep_bam_files": {
-                "default": "false",
-                "help_text": "Save intermediate BAM files."
-            },
             "save_fastqs": {
                 "default": "true",
                 "help_text": "Save basecalled reads in FASTQ format."
-            },
-            "save_trimmed": {
-                "default": "true",
-                "help_text": "Save reads with adapters trimmed."
-            },
-            "save_too_short": {
-                "default": "true",
-                "help_text": "Save reads that are too short."
-            },
-            "save_too_long": {
-                "default": "true",
-                "help_text": "Save reads that are too long."
             }
+         
         },
         "Reference Files": {
             "reference": {
@@ -61,14 +42,6 @@
             "raw_read_dir": {
                 "default": "",
                 "help_text": "Directory containing raw read files. (mandatory)"
-            },
-            "primers": {
-                "default": "",
-                "help_text": "Path to the primer sequences file. (mandatory)"
-            },
-            "target_regions_bed": {
-                "default": "",
-                "help_text": "Path to the BED file with target regions. (mandatory)"
             },
             "additional_metadata": {
                 "default": "",
