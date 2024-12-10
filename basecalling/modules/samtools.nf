@@ -1,4 +1,3 @@
-a
 process CONVERT_TO_FASTQ {
     label 'cpu_2'
     label 'mem_1'
@@ -22,7 +21,7 @@ process CONVERT_TO_FASTQ {
     samtools fastq -@ ${task.cpus} -0 ${fastq_output} ${reads_bam}
     """
 }
-a
+
 process MERGE_BAMS_FOR_SUMMARY {
     label 'cpu_2'
     label 'mem_1'
@@ -43,7 +42,7 @@ process MERGE_BAMS_FOR_SUMMARY {
     samtools merge -@ ${task.cpus} -o ${combined_bam} *.bam
     """
 }
-a
+
 process MANAGE_DUPLICATES_FROM_BAMS {
     label 'cpu_2'
     label 'mem_4'
