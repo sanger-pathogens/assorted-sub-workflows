@@ -6,7 +6,7 @@ process SNP_SITES{
     conda 'bioconda::snp-sites=2.5.1'
     container 'quay.io/biocontainers/snp-sites:2.5.1--he4a0461_4'
 
-    publishDir "${params.outdir}/snp_aln", mode: 'copy', overwrite: true, pattern: "*.snp.aln"
+    publishDir "${params.outdir}/snp_aln", mode: 'copy', overwrite: true, pattern: "${output_snpaln}"
 
     input:
     path(msa)
@@ -15,11 +15,11 @@ process SNP_SITES{
     tuple path(output_snpaln), path(output_conscount), emit: snp_aln_channel
 
     script:
-    output_snpaln="${msa}.snp.aln"
-    output_conscount="${msa}.conscount"
+    output_snpaln = "${msa.baseName}.snp.aln"
+    output_conscount = "${msa.baseName}.conscount"
     """
     snp-sites -o ${output_snpaln} ${msa}
-    snp-sites -C ${msa} | tr ',' '/' > ${msa}.conscount
+    snp-sites -C ${msa} | tr ',' '/' > ${output_conscount}
     """
 
 }

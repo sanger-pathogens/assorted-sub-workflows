@@ -27,6 +27,7 @@ process BAKTA {
 
     script:
     amended_id = "${meta.ID}".replaceAll(/[^\w.-]/, '_')
+    gff = "${amended_id}.gff3"
     """
     bakta \\
         ${fasta} \\
@@ -36,5 +37,8 @@ process BAKTA {
         --locus-tag ${amended_id} \\
         --db ${params.bakta_db} \\
         --keep-contig-headers
+
+    # Remove non-ASCII characters from GFF
+    sed -i "s/[‘’]/'/g" "${gff}"
     """
 }
