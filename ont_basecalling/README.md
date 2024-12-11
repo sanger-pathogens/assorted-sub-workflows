@@ -41,7 +41,7 @@ You can override the default paths using the command line parameters directly wh
 ### Other parameters:
 
 #### Basecalling
-
+Below are paramaters can be passed to customise the behaviour of the pipeline and their defaults
 - --basecall = "true"
 - --basecall_model = "dna_r10.4.1_e8.2_400bps_hac@v4.3.0"
 - --basecall_model_path = ""
