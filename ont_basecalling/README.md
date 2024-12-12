@@ -26,13 +26,10 @@ This subworkflow is used for basecalling Nanopore data in either pod5 or fast5 f
 ```
 nextflow run long-read-ampliseq/main.nf \
 --raw_read_dir <directory containing FAST5/POD5 files> \
---reference <reference fasta> \
 --additional_metadata <CSV mapping sample IDs to barcodes> \
---dorado_local_path <absolute path to Dorado executable> \
--profile docker
 ```
 
-instead of `-profile docker`, you can run the pipeline with `-profile laptop`. As well as enabling docker, the laptop profile allows the pipeline to be used offline by providing a local copy of a configuration file that is otherwise downloaded.
+You can run the pipeline with `-profile laptop`, as well as enabling docker, the laptop profile allows the pipeline to be used offline by providing a local copy of a configuration file that is otherwise downloaded.
 
 Should you need to run the pipeline offline, it is best to make use of pre-populated dependency caches. These can be created with any of the supported profiles (e.g. `-profile docker`) and involves running the pipeline once to completion. You will also need to provide a `--basecall_model_path` (see installation step 4)- the laptop profile includes a default local path for this, as well as the `--dorado_local_path`.
 
