@@ -1,5 +1,0 @@
-[submodule "nextflowtool"]
-	path = nextflowtool
-	url = https://gitlab.internal.sanger.ac.uk/sanger-pathogens/pipelines/nextflowtool.git
-[submodule "assorted-sub-workflows"]
-	branch = basecalling
