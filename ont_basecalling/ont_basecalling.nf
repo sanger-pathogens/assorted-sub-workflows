@@ -136,3 +136,45 @@ workflow ONT_BASECALLING{
     pycoqc_json
     //model_ch = MODEL_DOWNLOAD.out.model_ch.map{ pod5, model -> model} //currently not useful as we use 9.4.1 flow cells but later this could be useful
 }
+
+
+workflow LONG_READ_QC {
+    take:
+    barcode_bam_ch
+    
+    main:
+
+    barcode_bam_ch.branch { metaMap, long_bam ->
+        unclassified: metaMap.barcode == "unclassified"
+            return long_bam
+
+        classified: true
+            return long_bam
+    }.set { summarise_channel }
+    
+    //summarise the bams that have been classified successfully
+    
+    summarise_channel.classified.collect()
+    | MERGE_BAMS_FOR_SUMMARY
+    | DORADO_SUMMARY
+    | set{ summary_channel }
+    
+    PYCOQC(summary_channel)
+    PYCOQC.out.json
+    | set { pycoqc_json }
+
+    //if there are multiple barcode kits condense unclassified channel into 1 object to be merged
+    if (params.barcode_kit_name.size() == 1) {
+        summarise_channel.unclassified
+        | set{ unclassified_ch }
+
+    } else {
+        summarise_channel.unclassified.collect()
+        | set{ unclassified_ch }
+    }
+
+    emit:
+    summary_channel
+    unclassified_ch
+    pycoqc_json
+}
