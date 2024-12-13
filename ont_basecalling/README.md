@@ -1,6 +1,6 @@
 # Nanopore Basecalling
 
-This subworkflow is used for basecalling Nanopore data in either pod5 or fast5 formats.
+This subworkflow processes Nanopore sequencing data in POD5 or FAST5 formats, supporting file conversion, basecalling, demultiplexing, and quality control.
 
 ## Installation
 
@@ -22,12 +22,17 @@ This subworkflow is used for basecalling Nanopore data in either pod5 or fast5 f
    If a pre-downloaded model path is not provided to the pipeline, the model specified by the `--basecall_model` parameter will be downloaded on the fly.
 
 ## Usage
+Minimum usage
 
 ```
 nextflow run long-read-ampliseq/main.nf \
 --raw_read_dir <directory containing FAST5/POD5 files> \
 --additional_metadata <CSV mapping sample IDs to barcodes> \
 ```
+
+The CSV must be with the following stucture with each sample on a new line: 
+ID,barcode,barcode_kit
+21GUS-SR-008,01,SQK-NBD114-24
 
 You can run the pipeline with `-profile laptop`, as well as enabling docker, the laptop profile allows the pipeline to be used offline by providing a local copy of a configuration file that is otherwise downloaded.
 
