@@ -67,9 +67,11 @@ workflow IRODS_QUERY {
             cram_path = metamap.irods_path
             [metamap, cram_path]  }
         .ifEmpty { error("""
-            Error: IRODS search returned no data please ensure you are logged on with iinit
-            If you are please check the work directory for permission errors 
-            and the command to ensure the study exists
+            Error: IRODS search returned no data!
+            - Please ensure you are logged on with `iinit` and re-run the
+            pipeline without `-resume`.
+            - If you are logged in, check the process IRODS_QUERY:BATON work
+            directory for permission errors and ensure the study exists.
             """)
         }
         .filter{ it[0]["subset"] != "${params.irods_subset_to_skip}" }
