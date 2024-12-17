@@ -1,5 +1,40 @@
 # Combined Input subworkflow
 
+## Mixed_inputs.nf
+
+This workflow determines which processes should be called for the incoming parameters.
+
+`validate_parameters` takes no input but uses the params map from the Nextflow runtime environment and checks for either IRODS or READ type parameters, as defined below:
+
+
+There are two ways of specifying input for the pipeline:
+
+- Manifests (batch input files):
+- --manifest_of_lanes: IRODS
+- --manifest_of_reads or --manifest: READS
+
+CLI arguments:
+- --studyid: IRODS
+- --runid: IRODS
+- --laneid: IRODS
+- --plexid: IRODS
+
+`validate_parameters` returns a list of active workflows based on the runtime parameters
+
+This list is then used to trigger the correct workflows for the data specified a input to the pipeline: either IRODS (merging of CLI + Manifest input) or parsing the read manifest.
+
+The subworkflows can be executed separately through direct reference.  
+For example, to specify the use of data from IRODS, one can call either:
+
+COMBINE_IRODS
+
+or directly IRODS_EXTRACTOR
+
+Or, in the scenario of using only reads files available on disk, one can call directly:
+
+INPUT_CHECK
+
+Mixed input should be used in cases that you expect manifests of reads + IRODS extraction
 ## Scripts
 
 ### filter_metadata.py

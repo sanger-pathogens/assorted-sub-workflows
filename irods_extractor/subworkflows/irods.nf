@@ -66,6 +66,14 @@ workflow IRODS_QUERY {
             metamap = set_metadata(irods_item.collection, irods_item.data_object, irods_item.avus, params.combine_same_id_crams)
             cram_path = metamap.irods_path
             [metamap, cram_path]  }
+        .ifEmpty { error("""
+            Error: IRODS search returned no data!
+            - Please ensure you are logged on with `iinit` and re-run the
+            pipeline without `-resume`.
+            - If you are logged in, check the process IRODS_QUERY:BATON work
+            directory for permission errors and ensure the study exists.
+            """)
+        }
         .filter{ it[0]["subset"] != "${params.irods_subset_to_skip}" }
         .set{ meta_cram_ch }
         

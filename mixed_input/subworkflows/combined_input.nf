@@ -1,5 +1,4 @@
 include { IRODS_MANIFEST_PARSE } from './irods_manifest_parse.nf'
-include { INPUT_CHECK } from './input_check.nf'
 
 //
 // SUBWORKFLOW: Read in study, run, etc. parameters and pull data from iRODS
@@ -32,8 +31,7 @@ workflow IRODS_CLI {
 
 workflow COMBINE_IRODS {
     main:
-    // take iRODS dataset specification from CLI options
-    IRODS_CLI()
+    IRODS_CLI // take iRODS dataset specification from CLI options
     | set{ input_irods_from_opt_ch }
 
     // take iRODS dataset specification from manifest of lanes
@@ -53,24 +51,3 @@ workflow COMBINE_IRODS {
     input_irods_ch
 }
 
-workflow COMBINE_READS {
-    take:
-    irods_reads_ch // [meta, read_1, read_2] as from IRODS_EXTRACTOR
-
-    main:
-    // Read in samplesheet, validate and stage input files
-    if (params.manifest_of_reads) {
-        input_reads_ch = file(params.manifest_of_reads)
-        INPUT_CHECK (input_reads_ch)
-        | set{ ch_reads_from_manifest }
-    } else {
-        Channel.of("none").set{ ch_reads_from_manifest }
-    }  // ch_reads_from_manifest [meta, read_1, read_2]
-
-    // combine reads input channels
-    irods_reads_ch.mix(ch_reads_from_manifest.filter{ it != "none"}).set{ all_reads_ready_to_map_ch }
-
-    emit:
-    all_reads_ready_to_map_ch  // [meta, read_1, read_2]
-
-}
