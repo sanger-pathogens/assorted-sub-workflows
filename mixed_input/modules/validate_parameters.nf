@@ -1,5 +1,5 @@
 def validate_path_param(
-    paramoption, 
+    param_option,
     param, 
     type = "file", 
     mandatory = true) {
@@ -10,7 +10,7 @@ def validate_path_param(
         return 1
     }
 
-    def param_name = (paramoption - "--").replaceAll("", " ")
+    def param_name = (param_option - "--").replaceAll("", " ")
     if (param) {
         def file_param = file(param)
         if (!file_param.exists()) {
