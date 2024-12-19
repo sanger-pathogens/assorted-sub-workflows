@@ -1,5 +1,5 @@
 def validate_path_param(
-    paramoption, 
+    param_option,
     param, 
     type = "file", 
     mandatory = true) {
@@ -10,7 +10,7 @@ def validate_path_param(
         return 1
     }
 
-    def param_name = (paramoption - "--").replaceAll("", " ")
+    def param_name = (param_option - "--").replaceAll("", " ")
     if (param) {
         def file_param = file(param)
         if (!file_param.exists()) {
@@ -99,7 +99,7 @@ def validate_parameters() {
                 throw new Exception("Cannot supply both ${params.manifest_of_reads} and ${params.manifest} as they are alias's of the same manifest")
             } else {
                 // If manifest is provided but manifest_of_reads is not, use manifest for reads
-                log.info("manifest_of_reads not provided. Using manifest as manifest_of_reads.")
+                log.info("No --manifest_of_reads provided. Using --manifest parameter value '${params.manifest}' as --manifest_of_reads.\n")
                 /*
                 The manifest is not replaced at at this stage in reality as that is handled in the mixed_input workflow
                 def manifestToUse = params.manifest_of_reads ? params.manifest_of_reads : params.manifest

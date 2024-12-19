@@ -44,7 +44,13 @@
                 "default": "false",
                 "help_text": "Path to a manifest of search terms as specified above.\n            At least one of studyid or runid fields, or another field that matches the list of iRODS metadata fields must be specified; other parameters are not mandatory and corresponding\n            fields in the CSV manifest file can be left blank. laneid/plexid are only considered when provided alongside a studyid or runid. target/type are only considered in combination with studyid, runid, or other fields.\n\n            Example of manifest 1:\n                studyid,runid,laneid,plexid\n                ,37822,2,354\n                5970,37822,,332\n                5970,37822,2,\n\n            Example of manifest 2:\n                sample_common_name,type,target\n                Romboutsia lituseburensis,cram,1\n                Romboutsia lituseburensis,cram,0"
             }
-        }
+        },
+        "Aliased options": {
+            "manifest": {
+              "default": "",
+              "help_text": "Alias for --manifest_of_reads (optional)"
+            }
+          }
     }
 }
 

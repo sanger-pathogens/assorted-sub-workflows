@@ -27,21 +27,27 @@ def create_fastq_channels(LinkedHashMap row) {
     Path fastq_1 = null
     Path fastq_2 = null
 
+    def errors = []
     def array = []
     // check short reads
     if ( !(row.R1 == 'NA') ) {
         if ( !file(row.R1).exists() ) {
-            exit 1, "ERROR: Please check input samplesheet -> Read 1 FastQ file does not exist!\n${row.R1}"
+            errors << "R1 fastq file does not exist:\n${row.R1}"
         }
         fastq_1 = file(row.R1)
     }
     if ( !(row.R2 == 'NA') ) {
         if ( !file(row.R2).exists() ) {
-            exit 1, "ERROR: Please check input samplesheet -> Read 2 FastQ file does not exist!\n${row.R2}"
+            errors << "R2 fastq file does not exist:\n${row.R2}"
         }
         fastq_2 = file(row.R2)
     }
     
+    if (errors) {
+        errors.add(0, "Errors while parsing input manifest!")
+        throw new Exception(errors.join('\n'))
+    }
+
     array = [ meta, fastq_1, fastq_2 ]
     return array
 }
