@@ -1,6 +1,7 @@
 include { IRODS_MANIFEST_PARSE     } from './subworkflows/irods_manifest_parse.nf'
 include { INPUT_CHECK              } from './subworkflows/input_check.nf'
 include { IRODS_CLI; COMBINE_IRODS } from './subworkflows/combined_input.nf'
+include { ENA_DOWNLOAD             } from './subworkflows/ena_input.nf'
 include { IRODS_EXTRACTOR          } from '../irods_extractor/subworkflows/irods.nf'
 
 include { validate_parameters      } from './modules/validate_parameters'
@@ -20,15 +21,22 @@ workflow MIXED_INPUT {
     main:
     def active_workflows = validate_parameters() //ensure all potential inputs are parsed and validated
 
+    if ('ENA' in active_workflows) {
+        Channel.fromPath(params.manifest_ena)
+        | ENA_DOWNLOAD
+        | set { reads_from_ena_ch }
+    } else {
+        Channel.of("none")
+        | set { reads_from_ena_ch }
+    }
+
     if ('IRODS' in active_workflows) {
         COMBINE_IRODS
         | IRODS_EXTRACTOR
         | set { reads_from_irods_ch }
-
     } else {
         Channel.of("none")
-        | set{ reads_from_irods_ch }
-
+        | set { reads_from_irods_ch }
     }
 
     if ('READS_MANIFEST' in active_workflows ) {
@@ -37,14 +45,15 @@ workflow MIXED_INPUT {
         input_reads_ch = file(manifestToUse)
 
         INPUT_CHECK(input_reads_ch)
-        | set{ reads_from_local_ch }
-
+        | set { reads_from_local_ch }
     } else {
         Channel.of("none")
-        | set{ reads_from_local_ch }
+        | set { reads_from_local_ch }
     }
 
-    reads_from_irods_ch.mix(reads_from_local_ch)
+    reads_from_irods_ch
+    | mix(reads_from_local_ch)
+    | mix(reads_from_ena_ch)
     | filter { it != "none"}
     | set { all_reads_ready_ch }
 
