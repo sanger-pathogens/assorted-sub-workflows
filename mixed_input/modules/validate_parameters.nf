@@ -51,6 +51,7 @@ def validate_parameters() {
     def workflows_to_run = []
 
     // Determine which input specification method is provided
+    def manifest_ena_exists = params.manifest_ena != null
     def manifest_of_lanes_exists = params.manifest_of_lanes != null
     def manifest_of_reads_exists = params.manifest_of_reads != null
     def manifest_exists = params.manifest != null
@@ -62,18 +63,20 @@ def validate_parameters() {
     def has_plexid = params.plexid != -1
 
     // anything provided?
-    def input_specified = manifest_of_lanes_exists || 
-                          manifest_of_reads_exists || 
-                          manifest_exists || 
-                          has_studyid || 
-                          has_runid || 
-                          has_laneid || 
+    def input_specified = manifest_ena_exists ||
+                          manifest_of_lanes_exists ||
+                          manifest_of_reads_exists ||
+                          manifest_exists ||
+                          has_studyid ||
+                          has_runid ||
+                          has_laneid ||
                           has_plexid
 
     if (!input_specified) {
     throw new Exception("""No input specification provided. Please specify one or a mix of:
 
                 Manifests:
+                - --manifest_ena
                 - --manifest_of_lanes
                 - --manifest_of_reads or --manifest
 
@@ -86,11 +89,16 @@ def validate_parameters() {
 } 
 
     // Validate and route based on input type
-    if (manifest_of_lanes_exists || manifest_of_reads_exists || manifest_exists) {
+    if (manifest_ena_exists || manifest_of_lanes_exists || manifest_of_reads_exists || manifest_exists) {
         // Validate manifests
         if (manifest_of_lanes_exists) {
             errors += validate_path_param("--manifest_of_lanes", params.manifest_of_lanes)
             workflows_to_run << 'IRODS'
+        }
+
+        if (manifest_ena_exists) {
+            errors += validate_path_param("--manifest_ena", params.manifest_ena)
+            workflows_to_run << 'ENA'
         }
 
         if (manifest_exists) {
