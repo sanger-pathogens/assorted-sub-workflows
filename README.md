@@ -77,6 +77,10 @@ Note that, due to the large number of possible search terms used, no restriction
 
 The workflow should issue a notice of how many files are considered for download, which may allow you to stop it in time if you get scared of the numbers.
 
+### Retrieving reads from ENA
+
+Sequencing data generated historically by Sanger or at other instutions can be obtained through the ENA (if the data has been made publicly available). This is possible by supplying the `--manifest_ena` option with a file (manifest) of ENA accessions. The accession type (`run`, `sample` or `study`) must be declared using `--accession_type`. Files of mixed accession types are not supported.
+
 ### Saving (or not saving) Fastq files
 
 When retrieving data from iRODS, one of the steps - enabled by the `IRODS_EXTRACTOR` subworkflow - is to download sequencing read files from iRODS (most often in CRAM format) and to convert them to the Fastq format. In most pipeline applications, the only purpose of these fastq files are to be passed on to further processing steps, and permanently saving fastq files on disk is not required. In fact, in most cases, it is not advisable as these files can be very large and will soon eat up all your disk space; this is why the workflow parameter `save_fastqs` defaults to `false`.  
