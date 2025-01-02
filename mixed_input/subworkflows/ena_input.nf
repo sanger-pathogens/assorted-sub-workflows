@@ -17,7 +17,6 @@ workflow ENA_DOWNLOAD {
         [ sample_acc, cleaned_map ] //staging sample_acc infront for groupTuple to output from ENADownloader
     }
     | set { sample_metadata }
-    // sample_metadata.view()
 
     sample_metadata
     | map { id, metadata ->
