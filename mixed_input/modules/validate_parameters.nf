@@ -73,28 +73,20 @@ def validate_parameters() {
                           has_plexid
 
     if (!input_specified) {
-    throw new Exception("""No input specification provided. Please specify one or a mix of:
+        throw new Exception("""No input specification provided. Please specify one or a mix of:
 
-                Manifests:
-                - --manifest_ena
-                - --manifest_of_lanes
-                - --manifest_of_reads or --manifest
+                    Manifests:
+                    - --manifest_ena
+                    - --manifest_of_lanes
+                    - --manifest_of_reads or --manifest
 
-                CLI Arguments:
-                - --studyid
-                - --runid
-                - --laneid
-                - --plexid""")
-    errors += 1
-} 
-
-    // Validate and route based on input type
-    if (manifest_ena_exists || manifest_of_lanes_exists || manifest_of_reads_exists || manifest_exists) {
-        // Validate manifests
-        if (manifest_of_lanes_exists) {
-            errors += validate_path_param("--manifest_of_lanes", params.manifest_of_lanes)
-            workflows_to_run << 'IRODS'
-        }
+                    CLI Arguments:
+                    - --studyid
+                    - --runid
+                    - --laneid
+                    - --plexid""")
+        errors += 1
+    }
 
     // Validate manifest inputs
     if (manifest_of_lanes_exists) {
@@ -130,7 +122,7 @@ def validate_parameters() {
         workflows_to_run << 'READS_MANIFEST'
     }
 
-    // Check for CLI-based inputs
+    // Validate CLI-based inputs
     if (has_studyid || has_runid || has_laneid || has_plexid) {
         // Validate individual parameters
         if (has_studyid && !validate_integer(params.studyid)) {
