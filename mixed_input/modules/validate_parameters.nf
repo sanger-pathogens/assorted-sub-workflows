@@ -96,33 +96,38 @@ def validate_parameters() {
             workflows_to_run << 'IRODS'
         }
 
-        if (manifest_ena_exists) {
-            errors += validate_path_param("--manifest_ena", params.manifest_ena)
-            workflows_to_run << 'ENA'
-        }
+    // Validate manifest inputs
+    if (manifest_of_lanes_exists) {
+        errors += validate_path_param("--manifest_of_lanes", params.manifest_of_lanes)
+        workflows_to_run << 'IRODS'
+    }
 
-        if (manifest_exists) {
-            if (manifest_of_reads_exists) {
-                //exit early if you give both
-                throw new Exception("Cannot supply both ${params.manifest_of_reads} and ${params.manifest} as they are alias's of the same manifest")
-            } else {
-                // If manifest is provided but manifest_of_reads is not, use manifest for reads
-                log.info("No --manifest_of_reads provided. Using --manifest parameter value '${params.manifest}' as --manifest_of_reads.\n")
-                /*
-                The manifest is not replaced at at this stage in reality as that is handled in the mixed_input workflow
-                def manifestToUse = params.manifest_of_reads ? params.manifest_of_reads : params.manifest
-                This is just a good opportunity to throw a error
-                */
-            }
-            
-            errors += validate_path_param("--manifest", params.manifest)
-            workflows_to_run << 'READS_MANIFEST'
-        }
+    if (manifest_ena_exists) {
+        errors += validate_path_param("--manifest_ena", params.manifest_ena)
+        workflows_to_run << 'ENA'
+    }
 
+    if (manifest_exists) {
         if (manifest_of_reads_exists) {
-            errors += validate_path_param("--manifest_of_reads", params.manifest_of_reads)
-            workflows_to_run << 'READS_MANIFEST'
+            //exit early if you give both
+            throw new Exception("Cannot supply both ${params.manifest_of_reads} and ${params.manifest} as they are alias's of the same manifest")
+        } else {
+            // If manifest is provided but manifest_of_reads is not, use manifest for reads
+            log.info("No --manifest_of_reads provided. Using --manifest parameter value '${params.manifest}' as --manifest_of_reads.\n")
+            /*
+            The manifest is not replaced at at this stage in reality as that is handled in the mixed_input workflow
+            def manifestToUse = params.manifest_of_reads ? params.manifest_of_reads : params.manifest
+            This is just a good opportunity to throw a error
+            */
         }
+
+        errors += validate_path_param("--manifest", params.manifest)
+        workflows_to_run << 'READS_MANIFEST'
+    }
+
+    if (manifest_of_reads_exists) {
+        errors += validate_path_param("--manifest_of_reads", params.manifest_of_reads)
+        workflows_to_run << 'READS_MANIFEST'
     }
 
     // Check for CLI-based inputs
