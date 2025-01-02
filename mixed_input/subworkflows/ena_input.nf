@@ -12,16 +12,9 @@ workflow ENA_DOWNLOAD {
     DOWNLOAD_METADATA(download_metadata_input)
     | splitCsv(header: true, sep: "\t")
     | map { meta, full_metadata ->
-        def sample_acc = full_metadata.sample_accession
-        def cleaned_map = full_metadata.findAll { k, v -> v != '' }
-        [ sample_acc, cleaned_map ] //staging sample_acc infront for groupTuple to output from ENADownloader
-    }
-    | set { sample_metadata }
-
-    sample_metadata
-    | map { id, metadata ->
-        metadata.ID = id
-        metadata
+        full_metadata.ID = full_metadata.sample_accession
+        def cleaned_metadata = full_metadata.findAll { k, v -> v != '' }
+        cleaned_metadata
     }
     | filter { it.fastq_ftp.contains(';') } //if its paired its seperated by a semi-colon
     | map{ merged_meta ->
