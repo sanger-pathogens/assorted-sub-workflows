@@ -79,7 +79,7 @@ The workflow should issue a notice of how many files are considered for download
 
 ### Retrieving reads from ENA
 
-Sequencing data generated historically by Sanger or at other instutions can be obtained through the ENA (if the data has been made publicly available). This is possible by supplying the `--manifest_ena` option with a file (manifest) of ENA accessions. The accession type (`run`, `sample` or `study`) must be declared using `--accession_type`. Files of mixed accession types are not supported.
+Sequencing data generated historically by Sanger or at other institutions can be obtained through the ENA (if the data has been made publicly available). This is possible by supplying the `--manifest_ena` option with a file (manifest) of ENA accessions. The accession type (`run`, `sample` or `study`) must be declared using `--accession_type`. Files of mixed accession types are not supported.
 
 ### Saving (or not saving) Fastq files
 
