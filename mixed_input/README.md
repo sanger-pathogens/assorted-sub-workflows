@@ -6,10 +6,10 @@ This workflow determines which processes should be called for the incoming param
 
 `validate_parameters` takes no input but uses the params map from the Nextflow runtime environment and checks for either IRODS or READ type parameters, as defined below:
 
-
 There are two ways of specifying input for the pipeline:
 
 - Manifests (batch input files):
+- --manifest_ena: ENA
 - --manifest_of_lanes: IRODS
 - --manifest_of_reads or --manifest: READS
 
@@ -25,16 +25,26 @@ This list is then used to trigger the correct workflows for the data specified a
 
 The subworkflows can be executed separately through direct reference.  
 For example, to specify the use of data from IRODS, one can call either:
-
+```
 COMBINE_IRODS
-
-or directly IRODS_EXTRACTOR
+```
+or directly
+```
+IRODS_EXTRACTOR
+```
 
 Or, in the scenario of using only reads files available on disk, one can call directly:
-
+```
 INPUT_CHECK
+```
 
-Mixed input should be used in cases that you expect manifests of reads + IRODS extraction
+When data needs to be downloaded from the ENA:
+```
+ENA_DOWNLOAD
+```
+
+Mixed input should be used in cases that you expect manifests of reads, IRODS extraction, and/or download from ENA. 
+
 ## Scripts
 
 ### filter_metadata.py
