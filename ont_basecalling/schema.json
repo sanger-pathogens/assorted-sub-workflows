@@ -11,7 +11,7 @@
                 "help_text": "This is the the same as the default behavior. Any detected adapters or primers will be trimmed."
             },
             "barcode_kit_name": {
-                "default": [""],
+                "default": "",
                 "help_text": "Specifies the barcode kit used for multiplexing samples; must be changed in the config file."
             },
             "read_format": {

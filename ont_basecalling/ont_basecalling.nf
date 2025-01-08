@@ -10,7 +10,7 @@ def validateSingleFormat(listOfFormats){
     if (listOfFormats.size() != 1) {
         log.error("Multiple signal filetypes ${listOfFormats} found in '${params.raw_read_dir}'. Please separate filetypes into distinct directories and process independently.")
     }
-    if (barcode_kit_name.size() < 1) {
+    if (params.barcode_kit_name.size() < 1) {
         log.error("the names(s) of the barcode kit(s) used for library prep needs to be specified.")
     }
 }
@@ -86,7 +86,7 @@ workflow ONT_BASECALLING{
 
     } else {
         //sort classified by marking the duplicates in the summary then removing them from the bams
-        SUMMARY_DUPLICATES(LONG_READ_QC.out.summary_channel, "remove")
+        SUMMARY_DUPLICATES(LONG_READ_QC.out.summary_channel)
         | set { duplicate_classified_list }
 
         barcode_bam_ch.filter{ meta, long_bam -> long_bam.name != "unclassified.bam"}
@@ -195,7 +195,7 @@ workflow SORT_UNCLASSIFIED {
     | set{ unclassified_summary }
 
     //sort unclassified
-    SUMMARY_DUPLICATES(unclassified_summary, "keep")
+    SUMMARY_DUPLICATES(unclassified_summary)
     | set{ unclassified_duplicates }
 
     MERGE_BAMS_FOR_SUMMARY.out.summary_bam
