@@ -1,4 +1,4 @@
-def mark_read_duplicates_in_summary(sequencing_summary, outputFilePath, keep_or_remove){
+def mark_read_duplicates_in_summary(sequencing_summary, outputFilePath){
     def filePath = sequencing_summary.toString()
 
     // Read the TSV file
