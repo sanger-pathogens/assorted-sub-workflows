@@ -11,8 +11,8 @@
                 "help_text": "This is the the same as the default behavior. Any detected adapters or primers will be trimmed"
             },
             "barcode_kit_name": {
-                "default": ["SQK-NBD114-24"],
-                "help_text": "Specifies the barcode kit used for multiplexing samples."
+                "default": [""],
+                "help_text": "Specifies the barcode kit used for multiplexing samples; must be changed in the config file"
             },
             "read_format": {
                 "default": "fastq",
@@ -26,13 +26,13 @@
         "Output File Management": {
             "save_fastqs": {
                 "default": "true",
-                "help_text": "Save basecalled reads in FASTQ format."
+                "help_text": "Save basecalled reads in FASTQ format if --read_format set to fastq"
             }
         },
         "Reference Files": {
             "raw_read_dir": {
                 "default": "",
-                "help_text": "Directory containing raw read files. (mandatory)"
+                "help_text": "Save basecalled reads in FASTQ format if --read_format set to fastq"
             },
             "additional_metadata": {
                 "default": "",
