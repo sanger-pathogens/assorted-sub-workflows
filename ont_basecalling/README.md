@@ -34,7 +34,7 @@ The CSV must be with the following stucture with each sample on a new line:
 ID,barcode,barcode_kit
 21GUS-SR-008,01,SQK-NBD114-24
 
-You can run the pipeline with `-profile laptop`, as well as enabling docker, the laptop profile allows the pipeline to be used offline by providing a local copy of a configuration file that is otherwise downloaded.
+You can run the pipeline with `-profile laptop`. As well as enabling docker, the laptop profile allows the pipeline to be used offline by providing a local copy of a configuration file that is otherwise downloaded.
 
 Should you need to run the pipeline offline, it is best to make use of pre-populated dependency caches. These can be created with any of the supported profiles (e.g. `-profile docker`) and involves running the pipeline once to completion. You will also need to provide a `--basecall_model_path` (see installation step 4)- the laptop profile includes a default local path for this, as well as the `--dorado_local_path`.
 
