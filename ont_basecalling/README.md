@@ -25,7 +25,7 @@ This subworkflow processes Nanopore sequencing data in POD5 or FAST5 formats, su
 Minimum usage
 
 ```
-nextflow run long-read-ampliseq/main.nf \
+nextflow run my-pipeline-importing-this-workflow/main.nf \
 --raw_read_dir <directory containing FAST5/POD5 files> \
 --additional_metadata <CSV mapping sample IDs to barcodes> \
 ```
