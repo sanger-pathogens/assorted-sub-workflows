@@ -2,13 +2,9 @@
     "pipeline": "Nanopore Basecalling",
     "params": {
         "Basecalling": {
-            "basecall": {
-                "default": "true",
-                "help_text": "Enables basecalling to convert raw signal data to nucleotide sequences."
-            },
             "basecall_model": {
-                "default": "dna_r10.4.1_e8.2_400bps_hac@v4.3.0",
-                "help_text": "Specifies the model for basecalling, which matches specific flow cell and chemistry."
+                "default": "",
+                "help_text": "Specifies the model for basecalling, which matches specific flow cell and chemistry. Models can be found here https://github.com/nanoporetech/dorado?tab=readme-ov-file"
             },
             "trim_adapters": {
                 "default": "all",
