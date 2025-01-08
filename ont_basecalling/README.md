@@ -8,7 +8,7 @@ This subworkflow processes Nanopore sequencing data in POD5 or FAST5 formats, su
 
 2. [Install Docker](https://docs.docker.com/engine/install/)
 
-3. Download the appropriate Dorado installer from the [repo](https://github.com/nanoporetech/dorado#installation). The path to the executable will be `<path to downloaded folder>/bin/dorado`
+3. (Optional) Download the appropriate Dorado installer from the [repo](https://github.com/nanoporetech/dorado#installation). The path to the executable will be `<path to downloaded folder>/bin/dorado`
 
 4. (Optional) Download the appropriate Dorado model from the [repo](https://github.com/nanoporetech/dorado/#available-basecalling-models)
 
