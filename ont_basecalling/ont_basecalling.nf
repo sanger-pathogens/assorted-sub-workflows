@@ -181,3 +181,37 @@ workflow LONG_READ_QC {
     unclassified_ch
     pycoqc_json
 }
+workflow SORT_UNCLASSIFIED {
+    take:
+    unclassified
+
+    main:
+    /*
+    This workflow takes in the unclassified bams merges them into a single unclassifed bam - marks the duplicates in that file and produces a 
+    */
+
+    MERGE_BAMS_FOR_SUMMARY(unclassified)
+    | UNASSIGNED_SUMMARY
+    | set{ unclassified_summary }
+
+    //sort unclassified
+    SUMMARY_DUPLICATES(unclassified_summary, "keep")
+    | set{ unclassified_duplicates }
+
+    MERGE_BAMS_FOR_SUMMARY.out.summary_bam
+    | combine(unclassified_duplicates)
+    | map { long_bam, sequencing_summary -> 
+        def unclassified_meta = [:]
+        unclassified_meta.barcode_kit = "Multiple"
+        unclassified_meta.barcode = "Unclassified"
+        unclassified_meta.ID = "Unclassified_reads"
+        tuple( unclassified_meta, long_bam, sequencing_summary)
+    }
+    | set{ unclassified_marked }
+
+    KEEP_DUPLICATES_FROM_BAMS(unclassified_marked, "keep")
+    | set{ cleaned_unclassified }
+
+    emit:
+    cleaned_unclassified
+}
