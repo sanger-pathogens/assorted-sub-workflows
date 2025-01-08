@@ -43,11 +43,10 @@ process SUMMARY_DUPLICATES {
     
     input:
     val(summary)
-    val(mode)
 
     output:
     path("*.txt"), emit: summary_channel
 
     exec:
-    mark_read_duplicates_in_summary(summary, "${task.workDir}", mode)
+    mark_read_duplicates_in_summary(summary, "${task.workDir}")
 }
