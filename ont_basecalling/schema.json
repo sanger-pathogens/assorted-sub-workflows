@@ -40,14 +40,6 @@
             }
         },
         "LSF Options": {
-            "queue_size": {
-                "default": 50,
-                "help_text": "Maximum number of jobs in the queue."
-            },
-            "submit_rate_limit": {
-                "default": "50/2min",
-                "help_text": "Rate limit for job submissions."
-            },
             "monochrome_logs": {
                 "default": "false",
                 "help_text": "Logs will not be in monochrome."
