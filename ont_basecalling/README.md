@@ -45,15 +45,9 @@ You can override the default paths using the command line parameters directly wh
 
 ### Other parameters:
 
-#### ONT Basecalling
-Below are paramaters can be passed to customise the behaviour of the pipeline and their defaults
-- --basecall = "true"
-- --basecall_model = "dna_r10.4.1_e8.2_400bps_hac@v4.3.0"
+Below are parameters that can be passed to customise the behaviour of the pipeline, and their defaults
+
 - --basecall_model_path = ""
 - --trim_adapters = "all"
-- --barcode_kit_name = ["SQK-NBD114-24"] (currently this can only be edited via the config file)
 - --read_format = "fastq"
-
-#### Saving output files
-
 - --save_fastqs = true
