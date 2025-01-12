@@ -12,7 +12,7 @@ def validateSingleFormat(listOfFormats){
     if (listOfFormats.size() != 1) {
         log.error("Multiple signal filetypes ${listOfFormats} found in '${params.raw_read_dir}'. Please separate filetypes into distinct directories and process independently.")
     }
-    if (barcode_kit_name.size() < 1) {
+    if (params.barcode_kit_name.size() < 1) {
         log.error("the names(s) of the barcode kit(s) used for library prep needs to be specified.")
     }
 }
