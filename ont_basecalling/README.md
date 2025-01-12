@@ -22,7 +22,7 @@ This subworkflow processes Nanopore sequencing data in POD5 or FAST5 formats, su
    If a pre-downloaded model path is not provided to the pipeline, the model specified by the `--basecall_model` parameter will be downloaded on the fly.
 
 ## Usage
-Minimum usage
+Basic usage and mandatory parameters
 
 ```
 nextflow run my-pipeline-importing-this-workflow/main.nf \
