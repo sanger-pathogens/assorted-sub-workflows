@@ -169,7 +169,7 @@ workflow LONG_READ_QC {
     | set { pycoqc_json }
 
     //if there are multiple barcode kits condense unclassified channel into 1 object to be merged
-    if (params.barcode_kit_name.size() == 1) {
+    if (barcode_kit_name.size() == 1) {
         summarise_channel.unclassified
         | set{ unclassified_ch }
 
