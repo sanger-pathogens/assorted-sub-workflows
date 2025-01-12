@@ -6,11 +6,13 @@ include { CONVERT_TO_FASTQ; MERGE_BAMS_FOR_SUMMARY;
 include { SUMMARY_DUPLICATES                                                    } from './modules/summary_duplicates.nf'
 include { PYCOQC                                                                } from './modules/pycoqc.nf'
 
+def barcode_kit_name = (params.barcode_kit_name instanceof List) ? params.barcode_kit_name : [params.barcode_kit_name]
+
 def validateSingleFormat(listOfFormats){
     if (listOfFormats.size() != 1) {
         log.error("Multiple signal filetypes ${listOfFormats} found in '${params.raw_read_dir}'. Please separate filetypes into distinct directories and process independently.")
     }
-    if (params.barcode_kit_name.size() < 1) {
+    if (barcode_kit_name.size() < 1) {
         log.error("the names(s) of the barcode kit(s) used for library prep needs to be specified.")
     }
 }
