@@ -69,7 +69,7 @@ workflow ONT_BASECALLING{
         | BASECALL
     }
     
-    DEMUX(BASECALL.out.called_channel, params.barcode_kit_name) //todo https://github.com/nanoporetech/dorado/issues/625 if list of barcodes provided loop over and call for each
+    DEMUX(BASECALL.out.called_channel, barcode_kit_name) //todo https://github.com/nanoporetech/dorado/issues/625 if list of barcodes provided loop over and call for each
     | transpose
     | map{ barcode_kit, long_read_bam -> 
         def meta = [:]
