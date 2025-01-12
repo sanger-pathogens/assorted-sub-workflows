@@ -115,7 +115,7 @@ workflow ONT_BASECALLING{
     | set { bam_with_metadata_ch }
 
     if (params.read_format == "fastq") {
-        if (params.barcode_kit_name.size() == 1) {
+        if (barcode_kit_name.size() == 1) {
             CONVERT_TO_FASTQ(bam_with_metadata_ch)
             | set { long_reads_ch }
 
