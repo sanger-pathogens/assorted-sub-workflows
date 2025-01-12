@@ -83,7 +83,7 @@ workflow ONT_BASECALLING{
     LONG_READ_QC.out.pycoqc_json
     | set { pycoqc_json }
 
-    if (params.barcode_kit_name.size() == 1) {
+    if (barcode_kit_name.size() == 1) {
         barcode_bam_ch.set { bam_ch }
 
     } else {
