@@ -28,6 +28,8 @@ Basic usage and mandatory parameters
 nextflow run my-pipeline-importing-this-workflow/main.nf \
 --raw_read_dir <directory containing FAST5/POD5 files> \
 --additional_metadata <CSV mapping sample IDs to barcodes> \
+--basecall_model <name of Dorado basecalling model> \
+--barcode_kit_name <name of ONT barcoding kit used for multiplexing>
 ```
 
 The CSV must be with the following stucture with each sample on a new line: 
