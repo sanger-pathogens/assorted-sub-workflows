@@ -8,11 +8,11 @@ include { PYCOQC                                                                
 
 def barcode_kit_name = (params.barcode_kit_name instanceof List) ? params.barcode_kit_name : [params.barcode_kit_name]
 
-def validateSingleFormat(listOfFormats){
+def validateSingleFormat(listOfFormats,barcode_kit_name){
     if (listOfFormats.size() != 1) {
         log.error("Multiple signal filetypes ${listOfFormats} found in '${params.raw_read_dir}'. Please separate filetypes into distinct directories and process independently.")
     }
-    if (params.barcode_kit_name.size() < 1) {
+    if (barcode_kit_name.size() < 1) {
         log.error("the names(s) of the barcode kit(s) used for library prep needs to be specified.")
     }
 }
@@ -125,7 +125,7 @@ workflow ONT_BASECALLING{
             | set { long_reads_ch }
         }
     } else {
-        if (params.barcode_kit_name.size() == 1) {
+        if (barcode_kit_name.size() == 1) {
             bam_with_metadata_ch
             | set { long_reads_ch }
 
