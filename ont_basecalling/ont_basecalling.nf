@@ -37,7 +37,7 @@ workflow ONT_BASECALLING{
 
     input_formats.map{ format, files -> format }
     | collect
-    | map{ format -> validateSingleFormat(format)}
+    | map{ format -> validateSingleFormat(format,barcode_kit_name)}
 
     /*
     Files in the fast5 format are converted to pod5 and so are branched out into their respective channels
