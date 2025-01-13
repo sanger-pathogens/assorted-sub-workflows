@@ -12,7 +12,7 @@
             },
             "barcode_kit_name": {
                 "default": "",
-                "help_text": "Specifies the barcode kit used for multiplexing samples; must be changed in the config file."
+                "help_text": "Specifies the barcode kit used for multiplexing samples."
             },
             "read_format": {
                 "default": "fastq",
