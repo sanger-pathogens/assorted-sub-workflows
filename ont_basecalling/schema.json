@@ -1,0 +1,49 @@
+{
+    "pipeline": "Nanopore Basecalling",
+    "params": {
+        "Basecalling": {
+            "basecall_model": {
+                "default": "",
+                "help_text": "Specifies the model for basecalling, which matches specific flow cell and chemistry. Models can be found here https://github.com/nanoporetech/dorado?tab=readme-ov-file"
+            },
+            "trim_adapters": {
+                "default": "all",
+                "help_text": "This is the the same as the default behavior. Any detected adapters or primers will be trimmed."
+            },
+            "barcode_kit_name": {
+                "default": "",
+                "help_text": "Specifies the barcode kit used for multiplexing samples; if providing a list, please change in the config file."
+            },
+            "read_format": {
+                "default": "fastq",
+                "help_text": "Sets the output format for basecalled reads to FASTQ."
+            },
+            "dorado_local_path": {
+                "default": "",
+                "help_text": "Path to the local Dorado basecaller, if used."
+            }
+        },
+        "Output File Management": {
+            "save_fastqs": {
+                "default": "true",
+                "help_text": "Save basecalled reads in FASTQ format if --read_format set to fastq."
+            }
+        },
+        "Reference Files": {
+            "raw_read_dir": {
+                "default": "",
+                "help_text": "Save basecalled reads in FASTQ format if --read_format set to fastq."
+            },
+            "additional_metadata": {
+                "default": "",
+                "help_text": "Path to the metadata file linking samples to barcodes. (mandatory)"
+            }
+        },
+        "LSF Options": {
+            "monochrome_logs": {
+                "default": "false",
+                "help_text": "Logs will not be in monochrome."
+            }
+        }
+    }
+}
