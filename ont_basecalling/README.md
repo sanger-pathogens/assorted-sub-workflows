@@ -41,7 +41,7 @@ You can run the pipeline with `-profile laptop`. As well as enabling docker, the
 Should you need to run the pipeline offline, it is best to make use of pre-populated dependency caches. These can be created with any of the supported profiles (e.g. `-profile docker`) and involves running the pipeline once to completion. You will also need to provide a `--basecall_model_path` (see installation step 4).  
 The config file can be edited to specify a local path for `--basecall_model_path` and `--dorado_local_path` in the laptop profile scope section, allowing quicker run configuration with `-profile laptop`.
 
-You can override the default paths using the command line parameters directly when invoking nextflow or supplying an additional config file in which these parameters are set, using the `-c my_custom.config` nextflow option. Should you wish to pass a list of barcodekits to the process this must be done by editing the config direcetly and cannot be base as a CI option.
+You can override the default paths using the command line parameters directly when invoking nextflow or supplying an additional config file in which these parameters are set, using the `-c my_custom.config` nextflow option. Should you wish to pass a list of barcodekits to the pipeline, this must be done by editing the config file directly rather than using the --barcode_kit_name parameter on the command line.
 
 ### Other parameters:
 
