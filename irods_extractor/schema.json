@@ -29,6 +29,10 @@
             "combine_same_id_crams": {
                 "default": "false",
                 "help_text": "if retrieving read files representing subsets of the same source (files will share the same run, lane and plex IDs), should these files be combined into a 'total' subset i.e. reforming the source read file before subsetting by NPG processing."
+            },
+            "large_data": {
+                "default": "false",
+                "help_text": "If the data is very large instead start from the week queue with more memory (10GB)"
             }
         }
     }
