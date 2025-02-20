@@ -45,8 +45,9 @@ process JSON_PREP {
 
     script:
     json_file="input.json"
+    objectOrCollection = params.read_type != "Illumina" ? '"collection": true' : '"object": true'
     """
-    jq -n '{op: "metaquery", args: {object: true, "avu": true}, target: {avus: ${avuIdQuery(meta)}}}' > ${json_file}
+    jq -n '{op: "metaquery", args: {${objectOrCollection}, "avu": true}, target: {avus: ${avuIdQuery(meta)}}}' > ${json_file}
     """
 }
 
@@ -59,13 +60,11 @@ process JSON_PARSE {
     path(lane_file)
 
     output:
-    stdout emit: paths
     path("irods_paths.json"), emit: json_file
 
     script:
     //format is dodgy when it comes off of IRODS so second JQ fixes the formatting
     """
-    jq '.result[] | .collection + "/" + .data_object' ${lane_file}
     jq -r '' ${lane_file} > irods_paths.json
     """
 }
