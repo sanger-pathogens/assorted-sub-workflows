@@ -3,6 +3,7 @@
 */
 
 include { RETRIEVE_CRAM                 } from './../../modules/retrieve.nf'
+include { COLLATE_FASTQ; COMBINE_FASTQ  } from './../../modules/samtools.nf'
 include { METADATA as METADATA_COMBINED } from './../../modules/metadata_save.nf'
 
 def IRODS_ERROR_MSG = """
@@ -90,10 +91,10 @@ workflow CRAM_EXTRACT {
 
     if ("${params.save_method}" == "nested"){
         Channel.fromPath("${params.outdir}/*/${params.preexisting_fastq_tag}/*_1.fastq.gz")
-        | set{ preexisting_fastq_path_ch }
+        .set{ preexisting_fastq_path_ch }
     }else{
         Channel.fromPath("${params.outdir}/${params.preexisting_fastq_tag}/*_1.fastq.gz")
-        | set{ preexisting_fastq_path_ch }
+        .set{ preexisting_fastq_path_ch }
     }
     preexisting_fastq_path_ch.toList().map{ preexisting_fastq_path_list -> 
        no_download = preexisting_fastq_path_list.size()
@@ -103,14 +104,14 @@ workflow CRAM_EXTRACT {
     preexisting_fastq_path_ch.map{ preexisting_fastq_path ->
         preexisting_fastq_path.Name.split("${params.split_sep_for_ID_from_fastq}")[0]
     }
-    | collect().map{ [it] }
-    | ifEmpty("fresh_run")
-    | set{ existing_id }
+    .collect().map{ [it] }
+    .ifEmpty("fresh_run")
+    .set{ existing_id }
 
     meta_cram_ch.combine( existing_id )
-    | filter { metadata, cram_path, existing -> !(metadata.ID.toString() in existing) }
-    | map { it[0,1] }
-    | set{ do_not_exist }
+    .filter { metadata, cram_path, existing -> !(metadata.ID.toString() in existing) }
+    .map { it[0,1] }
+    .set{ do_not_exist }
 
     do_not_exist.toList().map{ do_not_exist_list -> 
        new_downloads = do_not_exist_list.size()
@@ -125,14 +126,12 @@ workflow CRAM_EXTRACT {
             commonid = "${metaMap.id_run}_${metaMap.lane}${params.lane_plex_sep}${metaMap.tag_index}"
             commonid = !metaMap.alt_process ? "${commonid}" : "${commonid}_${metaMap.alt_process}"
             tuple(commonid, metaMap, read_1, read_2)
-        }
-        | groupTuple()
-        | filter{ it[1].size() >= 2 } // only combine datasets into 'total' subset if more than one subset to start with
-        | map{ common_id, metadata_list, read_1_list, read_2_list ->
+        }.groupTuple()
+        .filter{ it[1].size() >= 2 } // only combine datasets into 'total' subset if more than one subset to start with
+        .map{ common_id, metadata_list, read_1_list, read_2_list ->
             tuple(meta_map_for_total_reads(metadata_list), read_1_list.join(' '), read_2_list.join(' ')) // amalgam metamap + concatenated path of read files
-        }
-        | filter { it[0] != "none" }
-        | set{ gathered_total_reads }
+        }.filter { it[0] != "none" }
+        .set{ gathered_total_reads }
 
         COMBINE_FASTQ(gathered_total_reads)
         
@@ -152,8 +151,8 @@ workflow CRAM_EXTRACT {
 
     if (params.cleanup_intermediate_files_irods_extractor) {
         COLLATE_FASTQ.out.remove_channel.flatten()
-        | filter(Path)
-        | map { it.delete() }
+                .filter(Path)
+                .map { it.delete() }
     }
 
     emit: reads_ch // tuple val(meta), path(forward_fastq), path(reverse_fastq
