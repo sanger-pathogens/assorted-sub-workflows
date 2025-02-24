@@ -15,8 +15,8 @@ workflow IRODS_QUERY {
         | BATON
         | JSON_PARSE
 
-        switch (params.read_type) {
-            case "Illumina":
+        switch (params.read_type.toLowerCase()) {
+            case "illumina":
                 ILLUMINA_PARSE(JSON_PARSE.out.json_file)
                 | set{ meta_file_ch }
 
