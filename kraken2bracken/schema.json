@@ -1,7 +1,7 @@
 {
-    "pipeline": "kraken2bracken (sub-workflow)",
+    "pipeline": "Combined input (sub-workflow)",
     "params": {
-        "kraken2bracken options": {
+        "Input options": {
             "kraken2_db": {
                 "default": null,
                 "help_text": "Path to the Kraken2 database"
