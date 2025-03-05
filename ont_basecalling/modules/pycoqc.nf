@@ -1,13 +1,17 @@
 process PYCOQC {
+    label 'cpu_1'
+    label 'mem_4'
+    label 'time_30m'
+
     container "quay.io/biocontainers/pycoqc:2.5.2--py_0"
     publishDir "${params.outdir}/qc/pycoqc", mode: 'copy', overwrite: true
     
     input:
-        path(sequence_summary_file)
+    path(sequence_summary_file)
 
     output:
-        path("*.html"), emit: html
-        path("*.json"), emit: json
+    path("*.html"), emit: html
+    path("*.json"), emit: json
         
     script:
     final_qc_file = "summary_pycoqc"

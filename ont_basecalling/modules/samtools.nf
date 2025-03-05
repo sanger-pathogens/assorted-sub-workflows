@@ -1,11 +1,10 @@
 process CONVERT_TO_FASTQ {
     label 'cpu_2'
     label 'mem_1'
-    label 'time_1'
+    label 'time_30m'
 
-    publishDir path: "${params.outdir}/fastqs/", enabled: params.save_fastqs, mode: 'copy', overwrite: true, pattern: "*.fastq.gz"
+    publishDir path: "${params.outdir}/fastqs/", enabled: params.save_fastqs, mode: 'copy', overwrite: true
     
-    conda 'bioconda::samtools=1.19'
     container 'quay.io/biocontainers/samtools:1.19.2--h50ea8bc_1'
 
     input:
@@ -15,57 +14,31 @@ process CONVERT_TO_FASTQ {
     tuple val(meta), path(fastq_output),  emit: reads_fastq
 
     script:
-    //will likely need thinking here as if we do other methods of sequencing and use this pipeline need the correct out flags
-    fastq_output = "${meta.ID}.fastq.gz"
+    //fall back to barcode_kit_barcode if no ID
+    fastq_output = "${meta.ID ?: "${meta.barcode_kit}_B${meta.barcode}"}.fastq.gz"
     """
     samtools fastq -@ ${task.cpus} -0 ${fastq_output} ${reads_bam}
     """
 }
 
-process MERGE_BAMS_FOR_SUMMARY {
-    label 'cpu_2'
+process PUBLISH_BAMS {
+    label 'cpu_1'
     label 'mem_1'
-    label 'time_1'
-    
-    conda 'bioconda::samtools=1.19'
-    container 'quay.io/biocontainers/samtools:1.19.2--h50ea8bc_1'
+    label 'time_30m'
+
+    executor = 'local'
+
+    publishDir path: "${params.outdir}/bams/", mode: 'copy', overwrite: true
 
     input:
-    path("*.bam")
+    tuple val(meta), path(reads_bam)
 
     output:
-    path(combined_bam),  emit: summary_bam
+    tuple val(meta), path(reads_bam),  emit: reads_bam
 
     script:
-    combined_bam = "merged.bam"
+    bam_output = "${meta.ID ?: "${meta.barcode_kit}_B${meta.barcode}"}.bam"
     """
-    samtools merge -@ ${task.cpus} -o ${combined_bam} *.bam
+    mv ${reads_bam} ${bam_output}
     """
-}
-
-process MANAGE_DUPLICATES_FROM_BAMS {
-    label 'cpu_2'
-    label 'mem_4'
-    label 'time_1'
-
-    conda "bioconda::samtools=1.19"
-    container "quay.io/biocontainers/samtools:1.19.2--h50ea8bc_1"
-
-    input:
-    tuple val(meta), path(bam), path(duplicates_list)
-    val(mode)
-
-    output:
-    tuple val(meta), path(final_bam), emit: bam
-
-    script:
-    final_bam = "${bam.simpleName}_clean.bam"
-    if (mode == "keep")
-        """
-        samtools view -N ${duplicates_list} -o ${final_bam} ${bam}
-        """
-    else if (mode == "remove")
-        """
-        samtools view -N ^${duplicates_list} -o ${final_bam} ${bam}
-        """
 }

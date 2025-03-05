@@ -1,47 +1,34 @@
-process MODEL_DOWNLOAD {
-    label 'cpu_1'
-    label 'mem_4'
-    label 'time_30m'
-
-    if (params.dorado_local_path == "") {
-        container 'quay.io/sangerpathogens/cuda_dorado:0.7.1'
-    }
-    
-    input:
-    path(pod5)
-
-    output:
-    tuple path(pod5), path(basecall_model), emit: model_ch
-
-    script:
-    dorado = "${params.dorado_local_path == "" ? "dorado" : "${params.dorado_local_path}"}"
-    basecall_model = "${params.basecall_model}"
-    """
-    ${dorado} download --model ${basecall_model}
-    """
-}
-
 process BASECALL {
     label 'cpu_1'
     label 'mem_4'
     label 'time_1'
     label 'gpu'
 
-    if (params.dorado_local_path == "") {
-        container 'quay.io/sangerpathogens/cuda_dorado:0.7.1'
-    }
+    tag "${params.barcode_kit_name}"
+
+    container 'quay.io/sangerpathogens/cuda_dorado:0.9.1'
     
     input:
-    tuple path(pod5), path(model)
+    path(pod5)
 
     output:
     path("calls.bam"), emit: called_channel
 
     script:
-    dorado = "${params.dorado_local_path == "" ? "dorado" : "${params.dorado_local_path}"}"
-    min_qscore = "${params.min_qscore == "" ? "" : "--min-qscore ${params.min_qscore}"}"
+    def min_qscore = "${params.min_qscore == "" ? "" : "--min-qscore ${params.min_qscore}"}"
+
+    def basecallCommand = "dorado basecaller ${params.basecall_model} --trim ${params.trim_adapters} ${min_qscore}"
+
+    if (params.barcode_arrangement) {
+        basecallCommand += " --kit-name ${params.barcode_kit_name} --barcode-arrangement ${params.barcode_arrangement} --barcode-sequences ${params.barcode_sequences} "
+    } else {
+        basecallCommand += " --kit-name ${params.barcode_kit_name} "
+    }
+
+    basecallCommand += "${pod5} > calls.bam"
+
     """
-    ${dorado} basecaller ${model} --trim ${params.trim_adapters} ${min_qscore} ${pod5} > calls.bam
+    ${basecallCommand}
     """
 }
 
@@ -49,25 +36,20 @@ process DEMUX {
     label 'cpu_1'
     label 'mem_4'
     label 'time_1'
-    label 'gpu'
 
-    tag "${barcode_kit_name}"
+    tag "${params.barcode_kit_name}"
 
-    if (params.dorado_local_path == "") {
-        container 'quay.io/sangerpathogens/cuda_dorado:0.7.1'
-    }
-    
+    container 'quay.io/sangerpathogens/cuda_dorado:0.9.1'
+
     input:
     path(called_bam)
-    each(barcode_kit_name)
 
     output:
-    tuple val(barcode_kit_name), path("barcodes/*.bam"), emit: called_channel
+    path("barcodes/*.bam"), emit: called_channel
 
     script:
-    dorado = "${params.dorado_local_path == "" ? "dorado" : "${params.dorado_local_path}"}"
     """
-    ${dorado} demux --output-dir ./barcodes --kit-name ${barcode_kit_name} ${called_bam}
+    dorado demux --output-dir ./barcodes --no-classify ${called_bam}
     """
 }
 
@@ -75,12 +57,12 @@ process DORADO_SUMMARY {
     label 'cpu_1'
     label 'mem_4'
     label 'time_1'
+    
+    tag "${params.barcode_kit_name}"
 
     publishDir path: "${params.outdir}/sequencing_summary/", mode: 'copy', overwrite: true, pattern: "summary.tsv"
 
-    if (params.dorado_local_path == "") {
-        container 'quay.io/sangerpathogens/cuda_dorado:0.7.1'
-    }
+    container 'quay.io/sangerpathogens/cuda_dorado:0.9.1'
     
     input:
     path(called_bam)
@@ -89,30 +71,7 @@ process DORADO_SUMMARY {
     path("summary.tsv"), emit: summary_channel
 
     script:
-    dorado = "${params.dorado_local_path == "" ? "dorado" : "${params.dorado_local_path}"}"
     """
-    ${dorado} summary ${called_bam} > summary.tsv
-    """
-}
-
-process UNASSIGNED_SUMMARY { 
-    label 'cpu_1'
-    label 'mem_4'
-    label 'time_1'
-
-    if (params.dorado_local_path == "") {
-        container 'quay.io/sangerpathogens/cuda_dorado:0.7.1'
-    }
-    
-    input:
-    path(called_bam)
-
-    output:
-    path("summary.tsv"), emit: summary_channel
-
-    script:
-    dorado = "${params.dorado_local_path == "" ? "dorado" : "${params.dorado_local_path}"}"
-    """
-    ${dorado} summary ${called_bam} > summary.tsv
+    dorado summary ${called_bam} > summary.tsv
     """
 }
