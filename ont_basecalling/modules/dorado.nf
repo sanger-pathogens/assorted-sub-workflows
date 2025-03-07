@@ -34,7 +34,7 @@ process BASECALL {
 
 process DEMUX {
     label 'cpu_1'
-    label 'mem_4'
+    label 'mem_1'
     label 'time_1'
 
     tag "${params.barcode_kit_name}"
@@ -55,7 +55,7 @@ process DEMUX {
 
 process DORADO_SUMMARY { 
     label 'cpu_1'
-    label 'mem_4'
+    label 'mem_500M'
     label 'time_1'
     
     tag "${params.barcode_kit_name}"

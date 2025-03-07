@@ -1,6 +1,6 @@
 process PYCOQC {
     label 'cpu_1'
-    label 'mem_4'
+    label 'mem_500M'
     label 'time_30m'
 
     container "quay.io/biocontainers/pycoqc:2.5.2--py_0"

@@ -1,6 +1,6 @@
 process CONVERT_TO_FASTQ {
     label 'cpu_2'
-    label 'mem_1'
+    label 'mem_250M'
     label 'time_30m'
 
     publishDir path: "${params.outdir}/fastqs/", enabled: params.save_fastqs, mode: 'copy', overwrite: true
