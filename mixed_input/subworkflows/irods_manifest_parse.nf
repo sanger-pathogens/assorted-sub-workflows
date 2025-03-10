@@ -31,7 +31,7 @@ def createChannel(LinkedHashMap row) {
     // Ensure at least studyid or runid is provided if laneid or plexid is specified
     if (metadata.laneid != -1 || metadata.plexid != -1) {
         if (metadata.studyid == -1 && metadata.runid == -1) {
-            log.warn "Cannot submit an iRODS query with only laneid or plexid without studyid or runid. Row ${row} is ignored."
+            log.warn ("Cannot submit an iRODS query based on laneid or plexid metadata tags where neither studyid or runid are specified, as this query would catch too many file objects.\nThe row ${row} in the input manifest is ignored")
             return "none"
         }
     }
