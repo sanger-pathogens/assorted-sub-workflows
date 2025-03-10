@@ -13,36 +13,45 @@ workflow IRODS_MANIFEST_PARSE {
         .fromPath( lane_manifest )
         .ifEmpty {exit 1, "File is empty / Cannot find file at ${lane_manifest}"}
         .splitCsv ( header:true, strip:true, sep:',' )
-        .map { create_channel(it) }
+        .map { createChannel(it) }
         .set { meta }
 
     emit:
     meta
 }
 
-def create_channel(LinkedHashMap row) {
-    def meta = [:]
-    meta.studyid = ((! row.studyid) || ("${row.studyid}" == "")) ? -1 : "${row.studyid}".toInteger()
-    meta.runid = ((! row.runid) || ("${row.runid}" == "")) ? -1 : "${row.runid}".toInteger()
-    meta.laneid = ((! row.laneid) || ("${row.laneid}" == "")) ? -1 : "${row.laneid}".toInteger()
-    meta.plexid = ((! row.plexid) || ("${row.plexid}" == "")) ? -1 : "${row.plexid}".toInteger()
-    if (((meta.studyid == -1) && (meta.runid == -1)) && ((meta.laneid != -1) || (meta.plexid != -1))) {
-        log.warn ("Cannot submit an iRODS query based on laneid or plexid metadata tags where neither studyid or runid are specified, as this query would catch too many file objects.\nThe row ${row} in the input manifest is ignored")
-        return "none"
+def createChannel(LinkedHashMap row) {
+    def metadata = [:]
+    
+    // Convert fields to integers, defaulting to -1 if missing or empty
+    ['studyid', 'runid', 'laneid', 'plexid'].each { key ->
+        metadata[key] = row[key]?.toString()?.trim()?.isInteger() ? row[key].toInteger() : -1
     }
-    def extraFields = row.keySet().minus(['studyid', 'runid', 'laneid', 'plexid', 'target', 'type'])
-    extraFields.each { key ->
-        if ("${row[key]}" != "") {
-            meta[key] = row[key].toString()
+    
+    // Ensure at least studyid or runid is provided if laneid or plexid is specified
+    if (metadata.laneid != -1 || metadata.plexid != -1) {
+        if (metadata.studyid == -1 && metadata.runid == -1) {
+            log.warn "Cannot submit an iRODS query with only laneid or plexid without studyid or runid. Row ${row} is ignored."
+            return "none"
         }
     }
-    if ((meta.studyid != -1) || (meta.runid != -1) || (extraFields.any { "${row[it]}" != "" })) {
-        meta.target = ((! row.target) || ("${row.target}" == "")) ? "1" : "${row.target}"
-        meta.type = ((! row.type) || ("${row.type}" == "")) ? "cram" : "${row.type}"
+    
+    // Collect additional metadata fields
+    def extraFields = row.keySet() - ['studyid', 'runid', 'laneid', 'plexid', 'target', 'type']
+    extraFields.each { key ->
+        if (row[key]?.toString()?.trim()) {
+            metadata[key] = row[key].toString()
+        }
     }
-    else if ((row.target && ("${row.target}" != "")) || (row.type && (row.type != ""))) {
-        log.warn ("Cannot submit an iRODS query solely based on target or type metadata tags, as this query would catch too many file objects.\nThe row ${row} in the input manifest is ignored")
+    
+    // Set target and type if necessary
+    if (metadata.studyid != -1 || metadata.runid != -1 || extraFields.any { row[it]?.toString()?.trim() }) {
+        metadata.target = row.target?.toString()?.trim() ?: "${params.target}"
+        metadata.type = row.type?.toString()?.trim() ?: "${params.type}"
+    } else if (row.target?.toString()?.trim() || row.type?.toString()?.trim()) {
+        log.warn "Cannot submit an iRODS query with only target or type. Row ${row} is ignored."
         return "none"
     }
-    return meta
+    
+    return metadata
 }
