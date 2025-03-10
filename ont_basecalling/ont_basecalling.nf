@@ -66,7 +66,7 @@ workflow ONT_BASECALLING{
     | map{ long_read_bam -> 
         def meta = [:]
         meta.barcode_kit = params.barcode_kit_name
-        meta.barcode = "${ long_read_bam.simpleName.contains("barcode") ? long_read_bam.simpleName.split("barcode")[-1] : long_read_bam.simpleName }" //i.e. when simpleName = unclassified
+        meta.barcode = "${ long_read_bam.simpleName.contains("barcode") ? long_read_bam.simpleName.split("barcode")[-1] : long_read_bam.simpleName.split("_")[-1] }" //i.e. when simpleName = unclassified
         tuple(meta, long_read_bam)
     }
     | set{ bam_ch }
@@ -82,7 +82,7 @@ workflow ONT_BASECALLING{
         Channel.fromPath(params.additional_metadata)
         | ifEmpty {exit 1, "${params.additional_metadata} appears to be an empty file!"}
         | splitCsv(header:true, sep:',')
-        | map { meta -> ["${meta.barcode_kit}_${meta.barcode}", meta] }
+        | map { meta -> ["${params.barcode_kit_name}_${meta.barcode}", meta] }
         | join(bam_by_barcode_ch)
         | map { barcodekit_barcode, meta1, meta2, reads -> [meta1 + meta2, reads] }
         | set { bam_ch }
