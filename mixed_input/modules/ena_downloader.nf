@@ -6,7 +6,7 @@ process DOWNLOAD_METADATA {
 
     container 'quay.io/sangerpathogens/enadownloader:v2.3.3-903be379'
 
-    publishDir "${params.outdir}/metadata", mode: 'copy', overwrite: true, enabled: params.publish_metadata
+    publishDir "${params.outdir}/metadata", mode: 'copy', overwrite: true, enabled: params.publish_metadata, saveAs: {filename -> "${timestampout}"}
 
     input:
     tuple val(meta), path(accessions)
@@ -15,6 +15,8 @@ process DOWNLOAD_METADATA {
     tuple val(meta), path("metadata.tsv"), emit: metadata_tsv
 
     script:
+    def date = params.short_metacsv_name ? "${workflow.start}".split('T')[0] : "${workflow.start}"
+    timestampout = "metadata_ENA_${date}.csv"
     """
     enadownloader --input ${accessions} --type ${params.accession_type} --write-metadata
     """
@@ -27,7 +29,7 @@ process DOWNLOAD_FASTQS {
     label 'time_30m'
     maxForks 10
 
-    publishDir "${params.outdir}/${meta.ID}/fastqs", mode: 'copy', overwrite: true
+    publishDir "${params.outdir}/${meta.ID}/fastqs", mode: 'copy', overwrite: true, enabled: params.save_fastqs
 
     input:
     tuple val(meta), val(fastq_path_1), val(fastq_path_2)
