@@ -6,7 +6,7 @@ process BAKTA {
 
     publishDir mode: 'copy', pattern: "${amended_id}.gff3", path: "${params.outdir}/gffs/"
 
-    container 'quay.io/biocontainers/bakta:1.9.4--pyhdfd78af_0'
+    container 'quay.io/biocontainers/bakta:1.11.0--pyhdfd78af_0'
 
     input:
     tuple val(meta), path(fasta)
