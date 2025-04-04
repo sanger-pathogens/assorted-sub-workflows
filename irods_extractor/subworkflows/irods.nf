@@ -53,7 +53,7 @@ workflow IRODS_EXTRACTOR {
 
     main:
     //todo remove or make new method for ONT
-    if (params.read_type.toLowerCase() != "Illumina") {
+    if (params.read_type.toLowerCase() != "illumina") {
         log.error("Only Illumina reads are supported in this pipeline")
     }
     //expects short reads currently.
