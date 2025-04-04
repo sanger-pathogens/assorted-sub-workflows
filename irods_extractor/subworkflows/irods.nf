@@ -39,8 +39,7 @@ workflow IRODS_QUERY {
             | collectFile() { map -> [ "lane_metadata.txt", map.collect{it}.join(', ') + '\n' ] }
             | set{ metadata_only }
 
-            metadata_tag = channel.value("irods_queried")
-            METADATA_QUERIED(metadata_only, metadata_tag)
+            METADATA_QUERIED(metadata_only, "irods_queried")
         }
 
         emit:
