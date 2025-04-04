@@ -2,6 +2,7 @@ include { COLLATE_FASTQ; COMBINE_FASTQ  } from '../modules/samtools.nf'
 include { BATON                         } from '../modules/baton.nf'
 include { JSON_PREP; JSON_PARSE         } from '../modules/jq.nf'
 include { METADATA as METADATA_QUERIED  } from '../modules/metadata_save.nf'
+include { CRAM_EXTRACT                  } from './extraction_methods/illumina_extract.nf'
 
 include { ILLUMINA_PARSE                } from './extraction_methods/illumina_extract.nf'
 include { ONT_PARSE                     } from './extraction_methods/ONT_extract.nf'
@@ -52,7 +53,7 @@ workflow IRODS_EXTRACTOR {
     input_irods_ch // map
 
     main:
-
+    //expects short reads currently.
     IRODS_QUERY(input_irods_ch)
     | CRAM_EXTRACT
 
