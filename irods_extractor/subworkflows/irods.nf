@@ -53,6 +53,10 @@ workflow IRODS_EXTRACTOR {
     input_irods_ch // map
 
     main:
+    //todo remove or make new method for ONT
+    if (params.read_type.toLowerCase() != "Illumina") {
+        log.error("Only Illumina reads are supported in this pipeline")
+    }
     //expects short reads currently.
     IRODS_QUERY(input_irods_ch)
     | CRAM_EXTRACT
