@@ -37,6 +37,8 @@ process JSON_PREP {
     label 'mem_1'
     label 'time_30m'
 
+    container 'quay.io/sangerpathogens/jq:1.6'
+
     input:
     val(meta)
 
@@ -55,6 +57,8 @@ process JSON_PARSE {
     label 'cpu_1'
     label 'mem_1'
     label 'time_30m'
+
+    container 'quay.io/sangerpathogens/jq:1.6'
     
     input:
     path(lane_file)
