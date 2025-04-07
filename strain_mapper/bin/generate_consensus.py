@@ -240,7 +240,7 @@ def get_seq(vcf: Path, ref_index: Path, default_seq_character: str) -> dict[str,
     with open(vcf, "r", newline="") as f:
         parsed_lines = parse_lines(f)
         for line in parsed_lines:
-            filter_val = line.get("FILTER", ".")
+            filter_val = line["FILTER"]
             filter_counter[filter_val] += 1
 
             seq_id = line["CHROM"]
