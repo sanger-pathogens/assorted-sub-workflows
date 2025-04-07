@@ -5,7 +5,48 @@ import csv
 import logging
 from pathlib import Path
 from typing import TextIO
-from collections import OrderedDict
+from collections import OrderedDict, Counter
+
+def log_filter_info(filter_counter: Counter, used_counter: Counter):
+    """
+    Logs information about FILTER values encountered and used during VCF parsing,
+    including the percentage of ambiguous variants.
+
+    Parameters:
+    filter_counter (Counter): A Counter object tallying all FILTER field values
+        encountered in the VCF file (e.g., PASS, ., lowQual, het).
+    used_counter (Counter): A Counter object tallying only the FILTER values that
+        were actually used to incorporate variants into the final consensus sequence
+        (typically only PASS and/or .).
+    total_variants (int): The total number of variants processed from the VCF file.
+
+    Behavior:
+    - Logs all unique FILTER values found in the VCF and their frequencies.
+    - Warns if both 'PASS' and '.' are present in the VCF, which can imply mixed
+      filtering conventions.
+    - Reports basic stats on consensus i.e how many ambigious bases
+      
+    Notes:
+    - Assumes that only variants with FILTER == 'PASS' or '.' are used.
+    """
+    all_filters = sorted(filter_counter.keys())
+    logging.info(f"Found FILTER values in VCF: {', '.join(all_filters)}")
+    
+    if "PASS" in filter_counter and "." in filter_counter:
+        logging.warning("VCF contains both 'PASS' and '.' in the FILTER column. "
+                        "These are treated as equivalent, but consider changing.")
+    
+    # this will be nice to show if you have just 1 random dot somewhere
+    if "PASS" in filter_counter:
+        logging.info(f"Variants used for consensus (FILTER == 'PASS'): {used_counter['PASS']}")
+    if "." in filter_counter:
+        logging.info(f"Variants used for consensus (FILTER == '.'): {used_counter['.']}")
+    
+    ambiguous = sum(used_counter[f] for f in used_counter if f not in {"PASS", "."})
+    if ambiguous > 0:
+        ambiguous_percentage = (ambiguous / total_variants) * 100
+        logging.info(f"Variants with non-passing FILTERs (left ambiguous): {ambiguous} "
+                     f"({ambiguous_percentage:.2f}% of total variants)")
 
 
 def get_chrom_id_and_size(ref_index: Path) -> dict[str, int]:
@@ -198,18 +239,26 @@ def get_seq(vcf: Path, ref_index: Path, default_seq_character: str) -> dict[str,
     for chrom_id, chrom_size in chrom_id_size.items():
         seq[chrom_id] = initialise_seq(chrom_size, default_seq_character)
 
+    filter_counter = Counter()
+    used_counter = Counter()
+
     with open(vcf, "r", newline="") as f:
         parsed_lines = parse_lines(f)
         for line in parsed_lines:
+            filter_val = line.get("FILTER", "PASS")
+            filter_counter[filter_val] += 1
+
             seq_id = line["CHROM"]
             ref = line["REF"]  # reference base
             alt = line["ALT"]  # alternative base
             pos = parse_position(line["POS"])
-            if seq_id in seq:
-                if line["FILTER"] in ("PASS", "."): # support unfiltered and hard/soft filter
-                    seq[seq_id][pos - 1] = get_nt_to_add(
-                        ref, alt, default_seq_character
-                    )
+            if seq_id in seq and filter_val in ("PASS", "."): # support unfiltered and hard/soft filter
+                used_counter[filter_val] += 1
+                seq[seq_id][pos - 1] = get_nt_to_add(
+                    ref, alt, default_seq_character
+                )
+
+    log_filter_info(filter_counter, used_counter)
 
     for chrom_id, chrom_seq in seq.items():
         assert len(chrom_seq) == chrom_id_size[chrom_id]
