@@ -168,7 +168,7 @@ def get_seq(vcf: Path, ref_index: Path, default_seq_character: str, unfiltered: 
     Parameters:
     vcf (Path): Path to the input VCF file containing variant data.
     ref_index (Path): Path to the reference index file containing chromosome sizes.
-    default_seq_character (str): Default character to initialize sequences with which will end as gaps.
+    default_seq_character (str): Default character to initialize sequences with which will appear at sites where no base has been called i.e. how to represent when neither a REF nor a VARIANT call.
     unfiltered (bool, optional): If True, includes all variants regardless of FILTER value.
         If False (default), includes variants with FILTER=PASS or empty FILTER ('.').
 
