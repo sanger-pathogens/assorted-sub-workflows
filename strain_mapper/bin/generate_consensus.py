@@ -179,7 +179,7 @@ def get_seq(vcf: Path, ref_index: Path, default_seq_character: str, unfiltered: 
     Notes:
     - When unfiltered=False (default), variants are included if either:
         1. FILTER column contains "PASS"
-        2. FILTER column is empty/missing (represented as '.' in VCF format)
+    - When unfiltered=False (default), variants are included if FILTER column contains "PASS"
     - When unfiltered=True, all variants are included regardless of FILTER status
     - The function preserves VCF convention where empty FILTER ('.') indicates
       the variant has passed all filters
