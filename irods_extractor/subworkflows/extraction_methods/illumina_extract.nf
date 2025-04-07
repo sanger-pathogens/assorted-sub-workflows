@@ -19,6 +19,10 @@ def setIlluminaMetadata(collection_path, data_obj_name, linked_metadata, combine
     metadata.irods_path = "${collection_path}/${data_obj_name}"
 
     linked_metadata.each { item ->
+        // Convert any dates to strings
+        def value = (item.value instanceof java.time.temporal.Temporal) ? 
+                   item.value.toString() : 
+                   item.value
         metadata[item.attribute.replaceAll("\\n|\\r", " ")] = item.value
     }
 
