@@ -206,7 +206,7 @@ def get_seq(vcf: Path, ref_index: Path, default_seq_character: str, unfiltered: 
             alt = line["ALT"]  # alternative base
             pos = parse_position(line["POS"])
             if seq_id in seq:
-                if unfiltered or line["FILTER"] == "PASS":
+                if unfiltered or line.get("FILTER", 'PASS') == "PASS":
                     seq[seq_id][pos - 1] = get_nt_to_add(
                         ref, alt, default_seq_character
                     )
