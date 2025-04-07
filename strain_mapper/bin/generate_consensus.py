@@ -161,26 +161,23 @@ def get_nt_to_add(ref: str, alt: str, default_seq_character):
     return alt
 
 
-def get_seq(vcf: Path, ref_index: Path, default_seq_character: str, unfiltered: bool) -> dict[str, str]:
+def get_seq(vcf: Path, ref_index: Path, default_seq_character: str) -> dict[str, str]:
     """
     Constructs sequences from VCF data, optionally filtering by FILTER status.
 
     Parameters:
     vcf (Path): Path to the input VCF file containing variant data.
     ref_index (Path): Path to the reference index file containing chromosome sizes.
-    default_seq_character (str): Default character to initialize sequences with which will appear at sites where no base has been called i.e. how to represent when neither a REF nor a VARIANT call.
-    unfiltered (bool, optional): If True, includes all variants regardless of FILTER value.
-        If False (default), includes variants with FILTER=PASS or empty FILTER ('.').
+    default_seq_character (str): Default character to initialize sequences with which 
+        will appear at sites where no base has been called i.e. how to represent when neither a REF 
+        nor a VARIANT call.
 
     Returns:
     Dict[str, str]: A dictionary where keys are chromosome IDs and values are the
         constructed sequences with variants incorporated.
 
     Notes:
-    - When unfiltered=False (default), variants are included if either:
-        1. FILTER column contains "PASS"
-    - When unfiltered=False (default), variants are included if FILTER column contains "PASS"
-    - When unfiltered=True, all variants are included regardless of FILTER status
+    - variants are included if FILTER column contains "PASS" or "."
     - The function preserves VCF convention where empty FILTER ('.') indicates
       the variant has passed all filters
 
@@ -190,8 +187,11 @@ def get_seq(vcf: Path, ref_index: Path, default_seq_character: str, unfiltered: 
         chr1 200 G C .
         chr1 300 C A FAIL
     Then:
-    - get_seq(vcf, ref_index, 'N') would incorporate chr1:100
-    - get_seq(vcf, ref_index, 'N', unfiltered=True) would incorporate all three variants
+    - get_seq(vcf, ref_index, 'N') would incorporate chr1:100 and chr1:200 into the sequence,
+      but skip chr1:300 due to the failing filter.
+
+    It is expected that positions are FILTERED consistently with either PASS or . being used,
+    depending on the filtering approach used (soft vs. hard filtering).
     """
     chrom_id_size = get_chrom_id_and_size(ref_index)
     seq = {}
@@ -206,7 +206,7 @@ def get_seq(vcf: Path, ref_index: Path, default_seq_character: str, unfiltered: 
             alt = line["ALT"]  # alternative base
             pos = parse_position(line["POS"])
             if seq_id in seq:
-                if unfiltered or line.get("FILTER", 'PASS') == "PASS":
+                if line["FILTER"] in ("PASS", "."): # support unfiltered and hard/soft filter
                     seq[seq_id][pos - 1] = get_nt_to_add(
                         ref, alt, default_seq_character
                     )
@@ -281,12 +281,6 @@ def parse_args():
         help="Output filename for aligned reads (fasta format)",
         default="out.fa",
     )
-    parser.add_argument(
-        "--unfiltered",
-        "-u",
-        help="skip PASS checks on the filter column in the VCF if unfiltered data used",
-        action='store_true',
-    )
     return parser.parse_args()
 
 
@@ -299,5 +293,5 @@ if __name__ == "__main__":
 
     args = parse_args()
 
-    seq = get_seq(args.vcf, args.ref_index, args.default_seq_char, args.unfiltered)
+    seq = get_seq(args.vcf, args.ref_index, args.default_seq_char)
     write_seq(seq, args.sample, args.output)
