@@ -6,7 +6,7 @@
                 "default": "",
                 "help_text": "Supply bakta arguments as a string, e.g. '--proteins <full path>'. Avoid the use of --prefix, --locus-tag, --keep-contig-headers, for which values are supplied by the pipeline."},
             "bakta_db": {
-                "default": "/data/pam/software/bakta/v5.1/",
+                "default": "/data/pam/software/bakta/v6.0/",
                 "help_text": "Absolute path to the Bakta DB used for annotation."
             },
             "publish_gbff": {
