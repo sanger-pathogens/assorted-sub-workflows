@@ -4,7 +4,8 @@ process BAKTA {
     label "mem_16"
     label "time_1"
 
-    publishDir mode: 'copy', pattern: "${amended_id}.gff3", path: "${params.outdir}/gffs/"
+    publishDir mode: 'copy', pattern: "${amended_id}.gff3", path: "${params.outdir}/gffs/", saveAs: {filename -> "${meta.ID}.gff3"}
+    publishDir mode: 'copy', pattern: "${amended_id}.gbff", path: "${params.outdir}/gbff/", saveAs: {filename -> "${meta.ID}.gbff"}, enabled: params.publish_gbff
 
     container 'quay.io/biocontainers/bakta:1.11.0--pyhdfd78af_0'
 

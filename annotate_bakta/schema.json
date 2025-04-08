@@ -9,6 +9,10 @@
                 "default": "/data/pam/software/bakta/v5.1/",
                 "help_text": "Absolute path to the Bakta DB used for annotation."
             },
+            "publish_gbff": {
+                "default": "false",
+                "help_text": "Save gbff (GBK) files into a /gbff directory"
+            },
             "combine_annotations": {
                 "default": "false",
                 "help_text": "EXPERIMENTAL: Combine annotations that you have produced seperately into the main bakta produced annotation"
