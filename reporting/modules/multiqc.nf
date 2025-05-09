@@ -18,7 +18,7 @@ process MULTIQC {
     script:
     def custom_config = params.multiqc_config ? "--config ${params.multiqc_config}" : "" // add config if you supply one
 
-    date = "${workflow.start}".split('T')[0] // workflow start is ugly 2024-02-29T12:01:26.233465Z, so split on T to use only date
+    date = "${workflow.start}".split('T')[0] // e.g. 2024-02-29T12:01:26.233465Z, so split on T to use only date
     out_report = "${date}-report.html"
     output_data = "${date}_data.tar.gz"
     output_plots = "${date}_plots.tar.gz"
