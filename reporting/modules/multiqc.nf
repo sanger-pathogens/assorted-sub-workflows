@@ -11,21 +11,21 @@ process MULTIQC {
     path('*') // we will likely need to collect + join into some mega channel unsure what to do here actually
 
     output:
-    path(out_report), emit: report
+    path(output_report), emit: report
     path(output_data), emit: data
     path(output_plots), optional:true, emit: plots
 
     script:
     def custom_config = params.multiqc_config ? "--config ${params.multiqc_config}" : "" // add config if you supply one
 
-    date = "${workflow.start}".split('T')[0] // e.g. 2024-02-29T12:01:26.233465Z, so split on T to use only date
-    out_report = "${date}-report.html"
+    def date = "${workflow.start}".split('T')[0] // e.g. 2024-02-29T12:01:26.233465Z, so split on T to use only date
+    output_report = "${date}-report.html"
     output_data = "${date}_data.tar.gz"
     output_plots = "${date}_plots.tar.gz"
 
     """
     multiqc \\
-        -n ${out_report} \\
+        -n ${output_report} \\
         -f \\
         ${custom_config} \\
         .
