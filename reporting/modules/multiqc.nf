@@ -1,6 +1,6 @@
 process MULTIQC {
     label 'cpu_1'
-    label 'mem_2'
+    label 'mem_10'
     label 'time_30m'
 
     container 'quay.io/biocontainers/multiqc:1.19--pyhdfd78af_0'
