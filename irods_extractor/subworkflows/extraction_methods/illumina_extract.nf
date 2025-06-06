@@ -68,7 +68,7 @@ workflow ILLUMINA_PARSE {
     main:
     illumina_json
     | filter{ it.text.contains('"attribute": "alignment"') }
-    | splitJson(path: "result")
+    | splitJson(path: "result.multiple")
     | map{irods_item ->
         metamap = [:]
         metamap = setIlluminaMetadata(irods_item.collection, irods_item.data_object, irods_item.avus, params.combine_same_id_crams)
