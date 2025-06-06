@@ -38,7 +38,7 @@ workflow ONT_PARSE {
     main:
     ont_json
     | filter{ it.text.contains('"attribute": "ont:tag_identifier"') }
-    | splitJson(path: "result")
+    | splitJson(path: "result.multiple")
     | map{irods_item ->
         metamap = [:]
         metamap = setONTMetadata(irods_item.collection, irods_item.avus)

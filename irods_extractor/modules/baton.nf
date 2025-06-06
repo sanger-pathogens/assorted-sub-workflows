@@ -4,7 +4,7 @@ process BATON {
     label 'time_30m'
     maxForks = 10
 
-    container "/data/pam/installs/images/baton.simg"
+    container "ghcr.io/wtsi-npg/ub-16.04-baton-irods-4.2.7:5.0.1"
     
     input:
     path(json_file)
