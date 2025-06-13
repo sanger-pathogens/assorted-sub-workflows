@@ -1,0 +1,87 @@
+{ 
+    "pipeline": "Abundance estimation (inStrain) sub-workflow",
+    "params": {
+        "Abundance estimation (inStrain) options": {
+            "abundance_estimation_subheader_1": {
+                "subtext": "\n  * Workflow step skipping/enabling options:"
+            },
+            "instrain_quick_profile_abundance_estimation": {
+                "default": false,
+                "help_text": "use quick profiling from inStrain instead of the standard (more intensive) abundance estimation method"
+            },
+            "bowtie2_samtools_only_abundance_estimation": {
+                "default": false,
+                "help_text": "stop after mapping reads to the reference genome database with Bowtie2 and skip inStrain abundance estimation."
+            },
+            "cleanup_intermediate_files_abundance_estimation": {
+                "default": true,
+                "help_text": "Should possibly large and numerous intermediate files from the ABUNDANCE_ESTIMATION workflow be removed on the fly\n            from the work/ folder? (prevents use of the -resume functionality for this workflow)."
+            },
+            "abundance_estimation_subheader_2": {
+                "subtext": "\n  * Output control options:"
+            },
+            "instrain_full_output_abundance_estimation": {
+                "default": false,
+                "help_text": "output all files from standard inStrain abundance estimation method;\n            default (false) is to output only the *_genome_info.tsv abundance profile table file."
+            },
+            "publish_host_reads_abundance_estimation": {
+                "default": false,
+                "help_text": "Should host reads detected by metaWRAP QC (as a prior step to abundance estimation with inStrain) be saved? [default: false]\n              NB: there shouldn't be much or any such reads when filtering upstream with Kneaddata (with `--human_read_removal true`)."
+            },
+            "abundance_estimation_subheader_3": {
+                "subtext": "\n  * Reference data file options for Sourmash/Bowtie2/inStrain:"
+            },
+            "genome_dir_abundance_estimation": {
+                "default": "/data/pam/team162/shared/gtdb_genomes_reps_r207/gtdb_genomes_reps_r207_genome_dir",
+                "help_text": "folder of reference genome database for Sourmash screening as a prior step to read mapping with Bowtie2"
+            },
+            "sourmash_db_abundance_estimation": {
+                "default": "/data/pam/team162/shared/sourmash_db/gtdb-rs207.genomic-reps.dna.k31.zip",
+                "help_text": "Sourmash index of reference genomes for read mapping with Bowtie2 as a prior step to abundance estimation with inStrain"
+            },
+            "abundance_estimation_subheader_4": {
+                "subtext": "\n  * Reference data file options for Bowtie2/inStrain that are required when --sourmash_subset_abundance_estimation is false, not used otherwise:"
+            },
+            "genome_file_abundance_estimation": {
+                "default": "",
+                "help_text": "reference genome database for mapping with Bowtie2 prior to abundance estimation with inStrain (mandatory)."
+            },
+            "precomputed_index_abundance_estimation": {
+                "default": "",
+                "help_text": "Pre-computed Bowtie2 index for reference genome database prior to abundance estimation with inStrain (mandatory)."
+            },
+            "stb_file_abundance_estimation": {
+                "default": "/lustre/scratch125/pam/data/software/gtdb/gtdb_genomes_reps_r207/gtdb_genomes_reps_r207.stb",
+                "help_text": "'Scaffold-to-Bin' table (matches assembly accessions with contig sequence accessions) for inStrain. Any custom name translation table can be used here, but it must cover the whole set of genomes in the reference database."
+            },
+            "custom_taxon_names_abundance_estimation": {
+                "default": "",
+                "help_text": "dictionary of taxon names (as provided in value field of STB file --stb_file_abundance_estimation) to custom names, used for ad-hoc relabelling. A 2-column TSV format expected; this may only feature a subset of taxa included in the database."
+            },
+            "abundance_estimation_subheader_5": {
+                "subtext": "\n  * Reference data file options for metaWRAP QC (irrelevant when --skip_qc_abundance_estimation is true):"
+            },
+            "bmtagger_db_abundance_estimation": {
+                "default": "/data/pam/software/BMTAGGER_INDEX",
+                "help_text": "location of BMTAGGER database for off-target read removal (as part of the ABUNDANCE_ESTIMATION:METAWRAP_QC subworkflow)"
+            },
+            "bmtagger_host_abundance_estimation": {
+                "default": "T2T-CHM13v2.0",
+                "help_text": "BMTAGGER database for off-target read removal (as part of the ABUNDANCE_ESTIMATION:METAWRAP_QC subworkflow); default to human genome assembly T2T-CHM13v2.0"
+            },
+            "abundance_estimation_subheader_6": {
+                "subtext": "\n  * Runtime parameter options:"
+            },
+            "bowtie2_samtools_threads_abundance_estimation": {
+                "default": 4
+            },
+            "instrain_threads_abundance_estimation": {
+                "default": 4
+            },
+            "instrain_profile_options": {
+                "default": "--database-mode",
+                "help_text": "profiling parameters for inStrain standard abundance estimation method."
+            }
+        }
+    }
+}
