@@ -2,21 +2,15 @@
     ILLUMINA WORKFLOWS AND FUNCTIONS
 */
 
-include { RETRIEVE_CRAM                 } from './../../modules/retrieve.nf'
+include { BATON_GET                     } from './../../modules/baton.nf'
 include { COLLATE_FASTQ; COMBINE_FASTQ  } from './../../modules/samtools.nf'
 include { METADATA as METADATA_COMBINED } from './../../modules/metadata_save.nf'
 
-def IRODS_ERROR_MSG = """
-    Error: IRODS search returned no data!
-    - Please ensure you are logged on with `iinit` and re-run the
-    pipeline without `-resume`.
-    - If you are logged in, check the process IRODS_QUERY:BATON work
-    directory for permission errors and ensure the study exists.
-"""
-
 def setIlluminaMetadata(collection_path, data_obj_name, linked_metadata, combine_same_id_crams) {
     def metadata = [:]
-    metadata.irods_path = "${collection_path}/${data_obj_name}"
+    metadata.collection = collection_path
+    metadata.data_obj = data_obj_name
+    metadata.read_type = "illuminia"
 
     linked_metadata.each { item ->
         metadata[item.attribute.replaceAll("\\n|\\r", " ")] = item.value
@@ -67,34 +61,35 @@ workflow ILLUMINA_PARSE {
 
     main:
     illumina_json
-    | filter{ it.text.contains('"attribute": "alignment"') }
-    | splitJson(path: "result.multiple")
     | map{irods_item ->
         metamap = [:]
         metamap = setIlluminaMetadata(irods_item.collection, irods_item.data_object, irods_item.avus, params.combine_same_id_crams)
-        cram_path = metamap.irods_path
-        [metamap, cram_path]  }
-    | ifEmpty { error(IRODS_ERROR_MSG) }
-    | filter{ it[0]["subset"] != "${params.irods_subset_to_skip}" }
-    | set{ meta_cram_ch }
+        metamap  }
+    | filter { meta ->
+        // params has to null OR has to match meta
+        (params.type == null || meta.type == params.type) &&
+        (params.target == null || meta.target == params.target) &&
+        (params.irods_subset_to_skip == null || meta.subset != params.irods_subset_to_skip )
+    }
+    | set{ meta_ch }
 
     emit:
-    meta_cram_ch
+    meta_ch
 }
 
 workflow CRAM_EXTRACT {
 
     take:
-    meta_cram_ch //tuple meta, cram_path
+    meta_ch //meta
 
     main:
 
     if ("${params.save_method}" == "nested"){
         Channel.fromPath("${params.outdir}/*/${params.preexisting_fastq_tag}/*_1.fastq.gz")
-        .set{ preexisting_fastq_path_ch }
+        | set{ preexisting_fastq_path_ch }
     }else{
         Channel.fromPath("${params.outdir}/${params.preexisting_fastq_tag}/*_1.fastq.gz")
-        .set{ preexisting_fastq_path_ch }
+        | set{ preexisting_fastq_path_ch }
     }
     preexisting_fastq_path_ch.toList().map{ preexisting_fastq_path_list -> 
        no_download = preexisting_fastq_path_list.size()
@@ -108,9 +103,9 @@ workflow CRAM_EXTRACT {
     .ifEmpty("fresh_run")
     .set{ existing_id }
 
-    meta_cram_ch.combine( existing_id )
-    .filter { metadata, cram_path, existing -> !(metadata.ID.toString() in existing) }
-    .map { it[0,1] }
+    meta_ch.combine( existing_id )
+    .filter { metadata, existing -> !(metadata.ID.toString() in existing) }
+    .map { it[0] }
     .set{ do_not_exist }
 
     do_not_exist.toList().map{ do_not_exist_list -> 
@@ -118,7 +113,7 @@ workflow CRAM_EXTRACT {
        log.info "irods_extractor: ${new_downloads} data items will be downloaded."
     }
 
-    RETRIEVE_CRAM(do_not_exist)
+    BATON_GET(do_not_exist)
     | COLLATE_FASTQ
 
     if (params.combine_same_id_crams) {
