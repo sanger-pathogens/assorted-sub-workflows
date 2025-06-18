@@ -22,7 +22,7 @@ def avuIdQuery(meta_query) {
     def query_list = []
     // with validation for numeric id types
     meta_query.each { key, value ->
-        if (value.class.simpleName == 'String' || value >= 0) {
+        if (value.class.simpleName == 'String' || value >= 0){
             def irods_key = translateKey(key)
             def query_part = """{"a": "${irods_key}", "v": "${value}"}"""
             query_list.add(query_part)
@@ -31,18 +31,6 @@ def avuIdQuery(meta_query) {
     return query_list
 }
 
-def objectOrCollection() {
-    switch(params.read_type) {
-        case 'ont':
-            return '"collection": true'
-        case 'all':
-            return '"object": true, "collection": true'
-        case 'illumina':
-            return '"object": true'
-        default:
-            log.error("read_type '${params.read_type}' was not one of illumina|ont|all")
-    }
-}
 
 process JSON_PREP {
     label 'cpu_1'
@@ -59,7 +47,28 @@ process JSON_PREP {
 
     script:
     json_file="input.json"
+    objectOrCollection = params.read_type != "Illumina" ? '"collection": true' : '"object": true'
     """
-    jq -n '{op: "metaquery", args: {${objectOrCollection()}, "avu": true}, target: {avus: ${avuIdQuery(meta)}}}' > ${json_file}
+    jq -n '{op: "metaquery", args: {${objectOrCollection}, "avu": true}, target: {avus: ${avuIdQuery(meta)}}}' > ${json_file}
+    """
+}
+
+process JSON_PARSE {
+    label 'cpu_1'
+    label 'mem_1'
+    label 'time_30m'
+
+    container 'quay.io/sangerpathogens/jq:1.6'
+    
+    input:
+    path(lane_file)
+
+    output:
+    path("irods_paths.json"), emit: json_file
+
+    script:
+    //format is dodgy when it comes off of IRODS so second JQ fixes the formatting
+    """
+    jq -r '' ${lane_file} > irods_paths.json
     """
 }

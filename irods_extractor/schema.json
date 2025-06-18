@@ -36,11 +36,7 @@
             },
             "read_type": {
                 "default": "Illumina",
-                "help_text": "Platform the data you wish to recieve was sequenced on Illumina|ont|all"
-            },
-            "pre_basecalled": {
-                "default": "false",
-                "help_text": "If true find the pod5 files rather than the basecalled fastqs"
+                "help_text": "Platform the data you wish to recieve was sequenced on Illumina|ont"
             }
         }
     }

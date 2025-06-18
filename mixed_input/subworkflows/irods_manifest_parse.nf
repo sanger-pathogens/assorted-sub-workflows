@@ -44,16 +44,12 @@ def createChannel(LinkedHashMap row) {
         }
     }
     
-    // Determine what metadata is meaningfull
-    def hasExtraMetadata = metadata.studyid != -1 || metadata.runid != -1 ||
-                           extraFields.any { row[it]?.toString()?.trim() }
-
-    def hasTarget = row.target?.toString()?.trim()
-    def hasType = row.type?.toString()?.trim()
-
-    // Reject if ONLY target/type are present
-    if (!hasExtraMetadata && (hasTarget || hasType)) {
-        log.warn("Cannot submit an iRODS query solely based on target or type metadata tags, as this query would catch too many file objects.\nThe row ${row} in the input manifest is ignored")
+    // Set target and type if necessary
+    if (metadata.studyid != -1 || metadata.runid != -1 || extraFields.any { row[it]?.toString()?.trim() }) {
+        metadata.target = row.target?.toString()?.trim() ?: "${params.target}"
+        metadata.type = row.type?.toString()?.trim() ?: "${params.type}"
+    } else if (row.target?.toString()?.trim() || row.type?.toString()?.trim()) {
+        log.warn ("Cannot submit an iRODS query solely based on target or type metadata tags, as this query would catch too many file objects.\nThe row ${row} in the input manifest is ignored")
         return "none"
     }
     
