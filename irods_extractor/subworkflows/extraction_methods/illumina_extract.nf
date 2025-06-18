@@ -10,7 +10,6 @@ def setIlluminaMetadata(collection_path, data_obj_name, linked_metadata, combine
     def metadata = [:]
     metadata.collection = collection_path
     metadata.data_obj = data_obj_name
-    metadata.read_type = "illuminia"
 
     linked_metadata.each { item ->
         metadata[item.attribute.replaceAll("\\n|\\r", " ")] = item.value

@@ -7,7 +7,6 @@ include { BATON_GET_COLLECTION } from '../../modules/baton.nf'
 def setONTMetadata(collection_path, linked_metadata) {
     def metadata = [:]
     metadata.irods_path = collection_path
-    metadata.read_type = "ont"
 
     //ONTRUN-xxx or null
     def matcher = metadata.irods_path =~ /ONTRUN-\d+/
