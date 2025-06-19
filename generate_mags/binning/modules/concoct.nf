@@ -63,7 +63,8 @@ process CONCOCT {
             -t ${task.cpus} \\
 		    --coverage_file ${depths} \\
 		    --composition_file ${split_fasta} \\
-		    -b ${meta.ID}_concoct
+		    -b ${meta.ID}_concoct \\
+            --seed ${params.bin_seed}
     """
 }
 

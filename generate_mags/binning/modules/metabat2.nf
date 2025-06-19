@@ -38,7 +38,8 @@ process METABAT1 {
         -o ${meta.ID}_bin \\
         -m ${params.min_contig} \\
         -t ${task.cpus} \\
-        --unbinned
+        --unbinned \\
+        --seed ${params.bin_seed}
     """
 }
 
@@ -62,7 +63,8 @@ process METABAT2 {
         -o metabat/${meta.ID}_bin \\
         -m ${params.min_contig} \\
         -t ${task.cpus} \\
-        --unbinned
+        --unbinned \\
+        --seed ${params.bin_seed}
 
     #move stuff out of the bin that isn't to use
     mv metabat/${meta.ID}_bin.BinInfo.txt .
