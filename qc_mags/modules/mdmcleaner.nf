@@ -6,13 +6,13 @@ process MDMCLEANER {
 
     container  'quay.io/biocontainers/mdmcleaner:0.8.7--pyh7cba7a3_0'
 
-    publishDir mode: 'copy', path: "${params.outdir}/gunc/"
+    publishDir mode: 'copy', path: "${params.outdir}/mdmcleaner/"
 
     input:
     tuple val(meta), path(fasta)
 
     output:
-    tuple val(meta), path(mdmcleaner_output), emit: results
+    tuple val(meta), path("mdmcleaner_output"), emit: results
 
     script:
     """

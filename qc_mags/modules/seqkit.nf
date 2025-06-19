@@ -6,7 +6,7 @@ process SEQKIT {
 
     container  'quay.io/biocontainers/seqkit:2.10.0--h9ee0642_0'
 
-    publishDir mode: 'copy', path: "${params.outdir}/gunc/"
+    publishDir mode: 'copy', path: "${params.outdir}/seqkit/"
 
     input:
     tuple val(meta), path(fastas)
