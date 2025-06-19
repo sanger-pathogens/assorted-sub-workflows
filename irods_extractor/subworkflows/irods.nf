@@ -21,7 +21,15 @@ workflow IRODS_QUERY {
         input_irods_ch // map
 
         main:
-        JSON_PREP(input_irods_ch)
+        if (params.fastsearch) {
+            input_irods_ch.collect()
+            | set { search_ch }
+        } else {
+            input_irods_ch
+            | set { search_ch }
+        }
+
+        JSON_PREP(search_ch)
         | BATON
         | splitJson(path: "result.multiple")
         | branch { meta ->
