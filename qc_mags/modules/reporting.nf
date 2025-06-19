@@ -13,7 +13,7 @@ process REPORT {
     tuple val(meta), path("*.csv"), emit: report
 
     script:
-    command = "${projectDir}/bin/report.py"
+    command = "${projectDir}/assorted-sub-workflows/qc_mags/bin/report.py"
     """
     ${command} ${merged_csv}
     """

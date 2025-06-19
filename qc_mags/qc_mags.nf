@@ -1,10 +1,10 @@
 include { CHECKM2 as PRE_CHECKM2;
-          CHECKM2                   } from '../modules/qc_mags/checkm2.nf'
+          CHECKM2                   } from './modules/checkm2.nf'
 include { GUNC as PRE_GUNC;
-          GUNC                      } from '../modules/qc_mags/gunc.nf'
-include { MDMCLEANER                } from '../modules/qc_mags/mdmcleaner.nf'
-include { SEQKIT                    } from '../modules/qc_mags/seqkit.nf'
-include { REPORT                    } from '../modules/qc_mags/reporting.nf'
+          GUNC                      } from './modules/gunc.nf'
+include { MDMCLEANER                } from './modules/mdmcleaner.nf'
+include { SEQKIT                    } from './modules/seqkit.nf'
+include { REPORT                    } from './modules/reporting.nf'
 
 
 workflow QC_MAGS {
