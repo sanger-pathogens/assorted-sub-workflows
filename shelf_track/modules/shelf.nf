@@ -13,7 +13,7 @@ process SHELF_GET_RUN_UUID {
 
     script:
     """
-    runuuid=\$(shelf get run -q run.name=${meta.ID} -H run_uuid)
+    runuuid=\$(shelf get run -q run.name=${meta.ID} -H run_uuid | tail -n1)
     """
 }
 
@@ -32,7 +32,7 @@ process SHELF_GET_METHOD_UUID {
     script:
     // relying on manifest scope from main config file but that might not be exported during task
     """
-    methuuid=\$(shelf get method -q url="${manifest.homePage}/-/tree/${manifest.version}" -H method_uuid)
+    methuuid=\$(shelf get method -q url="${manifest.homePage}/-/tree/${manifest.version}" -H method_uuid | tail -n1)
     """
 }
 
@@ -53,7 +53,7 @@ process SHELF_CREATE_FILE {
 
     script:
     """
-    fileuuid=\$(shelf_staging create file -k run_uuid,method_uuid -v $run_uuid,$method_uuid)
+    fileuuid=\$(shelf_staging create file -k run_uuid,method_uuid -v $run_uuid,$method_uuid | tail -n1)
     """
 
     
