@@ -3,7 +3,7 @@ process SHELF_GET_RUN_UUID {
     label 'mem_1'
     label 'time_from_queue_small'
 
-    container 'quay.io/sangerpathogens/shelf:0.0'
+    container 'gitlab.internal.sanger.ac.uk/sanger-pathogens/shelf/cli/container_registry/shelf_cli:v0.10.1'
 
     input:
     tuple val(meta), path(results)
@@ -22,7 +22,7 @@ process SHELF_GET_METHOD_UUID {
     label 'mem_1'
     label 'time_from_queue_small'
 
-    container 'quay.io/sangerpathogens/shelf:0.0'
+    container 'gitlab.internal.sanger.ac.uk/sanger-pathogens/shelf/cli/container_registry/shelf_cli:v0.10.1'
 
     // no input as really we only need to query this once per run based on pipeline own info
 
@@ -44,7 +44,9 @@ process SHELF_CREATE_FILE {
     container 'gitlab.internal.sanger.ac.uk/sanger-pathogens/shelf/cli/container_registry/shelf_cli:v0.10.1'
 
     input:
-    tuple val(meta), path(results), val(run_uuid), val(method_uuid)
+    tuple val(meta), path(results)
+    val(run_uuid)
+    val(method_uuid)
 
     output:
     env(fileuuid),  emit: file_uuid

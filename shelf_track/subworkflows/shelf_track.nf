@@ -9,8 +9,11 @@ workflow SHELF_PREPARE {
     main:
     SHELF_GET_METHOD_UUID()
 
-    emmit:
     SHELF_GET_METHOD_UUID.out.method_uuid
+    .set{ method }
+
+    emmit:
+    method
 }
 
 
@@ -24,8 +27,7 @@ workflow SHELF_TRACK {
 
     SHELF_GET_RUN_UUID(generic_output)
 
-    generic_output.join(SHELF_GET_RUN_UUID.out.run_uuid, method)
-    | SHELF_CREATE_FILE
+    SHELF_CREATE_FILE(generic_output, SHELF_GET_RUN_UUID.out.run_uuid, method)
 
     emmit:
     SHELF_CREATE_FILE.out.file_uuid
