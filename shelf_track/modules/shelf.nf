@@ -44,7 +44,9 @@ process SHELF_CREATE_FILE {
     container 'gitlab.internal.sanger.ac.uk/sanger-pathogens/shelf/cli/container_registry/shelf_cli:v0.10.1-rc1'
 
     input:
-    tuple val(meta), path(results)
+    tuple val(meta), path(results_file)
+    val(output_folder)
+    val(file_type)
     val(run_uuid)
     val(method_uuid)
 
@@ -52,8 +54,9 @@ process SHELF_CREATE_FILE {
     env(fileuuid),  emit: file_uuid
 
     script:
+    filepath = "${output_folder}/${results_file}"
     """
-    fileuuid=\$(shelf_staging create file -k run_uuid,method_uuid -v $run_uuid,$method_uuid | tail -n1)
+    fileuuid=\$(shelf_staging create file -k path,run_uuid,method_uuid,file_type -v ${filepath},${run_uuid},${method_uuid},${file_type} | tail -n1)
     """
 
     
