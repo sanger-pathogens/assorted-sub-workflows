@@ -51,8 +51,7 @@ process SHELF_CREATE_FILE {
 
     script:
     """
-    cd ${projectDir}
-    fileuuid=\$(shelf put )
+    fileuuid=\$(shelf create file -k run_uuid,method_uuid -v $run_uuid,$method_uuid)
     """
 
     
