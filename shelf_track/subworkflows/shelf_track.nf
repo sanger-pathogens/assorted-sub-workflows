@@ -20,8 +20,10 @@ workflow SHELF_PREPARE {
 workflow SHELF_TRACK {
 
     take:
-    generic_output // tupple val(meta), path(results)
-    method         // val(method_uuid)
+    generic_output      // tupple val(meta), path(results)
+    filetype            // val(file_type)
+    method              // val(method_uuid)
+    outdir              // val(output_folder)
 
     main:
 

@@ -45,10 +45,10 @@ process SHELF_CREATE_FILE {
 
     input:
     tuple val(meta), path(results_file)
-    val(output_folder)
     val(file_type)
     val(run_uuid)
     val(method_uuid)
+    val(output_folder)
 
     output:
     env(fileuuid),  emit: file_uuid
