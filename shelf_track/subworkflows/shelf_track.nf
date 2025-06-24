@@ -1,4 +1,4 @@
-include { SHELF_GET_RUN_UUID; SHELF_GET_METHOD_UUID; process SHELF_CREATE_FILE } from '../modules/shelf.nf'
+include { SHELF_GET_RUN_UUID; SHELF_GET_METHOD_UUID; SHELF_CREATE_FILE } from '../modules/shelf.nf'
 
 //
 // SUBWORKFLOW: Prepare registration of pipeline run and register data items in Shelf
@@ -12,7 +12,7 @@ workflow SHELF_PREPARE {
     SHELF_GET_METHOD_UUID.out.method_uuid
     .set{ method }
 
-    emmit:
+    emit:
     method
 }
 
@@ -31,6 +31,6 @@ workflow SHELF_TRACK {
 
     SHELF_CREATE_FILE(generic_output, SHELF_GET_RUN_UUID.out.run_uuid, method)
 
-    emmit:
+    emit:
     SHELF_CREATE_FILE.out.file_uuid
 }
