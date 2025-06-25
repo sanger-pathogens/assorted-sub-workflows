@@ -7,7 +7,6 @@ process DREP_GENERATE_STB {
     container 'quay.io/biocontainers/drep:3.5.0--pyhdfd78af_0'
 
     input:
-    val db_name
     path db_manifest
 
     output:
