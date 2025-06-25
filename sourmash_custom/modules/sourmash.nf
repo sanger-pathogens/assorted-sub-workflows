@@ -15,6 +15,7 @@ process SOURMASH_SKETCH_DB {
     path(final_name)
 
     script:
+    final_name = "${params.db_name}_s${params.sketch_size}k${params.klen}_sourmash.zip"
     """
     sourmash sketch dna -p scaled=${params.sketch_size},k=${params.klen} --from-file ${assembly_manifest} -o ${db_name}_s${params.sketch_size}k${params.klen}_sourmash.zip
     """
