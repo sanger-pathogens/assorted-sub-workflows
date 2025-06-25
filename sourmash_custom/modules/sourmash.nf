@@ -12,7 +12,7 @@ process SOURMASH_SKETCH_DB {
 
     output:
     val(db_name), emit: db_name
-    path("${db_name}_s${params.sketch_size}k${params.klen}_sourmash.zip")
+    path(final_name)
 
     script:
     """
