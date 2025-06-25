@@ -7,10 +7,10 @@ process DREP_GENERATE_STB {
     container 'quay.io/biocontainers/drep:3.5.0--pyhdfd78af_0'
 
     input:
-    path db_manifest
+    path(db_manifest)
 
     output:
-    path "${params.db_name}_drep.stb" , emit: stb_file
+    path("${params.db_name}_drep.stb") , emit: stb_file
 
     script:
     """
