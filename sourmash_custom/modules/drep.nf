@@ -10,8 +10,7 @@ process DREP_GENERATE_STB {
     path db_manifest
 
     output:
-    val "${db_name}", emit: db_name
-    path "${db_name}_drep.stb" , emit: stb_file
+    path "${params.db_name}_drep.stb" , emit: stb_file
 
     script:
     """

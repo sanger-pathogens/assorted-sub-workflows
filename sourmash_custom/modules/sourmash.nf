@@ -11,7 +11,6 @@ process SOURMASH_SKETCH_DB {
     path(assembly_manifest)
 
     output:
-    val(db_name), emit: db_name
     path(final_name)
 
     script:
