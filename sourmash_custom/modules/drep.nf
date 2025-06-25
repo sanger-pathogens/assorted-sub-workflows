@@ -15,6 +15,6 @@ process DREP_GENERATE_STB {
 
     script:
     """
-    parse_stb.py --reverse -f ${db_manifest} -o ${db_name}_drep.stb
+    parse_stb.py --reverse -f ${db_manifest} -o ${params.db_name}_drep.stb
     """
 }
