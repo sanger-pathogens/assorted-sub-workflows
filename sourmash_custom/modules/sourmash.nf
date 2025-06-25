@@ -8,7 +8,7 @@ process SOURMASH_SKETCH_DB {
     container 'quay.io/sangerpathogens/sourmash:4.5.0--hdfd78af_0'
 
     input: 
-    path assembly_manifest
+    path(assembly_manifest)
 
     output:
     val db_name, emit: db_name
