@@ -11,7 +11,7 @@ process SOURMASH_SKETCH_DB {
     path(assembly_manifest)
 
     output:
-    val db_name, emit: db_name
+    val(db_name), emit: db_name
     path("${db_name}_s${params.sketch_size}k${params.klen}_sourmash.zip")
 
     script:
