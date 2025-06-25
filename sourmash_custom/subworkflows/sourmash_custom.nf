@@ -18,8 +18,8 @@ workflow SOURMASH_DATABASE {
 
     main: 
 
-    DREP_GENERATE_STB(params.db_name, assembly_manifest_ch)
-    SOURMASH_SKETCH_DB(params.db_name, assembly_manifest_ch)
+    DREP_GENERATE_STB(assembly_manifest_ch)
+    SOURMASH_SKETCH_DB(assembly_manifest_ch)
 
 }
 
