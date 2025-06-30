@@ -1,12 +1,12 @@
-include { METASPADES                 } from './modules/spades.nf'
-include { MEGAHIT                    } from './modules/megahit.nf'
+include { METASPADES                 } from '../modules/assemble/spades.nf'
+include { MEGAHIT                    } from '../modules/assemble/megahit.nf'
 include { REMOVE_SMALL_CONTIGS;
           FIX_MEGAHIT_CONTIG_NAMING;
-          SORT_CONTIGS               } from './modules/helper_scripts.nf'
+          SORT_CONTIGS               } from '../modules/assemble/helper_scripts.nf'
 include { BWA_INDEX;
-          BWA                        } from './modules/bwa.nf'
-include { SAM_TO_FASTQ               } from './modules/samtools.nf'
-include { QUAST                      } from './modules/quast.nf'
+          BWA                        } from '../modules/assemble/bwa.nf'
+include { SAM_TO_FASTQ               } from '../modules/assemble/samtools.nf'
+include { QUAST                      } from '../modules/assemble/quast.nf'
 
 /*
 #############################################################################################################################################################
@@ -21,6 +21,8 @@ include { QUAST                      } from './modules/quast.nf'
 #
 # Modified by Yan Shao: 1) Default hybrid assembly (metaspades followed by megahit) assemblers ; 2) Added --fastspades option (use if default metaspades runs out of time);
 # 3) Disabled plots; 4) Disabled assembly QC by QUAST 
+#
+# Modified by Sam Dougan into nextflow :)
 ##############################################################################################################################################################
 */
 
@@ -74,7 +76,10 @@ workflow METAWRAP_ASSEMBLE {
     }
 
     SORT_CONTIGS(final_contigs)
-    | QUAST
+
+    if (params.assembly_stats) {
+        QUAST(SORT_CONTIGS.out.sorted_contigs)
+    }
 
     emit:
     SORT_CONTIGS.out.sorted_contigs
