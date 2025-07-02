@@ -1,12 +1,12 @@
-include { METASPADES                 } from '../modules/assemble/spades.nf'
-include { MEGAHIT                    } from '../modules/assemble/megahit.nf'
+include { METASPADES                 } from './modules/spades.nf'
+include { MEGAHIT                    } from './modules/megahit.nf'
 include { REMOVE_SMALL_CONTIGS;
           FIX_MEGAHIT_CONTIG_NAMING;
-          SORT_CONTIGS               } from '../modules/assemble/helper_scripts.nf'
+          SORT_CONTIGS               } from './modules/helper_scripts.nf'
 include { BWA_INDEX;
-          BWA                        } from '../modules/assemble/bwa.nf'
-include { SAM_TO_FASTQ               } from '../modules/assemble/samtools.nf'
-include { QUAST                      } from '../modules/assemble/quast.nf'
+          BWA                        } from './modules/bwa.nf'
+include { SAM_TO_FASTQ               } from './modules/samtools.nf'
+include { QUAST                      } from './modules/quast.nf'
 
 /*
 #############################################################################################################################################################
