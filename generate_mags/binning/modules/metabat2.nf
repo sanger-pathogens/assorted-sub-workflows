@@ -3,7 +3,7 @@ process CONTIG_DEPTHS {
     label 'mem_100M'
     label 'time_30m'
 
-    container 'quay.io/biocontainers/metabat2:2.18--h6f16272_0'
+    container 'quay.io/biocontainers/metabat2:2.12.1--1'
 
     input:
     tuple val(meta), path(bam)
@@ -23,7 +23,7 @@ process METABAT1 {
     label 'mem_1'
     label 'time_30m'
 
-    container 'quay.io/biocontainers/metabat2:2.18--h6f16272_0'
+    container 'quay.io/biocontainers/metabat2:2.12.1--1'
 
     input:
     tuple val(meta), path(depth_text), path(assembly)
@@ -48,7 +48,7 @@ process METABAT2 {
     label 'mem_1'
     label 'time_30m'
 
-    container 'quay.io/biocontainers/metabat2:2.18--h6f16272_0'
+    container 'quay.io/biocontainers/metabat2:2.12.1--1'
 
     input:
     tuple val(meta), path(depth_text), path(assembly)
@@ -67,9 +67,10 @@ process METABAT2 {
         --seed ${params.bin_seed}
 
     #move stuff out of the bin that isn't to use
-    mv metabat/${meta.ID}_bin.BinInfo.txt .
-    mv metabat/${meta.ID}_bin.lowDepth.fa .
-    mv metabat/${meta.ID}_bin.tooShort.fa .
+    ## top 3 added in later version so commented out
+    #mv metabat/${meta.ID}_bin.BinInfo.txt . 
+    #mv metabat/${meta.ID}_bin.lowDepth.fa .
+    #mv metabat/${meta.ID}_bin.tooShort.fa .
     mv metabat/${meta.ID}_bin.unbinned.fa .
 
     # rename remaining fasta rather than fa

@@ -3,7 +3,7 @@ process CONTIG_DEPTHS_NO_INTRA {
     label 'mem_100M'
     label 'time_30m'
 
-    container 'quay.io/biocontainers/metabat2:2.18--h6f16272_0'
+    container 'quay.io/biocontainers/metabat2:2.12.1--1'
 
     input:
     tuple val(meta), path(bam)
@@ -45,7 +45,7 @@ process MAXBIN2 {
     label 'mem_1'
     label 'time_30m'
 
-    container 'quay.io/biocontainers/maxbin2:2.2.7--h503566f_7'
+    container 'quay.io/biocontainers/maxbin2:2.2.6--h14c3975_0'
 
     input:
     tuple val(meta), path(depth_dir), path(assembly)
@@ -65,11 +65,12 @@ process MAXBIN2 {
 	    -abund_list ${depth_dir}/mb2_abund_list.txt
 
     #move stuff out of the bin that isn't to use
+    #commented line is not added until later version
     mv maxbin2/${meta.ID}.marker .
     mv maxbin2/${meta.ID}.noclass .
     mv maxbin2/${meta.ID}.tooshort .
     mv maxbin2/${meta.ID}.log .    
-    mv maxbin2/${meta.ID}.marker_of_each_bin.tar.gz .
+    #mv maxbin2/${meta.ID}.marker_of_each_bin.tar.gz .
     mv maxbin2/${meta.ID}.summary .
 
     #maxbin is already fasta

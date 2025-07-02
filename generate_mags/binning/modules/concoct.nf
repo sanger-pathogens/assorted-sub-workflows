@@ -4,7 +4,7 @@ process CUT_UP_FASTA {
     label 'mem_100M'
     label 'time_30m'
 
-    container 'quay.io/biocontainers/concoct:1.1.0--py312h71dcd68_7'
+    container 'quay.io/biocontainers/concoct:1.0.0--py36h88e4a8a_5'
 
     input:
     tuple val(meta), path(assembly)
@@ -27,7 +27,7 @@ process ESTIMATE_ABUNDANCE {
     label 'mem_250M'
     label 'time_30m'
 
-    container 'quay.io/biocontainers/concoct:1.1.0--py312h71dcd68_7'
+    container 'quay.io/biocontainers/concoct:1.0.0--py36h88e4a8a_5'
 
     input:
     tuple val(meta), path(bed_file), path(bam), path(bam_index)
@@ -48,7 +48,7 @@ process CONCOCT {
     label 'mem_1'
     label 'time_30m'
 
-    container 'quay.io/biocontainers/concoct:1.1.0--py312h71dcd68_7'
+    container 'quay.io/biocontainers/concoct:1.0.0--py36h88e4a8a_5'
 
     input:
     tuple val(meta), path(split_fasta), path(depths)
@@ -74,7 +74,7 @@ process CUTUP_CLUSTERING {
     label 'mem_250M'
     label 'time_30m'
 
-    container 'quay.io/biocontainers/concoct:1.1.0--py312h71dcd68_7'
+    container 'quay.io/biocontainers/concoct:1.0.0--py36h88e4a8a_5'
 
     input:
     tuple val(meta), path(concoct_files)
