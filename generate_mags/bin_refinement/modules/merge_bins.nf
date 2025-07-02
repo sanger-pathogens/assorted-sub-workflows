@@ -19,6 +19,6 @@ process MERGE_BINS {
     script:
     command = "${projectDir}/assorted-sub-workflows/generate_mags/bin_refinement/bin/merge_bins.py"
     """
-    ${command} -b ${bin_list} -s ${stats_list} -o ${meta.ID}_best_bins -c 50 -x 5 -l ${meta.ID}_merge.log -i ${meta.ID}
+    ${command} -b ${bin_list} -s ${stats_list} -o ${meta.ID}_best_bins -c ${params.min_completeness} -x ${params.max_contamination} -l ${meta.ID}_merge.log -i ${meta.ID}
     """
 }
