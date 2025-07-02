@@ -10,9 +10,10 @@ process RETRIEVE_CRAM {
     tuple val(meta), val(cram_path)
 
     output:
-    tuple val(meta), path("${meta.ID}{,_${meta.subset}}.{cram,bam}"), emit: path_channel
+    tuple val(meta), path(output_file), emit: path_channel
 
     script:
+    output_file = file(cram_path).name
     """
     iget -K ${cram_path}
     """
