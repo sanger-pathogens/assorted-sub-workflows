@@ -93,6 +93,8 @@ workflow METAWRAP_BIN_REFINEMENT {
         | set { checkm }
     } else {
         CHECKM2(refined_bins)
+
+        CHECKM2.out.results
         | set { checkm }
     }
     
@@ -104,73 +106,9 @@ workflow METAWRAP_BIN_REFINEMENT {
     | DEREPLICATE_CONTIGS
     | CHECKM2_FINAL_BIN
 
-    //todo add derep methods
-
+    CHECKM2_FINAL_BIN.out.results
+    | set { final_bins }
     
+    emit:
+    final_bins
 }
-
-
-//	
-//elif [ "$cherry_pick" == "false" ]; then
-//	comm "Skipping bin consolidation. Will try to pick the best binning folder without mixing bins from different sources."
-//	if [ $run_checkm = false ]; then 
-//		comm "cannot decide on best bin set because CheckM was not run. Will assume its binsA (first bin set)"
-//		best_bin_set=binsA
-//	elif [ $run_checkm = true ]; then
-//		max=0
-//		best_bin_set=none
-//		for bin_set in $(ls | grep .stats); do
-//			num=$(cat $bin_set | awk -v c="$comp" -v x="$cont" '{if ($2>=c && $2<=100 && $3>=0 && $3<=x) print $1 }' | wc -l)
-//			comm "There are $num 'good' bins found in ${bin_set%.*}! (>${comp}% completion and <${cont}% contamination)"
-//			if [ "$num" -gt "$max" ]; then
-//				max=$num
-//				best_bin_set=${bin_set%.*}
-//			fi
-//		done
-//		if [[ ! -d $best_bin_set ]]; then error "Something went wrong with deciding on the best bin set. Exiting."; fi
-//		comm "looks like the best bin set is $best_bin_set"
-//	else
-//		error "something is wrong with the run_checkm option (${run_checkm})"
-//	fi
-//else
-//	error "something is wrong with the cherry_pick option (${cherry_pick})"
-//fi
-//
-//comm "You will find the best non-reassembled versions of the bins in $best_bin_set"
-//
-//
-//########################################################################################################
-//########################               FINALIZING THE REFINED BINS              ########################
-//########################################################################################################
-//announcement "FINALIZING THE REFINED BINS"
-//
-//
-//if [ "$run_checkm" == "true" ] && [ $dereplicate != "false" ]; then
-//	comm "Re-running CheckM on binsO bins"
-//	mkdir binsO.tmp
-//
-//	if [ "$quick" == "true" ]; then
-//		checkm lineage_wf -x fa binsO binsO.checkm -t $threads --tmpdir binsO.tmp --pplacer_threads $p_threads --reduced_tree
-//	else
-//		checkm lineage_wf -x fa binsO binsO.checkm -t $threads --tmpdir binsO.tmp --pplacer_threads $p_threads
-//	fi
-//
-//	if [[ ! -s binsO.checkm/storage/bin_stats_ext.tsv ]]; then error "Something went wrong with running CheckM. Exiting..."; fi
-//	rm -r binsO.tmp
-//	${SOFT}/summarize_checkm.py binsO.checkm/storage/bin_stats_ext.tsv manual binsM.stats | (read -r; printf "%s\n" "$REPLY"; sort -rn -k2) > binsO.stats
-//	if [[ $? -ne 0 ]]; then error "Cannot make checkm summary file. Exiting."; fi
-//	rm -r binsO.checkm
-//	num=$(cat binsO.stats | awk -v c="$comp" -v x="$cont" '{if ($2>=c && $2<=100 && $3>=0 && $3<=x) print $1 }' | wc -l)
-//	comm "There are $num 'good' bins found in binsO.checkm! (>${comp}% completion and <${cont}% contamination)"
-//	
-//	comm "Removing bins that are inadequate quality..."
-//	for bin_name in $(cat binsO.stats | grep -v compl | awk -v c="$comp" -v x="$cont" '{if ($2<c || $2>100 || $3<0 || $3>x) print $1 }' | cut -f1); do
-//		echo "${bin_name} will be removed because it fell below the quality threshhold after de-replication of contigs..."
-//		rm binsO/${bin_name}.fa
-//	done
-//	head -n 1 binsO.stats > binsO.stats.tmp
-//	cat binsO.stats | awk -v c="$comp" -v x="$cont" '$2>=c && $2<=100 && $3>=0 && $3<=x' >> binsO.stats.tmp
-//	mv binsO.stats.tmp binsO.stats
-//	n=$(cat binsO.stats | grep -v comp | wc -l)
-//	comm "Re-evaluating bin quality after contig de-replication is complete! There are still $n high quality bins."
-//fi

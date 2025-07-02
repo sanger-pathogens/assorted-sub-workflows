@@ -41,7 +41,7 @@ process SUMMARISE_CHECKM {
     tuple val(meta), path(fastas), path(summary), emit: merged_bins
 
     script:
-    command = "${projectDir}/modules/bin_refinement/bin/summarise_checkm.py"
+    command = "${projectDir}/assorted-sub-workflows/generate_mags/bin_refinement/bin/summarise_checkm.py"
     summary = "${meta.ID}_${bin_name}checkm_summary.tsv"
     """
     ${command} ${report} ${bin_name} > ${summary}
