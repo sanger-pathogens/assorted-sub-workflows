@@ -4,7 +4,7 @@ process SPADES_REASSEMBLE {
     label 'mem_32'
     label 'time_12'
 
-    container 'quay.io/biocontainers/spades:3.12.0--1'
+    container 'quay.io/biocontainers/spades:3.15.5--h95f258a_1'
 
     input:
     tuple val(meta), val(fullBinInfo), path(bin), path(first_read), path(second_read)

@@ -34,7 +34,7 @@ process SPLIT_READS {
     tuple val(meta), path("bin.*.{permissive,strict}_{1,2}.fastq.gz"),  emit: split_reads
 
     script:
-    command = "${projectDir}/modules/reassemble/bin/filter_reads_for_bin_reassembly.py"
+    command = "${projectDir}/assorted-sub-workflows/generate_mags/reassemble/modules/bin/filter_reads_for_bin_reassembly.py"
     """
     ${command} ${untrusted_contigs} . ${params.strict_max} ${params.permissive_max} --sam ${sam}
     """
@@ -55,7 +55,7 @@ process REMOVE_SMALL_CONTIGS {
     tuple val(meta), path(long_scaffolds), emit: long_contigs
 
     script:
-    command = "${projectDir}/modules/assemble/bin/rm_short_contigs.py"
+    command = "${projectDir}/assorted-sub-workflows/generate_mags/assemble/bin/rm_short_contigs.py"
     long_scaffolds = "long_${contigs.name}"
     """
     ${command} ${params.min_contig} ${contigs} > ${long_scaffolds}
@@ -120,7 +120,7 @@ process CHOOSE_BEST_BIN {
     tuple val(meta), path(final_bin), path("${meta.ID}_best_bins_summary.tsv"), emit: bins
 
     script:
-    command = "${projectDir}/modules/reassemble/bin/choose_best_bin.py"
+    command = "${projectDir}/assorted-sub-workflows/generate_mags/reassemble/modules/bin/choose_best_bin.py"
     final_bin = "${meta.ID}_best_bins"
     """
     ${command} ${summary} ${bin} ${final_bin} --min-completeness ${params.min_completeness} --max-contamination ${params.max_contamination}

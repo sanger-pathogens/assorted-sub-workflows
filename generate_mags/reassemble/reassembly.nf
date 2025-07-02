@@ -1,12 +1,12 @@
-include { COMBINE_BINS; SPLIT_READS } from "../modules/reassemble/helper_scripts.nf"
-include { BWA_INDEX; BWA            } from '../modules/assemble/bwa.nf'
-include { SPADES_REASSEMBLE         } from '../modules/reassemble/spades.nf'
+include { COMBINE_BINS; SPLIT_READS } from "./modules/helper_scripts.nf"
+include { BWA_INDEX; BWA            } from '../assemble/modules/bwa.nf'
+include { SPADES_REASSEMBLE         } from './modules/spades.nf'
 include { REMOVE_SMALL_CONTIGS; 
 		  COLLECT_BINS;
 		  RENAME_ORIGINAL;
-		  CHOOSE_BEST_BIN			} from '../modules/reassemble/helper_scripts.nf'
-include { CHECKM; SUMMARISE_CHECKM	} from '../modules/reassemble/checkm1.nf'
-include { CHECKM2					} from '../modules/reassemble/checkm2.nf'
+		  CHOOSE_BEST_BIN			} from './modules/helper_scripts.nf'
+include { CHECKM; SUMMARISE_CHECKM	} from './modules/checkm1.nf'
+include { CHECKM2					} from './modules/checkm2.nf'
 
 /*
 ##############################################################################################################################################################
@@ -31,7 +31,6 @@ workflow METAWRAP_REASSEMBLY {
     take:
     un_trusted_contigs
     reads
-	//checkm_reports
 
     main:
 	un_trusted_contigs
@@ -118,6 +117,8 @@ workflow METAWRAP_REASSEMBLY {
         | set { checkm }
     } else {
         CHECKM2(reassembled_bins)
+
+		CHECKM2.out.results_with_bin
         | set { checkm }
     }
 
