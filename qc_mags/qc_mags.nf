@@ -1,10 +1,12 @@
 include { CHECKM2 as PRE_CHECKM2;
-          CHECKM2                   } from './modules/checkm2.nf'
+          CHECKM2                   } from './modules/qc_mags/checkm2.nf'
+include { GTBDTK                    } from './modules/qc_mags/gtdbtk.nf'
 include { GUNC as PRE_GUNC;
-          GUNC                      } from './modules/gunc.nf'
-include { MDMCLEANER                } from './modules/mdmcleaner.nf'
-include { SEQKIT                    } from './modules/seqkit.nf'
-include { REPORT                    } from './modules/reporting.nf'
+          GUNC                      } from './modules/qc_mags/gunc.nf'
+include { MDMCLEANER                } from './modules/qc_mags/mdmcleaner.nf'
+include { SEQKIT                    } from './modules/qc_mags/seqkit.nf'
+include { BUNDLE_FASTAS             } from './modules/qc_mags/helper_scripts.nf'
+include { REPORT                    } from './modules/qc_mags/reporting.nf'
 
 
 workflow QC_MAGS {
@@ -12,16 +14,27 @@ workflow QC_MAGS {
     fasta_directory
 
     main:
-    
     fasta_directory
-    | (PRE_CHECKM2 & PRE_GUNC)
+    | (PRE_CHECKM2 & PRE_GUNC & GTBDTK)
 
     fasta_directory
     | MDMCLEANER
+    | map { meta, fasta_list ->
+        def size = fasta_list.size()
+        def group_key = groupKey(meta, size)
+        [group_key, meta, fasta_list]
+    }
+    | transpose
     | SEQKIT
+    | groupTuple
+    | map { group_key, meta, fasta_list ->
+        [ meta.first(), fasta_list ]
+    }
+    | BUNDLE_FASTAS
     | (CHECKM2 & GUNC)
 
     PRE_CHECKM2.out.results
+    | join(GTBDTK.out.results)
     | join(PRE_GUNC.out.results)
     | join(CHECKM2.out.results)
     | join(GUNC.out.results)

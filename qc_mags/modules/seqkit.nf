@@ -1,7 +1,7 @@
 process SEQKIT {
     tag "${meta.ID}"
-    label "cpu_4"
-    label "mem_8"
+    label "cpu_1"
+    label "mem_1"
     label "time_30m"
 
     container  'quay.io/biocontainers/seqkit:2.10.0--h9ee0642_0'
@@ -9,13 +9,14 @@ process SEQKIT {
     publishDir mode: 'copy', path: "${params.outdir}/seqkit/"
 
     input:
-    tuple val(meta), path(fastas)
+    tuple val(group_key), val(meta), path(fasta)
 
     output:
-    tuple val(meta), path("${meta.ID}_cleaned.fa.gz"), emit: results
+    tuple val(group_key), val(meta), path(finalName), emit: results
 
     script:
+    finalName = "cleaned_${fasta.getBaseName()}" 
     """
-    seqkit seq ${meta.ID}.fasta -m 1000 > ${meta.ID}_cleaned.fa.gz
+    seqkit seq ${fasta} -m 1000 > ${finalName}
     """
 }

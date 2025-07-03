@@ -12,17 +12,14 @@ process CHECKM2 {
     tuple val(meta), path(fastas)
 
     output:
-    tuple val(meta), path(report_txt), path(diamond_results), emit: results
+    tuple val(meta), path(report_tsv), emit: results
 
     script:
-    report_txt = "${meta.ID}_quality_report.tsv"
-    diamond_results = "${meta.ID}_diamond_results.tsv"
+    report_tsv = "${meta.ID}_quality_report.tsv"
     """
     checkm2 predict -x .fa --threads ${task.cpus} --input ${fastas} --output-directory checkm2 --database_path ${params.checkm2_db}
 
     # move the output file names to something slightly more descriptive including method
-
-    mv checkm2/diamond_output/DIAMOND_RESULTS.tsv ${diamond_results}
-    mv checkm2/quality_report.tsv ${report_txt}
+    mv checkm2/quality_report.tsv ${report_tsv}
     """
 }

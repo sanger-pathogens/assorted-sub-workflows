@@ -4,6 +4,8 @@ process REPORT {
     label 'mem_1'
     label 'time_1'
 
+    publishDir mode: 'copy', path: "${params.outdir}/report/"
+
     container 'quay.io/sangerpathogens/python-curl:3.11'
 
     input:
@@ -13,7 +15,7 @@ process REPORT {
     tuple val(meta), path("*.csv"), emit: report
 
     script:
-    command = "${projectDir}/assorted-sub-workflows/qc_mags/bin/report.py"
+    command = "${projectDir}/bin/report.py"
     """
     ${command} ${merged_csv}
     """

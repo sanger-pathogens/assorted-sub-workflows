@@ -1,8 +1,8 @@
 process GUNC {
     tag "${meta.ID}"
-    label "cpu_4"
+    label "cpu_8"
     label "mem_8"
-    label "time_30m"
+    label "time_12"
 
     container  'quay.io/biocontainers/gunc:1.0.6--pyhdfd78af_0'
 
@@ -12,12 +12,14 @@ process GUNC {
     tuple val(meta), path(fastas)
 
     output:
-    tuple val(meta), path(outDir), emit: results
+    tuple val(meta), path(report_tsv), emit: results
 
     script:
-    outDir = "${meta.ID}_gunc"
+    report_tsv = "${meta.ID}_gunc.tsv"
     """
-    mkdir ${outDir}
-    gunc run -r ${params.gunc_db} -d ${fastas} -o ${outDir} -t ${task.cpus}
+    mkdir ${meta.ID}_gunc
+    gunc run -r ${params.gunc_db} -d ${fastas} -o ${meta.ID}_gunc -t ${task.cpus}
+
+    mv ${meta.ID}_gunc/GUNC.gtdb_95.maxCSS_level.tsv ${report_tsv}
     """
 }
