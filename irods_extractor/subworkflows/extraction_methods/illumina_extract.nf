@@ -25,7 +25,11 @@ def setIlluminaMetadata(collection_path, data_obj_name, linked_metadata, combine
     metadata.subset = "target"
     // target subset remains implicit in ID and file names
 
-    metadata.ID = "${metadata.id_run}_${metadata.lane}${params.lane_plex_sep}${metadata.tag_index}"
+    if (metadata.lane != null) {
+        metadata.ID = "${metadata.id_run}_${metadata.lane}${params.lane_plex_sep}${metadata.tag_index}"
+    } else {
+        metadata.ID = "${metadata.id_run}${params.lane_plex_sep}${metadata.tag_index}"
+    }
     // need to join on 'alt_process' as well, otherwise will combine reads from n different alternative processing options = n x the raw read set
     metadata.ID = !metadata.alt_process ? "${metadata.ID}" : "${metadata.ID}_${metadata.alt_process}"
     
