@@ -17,6 +17,7 @@ process GTBDTK {
     script:
     report_tsv = "${meta.ID}_gtdbtk_summary.tsv"
     """
+    export GTDBTK_DATA_PATH="${params.gtdbtk_db}"
     gtdbtk classify_wf --genome_dir ${fastas} -x ${params.fasta_ext} --skip_ani_screen --cpus ${task.cpus} --out_dir gtdbtk_outdir
 
     cp gtdbtk_outdir/gtdbtk.bac*.summary.tsv ${report_tsv}
