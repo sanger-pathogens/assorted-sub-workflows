@@ -1,8 +1,8 @@
-include { TRIMGALORE                        } from './modules/metawrap_qc/trimgalore.nf'
-include { BMTAGGER                          } from './modules/metawrap_qc/bmtagger.nf'
-include { FILTER_HOST_READS; GET_HOST_READS } from './modules/metawrap_qc/filter_reads.nf'
-include { GENERATE_STATS                    } from './modules/metawrap_qc/generate_stats.nf'
-include { COLLATE_STATS                     } from './modules/metawrap_qc/collate_stats.nf'
+include { TRIMGALORE                        } from './modules/trimgalore.nf'
+include { BMTAGGER                          } from './modules/bmtagger.nf'
+include { FILTER_HOST_READS; GET_HOST_READS } from './modules/filter_reads.nf'
+include { GENERATE_STATS                    } from './modules/generate_stats.nf'
+include { COLLATE_STATS                     } from './modules/collate_stats.nf'
 
 
 workflow METAWRAP_QC {
