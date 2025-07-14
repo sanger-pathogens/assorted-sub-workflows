@@ -1,7 +1,7 @@
 process GTDBTK {
     tag "${meta.ID}"
     label "cpu_8"
-    label "mem_96"
+    label "mem_120"
     label "time_12"
 
     container  'quay.io/biocontainers/gtdbtk:2.4.1--pyhdfd78af_1'
