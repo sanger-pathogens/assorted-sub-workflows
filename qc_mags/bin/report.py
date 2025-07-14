@@ -27,8 +27,8 @@ def read_tsv(path, name):
 def process_checkm2(df, qc_stage):
     return df.rename(columns={
         'genome': 'genome_name_preqc',
-        'checkm_completeness': f'{qc_stage}_completeness',
-        'checkm_contamination': f'{qc_stage}_contamination'
+        'checkm2_completeness': f'{qc_stage}_completeness',
+        'checkm2_contamination': f'{qc_stage}_contamination'
     })[['genome_name_preqc', f'{qc_stage}_completeness', f'{qc_stage}_contamination']]
 
 def process_gunc(df, qc_stage):
@@ -48,6 +48,9 @@ def process_mapping(df):
 def enrich_fields(df):
     df['sample_or_strain_name'] = df['genome_name_preqc'].apply(lambda x: x.split("_")[0])
     df['genome_status'] = df['genome_name_preqc'].apply(lambda x: "mag" if "MAG" in x.upper() else "isolate")
+    df['genome_size'] = 'NA'         # Placeholder
+    df['gtdbtk_taxonomy'] = 'NA'     # Placeholder
+    df['contig_count'] = 'NA'        # Placeholder
     return df
 
 def merge_all(mapping_df, pre_checkm2, pre_gunc, post_checkm2, post_gunc):
