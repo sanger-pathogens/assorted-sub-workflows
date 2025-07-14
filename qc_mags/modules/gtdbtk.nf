@@ -1,4 +1,4 @@
-process GTBDTK {
+process GTDBTK {
     tag "${meta.ID}"
     label "cpu_8"
     label "mem_96"

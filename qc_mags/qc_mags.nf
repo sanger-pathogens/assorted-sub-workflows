@@ -1,6 +1,6 @@
 include { CHECKM2 as PRE_CHECKM2;
           CHECKM2                   } from './modules/checkm2.nf'
-include { GTBDTK                    } from './modules/gtdbtk.nf'
+include { GTDBTK                    } from './modules/gtdbtk.nf'
 include { GUNC as PRE_GUNC;
           GUNC                      } from './modules/gunc.nf'
 include { MDMCLEANER                } from './modules/mdmcleaner.nf'
@@ -15,7 +15,7 @@ workflow QC_MAGS {
 
     main:
     fasta_directory
-    | (PRE_CHECKM2 & PRE_GUNC & GTBDTK)
+    | (PRE_CHECKM2 & PRE_GUNC & GTDBTK)
 
     fasta_directory
     | MDMCLEANER
@@ -34,7 +34,7 @@ workflow QC_MAGS {
     | (CHECKM2 & GUNC)
 
     PRE_CHECKM2.out.results
-    | join(GTBDTK.out.results)
+    | join(GTDBTK.out.results)
     | join(PRE_GUNC.out.results)
     | join(CHECKM2.out.results)
     | join(GUNC.out.results)
