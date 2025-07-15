@@ -6,7 +6,7 @@ process REPORT {
 
     publishDir mode: 'copy', path: "${params.outdir}/report/"
 
-    container 'quay.io/sangerpathogens/python-curl:3.11'
+    container 'quay.io/sangerpathogens/pandas:2.2.1'
 
     input:
     tuple val(meta), path(merged_csv), path(contigs)
@@ -17,7 +17,6 @@ process REPORT {
     script:
     command = "${projectDir}/assorted-sub-workflows/qc_mags/bin/report.py"
     """
-    pip install pandas==2.3.1
     ${command} ${merged_csv}
     """
 }
