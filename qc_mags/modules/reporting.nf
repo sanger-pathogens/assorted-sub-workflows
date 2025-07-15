@@ -17,7 +17,7 @@ process REPORT {
     script:
     command = "${projectDir}/assorted-sub-workflows/qc_mags/bin/report.py"
     """
-    pip install pandas
+    pip install pandas==2.3.1
     ${command} ${merged_csv}
     """
 }
