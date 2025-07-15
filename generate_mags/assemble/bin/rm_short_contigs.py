@@ -1,9 +1,14 @@
 #!/usr/bin/env python3
 import sys
 
-if len(sys.argv) < 3:
-    print("Usage: rm_short_contigs.py <min_len> <filename>")
-    sys.exit(1)
+try:
+    if len(sys.argv) != 3:
+        raise IOError(f"Usage: {sys.argv[0]} <min_len> <filename>\nNumber of args expected {2} given {len(sys.argv)-1}")
+except IOError as ex: 
+    exit(f"{ex.args[0]}")
+except Exception as ex:
+    print(f"Unexpected error: {ex.args[0]}")
+
 
 min_len = int(sys.argv[1])
 filename = sys.argv[2]
