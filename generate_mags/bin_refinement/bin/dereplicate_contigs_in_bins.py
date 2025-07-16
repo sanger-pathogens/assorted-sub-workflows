@@ -9,8 +9,8 @@ from collections import defaultdict
 print("Loading in bin completion and contamination scores...")
 bin_scores = {}
 try:
-    with open(sys.argv[1]) as f:
-        for line in f:
+    with open(sys.argv[1]) as bin_file:
+        for line in bin_file:
             if "Completeness" in line:
                 continue
             cut = line.strip().split("\t")
