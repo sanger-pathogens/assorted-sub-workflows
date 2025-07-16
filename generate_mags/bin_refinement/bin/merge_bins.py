@@ -56,7 +56,9 @@ class BinInfo:
         self.discard_stats = None
     
     def load_contig_data(self):
-        """Load contig information from bin files."""
+        """
+        Load contig information from bin files.
+        """
         logging.info(f"Loading contig data from {self.dataset_name}: {self.bin_folder}")
         
         for bin_file in self.good_bins:
