@@ -226,6 +226,8 @@ def load_good_bins(stats_file: str, min_completion: float, max_contamination: fl
                         })
                 except (ValueError, IndexError) as e:
                     logging.warning(f"Error parsing line in {stats_file}: {line.strip()} - {e}")
+                except Exception as e:
+                    logging.error(f"Unexpected error processing {stats_file}: {e}")
                     
     except FileNotFoundError:
         logging.error(f"Stats file not found: {stats_file}")
