@@ -8,7 +8,6 @@ import os
 print("Loading in bin completion and contamination scores...")
 bin_scores = {}
 <<<<<<< HEAD
-<<<<<<< HEAD
 with open(sys.argv[1]) as f:
     for line in f:
         if "Completeness" in line:
@@ -17,8 +16,6 @@ with open(sys.argv[1]) as f:
         score = float(cut[1]) - 5 * float(cut[2]) + 0.000_000_000_1 * float(cut[5])
         bin_scores[cut[0]] = score
 =======
-=======
->>>>>>> ddab2b3 (Add error handling for opening file in dereplicate contigs script)
 
 try:
     with open(sys.argv[1]) as f:
@@ -41,9 +38,6 @@ except Exception as e:
     print(f"An unexpected error occurred: {e}")
     sys.exit(1)
 
-<<<<<<< HEAD
->>>>>>> ddab2b3 (Add error handling for opening file in dereplicate contigs script)
-=======
 >>>>>>> ddab2b3 (Add error handling for opening file in dereplicate contigs script)
 
 # Load in contigs in each bin
