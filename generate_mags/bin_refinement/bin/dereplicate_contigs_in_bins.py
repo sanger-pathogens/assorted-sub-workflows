@@ -7,14 +7,6 @@ import os
 # Load in bin completion and contamination scores
 print("Loading in bin completion and contamination scores...")
 bin_scores = {}
-with open(sys.argv[1]) as f:
-    for line in f:
-        if "Completeness" in line:
-            continue
-        cut = line.strip().split("\t")
-        score = float(cut[1]) - 5 * float(cut[2]) + 0.000_000_000_1 * float(cut[5])
-        bin_scores[cut[0]] = score
-
 try:
     with open(sys.argv[1]) as f:
         for line in f:
