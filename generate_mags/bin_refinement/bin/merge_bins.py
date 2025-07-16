@@ -86,9 +86,20 @@ class BinInfo:
                     if contig_name:
                         self.bins_data[bin_file][contig_name] = contig_len
                         
+                if not self.bins_data[bin_file]:
+                    logging.error(f"No valid contigs found in bin file: {bin_path}")
+
+            except FileNotFoundError as e:
+                logging.error(f"Error: The file at {bin_path} was not found.\n With error: {e}")
+                sys.exit(1)
+
+            except IOError as e:
+                logging.error(f"Error: An I/O error occurred while reading {bin_path}.\n With error: {e}")
+                sys.exit(1)
+
             except Exception as e:
-                logging.error(f"Error reading bin file {bin_path}: {e}")
-                continue
+                logging.error(f"An unexpected error occurred: {e}")
+                sys.exit(1)
         
         logging.info(f"Loaded contig data for {len(self.bins_data)} bins from {self.dataset_name}")
     
