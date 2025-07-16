@@ -14,7 +14,7 @@ try:
             if "Completeness" in line:
                 continue
             cut = line.strip().split("\t")
-            score = float(cut[1]) - 5 * float(cut[2]) + 0.0000000001 * float(cut[5])
+            score = float(cut[1]) - 5 * float(cut[2]) + 0.000_000_0001 * float(cut[5])
             bin_scores[cut[0]] = score
 
 except FileNotFoundError as e:
