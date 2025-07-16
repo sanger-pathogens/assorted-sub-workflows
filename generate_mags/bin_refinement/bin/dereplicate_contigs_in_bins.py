@@ -12,7 +12,7 @@ with open(sys.argv[1]) as f:
         if "Completeness" in line:
             continue
         cut = line.strip().split("\t")
-        score = float(cut[1]) - 5 * float(cut[2]) + 0.0000000001 * float(cut[5])
+        score = float(cut[1]) - 5 * float(cut[2]) + 0.000_000_000_1 * float(cut[5])
         bin_scores[cut[0]] = score
 
 # Load in contigs in each bin
