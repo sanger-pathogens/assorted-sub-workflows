@@ -7,6 +7,7 @@ import os
 # Load in bin completion and contamination scores
 print("Loading in bin completion and contamination scores...")
 bin_scores = {}
+<<<<<<< HEAD
 with open(sys.argv[1]) as f:
     for line in f:
         if "Completeness" in line:
@@ -14,6 +15,30 @@ with open(sys.argv[1]) as f:
         cut = line.strip().split("\t")
         score = float(cut[1]) - 5 * float(cut[2]) + 0.000_000_000_1 * float(cut[5])
         bin_scores[cut[0]] = score
+=======
+
+try:
+    with open(sys.argv[1]) as f:
+        for line in f:
+            if "Completeness" in line:
+                continue
+            cut = line.strip().split("\t")
+            score = float(cut[1]) - 5 * float(cut[2]) + 0.0000000001 * float(cut[5])
+            bin_scores[cut[0]] = score
+
+except FileNotFoundError as e:
+    print(f"Error: The file {sys.argv[1]} was not found.\n With error: {e}")
+    sys.exit(1)
+
+except IOError as e:
+    print(f"Error: An I/O error occurred while reading {sys.argv[1]}.\n With error: {e}")
+    sys.exit(1)
+
+except Exception as e:
+    print(f"An unexpected error occurred: {e}")
+    sys.exit(1)
+
+>>>>>>> ddab2b3 (Add error handling for opening file in dereplicate contigs script)
 
 # Load in contigs in each bin
 print("Loading in contigs in each bin...")
