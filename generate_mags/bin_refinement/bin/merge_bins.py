@@ -150,7 +150,9 @@ class BinInfo:
         return 0.0
     
     def get_bin_path(self, bin_name: str) -> str:
-        """Get full path to a bin file."""
+        """
+        Get full path to a bin file.
+        """
         return os.path.join(self.bin_folder, bin_name)
     
     def get_bin_stats(self, bin_name: str) -> tuple:
@@ -165,7 +167,9 @@ class BinInfo:
 
 
 def setup_logging(log_level: str = 'INFO', log_file: str = 'merge.log') -> None:
-    """Setup logging configuration to write to a file."""
+    """
+    Setup logging configuration to write to a file.
+    """
     logging.basicConfig(
         level=getattr(logging, log_level.upper()),
         format='%(asctime)s - %(levelname)s - %(message)s',
@@ -175,7 +179,9 @@ def setup_logging(log_level: str = 'INFO', log_file: str = 'merge.log') -> None:
     )
 
 def clean_name(checkm2_file: str, ID: str) -> str:
-    """Strips prefixes/suffixes from the stats file name (for nicer dataset names in log/class)."""
+    """
+    Strips prefixes/suffixes from the stats file name (for nicer dataset names in log/class).
+    """
     if checkm2_file.startswith(f"{ID}_"):
         checkm2_file = checkm2_file[len(ID)+1:]
     if checkm2_file.endswith("_checkm2_report.tsv"):
@@ -237,7 +243,7 @@ def load_good_bins(stats_file: str, min_completion: float, max_contamination: fl
 
 def calculate_overlap(bin1_contigs: dict, bin2_contigs: dict) -> float:
     """
-        Calculates overlap ratio between two bins' contigs:
+    Calculates overlap ratio between two bins' contigs:
         Ratio is computed in both directions and the maximum is returned.
         If two bins share many contigs, their overlap will be high.
     """
@@ -263,8 +269,8 @@ def calculate_overlap(bin1_contigs: dict, bin2_contigs: dict) -> float:
 
 def compare_all_bins(datasets: list) -> dict:
     """
-        Compare all bins pairwise across all datasets using BinInfo objects.
-        results in nested dict comparisons[(dataset1, bin1)][(dataset2, bin2)] = overlap
+    Compare all bins pairwise across all datasets using BinInfo objects.
+    results in nested dict comparisons[(dataset1, bin1)][(dataset2, bin2)] = overlap
     """
     comparisons = {}
     
@@ -294,7 +300,9 @@ def compare_all_bins(datasets: list) -> dict:
     return comparisons
 
 def merge_bins(args) -> None:
-    """Main function to merge the best bins using BinInfo objects."""
+    """
+    Main function to merge the best bins using BinInfo objects.
+    """
     if len(args.bin_folders) != len(args.stats_files):
         logging.error("Number of bin folders must match number of stats files")
         sys.exit(1)

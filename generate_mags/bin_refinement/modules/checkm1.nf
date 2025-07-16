@@ -19,8 +19,6 @@ process CHECKM {
     """
     mkdir tmp
     checkm lineage_wf -x fasta ${fastas} ${meta.ID} -t ${task.cpus} --tmpdir tmp --pplacer_threads ${task.cpus}
-
-    
     """
 }
 
