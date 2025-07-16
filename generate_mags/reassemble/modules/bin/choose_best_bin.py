@@ -67,6 +67,7 @@ def select_best_bins(tsv_file, min_compl, max_contam):
     return best_bins
 
 def copy_best_bins(best_bins, bin_dir, output_dir):
+    ''' This function copy the best bins to a destination folder '''
     os.makedirs(output_dir, exist_ok=True)
     copied = 0
     for bin_base, (style, _, _) in best_bins.items():
@@ -80,6 +81,9 @@ def copy_best_bins(best_bins, bin_dir, output_dir):
         logging.info(f"Copied: {bin_path} -> {dest_path}")
         copied += 1
     logging.info(f"Total bins copied: {copied}")
+
+    if len(bin_base.keys())!= copied:
+        logging.error(f"Mismatch between number of bins and number of bins copied.\nExpected to copy {len(bin_base.keys())} bins but instead copied {copied}")
 
 def write_filtered_tsv(original_tsv, best_bins, output_tsv):
     with open(original_tsv, newline='') as infile, open(output_tsv, 'w', newline='') as outfile:
