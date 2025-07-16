@@ -8,15 +8,26 @@ import shutil
 from pathlib import Path
 
 def parse_arguments():
+
+    def restricted_float(x):
+        try:
+            x = float(x)
+        except ValueError:
+            raise argparse.ArgumentTypeError(f"{x} not a floating-point literal")
+        
+        if x < 0.0 or x > 100.0:
+            raise argparse.ArgumentTypeError(f"{x} not in range [0.0, 100.0]")
+        return x
+
     parser = argparse.ArgumentParser(
         description="Select the best bins based on completeness and contamination thresholds."
     )
     parser.add_argument("checkm_tsv", help="CheckM output TSV file")
     parser.add_argument("bin_dir", help="Directory containing bin FASTA files")
     parser.add_argument("output_dir", help="Directory to save the best bins")
-    parser.add_argument("--min-completeness", type=float, default=50.0,
+    parser.add_argument("--min-completeness", type=restricted_float, default=50.0,
                         help="Minimum completeness threshold (default: 50.0)")
-    parser.add_argument("--max-contamination", type=float, default=5.0,
+    parser.add_argument("--max-contamination", type=restricted_float, default=5.0,
                         help="Maximum contamination threshold (default: 5.0)")
     parser.add_argument("--log", default="INFO", choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
                         help="Logging level (default: INFO)")
