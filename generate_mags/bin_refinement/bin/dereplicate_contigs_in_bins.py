@@ -31,7 +31,7 @@ except Exception as e:
 
 # Load in contigs in each bin
 print("Loading in contigs in each bin...")
-contig_mapping = {}
+contig_mapping = defaultdict(str)
 for bin_file in os.listdir(sys.argv[2]):
     bin_name = ".".join(bin_file.split("/")[-1].split(".")[:-1])
     with open(os.path.join(sys.argv[2], bin_file)) as f:
