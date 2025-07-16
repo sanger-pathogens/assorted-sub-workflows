@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import sys
 import os
+from collections import defaultdict
 
 # Usage: ./script.py bins.stats binsFolder outFolder
 
