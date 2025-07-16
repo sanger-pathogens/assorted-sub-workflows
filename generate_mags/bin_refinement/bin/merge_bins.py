@@ -137,7 +137,9 @@ class BinInfo:
             sys.exit(1)
     
     def get_bin_score(self, bin_name: str) -> float:
-        """Calculate bin quality score for a specific bin."""
+        """
+        Calculate bin quality score for a specific bin.
+        """
         if bin_name in self.stats:
             completion, contamination = self.stats[bin_name]
             return completion - contamination * 5
