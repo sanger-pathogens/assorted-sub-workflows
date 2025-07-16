@@ -106,7 +106,9 @@ class BinInfo:
         logging.info(f"Loaded contig data for {len(self.bins_data)} bins from {self.dataset_name}")
     
     def load_stats_data(self):
-        """Load completion and contamination stats from stats file."""
+        """
+        Load completion and contamination stats from stats file.
+        """
         logging.info(f"Loading stats for {self.dataset_name}: {self.stats_file}")
         
         try:
