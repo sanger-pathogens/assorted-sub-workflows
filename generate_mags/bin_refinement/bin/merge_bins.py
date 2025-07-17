@@ -411,8 +411,8 @@ def merge_bins(args) -> None:
     
     summary_path = output_path.with_suffix('.stats')
     try:
-        with open(summary_path, 'w') as f:
-            f.writelines(new_summary_lines)
+        with open(summary_path, 'w') as summary_file:
+            summary_file.writelines(new_summary_lines)
         logging.info(f"Summary written to {summary_path}")
     except Exception as e:
         logging.error(f"Error writing summary file: {e}")
