@@ -138,9 +138,9 @@ class BinInfo:
                     except (ValueError, IndexError) as e:
                         logging.warning(f"Error parsing stats line: {line.strip()} - {e}")
                         
-        except FileNotFoundError:
+        except FileNotFoundError as e:
             logging.error(f"Stats file not found: {self.stats_file}")
-            raise IOError("File not found")
+            raise IOError(f"File not found: {self.stats_file}") from e
     
     def get_bin_score(self, bin_name: str) -> float:
         """
@@ -329,10 +329,18 @@ def merge_bins(args) -> None:
             stats_file=stats_file,
             good_bins=good_bins
         )
-        
-        # Load all data
+    #load the data
+    try:
         dataset.load_contig_data()
+    except IOError as e:
+        logging.error(f"Failed to load stats data: {e}")
+        sys.exit(1)  # exit here where you control program flow
+
+    try:
         dataset.load_stats_data()
+    except IOError as e:
+        logging.error(f"Failed to load stats data: {e}")
+        sys.exit(1)  # exit here where you control program flow
         
         datasets.append(dataset)
         all_discard_stats.append(discard_stats)
