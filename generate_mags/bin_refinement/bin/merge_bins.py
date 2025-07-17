@@ -307,7 +307,7 @@ def merge_bins(args) -> None:
     """
     if len(args.bin_folders) != len(args.stats_files):
         logging.error("Number of bin folders must match number of stats files")
-        sys.exit(1)
+        raise ValueError("Mismatched bin folders and stats files")
     
     datasets = []
     all_discard_stats = []
