@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-
+from itertools import combinations
 """
 This script extends consolidate_two_sets_of_bins.py in python3.
 
@@ -277,27 +277,24 @@ def compare_all_bins(datasets: list) -> dict:
     comparisons = {}
     
     # Create all pairwise comparisons between different datasets
-    for i, dataset_i in enumerate(datasets):
-        for j, dataset_j in enumerate(datasets):
-            if i >= j:  # Only compare each pair once
-                continue
-                
-            logging.info(f"Comparing bins between {dataset_i.dataset_name} and {dataset_j.dataset_name}")
+
+    for dataset_i, dataset_j in combinations(datasets,2):
+        logging.info(f"Comparing bins between {dataset_i.dataset_name} and {dataset_j.dataset_name}")
             
-            for bin_i in dataset_i.bins_data:
-                bin_key_i = (dataset_i, bin_i)
-                if bin_key_i not in comparisons:
-                    comparisons[bin_key_i] = {}
+        for bin_i in dataset_i.bins_data:
+            bin_key_i = (dataset_i, bin_i)
+            if bin_key_i not in comparisons:
+                comparisons[bin_key_i] = {}
                 
-                for bin_j in dataset_j.bins_data:
-                    bin_key_j = (dataset_j, bin_j)
-                    overlap = calculate_overlap(dataset_i.bins_data[bin_i], dataset_j.bins_data[bin_j])
-                    comparisons[bin_key_i][bin_key_j] = overlap
+            for bin_j in dataset_j.bins_data:
+                bin_key_j = (dataset_j, bin_j)
+                overlap = calculate_overlap(dataset_i.bins_data[bin_i], dataset_j.bins_data[bin_j])
+                comparisons[bin_key_i][bin_key_j] = overlap
                     
-                    # Also store reverse comparison
-                    if bin_key_j not in comparisons:
-                        comparisons[bin_key_j] = {}
-                    comparisons[bin_key_j][bin_key_i] = overlap
+                # Also store reverse comparison
+                if bin_key_j not in comparisons:
+                    comparisons[bin_key_j] = {}
+                comparisons[bin_key_j][bin_key_i] = overlap
     
     return comparisons
 
