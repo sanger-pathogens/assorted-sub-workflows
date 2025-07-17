@@ -40,7 +40,9 @@ import itertools
 import shutil
 
 class BinInfo:
-    """Class to hold dataset information and bin data."""
+    """
+    Class to hold dataset information and bin data.
+    """
     
     def __init__(self, dataset_name: str, dataset_idx: int, bin_folder: str, stats_file: str, good_bins: set):
         self.dataset_name = dataset_name
@@ -156,7 +158,9 @@ class BinInfo:
         return os.path.join(self.bin_folder, bin_name)
     
     def get_bin_stats(self, bin_name: str) -> tuple:
-        """Get completion and contamination for a bin."""
+        """
+        Get completion and contamination for a bin.
+        """
         return self.stats.get(bin_name, (0.0, 0.0))
     
     def __str__(self):
