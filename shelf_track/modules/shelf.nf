@@ -34,12 +34,11 @@ process SHELF_GET_METHOD_UUID {
 
     script:
     // relying on manifest scope from main config file but that might not be exported during task
+    pipeline_version = workflow.manifest.version == '{{irods_extractor_version}}' ? 'v3.5.2' : workflow.manifest.version
+    pipeline_homepage = workflow.manifest.homePage
     """
     module load shelf/v0.10.1
-    methuuid=\$(shelf get method -q url="${workflow.manifest.homePage}/-/tree/${workflow.manifest.version}" -H method_uuid | tail -n1)
-    #homepage=\$(grep -A10 "^manifest" ${projectDir}/nextflow.config | grep homePage | python3 -c "import sys; print(sys.stdin.readline().split()[-1].strip('\\''))")
-    #version=\$(grep -A10 "^manifest" ${projectDir}/nextflow.config | grep version | python3 -c "import sys; print(sys.stdin.readline().split()[-1].strip('\\''))")
-    #methuuid=\$(shelf get method -q url="\${homepage}/-/tree/\${version}" -H method_uuid | tail -n1)
+    methuuid=\$(shelf get method -q url="${pipeline_homepage}/-/tree/${pipeline_version}" -H method_uuid | tail -n1)
     """
 }
 
