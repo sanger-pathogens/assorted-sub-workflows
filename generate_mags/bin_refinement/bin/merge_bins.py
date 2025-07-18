@@ -140,7 +140,7 @@ class BinInfo:
                         
         except FileNotFoundError as e:
             logging.error(f"Stats file not found: {self.stats_file}")
-            raise IOError(f"File not found: {self.stats_file}") from e
+            raise FileNotFoundError(f"File not found: {self.stats_file}") from e
     
     def get_bin_score(self, bin_name: str) -> float:
         """
