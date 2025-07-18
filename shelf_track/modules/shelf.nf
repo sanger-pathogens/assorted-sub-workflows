@@ -37,10 +37,9 @@ process SHELF_GET_METHOD_UUID {
     // relying on manifest scope from main config file but that might not be exported during task
     pipeline_version = workflow.manifest.version == '{{irods_extractor_version}}' ? 'v3.5.2' : workflow.manifest.version
     pipeline_homepage = workflow.manifest.homePage
-    methuuid_out = 'meth_uuid.txt'
     """
     module load shelf/v0.10.1
-    shelf get method -q url="${pipeline_homepage}/-/tree/${pipeline_version}" -H method_uuid | tail -n1 > $methuuid_out
+    methuuid=\$(shelf get method -q url="${pipeline_homepage}/-/tree/${pipeline_version}" -H method_uuid | tail -n1)
     """
 }
 
