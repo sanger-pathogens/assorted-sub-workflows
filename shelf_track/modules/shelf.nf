@@ -36,10 +36,10 @@ process SHELF_GET_METHOD_UUID {
     // relying on manifest scope from main config file but that might not be exported during task
     """
     module load shelf/v0.10.1
-    # methuuid=\$(shelf get method -q url="${workflow.manifest.homePage}/-/tree/${workflow.manifest.version}" -H method_uuid | tail -n1)
-    homepage=\$(grep -A10 "^manifest" ${projectDir}/nextflow.config | grep homePage | python3 -c "import sys; print(sys.stdin.readline().split()[-1].strip('\''))")
-    version=\$(grep -A10 "^manifest" ${projectDir}/nextflow.config | grep version | python3 -c "import sys; print(sys.stdin.readline().split()[-1].strip('\''))")
-    methuuid=\$(shelf get method -q url="\${homepage}/-/tree/\${version}" -H method_uuid | tail -n1)
+    methuuid=\$(shelf get method -q url="${workflow.manifest.homePage}/-/tree/${workflow.manifest.version}" -H method_uuid | tail -n1)
+    #homepage=\$(grep -A10 "^manifest" ${projectDir}/nextflow.config | grep homePage | python3 -c "import sys; print(sys.stdin.readline().split()[-1].strip('\\''))")
+    #version=\$(grep -A10 "^manifest" ${projectDir}/nextflow.config | grep version | python3 -c "import sys; print(sys.stdin.readline().split()[-1].strip('\\''))")
+    #methuuid=\$(shelf get method -q url="\${homepage}/-/tree/\${version}" -H method_uuid | tail -n1)
     """
 }
 
