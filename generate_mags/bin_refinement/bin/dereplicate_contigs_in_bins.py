@@ -2,6 +2,7 @@
 import sys
 import os
 from collections import defaultdict
+import logging
 
 # Usage: ./script.py bins.stats binsFolder outFolder
 
@@ -11,7 +12,7 @@ bin_scores = {}
 try:
     with open(sys.argv[1]) as bin_file:
         for line in bin_file:
-            if "Completeness" in line:
+            if "Completeness" in line: # Skip the header
                 continue
             cut = line.strip().split("\t")
             score = float(cut[1]) - 5 * float(cut[2]) + 0.000_000_0001 * float(cut[5])
@@ -32,20 +33,31 @@ except Exception as e:
 # Load in contigs in each bin
 print("Loading in contigs in each bin...")
 contig_mapping = defaultdict(str)
-for bin_file in os.listdir(sys.argv[2]):
-    bin_name = ".".join(bin_file.split("/")[-1].split(".")[:-1])
-    with open(os.path.join(sys.argv[2], bin_file)) as f:
-        for line in f:
-            if not line.startswith(">"):
-                continue
-            contig = line[1:].strip()
-            if contig not in contig_mapping:
-                contig_mapping[contig] = bin_name
-            else:
-                if len(sys.argv) > 4 and sys.argv[4] == "remove":
-                    contig_mapping[contig] = None
-                elif bin_scores.get(bin_name, 0) > bin_scores.get(contig_mapping[contig], 0):
+try:
+    for bin_file in os.listdir(sys.argv[2]):
+        bin_name = ".".join(bin_file.split("/")[-1].split(".")[:-1])
+        with open(os.path.join(sys.argv[2], bin_file)) as f:
+            for line in f:
+                if not line.startswith(">"):
+                    continue
+                contig = line[1:].strip()
+                if contig not in contig_mapping:
                     contig_mapping[contig] = bin_name
+                else:
+                    if len(sys.argv) > 4 and sys.argv[4] == "remove":
+                        contig_mapping[contig] = None
+                    elif bin_scores.get(bin_name, 0) > bin_scores.get(contig_mapping[contig], 0):
+                        contig_mapping[contig] = bin_name
+
+except IOError as e:
+    logging.error(f"An IO error has occured with the file {bin_file}.\nexiting with error: {e}")
+    sys.exit(1)
+except FileNotFoundError as e:
+    logging.error(f"The program was unable to find the file {bin_file}.\nexiting with error: {e}")
+    sys.exit(1)
+except Exception as e:
+    logging.error(f"An unknown error has occured: {e}")
+    sys.exit(1)
 
 # Go over the bin files again and make a new dereplicated version of each bin file
 print("Making a new dereplicated version of each bin file")
