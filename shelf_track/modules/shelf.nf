@@ -9,13 +9,12 @@ process SHELF_GET_RUN_UUID {
     tuple val(meta), path(results)
 
     output:
-    tuple val(meta), val(runuuid_out),  emit: run_uuid
+    tuple val(meta), env(runuuid_out),  emit: run_uuid
 
     script:
-    runuuid_out = 'run_uuid.txt'
     """
     module load shelf/v0.10.1
-    shelf get run -q run.name=${meta.ID} -H run_uuid | tail -n1 > $runuuid_out
+    export runuuid=\$(export shelf get run -q run.name=${meta.ID} -H run_uuid | tail -n1)
     """
 }
 
@@ -31,7 +30,7 @@ process SHELF_GET_METHOD_UUID {
     //val(pipeline_manifest) // map
 
     output:
-    val(methuuid_out),  emit: method_uuid
+    env(methuuid),  emit: method_uuid
 
     script:
     // relying on manifest scope from main config file but that might not be exported during task
@@ -39,7 +38,7 @@ process SHELF_GET_METHOD_UUID {
     pipeline_homepage = workflow.manifest.homePage
     """
     module load shelf/v0.10.1
-    methuuid=\$(shelf get method -q url="${pipeline_homepage}/-/tree/${pipeline_version}" -H method_uuid | tail -n1)
+    export methuuid=\$(shelf get method -q url="${pipeline_homepage}/-/tree/${pipeline_version}" -H method_uuid | tail -n1)
     """
 }
 
@@ -58,14 +57,13 @@ process SHELF_CREATE_FILE {
     val(output_folder)
 
     output:
-    val(fileuuid_out),  emit: file_uuid
+    env(fileuuid_out),  emit: file_uuid
 
     script:
     filepath = "${output_folder}/${results_file}"
-    fileuuid_out = 'file_uuid.txt'
     """
     module load shelf_staging/v0.10.1-rc1
-    shelf_staging create file -k path,run_uuid,method_uuid,file_type -v ${filepath},${run_uuid},${method_uuid},${file_type} | tail -n1 > $fileuuid_out
+    export fileuuid=\$(shelf_staging create file -k path,run_uuid,method_uuid,file_type -v ${filepath},${run_uuid},${method_uuid},${file_type} | tail -n1)
     """
 
     
