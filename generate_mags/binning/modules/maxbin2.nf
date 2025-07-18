@@ -66,11 +66,22 @@ process MAXBIN2 {
 
     #move stuff out of the bin that isn't to use
     #commented line is not added until later version
+    #touch files first to avoid crash if file not generated
+    touch maxbin2/${meta.ID}.marker .
     mv maxbin2/${meta.ID}.marker .
+
+    touch maxbin2/${meta.ID}.noclass .
     mv maxbin2/${meta.ID}.noclass .
+
+    touch maxbin2/${meta.ID}.tooshort .
     mv maxbin2/${meta.ID}.tooshort .
+
+    touch maxbin2/${meta.ID}.log .    
     mv maxbin2/${meta.ID}.log .    
+
     #mv maxbin2/${meta.ID}.marker_of_each_bin.tar.gz .
+
+    touch maxbin2/${meta.ID}.summary .
     mv maxbin2/${meta.ID}.summary .
 
     #maxbin is already fasta
