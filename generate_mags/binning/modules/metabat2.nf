@@ -71,10 +71,13 @@ process METABAT2 {
     #mv metabat/${meta.ID}_bin.BinInfo.txt . 
     #mv metabat/${meta.ID}_bin.lowDepth.fa .
     #mv metabat/${meta.ID}_bin.tooShort.fa .
+    #fixes error where no unbinned.fa file is present
+    touch metabat/${meta.ID}_bin.unbinned.fa . 
     mv metabat/${meta.ID}_bin.unbinned.fa .
 
     # rename remaining fasta rather than fa
     for file in metabat/*.fa; do
+        touch "\$file" "\${file%.fa}.fasta"
         mv "\$file" "\${file%.fa}.fasta"
     done
     """
