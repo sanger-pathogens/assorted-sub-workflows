@@ -333,14 +333,14 @@ def merge_bins(args) -> None:
     try:
         dataset.load_contig_data()
     except IOError as e:
-        logging.error(f"Failed to load stats data: {e}")
-        sys.exit(1)  # exit here where you control program flow
+        logging.error(f"Failed to load contig data: {e}")
+        sys.exit(1) 
 
     try:
         dataset.load_stats_data()
     except IOError as e:
         logging.error(f"Failed to load stats data: {e}")
-        sys.exit(1)  # exit here where you control program flow
+        sys.exit(1)  
         
         datasets.append(dataset)
         all_discard_stats.append(discard_stats)
