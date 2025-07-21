@@ -13,7 +13,7 @@ process SHELF_GET_RUN_UUID {
     script:
     """
     module load shelf/v0.10.1
-    export runuuid=\$(export shelf get run -q run.name=${meta.ID} -H run_uuid | tail -n1)
+    export runuuid=\$(shelf get run -q run.name=${meta.ID} -H run_uuid | tail -n1)
     """
 }
 
