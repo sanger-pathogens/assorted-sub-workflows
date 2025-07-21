@@ -6,10 +6,10 @@ process SHELF_GET_RUN_UUID {
     //container 'gitlab.internal.sanger.ac.uk/sanger-pathogens/shelf/cli/container_registry/shelf_cli:v0.10.1'
 
     input:
-    tuple val(meta), path(results)
+    tuple val(meta), path(read1), path(read2) // this need to be made generic taking an array of file paths
 
     output:
-    tuple val(meta), env(runuuid_out),  emit: run_uuid
+    tuple val(meta), env(runuuid),  emit: run_uuid
 
     script:
     """
@@ -57,7 +57,7 @@ process SHELF_CREATE_FILE {
     val(output_folder)
 
     output:
-    env(fileuuid_out),  emit: file_uuid
+    env(fileuuid),  emit: file_uuid
 
     script:
     filepath = "${output_folder}/${results_file}"
