@@ -8,7 +8,7 @@ process SHELF_GET_RUN_UUID {
     input:
     tuple val(meta), path(results) // results are not used here but this allows using the same generic input channel for SHELF_CREATE_FILE
     output:
-    tuple val(meta), env(runuuid),  emit: run_uuid
+    env(runuuid),  emit: run_uuid
 
     script:
     """
