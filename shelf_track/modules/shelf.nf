@@ -13,7 +13,7 @@ process SHELF_GET_RUN_UUID {
     script:
     """
     module load shelf/v0.10.1
-    export runuuid=\$(shelf get run -q run.name=${meta.ID} -H run_uuid | tail -n1)
+    export runuuid=\$(shelf get run -q run.name='${meta.ID}' -H run_uuid | tail -n1)
     """
 }
 
@@ -39,7 +39,7 @@ process SHELF_GET_METHOD_UUID {
     pipeline_homepage = workflow.manifest.homePage
     """
     module load shelf/v0.10.1
-    export methuuid=\$(shelf get method -q url="${pipeline_homepage}/-/tree/${pipeline_version}" -H method_uuid | tail -n1)
+    export methuuid=\$(shelf get method -q url='${pipeline_homepage}/-/tree/${pipeline_version}' -H method_uuid | tail -n1)
     """
 }
 
@@ -64,7 +64,7 @@ process SHELF_CREATE_FILE {
     filepath = "${output_folder}/${results}"
     """
     module load shelf_staging/v0.10.1-rc1
-    export fileuuid=\$(shelf_staging create file -k path,run_uuid,method_uuid,file_type -v ${filepath},${run_uuid},${method_uuid},${file_type} | tail -n1)
+    export fileuuid=\$(shelf_staging create file -k path,run_uuid,method_uuid,file_type -v '${filepath},${run_uuid},${method_uuid},${file_type}' | tail -n1)
     """
 
     
