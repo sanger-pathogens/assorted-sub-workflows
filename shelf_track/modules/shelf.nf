@@ -6,8 +6,7 @@ process SHELF_GET_RUN_UUID {
     //container 'gitlab.internal.sanger.ac.uk/sanger-pathogens/shelf/cli/container_registry/shelf_cli:v0.10.1'
 
     input:
-    tuple val(meta), path(read1), path(read2) // this need to be made generic taking an array of file paths
-
+    tuple val(meta), path(results) // results are not used here but this allows using the same generic input channel for SHELF_CREATE_FILE
     output:
     tuple val(meta), env(runuuid),  emit: run_uuid
 
@@ -33,7 +32,9 @@ process SHELF_GET_METHOD_UUID {
     env(methuuid),  emit: method_uuid
 
     script:
-    // relying on manifest scope from main config file but that might not be exported during task
+    // relying on manifest scope from main config file 
+    // but version field is only populated with real value when running code deployed on farm
+    // when running piepline code straight from repo, version field still has template value so taking hard coded value instead
     pipeline_version = workflow.manifest.version == '{{irods_extractor_version}}' ? 'v3.5.2' : workflow.manifest.version
     pipeline_homepage = workflow.manifest.homePage
     """
@@ -50,7 +51,7 @@ process SHELF_CREATE_FILE {
     //container 'gitlab.internal.sanger.ac.uk/sanger-pathogens/shelf/cli/container_registry/shelf_cli:v0.10.1-rc1'
 
     input:
-    tuple val(meta), path(results_file)
+    tuple val(meta), path(results)
     val(file_type)
     val(run_uuid)
     val(method_uuid)
@@ -60,7 +61,7 @@ process SHELF_CREATE_FILE {
     env(fileuuid),  emit: file_uuid
 
     script:
-    filepath = "${output_folder}/${results_file}"
+    filepath = "${output_folder}/${results}"
     """
     module load shelf_staging/v0.10.1-rc1
     export fileuuid=\$(shelf_staging create file -k path,run_uuid,method_uuid,file_type -v ${filepath},${run_uuid},${method_uuid},${file_type} | tail -n1)
