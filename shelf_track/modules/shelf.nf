@@ -73,25 +73,3 @@ process SHELF_CREATE_FILE {
 
     
 }
-
-/*
-process PARSE_FILE_BLOB {
-    label 'cpu_1'
-    label 'mem_1'
-    label 'time_30m'
-
-    container 'quay.io/sangerpathogens/jq:1.6'
-
-    input:
-    tuple val(file_blob)
-
-    output:
-    env(file_uuid)
-
-    script:
-    'created_file_uuids.txt'
-    """
-    export file_uuid=\$(jq '{file_uuid}' "${file_blob}")
-    """
-}
-*/
