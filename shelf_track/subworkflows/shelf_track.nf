@@ -31,6 +31,13 @@ workflow SHELF_TRACK {
 
     SHELF_CREATE_FILE(generic_output, filetype, SHELF_GET_RUN_UUID.out.run_uuid, method, outdir)
 
+    SHELF_CREATE_FILE.out.created_file_uuid
+    .collect()
+    .set{ created_file_uuids }
+
+    println("UUIDS of files registered into Shelf:")
+    created_file_uuids.view()
+
     emit:
     SHELF_CREATE_FILE.out.created_file_blob
 }
