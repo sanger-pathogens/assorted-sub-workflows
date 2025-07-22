@@ -32,9 +32,9 @@ workflow SHELF_TRACK {
     SHELF_CREATE_FILE(generic_output, filetype, SHELF_GET_RUN_UUID.out.run_uuid, method, outdir)
 
     SHELF_CREATE_FILE.out.created_file_uuid
-    .map{ meta, uuid -> meta.ID, uuid }
+    .map { meta, uuid -> meta.ID, uuid }
     .groupTuple()
-    .view{ runid, fuuids -> "Run Ids and File UUIDs of files registered into Shelf: $runid, $fuuids" }
+    .view()
 
     emit:
     SHELF_CREATE_FILE.out.created_file_blob
