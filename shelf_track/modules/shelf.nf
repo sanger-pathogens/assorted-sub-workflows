@@ -60,13 +60,15 @@ process SHELF_CREATE_FILE {
     output:
     // it would be nice to parse the blob to get the file uuid and at least print it out, maybe all at the end of the pipeline run collecting all blob outputs and doing a bulk print of recorded files
     tuple val(meta), path(file_outblob),  emit: created_file_blob
+    tuple val(meta), env(fileuuid)
 
     script:
     filepath = "${output_folder}/${results}"
     file_outblob = 'shelf_create_file_out.json'
     """
     module load shelf_staging
-    shelf_staging create file -k path,run_uuid,method_uuid,file_type -v '${filepath},${run_uuid},${method_uuid},${file_type}' > ${file_outblob}
+    fileuuid=\$(uuidgen -r)
+    shelf_staging create file -k file_uuid,path,run_uuid,method_uuid,file_type -v "\${fileuuid},${filepath},${run_uuid},${method_uuid},${file_type}" > ${file_outblob}
     """
 
     
