@@ -32,5 +32,5 @@ workflow SHELF_TRACK {
     SHELF_CREATE_FILE(generic_output, filetype, SHELF_GET_RUN_UUID.out.run_uuid, method, outdir)
 
     emit:
-    SHELF_CREATE_FILE.out.file_uuid
+    SHELF_CREATE_FILE.out.created_file_blob
 }
