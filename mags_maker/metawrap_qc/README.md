@@ -11,7 +11,7 @@ Reads are trimmed of adapters and regions of low quality with TrimGalore. Host c
 The pipeline also generates stats about raw, trimmed and cleaned reads for each sample and collates these into one output CSV.
 
 ### Inputs
-- Raw metgenomic paired-end reads (FASTQs) per sample
+- Raw metagenomic paired-end reads (FASTQs) per sample
 
 ### Outputs
 - Filtered, trimmed reads per sample (FASTQs)
@@ -19,12 +19,7 @@ The pipeline also generates stats about raw, trimmed and cleaned reads for each 
 - Host reads per sample (FASTQs) - OPTIONAL
 
 
-### Outputs (incl. work dir)
-- Trimmed reads
-- Host-depleted trimmed reads
-- Host reads - OPTIONAL
-- Host read identifiers
-- Per sample QC
-- Aggregated QC
+### Dependencies
+All dependencies including generate_stats.py and filter_reads.py scripts are available in the run time container. The dockerfile for this and the scripts themselves can be found [in the repo for metawrap_qc_nextflow](https://gitlab.internal.sanger.ac.uk/sanger-pathogens/pipelines/metawrap_qc_nextflow).
 
 
