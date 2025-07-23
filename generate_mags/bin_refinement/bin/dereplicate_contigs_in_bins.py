@@ -1,13 +1,23 @@
 #!/usr/bin/env python3
+
 import sys
 import os
 from collections import defaultdict
 import logging
 
-# Usage: ./script.py bins.stats binsFolder outFolder
+'''
+Usage:
+    ./dereplicate_contigs_in_bins.py checkm2_report.txt input_dir output_dir [remove]
 
-# Load in bin completion and contamination scores
-print("Loading in bin completion and contamination scores...")
+Arguments:
+    checkm2_report.txt  Output report from CheckM2 containing Completeness and Contamination scores
+    input_dir           Directory with input reads as FASTAs (bin file?)
+    output_dir          Directory to output dereplicated bins
+    remove              Optional (string), remove contigs shared by multiple bins (strict bin purity)
+'''
+
+# Score bins using completeness and contamination scores from CheckM2 report
+print("Loading in bin completeness and contamination scores...")
 bin_scores = {}
 try:
     with open(sys.argv[1]) as bin_file:
@@ -30,7 +40,7 @@ except Exception as e:
     print(f"An unexpected error occurred: {e}")
     sys.exit(1)
 
-# Load in contigs in each bin
+# Assign contigs to the highest scoring bin they appear in, unless remove option is given
 print("Loading in contigs in each bin...")
 contig_mapping = defaultdict(str)
 try:
@@ -59,7 +69,7 @@ except Exception as e:
     logging.error(f"An unknown error has occured: {e}")
     sys.exit(1)
 
-# Go over the bin files again and make a new dereplicated version of each bin file
+# Make a new dereplicated version of each bin file based on the final assignments
 print("Making a new dereplicated version of each bin file")
 os.makedirs(sys.argv[3], exist_ok=True)
 
@@ -81,6 +91,7 @@ for bin_file in os.listdir(sys.argv[2]):
                     store = False
             if store:
                 out.write(line)
-    
+
+    # Remove any bins that are empty by the end
     if not at_least_one:
         os.remove(output_path)
