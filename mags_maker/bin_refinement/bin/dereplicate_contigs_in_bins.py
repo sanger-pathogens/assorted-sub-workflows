@@ -16,8 +16,13 @@ Arguments:
     remove              Optional (string), remove contigs shared by multiple bins (strict bin purity)
 '''
 
+# Set up logging
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+)
+
 # Score bins using completeness and contamination scores from CheckM2 report
-print("Loading in bin completeness and contamination scores...")
+logging.info("Loading in bin completeness and contamination scores...")
 bin_scores = {}
 try:
     with open(sys.argv[1]) as bin_file:
@@ -29,19 +34,19 @@ try:
             bin_scores[cut[0]] = score
 
 except FileNotFoundError as e:
-    print(f"Error: The file {sys.argv[1]} was not found.\n With error: {e}")
+    logging.error(f"Error: The file {sys.argv[1]} was not found.\n With error: {e}")
     sys.exit(1)
 
 except IOError as e:
-    print(f"Error: An I/O error occurred while reading {sys.argv[1]}.\n With error: {e}")
+    logging.error(f"Error: An I/O error occurred while reading {sys.argv[1]}.\n With error: {e}")
     sys.exit(1)
 
 except Exception as e:
-    print(f"An unexpected error occurred: {e}")
+    logging.exception(f"An unexpected error occurred: {e}")
     sys.exit(1)
 
 # Assign contigs to the highest scoring bin they appear in, unless remove option is given
-print("Loading in contigs in each bin...")
+logging.info("Loading in contigs in each bin...")
 contig_mapping = defaultdict(str)
 try:
     for bin_file in os.listdir(sys.argv[2]):
@@ -66,11 +71,11 @@ except FileNotFoundError as e:
     logging.error(f"The program was unable to find the file {bin_file}.\nexiting with error: {e}")
     sys.exit(1)
 except Exception as e:
-    logging.error(f"An unknown error has occured: {e}")
+    logging.exception(f"An unknown error has occured: {e}")
     sys.exit(1)
 
 # Make a new dereplicated version of each bin file based on the final assignments
-print("Making a new dereplicated version of each bin file")
+logging.info("Making a new dereplicated version of each bin...")
 os.makedirs(sys.argv[3], exist_ok=True)
 
 for bin_file in os.listdir(sys.argv[2]):
