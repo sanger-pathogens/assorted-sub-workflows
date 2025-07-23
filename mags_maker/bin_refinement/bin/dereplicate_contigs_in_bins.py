@@ -10,7 +10,7 @@ Usage:
     ./dereplicate_contigs_in_bins.py checkm2_report.txt input_dir output_dir [remove]
 
 Arguments:
-    checkm2_report.txt  Output report from CheckM2 containing Completeness and Contamination scores
+    checkm2_report.txt  Tab-seperated report from CheckM2 containing Completeness and Contamination scores
     input_dir           Directory with input reads as FASTAs (bin file?)
     output_dir          Directory to output dereplicated bins
     remove              Optional (string), remove contigs shared by multiple bins (strict bin purity)
@@ -24,12 +24,27 @@ logging.basicConfig(
 # Score bins using completeness and contamination scores from CheckM2 report
 logging.info("Loading in bin completeness and contamination scores...")
 bin_scores = {}
+
+required_columns = {"Completeness", "Contamination"}
+
 try:
     with open(sys.argv[1]) as bin_file:
+        # Check the header on the report is as expected
+        first_line = next(bin_file, None)
+        if first_line is None:
+            raise ValueError(f"Error: File {sys.argv[1]} is empty.")
+        
+        header_columns = set(first_line.strip().split("\t"))
+        missing_columns = required_columns - header_columns
+        if missing_columns:
+            raise ValueError(f"Header in {sys.argv[1]} is missing required columns: {missing_columns}")
+
+        if not required_columns.issubset(header_columns):
+            raise ValueError(f"Header of {sys.argv[1]} is missing the required columns: {required_columns}")
+        
+        # Then process each non-header line to determine scores per bin
         for line in bin_file:
-            if "Completeness" in line: # Skip the header
-                continue
-            cut = line.strip().split("\t")
+            cut = line.strip().split("\t")   #TODO: Move to pandas? Currently reliant on consistent checkm2 reports
             score = float(cut[1]) - 5 * float(cut[2]) + 0.000_000_0001 * float(cut[5])
             bin_scores[cut[0]] = score
 
