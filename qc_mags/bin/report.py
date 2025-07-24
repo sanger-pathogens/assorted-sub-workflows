@@ -37,14 +37,6 @@ def process_gunc(df, qc_stage):
         'pass.GUNC': f'{qc_stage}_gunc_pass_or_fail'
     })[['genome_name_preqc', f'{qc_stage}_gunc_pass_or_fail']]
 
-def process_mapping(df):
-    expected_cols = ['genome_name_preqc', 'genome_name_postqc', 'mdm_cleaner_status', 'final_qc_status']
-    for col in expected_cols:
-        if col not in df.columns:
-            logging.warning(f"Missing column in mapping file: {col}")
-            df[col] = 'NA'
-    return df[expected_cols]
-
 def enrich_fields(df):
     df['sample_or_strain_name'] = df['genome_name_preqc'].apply(lambda x: x.split("_")[0])
     df['genome_status'] = df['genome_name_preqc'].apply(lambda x: "mag" if "MAG" in x.upper() else "isolate")
@@ -66,7 +58,6 @@ def parse_args():
     parser.add_argument('--pre_qc_gunc', required=True, help='Path to pre-QC GUNC TSV')
     parser.add_argument('--post_qc_checkm2', required=True, help='Path to post-QC CheckM2 TSV')
     parser.add_argument('--post_qc_gunc', required=True, help='Path to post-QC GUNC TSV')
-    parser.add_argument('--postqc_mapping', required=True, help='Path to post-QC mapping TSV')
     parser.add_argument('--output', required=True, help='Output TSV path')
     return parser.parse_args()
 
@@ -78,9 +69,8 @@ def main():
     pre_gunc = process_gunc(read_tsv(args.pre_qc_gunc, "Pre-QC GUNC"), "preqc")
     post_checkm2 = process_checkm2(read_tsv(args.post_qc_checkm2, "Post-QC CheckM2"), "postqc")
     post_gunc = process_gunc(read_tsv(args.post_qc_gunc, "Post-QC GUNC"), "postqc")
-    mapping = process_mapping(read_tsv(args.postqc_mapping, "Post-QC Mapping"))
 
-    merged = merge_all(mapping, pre_checkm2, pre_gunc, post_checkm2, post_gunc)
+    merged = merge_all(pre_checkm2, pre_gunc, post_checkm2, post_gunc)
 
     output_cols = [
         'genome_name_preqc',
