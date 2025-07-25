@@ -33,9 +33,16 @@ workflow QC_MAGS {
     | (CHECKM2 & GUNC)
 
     PRE_CHECKM2.out.results
-    | join(GTDBTK.out.results)
     | join(PRE_GUNC.out.results)
     | join(CHECKM2.out.results)
     | join(GUNC.out.results)
+    | join(GTDBTK.out.results)
+    | view()
+
+    PRE_CHECKM2.out.results
+    | join(PRE_GUNC.out.results)
+    | join(CHECKM2.out.results)
+    | join(GUNC.out.results)
+    | join(GTDBTK.out.results)
     | REPORT
 }
