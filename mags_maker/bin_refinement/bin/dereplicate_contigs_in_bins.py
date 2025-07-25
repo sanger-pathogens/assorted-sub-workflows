@@ -68,7 +68,7 @@ try:
         bin_name = ".".join(bin_file.split("/")[-1].split(".")[:-1])
         with open(os.path.join(sys.argv[2], bin_file)) as f:
             for line in f:
-                if not line.startswith(">"):
+                if not line.startswith(">"):    #TODO: move to Biopython for safer and easier fasta handling?
                     continue
                 contig = line[1:].strip()
                 if contig not in contig_mapping:
