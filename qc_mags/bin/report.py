@@ -23,10 +23,10 @@ def read_tsv(path, name):
     try:
         df = pd.read_csv(path, sep='\t')
         logging.info(f"{name} loaded successfully: {path}")
-        return df
     except Exception as e:
         logging.error(f"Error reading {name} from {path}: {e}")
-        sys.exit(f"Error reading {name}: {e}")
+        sys.exit(1)
+    return df
 
 def process_gtdbtk(df):
     return df.rename(columns={
