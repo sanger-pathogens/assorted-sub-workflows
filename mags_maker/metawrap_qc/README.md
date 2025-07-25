@@ -10,6 +10,11 @@ Reads are trimmed of adapters and regions of low quality with TrimGalore. Host c
 
 The pipeline also generates stats about raw, trimmed and cleaned reads for each sample and collates these into one output CSV.
 
+### Parameters
+- `--publish_host_data` (default: False)
+- `--bmtagger_db` (default: "/data/pam/software/bmtagger")
+- `--bmtagger_host` (default: "T2T-CHM13v2.0")
+
 ### Inputs
 - Raw metagenomic paired-end reads (FASTQs) per sample
 
