@@ -1,0 +1,20 @@
+{
+    "params": {
+        "header": {
+            "title": "metawrap_qc Subworkflow Options"
+        },
+        "publish_host_data": {
+            "default": "false",
+            "help_text": "Publish the reads determined to originate from the host organism"
+        },
+        "bmtagger_db": {
+            "default": "/data/pam/software/bmtagger",
+            "help_text": "Path to directory containing BMTagger database."
+        },
+        "bmtagger_host":{
+            "default": "T2T-CHM13v2.0",
+            "help_text": "Reference genome version used for host read filtering."
+        }
+    }
+}
+
