@@ -36,3 +36,4 @@ metaspades.py ${params.fastspades ? "--only-assembler" : ""} \\
 
 mv ${contigs} ${meta.ID}_contigs.fasta
 """
+}
