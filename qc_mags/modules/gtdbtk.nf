@@ -9,7 +9,7 @@ process GTDBTK {
     publishDir mode: 'copy', path: "${params.outdir}/gtdbtk/"
 
     input:
-    tuple val(meta), path(fastas)
+    tuple val(meta), path(fastas, stageAs: "fastas/*")
 
     output:
     tuple val(meta), path(report_tsv), emit: results
@@ -18,7 +18,7 @@ process GTDBTK {
     report_tsv = "${meta.ID}_gtdbtk_summary.tsv"
     """
     export GTDBTK_DATA_PATH="${params.gtdbtk_db}"
-    gtdbtk classify_wf --genome_dir ${fastas} -x ${params.fasta_ext} --skip_ani_screen --cpus ${task.cpus} --out_dir gtdbtk_outdir
+    gtdbtk classify_wf --genome_dir fastas -x ${params.fasta_ext} --skip_ani_screen --cpus ${task.cpus} --out_dir gtdbtk_outdir
 
     cp gtdbtk_outdir/gtdbtk.bac*.summary.tsv ${report_tsv}
     """

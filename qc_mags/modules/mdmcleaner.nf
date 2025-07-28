@@ -9,7 +9,7 @@ process MDMCLEANER {
     publishDir mode: 'copy', path: "${params.outdir}/mdmcleaner/"
 
     input:
-    tuple val(meta), path(fasta_dir)
+    tuple val(meta), path(fastas, stageAs: "fastas/*")
 
     output:
     tuple val(meta), path("*.${params.fasta_ext}.gz"), emit: results
@@ -17,7 +17,7 @@ process MDMCLEANER {
     script:
     """
     mdmcleaner set_configs --db_basedir ${params.mdmcleaner_db} --threads ${task.cpus}
-    mdmcleaner clean -i ${fasta_dir}/*${params.fasta_ext} -o mdmcleaner_output -t ${task.cpus} -c mdmcleaner.config --fast_run
+    mdmcleaner clean -i fastas/*${params.fasta_ext} -o mdmcleaner_output -t ${task.cpus} -c mdmcleaner.config --fast_run
 
 
     # Rename files to match desired extension as mdmcleaner is always fasta
