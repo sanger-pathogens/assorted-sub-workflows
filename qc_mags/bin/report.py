@@ -13,7 +13,7 @@ from typing import Optional
 JOIN_COLUMN_STEM = "genome_name"
 JOIN_COLUMN = f"preqc_{JOIN_COLUMN_STEM}"
 
-def setup_logging(log_file='qc_merge.log'):
+def setup_logging(log_file: str = 'qc_merge.log'):
     logging.basicConfig(
         level=logging.INFO,
         handlers=[
@@ -24,7 +24,7 @@ def setup_logging(log_file='qc_merge.log'):
     )
     logging.info("Logging initialized.")
 
-def read_tsv(path, name):
+def read_tsv(path: Path, name: str) -> pd.DataFrame:
     try:
         df = pd.read_csv(path, sep='\t')
         logging.info(f"{name} loaded successfully: {path}")
@@ -49,7 +49,7 @@ def read_config(path: Path) -> dict:
 class InvalidConfig(ValueError):
     pass
 
-def validate_config(config: dict):
+def validate_config(config: dict) -> None:
     valid_tools = {"GUNC", "CHECKM2", "GTDBTK"}
     expected_tools = valid_tools & config.keys()
     unexpected_tools = set(config.keys()) - valid_tools
@@ -64,7 +64,7 @@ def validate_config(config: dict):
     logging.info("Config passed validation")
 
 
-def process_input_report(df: pd.DataFrame, config: dict, tool: str, qc_stage: Optional[str] = None):
+def process_input_report(df: pd.DataFrame, config: dict, tool: str, qc_stage: Optional[str] = None) -> pd.DataFrame:
     tool = tool.lower()
     columns = config[tool.upper()]["keep_columns"]
     rename_dict = {}
@@ -80,17 +80,17 @@ def process_input_report(df: pd.DataFrame, config: dict, tool: str, qc_stage: Op
             rename_dict[column] = f"{tool}_{column}"
     return df.rename(columns=rename_dict)[rename_dict.values()]
 
-def process_postqc_genome_name(df):
+def process_postqc_genome_name(df: pd.DataFrame) -> pd.DataFrame:
     new_df = df.copy() 
     new_df[JOIN_COLUMN] = df[f"postqc_{JOIN_COLUMN_STEM}"].str.extract(r"cleaned_(.*)_filtered_kept_contigs")
     return new_df
 
-def enrich_fields(df):
+def enrich_fields(df: pd.DataFrame) -> pd.DataFrame:
     df['sample_or_strain_name'] = df[JOIN_COLUMN].str.rsplit("_", expand=True, n=1).loc[:, 0]
     df['genome_status'] = df[JOIN_COLUMN].apply(lambda x: "mag" if "MAG" in x.upper() else "isolate")
     return df
 
-def merge_all(*dfs):
+def merge_all(*dfs: pd.DataFrame) -> pd.DataFrame:
     df, other_dfs = dfs[0], dfs[1:]
     join_keys = [JOIN_COLUMN]
     for other_df in other_dfs:
@@ -101,7 +101,7 @@ def merge_all(*dfs):
     df = enrich_fields(df)
     return df
 
-def reorder_columns(df: pd.DataFrame):
+def reorder_columns(df: pd.DataFrame) -> pd.DataFrame:
     priority_cols = [JOIN_COLUMN, f"postqc_{JOIN_COLUMN_STEM}", "sample_or_strain_name", "genome_status"]
     other_cols = sorted([col for col in df.columns if col not in priority_cols])
     new_order = priority_cols + other_cols
