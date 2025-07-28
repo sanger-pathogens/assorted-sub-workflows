@@ -3,9 +3,6 @@
 import os
 import sys
 
-import os
-import sys
-
 def split_contig_depth_file(master_depth_path, output_dir):
     # Ensure output directory exists
     os.makedirs(output_dir, exist_ok=True)
@@ -35,7 +32,7 @@ def split_contig_depth_file(master_depth_path, output_dir):
         sample_base = os.path.splitext(sample)[0]
         sample_file = os.path.join(output_dir, f"mb2_{sample_base}.txt")
         try:
-            
+
             with open(sample_file, 'w') as out_f:
                 for line in lines:
                     cols = line.split('\t')
