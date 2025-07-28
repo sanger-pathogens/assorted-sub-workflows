@@ -7,13 +7,12 @@ import ast
 # the checkm_folder/storage/bin_stats_ext.tsv file of the CheckM output
 
 def main():
-    args = sys.argv
-    if len(args) == 3:
-        binner = args[2]
+    if len(sys.argv) == 3:
+        binner = sys.argv[2]
         print("bin\tcompleteness\tcontamination\tGC\tlineage\tN50\tsize\tbinner")
-    elif len(args) == 4:
+    elif len(sys.argv) == 4:
         source = {}
-        with open(args[3], 'w') as f:
+        with open(sys.argv[3], 'w') as f:
             for line in f:
                 cut = line.strip().split("\t")
                 source[cut[0]] = cut[7]
@@ -21,7 +20,7 @@ def main():
     else:
         print("bin\tcompleteness\tcontamination\tGC\tlineage\tN50\tsize")
 
-    with open(args[1], 'r') as f:
+    with open(sys.argv[1], 'r') as f:
         for line in f:
             name, data_str = line.strip().split("\t", 1)
             dic = ast.literal_eval(data_str)
@@ -39,9 +38,9 @@ def main():
                 str(dic.get("Genome size", ""))
             ]
 
-            if len(args) == 3:
+            if len(sys.argv) == 3:
                 output.append(binner)
-            elif len(args) == 4:
+            elif len(sys.argv) == 4:
                 output.append(source.get(name, "NA"))
 
             print("\t".join(output))

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-
+from itertools import combinations
 """
 This script extends consolidate_two_sets_of_bins.py in python3.
 
@@ -40,7 +40,9 @@ import itertools
 import shutil
 
 class BinInfo:
-    """Class to hold dataset information and bin data."""
+    """
+    Class to hold dataset information and bin data.
+    """
     
     def __init__(self, dataset_name: str, dataset_idx: int, bin_folder: str, stats_file: str, good_bins: set):
         self.dataset_name = dataset_name
@@ -56,7 +58,9 @@ class BinInfo:
         self.discard_stats = None
     
     def load_contig_data(self):
-        """Load contig information from bin files."""
+        """
+        Load contig information from bin files.
+        """
         logging.info(f"Loading contig data from {self.dataset_name}: {self.bin_folder}")
         
         for bin_file in self.good_bins:
@@ -86,14 +90,27 @@ class BinInfo:
                     if contig_name:
                         self.bins_data[bin_file][contig_name] = contig_len
                         
+                if not self.bins_data[bin_file]:
+                    logging.error(f"No valid contigs found in bin file: {bin_path}")
+
+            except FileNotFoundError as e:
+                logging.error(f"Error: The file at {bin_path} was not found.\n With error: {e}")
+                sys.exit(1)
+
+            except IOError as e:
+                logging.error(f"Error: An I/O error occurred while reading {bin_path}.\n With error: {e}")
+                sys.exit(1)
+
             except Exception as e:
-                logging.error(f"Error reading bin file {bin_path}: {e}")
-                continue
+                logging.error(f"An unexpected error occurred: {e}")
+                sys.exit(1)
         
         logging.info(f"Loaded contig data for {len(self.bins_data)} bins from {self.dataset_name}")
     
     def load_stats_data(self):
-        """Load completion and contamination stats from stats file."""
+        """
+        Load completion and contamination stats from stats file.
+        """
         logging.info(f"Loading stats for {self.dataset_name}: {self.stats_file}")
         
         try:
@@ -121,23 +138,29 @@ class BinInfo:
                     except (ValueError, IndexError) as e:
                         logging.warning(f"Error parsing stats line: {line.strip()} - {e}")
                         
-        except FileNotFoundError:
+        except FileNotFoundError as e:
             logging.error(f"Stats file not found: {self.stats_file}")
-            sys.exit(1)
+            raise FileNotFoundError(f"File not found: {self.stats_file}") from e
     
     def get_bin_score(self, bin_name: str) -> float:
-        """Calculate bin quality score for a specific bin."""
+        """
+        Calculate bin quality score for a specific bin.
+        """
         if bin_name in self.stats:
             completion, contamination = self.stats[bin_name]
             return completion - contamination * 5
         return 0.0
     
     def get_bin_path(self, bin_name: str) -> str:
-        """Get full path to a bin file."""
+        """
+        Get full path to a bin file.
+        """
         return os.path.join(self.bin_folder, bin_name)
     
     def get_bin_stats(self, bin_name: str) -> tuple:
-        """Get completion and contamination for a bin."""
+        """
+        Get completion and contamination for a bin.
+        """
         return self.stats.get(bin_name, (0.0, 0.0))
     
     def __str__(self):
@@ -148,7 +171,9 @@ class BinInfo:
 
 
 def setup_logging(log_level: str = 'INFO', log_file: str = 'merge.log') -> None:
-    """Setup logging configuration to write to a file."""
+    """
+    Setup logging configuration to write to a file.
+    """
     logging.basicConfig(
         level=getattr(logging, log_level.upper()),
         format='%(asctime)s - %(levelname)s - %(message)s',
@@ -158,7 +183,9 @@ def setup_logging(log_level: str = 'INFO', log_file: str = 'merge.log') -> None:
     )
 
 def clean_name(checkm2_file: str, ID: str) -> str:
-    """Strips prefixes/suffixes from the stats file name (for nicer dataset names in log/class)."""
+    """
+    Strips prefixes/suffixes from the stats file name (for nicer dataset names in log/class).
+    """
     if checkm2_file.startswith(f"{ID}_"):
         checkm2_file = checkm2_file[len(ID)+1:]
     if checkm2_file.endswith("_checkm2_report.tsv"):
@@ -203,6 +230,8 @@ def load_good_bins(stats_file: str, min_completion: float, max_contamination: fl
                         })
                 except (ValueError, IndexError) as e:
                     logging.warning(f"Error parsing line in {stats_file}: {line.strip()} - {e}")
+                except Exception as e:
+                    logging.error(f"Unexpected error processing {stats_file}: {e}")
                     
     except FileNotFoundError:
         logging.error(f"Stats file not found: {stats_file}")
@@ -220,7 +249,7 @@ def load_good_bins(stats_file: str, min_completion: float, max_contamination: fl
 
 def calculate_overlap(bin1_contigs: dict, bin2_contigs: dict) -> float:
     """
-        Calculates overlap ratio between two bins' contigs:
+    Calculates overlap ratio between two bins' contigs:
         Ratio is computed in both directions and the maximum is returned.
         If two bins share many contigs, their overlap will be high.
     """
@@ -246,41 +275,40 @@ def calculate_overlap(bin1_contigs: dict, bin2_contigs: dict) -> float:
 
 def compare_all_bins(datasets: list) -> dict:
     """
-        Compare all bins pairwise across all datasets using BinInfo objects.
-        results in nested dict comparisons[(dataset1, bin1)][(dataset2, bin2)] = overlap
+    Compare all bins pairwise across all datasets using BinInfo objects.
+    results in nested dict comparisons[(dataset1, bin1)][(dataset2, bin2)] = overlap
     """
     comparisons = {}
     
     # Create all pairwise comparisons between different datasets
-    for i, dataset_i in enumerate(datasets):
-        for j, dataset_j in enumerate(datasets):
-            if i >= j:  # Only compare each pair once
-                continue
-                
-            logging.info(f"Comparing bins between {dataset_i.dataset_name} and {dataset_j.dataset_name}")
+
+    for dataset_i, dataset_j in combinations(datasets,2):
+        logging.info(f"Comparing bins between {dataset_i.dataset_name} and {dataset_j.dataset_name}")
             
-            for bin_i in dataset_i.bins_data:
-                bin_key_i = (dataset_i, bin_i)
-                if bin_key_i not in comparisons:
-                    comparisons[bin_key_i] = {}
+        for bin_i in dataset_i.bins_data:
+            bin_key_i = (dataset_i, bin_i)
+            if bin_key_i not in comparisons:
+                comparisons[bin_key_i] = {}
                 
-                for bin_j in dataset_j.bins_data:
-                    bin_key_j = (dataset_j, bin_j)
-                    overlap = calculate_overlap(dataset_i.bins_data[bin_i], dataset_j.bins_data[bin_j])
-                    comparisons[bin_key_i][bin_key_j] = overlap
+            for bin_j in dataset_j.bins_data:
+                bin_key_j = (dataset_j, bin_j)
+                overlap = calculate_overlap(dataset_i.bins_data[bin_i], dataset_j.bins_data[bin_j])
+                comparisons[bin_key_i][bin_key_j] = overlap
                     
-                    # Also store reverse comparison
-                    if bin_key_j not in comparisons:
-                        comparisons[bin_key_j] = {}
-                    comparisons[bin_key_j][bin_key_i] = overlap
+                # Also store reverse comparison
+                if bin_key_j not in comparisons:
+                    comparisons[bin_key_j] = {}
+                comparisons[bin_key_j][bin_key_i] = overlap
     
     return comparisons
 
 def merge_bins(args) -> None:
-    """Main function to merge the best bins using BinInfo objects."""
+    """
+    Main function to merge the best bins using BinInfo objects.
+    """
     if len(args.bin_folders) != len(args.stats_files):
         logging.error("Number of bin folders must match number of stats files")
-        sys.exit(1)
+        raise ValueError("Mismatched bin folders and stats files")
     
     datasets = []
     all_discard_stats = []
@@ -301,10 +329,18 @@ def merge_bins(args) -> None:
             stats_file=stats_file,
             good_bins=good_bins
         )
-        
-        # Load all data
+    #load the data
+    try:
         dataset.load_contig_data()
+    except IOError as e:
+        logging.error(f"Failed to load contig data: {e}")
+        sys.exit(1) 
+
+    try:
         dataset.load_stats_data()
+    except IOError as e:
+        logging.error(f"Failed to load stats data: {e}")
+        sys.exit(1)  
         
         datasets.append(dataset)
         all_discard_stats.append(discard_stats)
@@ -384,8 +420,8 @@ def merge_bins(args) -> None:
     
     summary_path = output_path.with_suffix('.stats')
     try:
-        with open(summary_path, 'w') as f:
-            f.writelines(new_summary_lines)
+        with open(summary_path, 'w') as summary_file:
+            summary_file.writelines(new_summary_lines)
         logging.info(f"Summary written to {summary_path}")
     except Exception as e:
         logging.error(f"Error writing summary file: {e}")
