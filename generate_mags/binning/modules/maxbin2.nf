@@ -67,6 +67,7 @@ process MAXBIN2 {
     #move stuff out of the bin that isn't to use
     #commented line is not added until later version
     #touch files first to avoid crash if file not generated
+    
     touch maxbin2/${meta.ID}.marker .
     mv maxbin2/${meta.ID}.marker .
 

@@ -72,6 +72,7 @@ process METABAT2 {
     #mv metabat/${meta.ID}_bin.lowDepth.fa .
     #mv metabat/${meta.ID}_bin.tooShort.fa .
     #fixes error where no unbinned.fa file is present
+    
     touch metabat/${meta.ID}_bin.unbinned.fa . 
     mv metabat/${meta.ID}_bin.unbinned.fa .
 
