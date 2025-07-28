@@ -110,8 +110,8 @@ process SPLIT_BINS {
 
     ${command} ${merged_csv} ${contigs} concoct
 
-    # move stuff out of the bin that isn't to use
-    #if missing touch will stop a crash
+    # Move stuff out of the bin that wont be used
+    # The touch command is to stop a crash should unbinned.fasta be missing
     touch concot/unbinned.fasta 
     mv concoct/unbinned.fasta .
     """
