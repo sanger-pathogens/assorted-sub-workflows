@@ -44,5 +44,6 @@ workflow QC_MAGS {
     | join(CHECKM2.out.results)
     | join(GUNC.out.results)
     | join(GTDBTK.out.results)
+    | combine(Channel.fromPath(params.report_config))
     | REPORT
 }

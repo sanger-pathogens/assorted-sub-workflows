@@ -1,0 +1,24 @@
+{
+    "GUNC": {
+        "id_column": "genome",
+        "keep_columns": [
+            "pass.GUNC",
+            "n_contigs"
+        ]
+    },
+    "CHECKM2": {
+        "id_column": "Name",
+        "keep_columns": [
+            "Completeness",
+            "Contamination",
+            "Genome_Size"
+        ]
+    },
+    "GTDBTK": {
+        "id_column": "user_genome",
+        "keep_columns": [
+            "classification",
+            "closest_genome_reference"
+        ]
+    }
+}

@@ -23,6 +23,10 @@
       "fasta_ext": {
         "default": "fa",
         "help_text": "Rename fasta output files using the given extension"
+      },
+      "report_config": {
+        "default": "./assorted-sub-workflows/qc_mags/assets/report_config.json",
+        "help_text": "Configuration file (JSON) to customise summary report"
       }
     }
   }
