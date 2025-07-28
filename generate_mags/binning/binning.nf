@@ -4,9 +4,9 @@ include { SORT_BAM;
           INDEX                   } from './modules/samtools.nf'
 include { CONTIG_DEPTHS;
           METABAT1; 
-          METABAT2                } from './modules/metabat2.nf'
-include { CONTIG_DEPTHS_NO_INTRA; 
-          SPLIT_DEPTHS; 
+          METABAT2;
+          CONTIG_DEPTHS_NO_INTRA  } from './modules/metabat2.nf'
+include { SPLIT_DEPTHS; 
           MAXBIN2                 } from './modules/maxbin2.nf'
 include {CUT_UP_FASTA ;
          ESTIMATE_ABUNDANCE;
@@ -102,17 +102,13 @@ workflow METABAT_WF {
     | join(contigs)
     | set { depth_file_and_contigs }
 
-    METABAT2(depth_file_and_contigs)
-    | set { bins }
-
     if (params.metabat1) {
-        METABAT1(depth_file_and_contigs)
-        | join(bins)
-        | set { final_bins }
-    } else {
-        bins
-        | set { final_bins }
-    }
+            METABAT1(depth_file_and_contigs)
+              set { final_bins }
+        } else {
+        METABAT2(depth_file_and_contigs)
+            | set { final_bins }
+        }
 
     emit:
     final_bins

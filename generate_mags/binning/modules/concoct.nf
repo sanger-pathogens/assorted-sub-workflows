@@ -110,7 +110,10 @@ process SPLIT_BINS {
 
     ${command} ${merged_csv} ${contigs} concoct
 
-    # move stuff out of the bin that isn't to use
-    mv concoct/unbinned.fasta .
-    """
+    # Conditionally move unbinned file if keep_unbinned is false
+    if [[ "${params.keep_unbinned}" == "false" ]]; then
+        touch concoct/unbinned.fasta 
+        mv concoct/unbinned.fasta .
+    fi
+"""
 }
