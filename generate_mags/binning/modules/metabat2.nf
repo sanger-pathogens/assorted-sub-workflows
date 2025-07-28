@@ -108,7 +108,6 @@ process METABAT2 {
 
     # rename remaining fasta rather than fa
     for file in metabat/*.fa; do
-        touch "\$file" "\${file%.fa}.fasta"
         mv "\$file" "\${file%.fa}.fasta"
     done
     """
