@@ -18,6 +18,27 @@ process CONTIG_DEPTHS {
     """
 }
 
+process CONTIG_DEPTHS_NO_INTRA {
+    label 'cpu_1'
+    label 'mem_100M'
+    label 'time_30m'
+
+    container 'quay.io/biocontainers/metabat2:2.12.1--1'
+
+    input:
+    tuple val(meta), path(bam)
+
+    output:
+    tuple val(meta), path(depth_text),  emit: depth
+
+    script:
+    depth_text = "${meta.ID}_depth.txt"
+    """
+    jgi_summarize_bam_contig_depths --outputDepth ${depth_text} --noIntraDepthVariance ${bam}
+    """
+}
+
+
 process METABAT1 {
     label 'cpu_2'
     label 'mem_1'
@@ -72,7 +93,7 @@ process METABAT2 {
     #mv metabat/${meta.ID}_bin.lowDepth.fa .
     #mv metabat/${meta.ID}_bin.tooShort.fa .
     #fixes error where no unbinned.fa file is present
-    
+
     touch metabat/${meta.ID}_bin.unbinned.fa . 
     mv metabat/${meta.ID}_bin.unbinned.fa .
 

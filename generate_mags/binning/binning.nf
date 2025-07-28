@@ -4,9 +4,9 @@ include { SORT_BAM;
           INDEX                   } from './modules/samtools.nf'
 include { CONTIG_DEPTHS;
           METABAT1; 
-          METABAT2                } from './modules/metabat2.nf'
-include { CONTIG_DEPTHS_NO_INTRA; 
-          SPLIT_DEPTHS; 
+          METABAT2;
+          CONTIG_DEPTHS_NO_INTRA  } from './modules/metabat2.nf'
+include { SPLIT_DEPTHS; 
           MAXBIN2                 } from './modules/maxbin2.nf'
 include {CUT_UP_FASTA ;
          ESTIMATE_ABUNDANCE;
