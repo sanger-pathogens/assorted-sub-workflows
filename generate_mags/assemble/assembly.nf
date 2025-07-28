@@ -28,7 +28,7 @@ include { QUAST                      } from './modules/quast.nf'
 
 workflow METAWRAP_ASSEMBLE {
     take:
-    reads
+    reads_ch
 
     main:
 
@@ -37,7 +37,7 @@ workflow METAWRAP_ASSEMBLE {
     }
 
     if (params.metaspades) {
-        METASPADES(reads)
+        METASPADES(reads_ch)
         | REMOVE_SMALL_CONTIGS
         | set { metaspades_contigs }
 
@@ -52,7 +52,7 @@ workflow METAWRAP_ASSEMBLE {
         }
 
     } else {
-        final_reads_ch = reads
+        final_reads_ch = reads_ch
     }
 
     if (params.megahit) {
