@@ -5,7 +5,6 @@ include { GUNC as PRE_GUNC;
           GUNC                      } from './modules/gunc.nf'
 include { MDMCLEANER                } from './modules/mdmcleaner.nf'
 include { SEQKIT                    } from './modules/seqkit.nf'
-include { BUNDLE_FASTAS             } from './modules/helper_scripts.nf'
 include { REPORT                    } from './modules/reporting.nf'
 
 
