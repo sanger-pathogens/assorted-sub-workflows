@@ -1,7 +1,7 @@
-process GTBDTK {
+process GTDBTK {
     tag "${meta.ID}"
     label "cpu_8"
-    label "mem_96"
+    label "mem_120"
     label "time_12"
 
     container  'quay.io/biocontainers/gtdbtk:2.4.1--pyhdfd78af_1'
@@ -17,6 +17,7 @@ process GTBDTK {
     script:
     report_tsv = "${meta.ID}_gtdbtk_summary.tsv"
     """
+    export GTDBTK_DATA_PATH="${params.gtdbtk_db}"
     gtdbtk classify_wf --genome_dir ${fastas} -x ${params.fasta_ext} --skip_ani_screen --cpus ${task.cpus} --out_dir gtdbtk_outdir
 
     cp gtdbtk_outdir/gtdbtk.bac*.summary.tsv ${report_tsv}
