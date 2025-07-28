@@ -102,17 +102,13 @@ workflow METABAT_WF {
     | join(contigs)
     | set { depth_file_and_contigs }
 
-    METABAT2(depth_file_and_contigs)
-    | set { bins }
-
     if (params.metabat1) {
-        METABAT1(depth_file_and_contigs)
-        | join(bins)
-        | set { final_bins }
-    } else {
-        bins
-        | set { final_bins }
-    }
+            METABAT1(depth_file_and_contigs)
+              set { final_bins }
+        } else {
+        METABAT2(depth_file_and_contigs)
+            | set { final_bins }
+        }
 
     emit:
     final_bins
