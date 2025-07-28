@@ -88,11 +88,18 @@ process METABAT2 {
         --seed ${params.bin_seed}
 
     #move stuff out of the bin that isn't to use
-    ## top 3 added in later version so commented out
-    #mv metabat/${meta.ID}_bin.BinInfo.txt . 
-    #mv metabat/${meta.ID}_bin.lowDepth.fa .
-    #mv metabat/${meta.ID}_bin.tooShort.fa .
-    #fixes error where no unbinned.fa file is present
+    ## top 3 files are added in later version, we touch the files to avoid a crash 
+
+    touch metabat/${meta.ID}_bin.BinInfo.txt . 
+    mv metabat/${meta.ID}_bin.BinInfo.txt . 
+
+    touch metabat/${meta.ID}_bin.lowDepth.fa .
+    mv metabat/${meta.ID}_bin.lowDepth.fa .
+
+    touch metabat/${meta.ID}_bin.tooShort.fa .
+    mv metabat/${meta.ID}_bin.tooShort.fa .
+
+    #Touch the files to avoid an error where no unbinned.fa file is made
 
     touch metabat/${meta.ID}_bin.unbinned.fa . 
     mv metabat/${meta.ID}_bin.unbinned.fa .
