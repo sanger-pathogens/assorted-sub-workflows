@@ -34,16 +34,33 @@ def split_contig_depth_file(master_depth_path, output_dir):
     for i, sample in enumerate(sample_names, start=3):
         sample_base = os.path.splitext(sample)[0]
         sample_file = os.path.join(output_dir, f"mb2_{sample_base}.txt")
+        try:
+            
+            with open(sample_file, 'w') as out_f:
+                for line in lines:
+                    cols = line.split('\t')
+                    if len(cols) > i:  # Avoid index errors
+                        out_f.write(f"{cols[0]}\t{cols[i]}\n")
 
-        with open(sample_file, 'w') as out_f:
-            for line in lines:
-                cols = line.split('\t')
-                if len(cols) > i:  # Avoid index errors
-                    out_f.write(f"{cols[0]}\t{cols[i]}\n")
+        except IOError as e:
+            print(f"Error writing to file {sample_file}: {e}")
+            continue
+        except Exception as e:
+            print(f"Unexpected error while processing {sample_file}: {e}")
+            continue
 
         # Add absolute path to abundance list
-        with open(abund_list_path, 'a') as abund_f:
-            abund_f.write(f"{os.path.abspath(sample_file)}\n")
+        try:
+
+            with open(abund_list_path, 'a') as abund_f:
+                abund_f.write(f"{os.path.abspath(sample_file)}\n")
+
+        except IOError as e:
+            print(f"Error writing to abundance list {abund_list_path}: {e}")
+            continue
+        except Exception as e:
+            print(f"Unexpected error while updating abundance list: {e}")
+            continue
 
 if __name__ == "__main__":
     if len(sys.argv) != 3:
