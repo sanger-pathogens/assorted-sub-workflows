@@ -1,4 +1,4 @@
-include { PUBLISH_RESULTS; SUMMARY } from '../modules/reporting/report.nf'
+include { PUBLISH_RESULTS; SUMMARY } from '../modules/report.nf'
 
 workflow REPORT_BINS {
     
