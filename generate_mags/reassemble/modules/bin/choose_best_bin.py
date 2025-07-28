@@ -8,15 +8,26 @@ import shutil
 from pathlib import Path
 
 def parse_arguments():
+
+    def restricted_float(x):
+        try:
+            x = float(x)
+        except ValueError:
+            raise argparse.ArgumentTypeError(f"{x} not a floating-point literal")
+        
+        if x < 0.0 or x > 100.0:
+            raise argparse.ArgumentTypeError(f"{x} not in range [0.0, 100.0]")
+        return x
+
     parser = argparse.ArgumentParser(
         description="Select the best bins based on completeness and contamination thresholds."
     )
     parser.add_argument("checkm_tsv", help="CheckM output TSV file")
     parser.add_argument("bin_dir", help="Directory containing bin FASTA files")
     parser.add_argument("output_dir", help="Directory to save the best bins")
-    parser.add_argument("--min-completeness", type=float, default=50.0,
+    parser.add_argument("--min-completeness", type=restricted_float, default=50.0,
                         help="Minimum completeness threshold (default: 50.0)")
-    parser.add_argument("--max-contamination", type=float, default=5.0,
+    parser.add_argument("--max-contamination", type=restricted_float, default=5.0,
                         help="Maximum contamination threshold (default: 5.0)")
     parser.add_argument("--log", default="INFO", choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
                         help="Logging level (default: INFO)")
@@ -56,6 +67,7 @@ def select_best_bins(tsv_file, min_compl, max_contam):
     return best_bins
 
 def copy_best_bins(best_bins, bin_dir, output_dir):
+    ''' This function copy the best bins to a destination folder '''
     os.makedirs(output_dir, exist_ok=True)
     copied = 0
     for bin_base, (style, _, _) in best_bins.items():
@@ -69,6 +81,9 @@ def copy_best_bins(best_bins, bin_dir, output_dir):
         logging.info(f"Copied: {bin_path} -> {dest_path}")
         copied += 1
     logging.info(f"Total bins copied: {copied}")
+
+    if len(bin_base.keys())!= copied:
+        logging.error(f"Mismatch between number of bins and number of bins copied.\nExpected to copy {len(bin_base.keys())} bins but instead copied {copied}")
 
 def write_filtered_tsv(original_tsv, best_bins, output_tsv):
     with open(original_tsv, newline='') as infile, open(output_tsv, 'w', newline='') as outfile:
