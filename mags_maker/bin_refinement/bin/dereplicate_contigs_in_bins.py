@@ -7,13 +7,13 @@ import logging
 
 '''
 Usage:
-    ./dereplicate_contigs_in_bins.py checkm2_report.txt input_dir output_dir [remove]
+    ./dereplicate_contigs_in_bins.py checkm2_report.txt input_dir output_dir ["remove_ambiguous_contigs"]
 
 Arguments:
     checkm2_report.txt  Tab-seperated report from CheckM2 containing Completeness and Contamination scores
-    input_dir           Directory with input reads as FASTAs (bin file?)
-    output_dir          Directory to output dereplicated bins
-    remove              Optional (string), remove contigs shared by multiple bins (strict bin purity)
+    input_dir                   Directory with input reads as FASTAs (bin file?)
+    output_dir                  Directory to output dereplicated bins
+    remove_ambiguous_contigs    Optional (string), remove contigs shared by multiple bins (strict bin purity)
 '''
 
 # Set up logging
@@ -60,7 +60,7 @@ except Exception as e:
     logging.exception(f"An unexpected error occurred: {e}")
     sys.exit(1)
 
-# Assign contigs to the highest scoring bin they appear in, unless remove option is given
+# Assign contigs to the highest scoring bin they appear in, unless remove_ambiguous_contigs option is given
 logging.info("Loading in contigs in each bin...")
 contig_mapping = defaultdict(str)
 try:
@@ -74,7 +74,7 @@ try:
                 if contig not in contig_mapping:
                     contig_mapping[contig] = bin_name
                 else:
-                    if len(sys.argv) > 4 and sys.argv[4] == "remove":
+                    if len(sys.argv) > 4 and sys.argv[4] == "remove_ambiguous_contigs":
                         contig_mapping[contig] = None
                     elif bin_scores.get(bin_name, 0) > bin_scores.get(contig_mapping[contig], 0):
                         contig_mapping[contig] = bin_name

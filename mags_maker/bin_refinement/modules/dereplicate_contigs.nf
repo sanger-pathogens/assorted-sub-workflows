@@ -15,7 +15,15 @@ process DEREPLICATE_CONTIGS {
     script:
     command = "${projectDir}/assorted-sub-workflows/generate_mags/bin_refinement/bin/dereplicate_contigs_in_bins.py"
     final_bins = "${meta.ID}_final_bins"
-    """
-    ${command} ${report_txt} ${fastas} ${final_bins}
-    """
+
+    if params.remove_ambiguous_contigs{
+        """
+        ${command} ${report_txt} ${fastas} ${final_bins} "remove_ambiguous_contigs"
+        """ 
+    } else {
+        """
+        ${command} ${report_txt} ${fastas} ${final_bins}
+        """ 
+    }
+
 }
