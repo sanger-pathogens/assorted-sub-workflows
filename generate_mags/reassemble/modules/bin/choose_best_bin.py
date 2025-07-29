@@ -120,9 +120,9 @@ def write_filtered_tsv(original_tsv, best_bins, output_tsv):
         writer.writeheader()
 
         for row in reader:
-            bin_full = row['bin'] 
-            bin_parts = bin_full.split('_') 
-            style = bin_parts[-1] 
+            bin_full = row['bin']
+            bin_parts = bin_full.split('_')
+            style = bin_parts[-1]
             bin_base = '_'.join(bin_parts[:-1])
 
             if bin_base in best_bins and best_bins[bin_base][0] == style:
