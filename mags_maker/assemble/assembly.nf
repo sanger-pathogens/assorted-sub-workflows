@@ -45,7 +45,7 @@ workflow METAWRAP_ASSEMBLE {
             BWA_INDEX(metaspades_contigs)
             | set { indexed_contigs }
 
-            reads.join(indexed_contigs)
+            reads_ch.join(indexed_contigs)
             | BWA
             | SAM_TO_FASTQ
             | set { final_reads_ch }
