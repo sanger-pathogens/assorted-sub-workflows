@@ -11,13 +11,13 @@ include { REPORT                    } from './modules/reporting.nf'
 
 workflow QC_MAGS {
     take:
-    fasta_directory
+    fastas  // [meta, [1.fasta, 2.fasta, ...]]
 
     main:
-    fasta_directory
+    fastas
     | (PRE_CHECKM2 & PRE_GUNC & GTDBTK)
 
-    fasta_directory
+    fastas
     | MDMCLEANER
     | map { meta, fasta_list ->
         def size = fasta_list.size()
@@ -30,7 +30,6 @@ workflow QC_MAGS {
     | map { group_key, meta, fasta_list ->
         [ meta.first(), fasta_list ]
     }
-    | BUNDLE_FASTAS
     | (CHECKM2 & GUNC)
 
     PRE_CHECKM2.out.results
