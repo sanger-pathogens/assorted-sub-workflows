@@ -13,7 +13,7 @@ process SPLIT_DEPTHS {
     tuple val(meta), path(depth_out), emit: depths
 
     script:
-    command = "${projectDir}/assorted-sub-workflows/generate_mags/binning/bin/split_depths.py"
+    command = "${projectDir}/assorted-sub-workflows/mags_maker/binning/bin/split_depths.py"
     depth_out = "${meta.ID}_split_depths"
     """
     ${command} ${depth_text} ${depth_out}

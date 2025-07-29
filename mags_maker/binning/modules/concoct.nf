@@ -104,7 +104,7 @@ process SPLIT_BINS {
     tuple val(meta), path("concoct"), emit: bins
 
     script:
-    command = "${projectDir}/assorted-sub-workflows/generate_mags/binning/bin/split_concoct_bins.py"
+    command = "${projectDir}/assorted-sub-workflows/mags_maker/binning/bin/split_concoct_bins.py"
     """
     mkdir concoct
 
