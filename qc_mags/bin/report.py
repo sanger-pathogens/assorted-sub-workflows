@@ -1,110 +1,198 @@
 #!/usr/bin/env python3
 
-import pandas as pd
 import argparse
+import json
 import logging
 import sys
 from pathlib import Path
+from typing import Optional
 
-def setup_logging(log_file='qc_merge.log'):
+import pandas as pd
+
+JOIN_COLUMN_STEM = "genome_name"
+JOIN_COLUMN = f"preqc_{JOIN_COLUMN_STEM}"
+
+
+def setup_logging(log_file: str = "qc_merge.log"):
     logging.basicConfig(
-        filename=log_file,
-        filemode='w',
         level=logging.INFO,
-        format='%(asctime)s - %(levelname)s - %(message)s'
+        handlers=[logging.StreamHandler(), logging.FileHandler(log_file, mode="w")],
+        format="%(asctime)s - %(levelname)s - %(message)s",
     )
     logging.info("Logging initialized.")
 
-def read_tsv(path, name):
+
+def read_tsv(path: Path, name: str) -> pd.DataFrame:
     try:
-        df = pd.read_csv(path, sep='\t')
+        df = pd.read_csv(path, sep="\t")
         logging.info(f"{name} loaded successfully: {path}")
-        return df
     except Exception as e:
         logging.error(f"Error reading {name} from {path}: {e}")
-        sys.exit(f"Error reading {name}: {e}")
-
-def process_checkm2(df, qc_stage):
-    return df.rename(columns={
-        'genome': 'genome_name_preqc',
-        'checkm2_completeness': f'{qc_stage}_completeness',
-        'checkm2_contamination': f'{qc_stage}_contamination'
-    })[['genome_name_preqc', f'{qc_stage}_completeness', f'{qc_stage}_contamination']]
-
-def process_gunc(df, qc_stage):
-    return df.rename(columns={
-        'genome': 'genome_name_preqc',
-        'pass.GUNC': f'{qc_stage}_gunc_pass_or_fail'
-    })[['genome_name_preqc', f'{qc_stage}_gunc_pass_or_fail']]
-
-def process_mapping(df):
-    expected_cols = ['genome_name_preqc', 'genome_name_postqc', 'mdm_cleaner_status', 'final_qc_status']
-    for col in expected_cols:
-        if col not in df.columns:
-            logging.warning(f"Missing column in mapping file: {col}")
-            df[col] = 'NA'
-    return df[expected_cols]
-
-def enrich_fields(df):
-    df['sample_or_strain_name'] = df['genome_name_preqc'].apply(lambda x: x.split("_")[0])
-    df['genome_status'] = df['genome_name_preqc'].apply(lambda x: "mag" if "MAG" in x.upper() else "isolate")
-    df['genome_size'] = 'NA'         # Placeholder
-    df['gtdbtk_taxonomy'] = 'NA'     # Placeholder
-    df['contig_count'] = 'NA'        # Placeholder
+        sys.exit(1)
     return df
 
-def merge_all(mapping_df, pre_checkm2, pre_gunc, post_checkm2, post_gunc):
-    df = mapping_df.copy()
-    for other_df in [pre_checkm2, pre_gunc, post_checkm2, post_gunc]:
-        df = df.merge(other_df, on='genome_name_preqc', how='left')
+
+def read_config(path: Path) -> dict:
+    try:
+        with open(path) as f:
+            config = json.load(f)
+    except Exception as e:
+        logging.error(f"Error reading configuration file {path}: {e}")
+        sys.exit(1)
+    try:
+        validate_config(config)
+    except InvalidConfig:
+        logging.error(
+            f"Invalid config structure detected in configuration file {path}: {e}"
+        )
+    return config
+
+
+class InvalidConfig(ValueError):
+    pass
+
+
+def validate_config(config: dict) -> None:
+    valid_tools = {"GUNC", "CHECKM2", "GTDBTK"}
+    expected_tools = valid_tools & config.keys()
+    unexpected_tools = set(config.keys()) - valid_tools
+    if expected_tools == set():
+        raise InvalidConfig(
+            f"Config does not contain at least one valid tool: {valid_tools}"
+        )
+    if unexpected_tools != set():
+        logging.warning(
+            f"Config contains keys that were not expected (and are ignored): {unexpected_tools}"
+        )
+    for tool in expected_tools:
+        missing_keys = {"id_column", "keep_columns"} - config[tool].keys()
+        if missing_keys != set():
+            raise InvalidConfig(
+                f"Config is missing a mandatory key for tool '{tool}': {missing_keys}"
+            )
+    logging.info("Config passed validation")
+
+
+def process_input_report(
+    df: pd.DataFrame, config: dict, tool: str, qc_stage: Optional[str] = None
+) -> pd.DataFrame:
+    tool = tool.lower()
+    columns = config[tool.upper()]["keep_columns"]
+    rename_dict = {}
+    if qc_stage is not None:
+        assert qc_stage in ("preqc", "postqc")
+        rename_dict[config[tool.upper()]["id_column"]] = (
+            f"{qc_stage}_{JOIN_COLUMN_STEM}"
+        )
+    else:
+        rename_dict[config[tool.upper()]["id_column"]] = JOIN_COLUMN
+    for column in columns:
+        if qc_stage is not None:
+            rename_dict[column] = f"{tool}_{qc_stage}_{column}"
+        else:
+            rename_dict[column] = f"{tool}_{column}"
+    return df.rename(columns=rename_dict)[rename_dict.values()]
+
+
+def process_postqc_genome_name(df: pd.DataFrame) -> pd.DataFrame:
+    new_df = df.copy()
+    new_df[JOIN_COLUMN] = df[f"postqc_{JOIN_COLUMN_STEM}"].str.extract(
+        r"cleaned_(.*)_filtered_kept_contigs"
+    )
+    return new_df
+
+
+def enrich_fields(df: pd.DataFrame) -> pd.DataFrame:
+    df["sample_or_strain_name"] = (
+        df[JOIN_COLUMN].str.rsplit("_", expand=True, n=1).loc[:, 0]
+    )
+    df["genome_status"] = df[JOIN_COLUMN].apply(
+        lambda x: "mag" if "MAG" in x.upper() else "isolate"
+    )
+    return df
+
+
+def merge_all(*dfs: pd.DataFrame) -> pd.DataFrame:
+    df, other_dfs = dfs[0], dfs[1:]
+    join_keys = [JOIN_COLUMN]
+    for other_df in other_dfs:
+        overlapping_cols = set(df.columns) & set(other_df.columns)
+        cols_to_drop = overlapping_cols - set(join_keys)
+        other_df_clean = other_df.drop(columns=cols_to_drop)
+        df = df.merge(other_df_clean, on=join_keys, how="left")
     df = enrich_fields(df)
     return df
 
+
+def reorder_columns(df: pd.DataFrame) -> pd.DataFrame:
+    priority_cols = [
+        JOIN_COLUMN,
+        f"postqc_{JOIN_COLUMN_STEM}",
+        "sample_or_strain_name",
+        "genome_status",
+    ]
+    other_cols = sorted([col for col in df.columns if col not in priority_cols])
+    new_order = priority_cols + other_cols
+    return df[new_order]
+
+
 def parse_args():
-    parser = argparse.ArgumentParser(description="Merge GUNC, CheckM2 and post-QC metadata.")
-    parser.add_argument('--pre_qc_checkm2', required=True, help='Path to pre-QC CheckM2 TSV')
-    parser.add_argument('--pre_qc_gunc', required=True, help='Path to pre-QC GUNC TSV')
-    parser.add_argument('--post_qc_checkm2', required=True, help='Path to post-QC CheckM2 TSV')
-    parser.add_argument('--post_qc_gunc', required=True, help='Path to post-QC GUNC TSV')
-    parser.add_argument('--postqc_mapping', required=True, help='Path to post-QC mapping TSV')
-    parser.add_argument('--output', required=True, help='Output TSV path')
+    parser = argparse.ArgumentParser(
+        description="Merge GUNC, CheckM2 and post-QC metadata."
+    )
+    parser.add_argument(
+        "--pre_qc_checkm2", type=Path, required=True, help="Path to pre-QC CheckM2 TSV"
+    )
+    parser.add_argument(
+        "--pre_qc_gunc", type=Path, required=True, help="Path to pre-QC GUNC TSV"
+    )
+    parser.add_argument(
+        "--post_qc_checkm2",
+        type=Path,
+        required=True,
+        help="Path to post-QC CheckM2 TSV",
+    )
+    parser.add_argument(
+        "--post_qc_gunc", type=Path, required=True, help="Path to post-QC GUNC TSV"
+    )
+    parser.add_argument("--gtdbtk", type=Path, required=True, help="Path to GTDBTK TSV")
+    parser.add_argument(
+        "--config", type=Path, required=True, help="Path to report configuration file"
+    )
+    parser.add_argument("--output", type=Path, required=True, help="Output TSV path")
     return parser.parse_args()
+
 
 def main():
     setup_logging()
     args = parse_args()
 
-    pre_checkm2 = process_checkm2(read_tsv(args.pre_qc_checkm2, "Pre-QC CheckM2"), "preqc")
-    pre_gunc = process_gunc(read_tsv(args.pre_qc_gunc, "Pre-QC GUNC"), "preqc")
-    post_checkm2 = process_checkm2(read_tsv(args.post_qc_checkm2, "Post-QC CheckM2"), "postqc")
-    post_gunc = process_gunc(read_tsv(args.post_qc_gunc, "Post-QC GUNC"), "postqc")
-    mapping = process_mapping(read_tsv(args.postqc_mapping, "Post-QC Mapping"))
+    config = read_config(args.config)
 
-    merged = merge_all(mapping, pre_checkm2, pre_gunc, post_checkm2, post_gunc)
+    args_qc_stage = {
+        "pre_qc_checkm2": "preqc",
+        "pre_qc_gunc": "preqc",
+        "gtdbtk": None,
+        "post_qc_checkm2": "postqc",
+        "post_qc_gunc": "postqc",
+    }
 
-    output_cols = [
-        'genome_name_preqc',
-        'genome_name_postqc',
-        'sample_or_strain_name',
-        'genome_status',
-        'genome_size',
-        'gtdbtk_taxonomy',
-        'contig_count',
-        'final_qc_status',
-        'preqc_completeness',
-        'preqc_contamination',
-        'preqc_gunc_pass_or_fail',
-        'postqc_completeness',
-        'postqc_contamination',
-        'postqc_gunc_pass_or_fail',
-        'mdm_cleaner_status'
-    ]
-    for col in output_cols:
-        if col not in merged.columns:
-            merged[col] = 'NA'
+    dfs = []
+    for arg, qc_stage in args_qc_stage.items():
+        tool = arg.rsplit("_", maxsplit=1)[-1]
+        df = process_input_report(
+            read_tsv(vars(args)[arg], arg), config, tool, qc_stage
+        )
+        if qc_stage == "postqc":
+            df = process_postqc_genome_name(df)
+        dfs.append(df)
 
-    merged[output_cols].to_csv(args.output, sep='\t', index=False)
+    merged = merge_all(*dfs)
+    merged = reorder_columns(merged)
+
+    merged.to_csv(args.output, sep="\t", index=False)
     logging.info(f"Merged QC report written to: {args.output}")
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()
