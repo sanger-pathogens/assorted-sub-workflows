@@ -1,0 +1,41 @@
+{
+    "params": {
+        "reassemble Subworkflow Options": {
+            "strict_max": {
+                "default": "2",
+                "help_text": "Strict bin mismatch threshold."
+            },
+            "permissive_max": {
+                "default": "5",
+                "help_text": "Path to directory containing CheckM2 database."
+            },
+            "min_contig": {
+                "default": "1500",
+                "help_text": "Minimum threshold for contig size (kb)."
+            },
+            "min_completeness":{
+                "default": "50",
+                "help_text": "Minimum threshold for completeness (%)."
+            },
+            "max_contamination":{
+                "default": "5",
+                "help_text": "Maximum threshold for contamination (%)."
+            },
+            "checkm2_db":{
+                "default": "/data/pam/software/checkm2_db/uniref100.KO.1.dmnd",
+                "help_text": "Path to CheckM2 database."
+            },
+            "checkm1": {
+                "default": "false",
+                "help_text": "Assess quality using the CheckM tool rather than the default - CheckM2."
+            },
+            "lock_phred": {
+                "default": "false",
+                "help_text": "Set PHRED quality offset to 33 when using SPAdes."
+            }
+
+        }
+    }
+}
+
+
