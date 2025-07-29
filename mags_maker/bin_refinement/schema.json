@@ -17,7 +17,7 @@
                 "default": "5",
                 "help_text": ""
             },
-            "strict_bins":{
+            "remove_ambiguous_contigs":{
                 "default": "false",
                 "help_text": "Dereplicate by removing ambiguous contigs rather than the default strategy of assigning them to the highest quality potential bin"
             }
