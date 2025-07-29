@@ -1,5 +1,5 @@
 include { COMBINE_BINS; SPLIT_READS } from "./modules/helper_scripts.nf"
-include { BWA_INDEX; BWA            } from '../assemble/modules/bwa.nf'
+include { BWA_INDEX; BWA            } from './modules/bwa.nf'
 include { SPADES_REASSEMBLE         } from './modules/spades.nf'
 include { REMOVE_SMALL_CONTIGS; 
 		  COLLECT_BINS;
@@ -30,7 +30,7 @@ def filesFromDir(Path dirPath) {
 workflow METAWRAP_REASSEMBLY {
     take:
     un_trusted_contigs
-    reads
+    reads_ch
 
     main:
 	un_trusted_contigs
@@ -41,7 +41,7 @@ workflow METAWRAP_REASSEMBLY {
     | BWA_INDEX
     | set { index }
 
-    reads
+    reads_ch
     | join(index)
     | BWA
     | set { sam }
