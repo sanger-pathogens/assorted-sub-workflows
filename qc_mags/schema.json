@@ -1,0 +1,33 @@
+{
+  "pipeline": "qc_mags",
+  "params": {
+    "Database options": {
+      "checkm2_db": {
+        "default": "/data/pam/software/checkm2_db/uniref100.KO.1.dmnd",
+        "help_text": "Path to checkm2 diamond database file"
+      },
+      "gunc_db": {
+        "default": "/data/pam/software/gunc/GTDB/gunc_db_gtdb95.dmnd",
+        "help_text": "Path to GUNC diamond database file"
+      },
+      "mdmcleaner_db": {
+        "default": "/data/pam/software/mdmcleaner/v1",
+        "help_text": "Path to MDMCleaner database directory"
+      },
+      "gtdbtk_db": {
+        "default": "/data/pam/software/GTDBTk/release226",
+        "help_text": "Path to gtdbtk database directory"
+      }
+    },
+    "Other options": {
+      "fasta_ext": {
+        "default": "fa",
+        "help_text": "Rename fasta output files using the given extension"
+      },
+      "report_config": {
+        "default": "./assorted-sub-workflows/qc_mags/assets/report_config.json",
+        "help_text": "Configuration file (JSON) to customise summary report"
+      }
+    }
+  }
+}
