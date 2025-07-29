@@ -46,6 +46,15 @@ A configuration file can be supplied to the `--report_config` option to customis
 
 Please refer to the default [`report_config.json`](./assets/report_config.json) for expected JSON structure.
 
+NOTE: In addition to columns derived from the tool reports, the script includes 4 columns `preqc_genome_name`, `postqc_genome_name`, `sample_or_strain_name` and `genome_status`. These are currently all derived from filenames (at some point).
+
+| column                | description                                                                              |
+| --------------------- | ---------------------------------------------------------------------------------------- |
+| preqc_genome_name     | Name of the input fasta file minus extension                                             |
+| post_genome_name      | Name of the fasta file output after processing with `seqkit` minus extension             |
+| sample_or_strain_name | Name of the fasta file up to the last `_` character                                      |
+| genome_status         | `mag` if the fasta file contains the string `mag` (lower/uppercase), `isolate` otherwise |
+
 ### Inputs
 
 - (Metagenomic) assemblies per sample. Channel emitting elements `[meta, [1.fa, 2.fa, ...]]`, where meta is a map containing metadata (including the mandatory `ID`, tracking a sample ID).
