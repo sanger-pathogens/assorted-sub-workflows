@@ -115,5 +115,5 @@ process SPLIT_BINS {
         touch concoct/unbinned.fasta 
         mv concoct/unbinned.fasta .
     fi
-"""
+    """
 }
