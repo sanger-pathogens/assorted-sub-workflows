@@ -341,9 +341,9 @@ def merge_bins(args) -> None:
     except IOError as e:
         logging.error(f"Failed to load stats data: {e}")
         sys.exit(1)  
-        
-        datasets.append(dataset)
-        all_discard_stats.append(discard_stats)
+    
+    datasets.append(dataset)
+    all_discard_stats.append(discard_stats)
     
     total_discarded = sum(stats['discarded'] for stats in all_discard_stats)
     total_bins = sum(stats['total'] for stats in all_discard_stats)
