@@ -47,7 +47,7 @@ def print_sorted_contigs(contigs, line_width=100):
 def main():
     parser = argparse.ArgumentParser(description="Combine and sort contigs from multiple FASTA files.")
     parser.add_argument("fastas", nargs="+", help="Input FASTA files")
-    parser.add_argument("--min_contig", type=int, default=1000, help="Minimum contig length to include (default: 0)")
+    parser.add_argument("--min_contig", type=int, default=1500, help="Minimum contig length to include (default: 0)")
 
     args = parser.parse_args()
     combined_contigs = combine_fastas(args.fastas, min_contig=args.min_contig)
