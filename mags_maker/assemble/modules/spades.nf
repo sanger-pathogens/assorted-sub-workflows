@@ -15,11 +15,11 @@ process METASPADES {
 script:
 def contigs = "metaspades/contigs.fasta"
 """
-#This is done beacuse if the sra lite format there is no quality information so phre-offset needs to be set
+# This is done beacuse if the sra-lite format there is no quality information so phred-offset needs to be set
 # Determine phred flag
 if [[ "${params.lock_phred}" == "true" ]]; then
     phred_flag="--phred-offset 33"
-elif head -n 4 ${contigs} | grep -q '?'; then
+elif zcat "${first_read}" | head -n 75 | grep -q '?'; then
     phred_flag="--phred-offset 33"
 else
     phred_flag=""
