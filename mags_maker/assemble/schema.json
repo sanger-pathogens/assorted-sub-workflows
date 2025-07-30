@@ -1,0 +1,37 @@
+{
+    "params": {
+        "assemble Subworkflow Options": {
+            "assembly_stats": {
+                "default": "false",
+                "help_text": "Generate assembly statistics."
+            },
+            "min_contig": {
+                "default": "1500",
+                "help_text": "Minimum threshold for contig size (kb)."
+            },
+            "fastspades":{
+                "default": "null",
+                "help_text": "Run SPAdes assembly module only."
+            },
+            "lock_phred":{
+                "default": "null",
+                "help_text": "Set PHRED quality offset to 33 (SPAdes option)."
+            },
+            "metaspades":{
+                "default": "true",
+                "help_text": "Run metaSPAdes assembly."
+            },
+            "megahit": {
+                "default": "true",
+                "help_text": "Run MEGAHIT assembly."
+            },
+            "output_transposed": {
+                "default": "false",
+                "help_text": "Output transposed quast reports."
+            }
+
+        }
+    }
+}
+
+

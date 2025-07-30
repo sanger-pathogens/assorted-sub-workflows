@@ -1,0 +1,28 @@
+{
+    "params": {
+        "binning Subworkflow Options": {
+            "bin_seed": {
+                "default": "1234",
+                "help_text": "Set a fixed seed for metaBAT1/2 and CONCOCT."
+            },
+            "min_contig": {
+                "default": "1500",
+                "help_text": "Minimum threshold for contig size (kb)."
+            },
+            "maxbin_markers":{
+                "default": "140",
+                "help_text": "Marker set to choose from 107 marker genes present in >95% of bacteria, or 40 marker gene sets that are universal among bacteria and archaea."
+            },
+            "metabat1":{
+                "default": "null",
+                "help_text": "Run metaBAT1 binning instead of default metaBAT2."
+            },
+            "keep_unbinned":{
+                "default": "false",
+                "help_text": "Keep unbinned contigs."
+            }
+        }
+    }
+}
+
+
