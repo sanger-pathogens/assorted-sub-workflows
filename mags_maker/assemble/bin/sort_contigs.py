@@ -28,15 +28,18 @@ def parse_fasta(filepath):
 
 def combine_fastas(fasta_files, min_contig):
     """Combines multiple FASTA files, filters by min_contig."""
-    combined = {}
+    passed = False
     for file in fasta_files:
+        combined = {}
         contigs = parse_fasta(file)
         for header, seq in contigs.items():
             if len(seq) >= min_contig:
                 combined[header] = seq
+                passed = True
             else:
                 print(f"removed {len(seq)} contig")
-    return combined
+        print_sorted_contigs(combined)
+    return passed
 
 def print_sorted_contigs(contigs, line_width=100):
     """Prints contigs sorted by length, formatted."""
@@ -47,16 +50,14 @@ def print_sorted_contigs(contigs, line_width=100):
 def main():
     parser = argparse.ArgumentParser(description="Combine and sort contigs from multiple FASTA files.")
     parser.add_argument("fastas", nargs="+", help="Input FASTA files")
-    parser.add_argument("--min_contig", type=int, default=1000, help="Minimum contig length to include (default: 0)")
+    parser.add_argument("--min_contig", type=int, default=1500, help="Minimum contig length to include (default: 1500)")
 
     args = parser.parse_args()
-    combined_contigs = combine_fastas(args.fastas, min_contig=args.min_contig)
+    passed = combine_fastas(args.fastas, min_contig=args.min_contig)
     
-    if not combined_contigs:
+    if not passed:
         print(f"No contigs passed the length filter (min_contig = {args.min_contig}).", file=sys.stderr)
         sys.exit(1)
-
-    print_sorted_contigs(combined_contigs)
 
 if __name__ == "__main__":
     main()
