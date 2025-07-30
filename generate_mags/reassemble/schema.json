@@ -7,7 +7,7 @@
             },
             "permissive_max": {
                 "default": "5",
-                "help_text": "Path to directory containing CheckM2 database."
+                "help_text": "Permissive bin mismatch threshold."
             },
             "min_contig": {
                 "default": "1500",
@@ -31,7 +31,7 @@
             },
             "lock_phred": {
                 "default": "false",
-                "help_text": "Set PHRED quality offset to 33 when using SPAdes."
+                "help_text": "Set PHRED quality offset to 33 (SPAdes option)."
             }
 
         }
