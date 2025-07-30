@@ -6,7 +6,7 @@ process QUAST {
 
     container  'quay.io/biocontainers/quast:5.0.2--py36pl5321hcac48a8_7'
 
-    publishDir mode: 'copy', pattern: "${report_txt}", path: "${params.outdir}/${meta.ID}/quast"
+    publishDir mode: 'copy', pattern: "${report_out}", path: "${params.outdir}/${meta.ID}/quast"
 
     input:
     tuple val(meta), path(consensus)
