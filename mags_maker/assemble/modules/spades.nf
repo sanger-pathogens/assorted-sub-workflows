@@ -34,7 +34,7 @@ metaspades.py ${params.fastspades ? "--only-assembler" : ""} \\
         -o metaspades \\
         -1 ${first_read} \\
         -2 ${second_read} \\
-        \$phred_flag
+        \${phred_flag}
 
 mv ${contigs} ${meta.ID}_contigs.fasta
 """
