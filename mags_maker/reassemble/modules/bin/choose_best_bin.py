@@ -109,8 +109,8 @@ def copy_best_bins(best_bins, bin_dir, output_dir):
         copied += 1
     logging.info(f"Total bins copied: {copied}, Total bin files not found : {not_found}")
 
-    if len(bin_base.keys())!= copied:
-        logging.error(f"Mismatch between number of bins and number of bins copied.\nExpected to copy {len(bin_base.keys())} bins but instead copied {copied}")
+    if len(best_bins.keys())!= copied:
+        logging.error(f"Mismatch between number of bins and number of bins copied.\nExpected to copy {len(best_bins.keys())} bins but instead copied {copied}")
 
 def write_filtered_tsv(original_tsv, best_bins, output_tsv):
     with open(original_tsv, newline='') as infile, open(output_tsv, 'w', newline='') as outfile:
