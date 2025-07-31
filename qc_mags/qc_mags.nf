@@ -5,19 +5,18 @@ include { GUNC as PRE_GUNC;
           GUNC                      } from './modules/gunc.nf'
 include { MDMCLEANER                } from './modules/mdmcleaner.nf'
 include { SEQKIT                    } from './modules/seqkit.nf'
-include { BUNDLE_FASTAS             } from './modules/helper_scripts.nf'
 include { REPORT                    } from './modules/reporting.nf'
 
 
 workflow QC_MAGS {
     take:
-    fasta_directory
+    fastas  // [meta, [1.fasta, 2.fasta, ...]]
 
     main:
-    fasta_directory
+    fastas
     | (PRE_CHECKM2 & PRE_GUNC & GTDBTK)
 
-    fasta_directory
+    fastas
     | MDMCLEANER
     | map { meta, fasta_list ->
         def size = fasta_list.size()
@@ -30,13 +29,13 @@ workflow QC_MAGS {
     | map { group_key, meta, fasta_list ->
         [ meta.first(), fasta_list ]
     }
-    | BUNDLE_FASTAS
     | (CHECKM2 & GUNC)
 
     PRE_CHECKM2.out.results
-    | join(GTDBTK.out.results)
     | join(PRE_GUNC.out.results)
     | join(CHECKM2.out.results)
     | join(GUNC.out.results)
+    | join(GTDBTK.out.results)
+    | combine(Channel.fromPath(params.report_config))
     | REPORT
 }

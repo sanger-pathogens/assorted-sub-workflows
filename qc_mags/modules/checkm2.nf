@@ -9,7 +9,7 @@ process CHECKM2 {
     publishDir mode: 'copy', path: "${params.outdir}/checkm2/"
 
     input:
-    tuple val(meta), path(fastas)
+    tuple val(meta), path(fastas, stageAs: "fastas/*")
 
     output:
     tuple val(meta), path(report_tsv), emit: results
@@ -17,7 +17,7 @@ process CHECKM2 {
     script:
     report_tsv = "${meta.ID}_quality_report.tsv"
     """
-    checkm2 predict -x .fa --threads ${task.cpus} --input ${fastas} --output-directory checkm2 --database_path ${params.checkm2_db}
+    checkm2 predict -x .fa --threads ${task.cpus} --input fastas --output-directory checkm2 --database_path ${params.checkm2_db}
 
     # move the output file names to something slightly more descriptive including method
     mv checkm2/quality_report.tsv ${report_tsv}

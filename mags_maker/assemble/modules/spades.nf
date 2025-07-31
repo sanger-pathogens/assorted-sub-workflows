@@ -16,7 +16,7 @@ script:
 def contigs = "metaspades/contigs.fasta"
 
 """
-#This is done beacuse if the sra lite format there is no quality information so phred-offset needs to be set
+# This is done beacuse if the sra-lite format there is no quality information so phred-offset needs to be set
 # Determine phred flag
 
 if [[ "${params.lock_phred}" == "true" ]]; then

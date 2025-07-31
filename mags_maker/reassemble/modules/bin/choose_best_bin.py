@@ -5,7 +5,9 @@ import csv
 import logging
 import os
 import shutil
+import sys
 from pathlib import Path
+
 
 def parse_arguments():
 
@@ -36,8 +38,35 @@ def parse_arguments():
 def setup_logging(level):
     logging.basicConfig(format="%(levelname)s: %(message)s", level=getattr(logging, level))
 
+
+def validate_tsv(tsv_file):
+    try: 
+        with open(tsv_file, 'r') as f:
+            reader = csv.DictReader(f, delimiter='\t')
+
+            if next(reader, None) is None:
+                logging.error("CheckM TSV file contains no data rows.")
+                sys.exit(1)
+
+    except FileNotFoundError as e:
+        logging.error(f"CheckM TSV file not found: {e}")
+        sys.exit(1)
+
+    except Exception as e:
+        logging.error(f"Error reading CheckM TSV file: {e}")
+        sys.exit(1)
+
+
 def score_bin(completeness, contamination):
     return completeness + 5 * (100 - contamination)
+
+def bin_assessment(bin_base, best_bins, score, style, n50):
+    if bin_base not in best_bins or (
+        best_bins[bin_base][1] < score or
+        (best_bins[bin_base][1] == score and n50 > best_bins[bin_base][2])
+    ):
+        best_bins[bin_base] = (style, score, n50)
+    return best_bins
 
 def select_best_bins(tsv_file, min_compl, max_contam):
     best_bins = {}
@@ -50,19 +79,15 @@ def select_best_bins(tsv_file, min_compl, max_contam):
             if completeness < min_compl or contamination > max_contam:
                 continue
 
-            bin_full = row['bin']
+            bin_full = row['bin']  # This is the full bin name e.g long_SRR23994567_bin_1_strict
             bin_parts = bin_full.split('_')
-            style = bin_parts[-1]
-            bin_base = '_'.join(bin_parts[:-1])
+            style = bin_parts[-1]  # This is the bin style e.g strict
+            bin_base = '_'.join(bin_parts[:-1]) # This is the base name e.g long_SRR23994567_bin_1
 
             score = score_bin(completeness, contamination)
             n50 = int(row['N50'])
 
-            if bin_base not in best_bins or (
-                score > best_bins[bin_base][1] or 
-                (score == best_bins[bin_base][1] and n50 > best_bins[bin_base][2])
-            ):
-                best_bins[bin_base] = (style, score, n50)
+            best_bins = bin_assessment(bin_base, best_bins, score, style, n50)
 
     return best_bins
 
@@ -70,20 +95,22 @@ def copy_best_bins(best_bins, bin_dir, output_dir):
     ''' This function copy the best bins to a destination folder '''
     os.makedirs(output_dir, exist_ok=True)
     copied = 0
+    not_found = 0
     for bin_base, (style, _, _) in best_bins.items():
         bin_filename = f"{bin_base}_{style}.fasta"
         bin_path = Path(bin_dir) / bin_filename
         if not bin_path.exists():
+            not_found += 1
             logging.warning(f"Bin file not found: {bin_filename}")
             continue
         dest_path = Path(output_dir) / bin_path.name
         shutil.copy(bin_path, dest_path)
         logging.info(f"Copied: {bin_path} -> {dest_path}")
         copied += 1
-    logging.info(f"Total bins copied: {copied}")
+    logging.info(f"Total bins copied: {copied}, Total bin files not found : {not_found}")
 
-    if len(bin_base.keys())!= copied:
-        logging.error(f"Mismatch between number of bins and number of bins copied.\nExpected to copy {len(bin_base.keys())} bins but instead copied {copied}")
+    if len(best_bins.keys())!= copied:
+        logging.error(f"Mismatch between number of bins and number of bins copied.\nExpected to copy {len(best_bins.keys())} bins but instead copied {copied}")
 
 def write_filtered_tsv(original_tsv, best_bins, output_tsv):
     with open(original_tsv, newline='') as infile, open(output_tsv, 'w', newline='') as outfile:
@@ -105,6 +132,8 @@ def write_filtered_tsv(original_tsv, best_bins, output_tsv):
 def main():
     args = parse_arguments()
     setup_logging(args.log)
+
+    validate_tsv(args.checkm_tsv)
 
     logging.info("Selecting best bins...")
     best_bins = select_best_bins(args.checkm_tsv, args.min_completeness, args.max_contamination)
