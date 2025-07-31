@@ -20,6 +20,22 @@ workflow IRODS_MANIFEST_PARSE {
     meta
 }
 
+def setMissingValue(String var, row, params) {
+    if (row[var] == null) {
+        // If manifest doesn't include column for given var, return CLI (params) var value
+        params[var]
+    } else {
+        def value = row[var]?.toString()?.trim()
+        if (value == "-1") {
+            // If manifest includes column for given var, but set to -1, return -1
+            -1
+        } else {
+            // Otherwise, if column left empty set to -1, else use value (string converted)
+            value ?: -1
+        }
+    }
+}
+
 def createChannel(LinkedHashMap row) {
     def metadata = [:]
     
@@ -43,19 +59,11 @@ def createChannel(LinkedHashMap row) {
             metadata[key] = row[key].toString()
         }
     }
-    
+
     // Set target and type if necessary
     if (metadata.studyid != -1 || metadata.runid != -1 || extraFields.any { row[it]?.toString()?.trim() }) {
-        if (row.target == null) {
-            metadata.target = "${params.target}"
-        } else {
-            metadata.target = row.target?.toString()?.trim() ?: -1
-        }
-        if (row.type == null) {
-            metadata.type = "${params.type}"
-        } else {
-            metadata.type = row.type?.toString()?.trim() ?: -1
-        }
+        metadata.target = setMissingValue("target", row, params)
+        metadata.type = setMissingValue("type", row, params)
     } else if (row.target?.toString()?.trim() || row.type?.toString()?.trim()) {
         log.warn ("Cannot submit an iRODS query solely based on target or type metadata tags, as this query would catch too many file objects.\nThe row ${row} in the input manifest is ignored")
         return "none"
