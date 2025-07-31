@@ -46,8 +46,16 @@ def createChannel(LinkedHashMap row) {
     
     // Set target and type if necessary
     if (metadata.studyid != -1 || metadata.runid != -1 || extraFields.any { row[it]?.toString()?.trim() }) {
-        metadata.target = row.target?.toString()?.trim() ?: "${params.target}"
-        metadata.type = row.type?.toString()?.trim() ?: "${params.type}"
+        if (row.target == null) {
+            metadata.target = "${params.target}"
+        } else {
+            metadata.target = row.target?.toString()?.trim() ?: -1
+        }
+        if (row.type == null) {
+            metadata.type = "${params.type}"
+        } else {
+            metadata.type = row.type?.toString()?.trim() ?: -1
+        }
     } else if (row.target?.toString()?.trim() || row.type?.toString()?.trim()) {
         log.warn ("Cannot submit an iRODS query solely based on target or type metadata tags, as this query would catch too many file objects.\nThe row ${row} in the input manifest is ignored")
         return "none"
