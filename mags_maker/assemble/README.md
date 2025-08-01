@@ -27,3 +27,8 @@ By default, this workflow assembles sequencing reads using metaSPAdes v3.14. Rea
 ### Dependencies
 All dependencies are contained in runtime containers.
 
+### Further information
+
+If using a sra-lite format reads, or other formats not containing quality scores, the pipeline will attempt to automatically override the phred quality offset to 33.
+If the pipeline is unable to automatically detect the lack of quality score before assembly steps it will fail the sample, set --lock_phred to supress these failiures in this case. 
+
