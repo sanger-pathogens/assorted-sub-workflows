@@ -19,7 +19,7 @@ workflow QC_MAGS {
     fastas
     | MDMCLEANER
     | map { meta, fasta_list ->
-        def size = fasta_list.size()
+        def size = fasta_list.collect().size()
         def group_key = groupKey(meta, size)
         [group_key, meta, fasta_list]
     }
