@@ -10,20 +10,17 @@ process DEREPLICATE_CONTIGS {
     tuple val(meta), path(fastas), path(report_txt)
 
     output:
-    tuple val(meta), val("final_bins"), path(final_bins), emit: merged_bins
+    tuple val(meta), val("final_bins"), path("${meta.ID}_final_bins"), emit: merged_bins
 
     script:
-    command = "${projectDir}/assorted-sub-workflows/generate_mags/bin_refinement/bin/dereplicate_contigs_in_bins.py"
+    command = "${projectDir}/assorted-sub-workflows/mags_maker/bin_refinement/bin/dereplicate_contigs_in_bins.py"
     final_bins = "${meta.ID}_final_bins"
 
-    if params.remove_ambiguous_contigs{
-        """
-        ${command} ${report_txt} ${fastas} ${final_bins} "remove_ambiguous_contigs"
-        """ 
-    } else {
-        """
-        ${command} ${report_txt} ${fastas} ${final_bins}
-        """ 
-    }
-
+    """
+    if [ "${params.remove_ambiguous_contigs}" == "true" ]; then
+        ${command} "${report_txt}" "${fastas}" "${final_bins}" "remove_ambiguous_contigs"
+    else
+        ${command} "${report_txt}" "${fastas}" "${final_bins}"
+    fi
+    """
 }

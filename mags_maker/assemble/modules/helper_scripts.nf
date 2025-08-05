@@ -13,7 +13,7 @@ process REMOVE_SMALL_CONTIGS {
     tuple val(meta), path(long_scaffolds), emit: long_contigs
 
     script:
-    command = "${projectDir}/assorted-sub-workflows/generate_mags/assemble/bin/rm_short_contigs.py"
+    command = "${projectDir}/assorted-sub-workflows/mags_maker/assemble/bin/rm_short_contigs.py"
     long_scaffolds = "${meta.ID}_long.scaffolds"
     """
     ${command} ${params.min_contig} ${contigs} > ${long_scaffolds}
@@ -36,7 +36,7 @@ process FIX_MEGAHIT_CONTIG_NAMING {
     tuple val(meta), path(long_scaffolds), emit: long_contigs
 
     script:
-    command = "${projectDir}/assorted-sub-workflows/generate_mags/assemble/bin/fix_megahit_contig_naming.py"
+    command = "${projectDir}/assorted-sub-workflows/mags_maker/assemble/bin/fix_megahit_contig_naming.py"
     long_scaffolds = "${meta.ID}_long.scaffolds"
     """
     ${command} ${params.min_contig} ${contigs} > ${long_scaffolds}
@@ -58,7 +58,7 @@ process SORT_CONTIGS {
     tuple val(meta), path(final_contigs), emit: sorted_contigs
 
     script:
-    command = "${projectDir}/assorted-sub-workflows/generate_mags/assemble/bin/sort_contigs.py"
+    command = "${projectDir}/assorted-sub-workflows/mags_maker/assemble/bin/sort_contigs.py"
     final_contigs = "${meta.ID}.contigs"
     """
     ${command} *scaffolds --min_contig ${params.min_contig} > ${final_contigs}

@@ -14,6 +14,7 @@ min_len = int(sys.argv[1])
 filename = sys.argv[2]
 
 with open(filename) as f:
+    contigs_found = False
     for line in f:
         if not line.startswith(">"):
             print(line.strip())
@@ -28,3 +29,8 @@ with open(filename) as f:
                 break
             else:
                 print(line.strip())
+                contigs_found = True
+
+if not contigs_found:
+    print(f"Warning: No contigs found longer than {min_len} in {filename}", file=sys.stderr)
+    exit(1)  # Indicate that no valid contigs were found

@@ -93,17 +93,17 @@ process METABAT2 {
     #Creating a directory to place these unneeded files, can be published later if users want and the version updates 
     mkdir meatbat2_misc 
 
-    touch metabat/${meta.ID}_bin.BinInfo.txt . 
+    touch metabat/${meta.ID}_bin.BinInfo.txt
     mv metabat/${meta.ID}_bin.BinInfo.txt meatbat2_misc 
 
-    touch metabat/${meta.ID}_bin.lowDepth.fa .
+    touch metabat/${meta.ID}_bin.lowDepth.fa
     mv metabat/${meta.ID}_bin.lowDepth.fa meatbat2_misc
 
-    touch metabat/${meta.ID}_bin.tooShort.fa .
+    touch metabat/${meta.ID}_bin.tooShort.fa
     mv metabat/${meta.ID}_bin.tooShort.fa meatbat2_misc
 
     #Touch the files to avoid an error where no unbinned.fa file is made
-    touch metabat/${meta.ID}_bin.unbinned.fa . 
+    touch metabat/${meta.ID}_bin.unbinned.fa
     mv metabat/${meta.ID}_bin.unbinned.fa .
 
     # rename remaining fasta rather than fa
