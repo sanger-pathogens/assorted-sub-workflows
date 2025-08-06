@@ -12,20 +12,20 @@ process MDMCLEANER {
     tuple val(meta), path(fastas, stageAs: "fastas/*")
 
     output:
-    tuple val(meta), path("*.${params.fasta_ext}.gz"), emit: results
+    tuple val(meta), path("*${output_fasta_ext}"), emit: results
 
     script:
+    output_fasta_ext="${params.fasta_ext.replaceAll(/^./, '')}.gz"
     """
     mdmcleaner set_configs --db_basedir ${params.mdmcleaner_db} --threads ${task.cpus}
     mdmcleaner clean -i fastas/*${params.fasta_ext} -o mdmcleaner_output -t ${task.cpus} -c mdmcleaner.config --fast_run
 
-
     # Rename files to match desired extension as mdmcleaner is always fasta
-    for file in mdmcleaner_output/*/*_filtered_kept_contigs.fasta.gz; do
-        new_name=\$(echo "\$file" | sed "s|\\.fasta\\.gz\$|\\.${params.fasta_ext}.gz|")
+    for file in mdmcleaner_output/*/*.fasta.gz; do
+        new_name=\$(echo "\$file" | sed "s|\\.fasta\\.gz\$|.${output_fasta_ext}|")
         mv "\$file" "\$new_name"
     done
 
-    mv mdmcleaner_output/*/*_filtered_kept_contigs.${params.fasta_ext}.gz .
+    mv mdmcleaner_output/*/*_filtered_kept_contigs.${output_fasta_ext} .
     """
 }
