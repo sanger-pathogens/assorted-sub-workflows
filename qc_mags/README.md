@@ -27,7 +27,7 @@ Several parameters set paths to various databases used by pipeline tools:
 
 Other parameters:
 
-- `--fasta_ext` (default: `fa`): Set the expected extension of fasta files in the input directories.
+- `--fasta_ext` (default: `.fa`): Set the expected extension of fasta files in the input directories.
 - `--report_config` (default: [`./assets/report_config.json`](./assets/report_config.json)). See [configuration](#configuration) for more details.
 
 ## Report configuration
