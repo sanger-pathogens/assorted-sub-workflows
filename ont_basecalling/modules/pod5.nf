@@ -19,7 +19,7 @@ process CONVERT_FAST5_TO_POD5 {
 
 process MERGE_POD5 {
     label 'cpu_1'
-    label 'mem_1'
+    label 'mem_8'
     label 'time_30m'
 
     container 'quay.io/sangerpathogens/pod5:0.3.6'
