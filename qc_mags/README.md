@@ -18,10 +18,6 @@ It runs the following steps on the assembly (`fasta` files):
 
 ### Parameters
 
-      --autoqc
-            default: False
-            Enable filtering MAGs (fasta) that pass QC thresholds/filters provided in the --autoqc_config
-
 Several parameters set paths to various databases used by pipeline tools:
 
 - `--checkm2_db` (default: `/data/pam/software/checkm2_db/uniref100.KO.1.dmnd`)
