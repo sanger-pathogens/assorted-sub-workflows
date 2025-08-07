@@ -7,6 +7,17 @@ include { MDMCLEANER                } from './modules/mdmcleaner.nf'
 include { SEQKIT                    } from './modules/seqkit.nf'
 include { REPORT                    } from './modules/reporting.nf'
 
+// Helper functions
+
+def ensureList(Object maybeListLike) {
+    if (maybeListLike instanceof Collection) {
+        return maybeListLike as List
+    } else {
+        return [maybeListLike]
+    }
+}
+
+// Workflows
 
 workflow QC_MAGS {
     take:
@@ -18,10 +29,10 @@ workflow QC_MAGS {
 
     fastas
     | MDMCLEANER
-    | map { meta, fasta_list ->
-        def size = fasta_list.collect().size()
+    | map { meta, fastas ->
+        def size = ensureList(fastas).size()
         def group_key = groupKey(meta, size)
-        [group_key, meta, fasta_list]
+        [group_key, meta, fastas]
     }
     | transpose
     | SEQKIT
