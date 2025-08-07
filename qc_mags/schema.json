@@ -2,6 +2,9 @@
   "pipeline": "qc_mags",
   "params": {
     "Database options": {
+      "header_1": {
+        "subtext": "These parameters set paths to various databases used by the qc_mags workflow"
+      },
       "checkm2_db": {
         "default": "/data/pam/software/checkm2_db/uniref100.KO.1.dmnd",
         "help_text": "Path to checkm2 diamond database file"
@@ -27,6 +30,14 @@
       "report_config": {
         "default": "./assorted-sub-workflows/qc_mags/assets/report_config.json",
         "help_text": "Configuration file (JSON) to customise summary report"
+      },
+      "autoqc": {
+        "default": "False",
+        "help_text": "Enable filtering MAGs (fasta) that pass QC thresholds/filters provided in the --autoqc_config"
+      },
+      "autoqc_config": {
+        "default": "./assorted-sub-workflows/qc_mags/assets/report_config.json",
+        "help_text": "Configuration file (TSV) to customise filtering of MAGs (fasta), based on metrics in summary report"
       }
     }
   }
