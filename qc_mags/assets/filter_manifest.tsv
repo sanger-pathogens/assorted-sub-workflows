@@ -1,0 +1,4 @@
+column	filter	datatype
+checkm2_postqc_Completeness	"checkm2_postqc_Completeness > 90"	float
+checkm2_postqc_Contamination	"checkm2_postqc_Contamination < 5"	float
+gunc_postqc_pass.GUNC	"`gunc_postqc_pass.GUNC` == True"	bool
