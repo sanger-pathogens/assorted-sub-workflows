@@ -56,13 +56,13 @@ workflow QC_MAGS {
     | combine(Channel.fromPath(params.report_config))
     | REPORT
 
-    if (params.filter_manifest) {
-        Path filter_manifest = file(params.filter_manifest, checkIfExists: true)
+    if (params.autoqc) {
+        Path autoqc_config = file(params.autoqc_config, checkIfExists: true)
         String fasta_ext = params.fasta_ext.replaceAll(/^\./, '')
 
         FILTER_REPORT(
             REPORT.out.report,
-            filter_manifest,
+            autoqc_config,
             "", // select all columns
             false,  // don't remove header
             "" // don't drop duplicates
