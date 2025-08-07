@@ -21,7 +21,7 @@
     },
     "Other options": {
       "fasta_ext": {
-        "default": ".fa",
+        "default": "fa",
         "help_text": "Rename fasta output files using the given extension"
       },
       "report_config": {
