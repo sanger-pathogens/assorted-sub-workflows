@@ -82,18 +82,5 @@ workflow QC_MAGS {
             FILTER_REPORT.out.filtered_metadata,
             "${params.outdir}/pass/report"
         )
-
-        // postqc_fastas
-        // | join(filtered_fasta_filenames)
-        // | map { meta, postqc_fastas_list, filtered_fasta_filenames_list -> 
-        //     def postqc_filtered_fastas_list = []
-        //     postqc_fastas_list.each { fasta -> 
-        //         if (filtered_fasta_filenames_list.contains(fasta.getBaseName())) {
-        //             postqc_filtered_fastas_list << fasta
-        //         }
-        //     }
-        //     [meta, postqc_filtered_fastas_list]
-        // }
-        // | set { filtered_postqc_fastas }
     }
 }
