@@ -64,10 +64,30 @@ It is also possible to automatically filter MAGs based on QC metrics produced in
 
 To apply this function, you must enable AutoQC by supplying a configuration file path to `--autoqc_config` (config as described [here](../mixed_input/README.md#filter_metadatapy)) or by supplying the string "default" so that the default [autoqc_config.tsv](./assets/autoqc_config.tsv) is used.
 
-The default config's AutoQC pass criteria are:
+The default AutoQC config's pass criteria are:
 - Over 90% Completeness
 - Under 5% Contamination
 - Passes GUNC contamination checks
+
+If writing a custom AutoQC config the filterable columns with the default report config are:
+- preqc_genome_name
+- postqc_genome_name
+- sample_or_strain_name
+- genome_status
+- checkm2_postqc_Completeness
+- checkm2_postqc_Contamination
+- checkm2_postqc_Genome_Size
+- checkm2_preqc_Completeness
+- checkm2_preqc_Contamination
+- checkm2_preqc_Genome_Size
+- gtdbtk_classification
+- gtdbtk_closest_genome_reference
+- gunc_postqc_n_contigs
+- gunc_postqc_pass.GUNC
+- gunc_preqc_n_contigs
+- gunc_preqc_pass.GUNC
+
+If using a custom report config you can customise your AutoQC config: for the column using the tool name (lowercase) and keep_column from the report config seperated by an underscore. i.e.  `<tool>_<keep_column>`.
 
 Please note - if you add the parameter `--autoqc_config` but do not supply either a valid config file path or "default" the pipeline will error on not being able to find a config file to use.
 
