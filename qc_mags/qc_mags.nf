@@ -56,8 +56,12 @@ workflow QC_MAGS {
     | combine(Channel.fromPath(params.report_config))
     | REPORT
 
-    if (params.autoqc) {
-        Path autoqc_config = file(params.autoqc_config, checkIfExists: true)
+    if (params.autoqc_config) {
+        // Check if user-supplied config or opted for default config
+        Path autoqc_config = params.autoqc_config == "default"
+            ? file("${projectDir}/assorted-sub-workflows/qc_mags/assets/autoqc_config.tsv", checkIfExists: true)
+            : file(params.autoqc_config, checkIfExists: true)
+
         String fasta_ext = params.fasta_ext.replaceAll(/^\./, '')
 
         FILTER_REPORT(

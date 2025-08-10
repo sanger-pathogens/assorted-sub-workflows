@@ -29,8 +29,7 @@ Other parameters:
 
 - `--fasta_ext` (default: `fa`): Set the expected extension of fasta files in the input directories.
 - `--report_config` (default: [`./assets/report_config.json`](./assets/report_config.json)). See [Report configuration](#report-configuration) for more details.
-- `--autoqc` (default: false) Enable filtering MAGs (fasta) that pass QC thresholds/filters provided in the --autoqc_config
-- `--autoqc_config` (default: `./assorted-sub-workflows/qc_mags/assets/report_config.json`) Configuration file (TSV) to customise filtering of MAGs (fasta), based on metrics in summary report. See [Autoqc configuration](#autoqc-configuration) for more details.
+- `--autoqc_config` (default: null) Optional parameter to filter MAGs that pass QC thresholds specified in the config. When applying this option you must either provide the path to a config or with the string "default" use the provided config at `./assorted-sub-workflows/qc_mags/assets/autoqc_config.json`. See [AutoQC configuration](#autoqc-configuration) for more details.
 
 ## Configuration
 
@@ -59,9 +58,18 @@ NOTE: In addition to columns derived from the tool reports, the script includes 
 | sample_or_strain_name | Name of the fasta file up to the last `_` character                                      |
 | genome_status         | `mag` if the fasta file contains the string `mag` (lower/uppercase), `isolate` otherwise |
 
-### Autoqc configuration
+### AutoQC configuration
 
-It is also possible to automatically filter MAGs based on QC metrics produced in the summary report described in [Report configuration](#report-configuration). To do this, you must enable autoqc with the `--autoqc` option and supply an configuration file to `--autoqc_config` as described [here](../mixed_input/README.md#filter_metadatapy). If you do not supply a configuration file, the default [autoqc_config.tsv](./assets/autoqc_config.tsv) will be used.
+It is also possible to automatically filter MAGs based on QC metrics produced in the summary report described in [Report configuration](#report-configuration).
+
+To apply this function, you must enable AutoQC by supplying a configuration file path to `--autoqc_config` (config as described [here](../mixed_input/README.md#filter_metadatapy)) or by supplying the string "default" so that the default [autoqc_config.tsv](./assets/autoqc_config.tsv) is used.
+
+The default config's AutoQC pass criteria are:
+- Over 90% Completeness
+- Under 5% Contamination
+- Passes GUNC contamination checks
+
+Please note - if you add the parameter `--autoqc_config` but do not supply either a valid config file path or "default" the pipeline will error on not being able to find a config file to use.
 
 ### Inputs
 
