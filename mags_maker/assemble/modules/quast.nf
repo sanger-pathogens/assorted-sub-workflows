@@ -19,7 +19,7 @@ process QUAST {
     report_path = "${output}/transposed_report.tsv"
     report_txt = "${output}/report.txt"
 
-    report_out = output_transposed ? report_path : report_txt
+    report_out = params.output_transposed ? report_path : report_txt
 
     """
     quast.py ${consensus} -o ${output} --no-html --no-plots
