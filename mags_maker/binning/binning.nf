@@ -104,9 +104,10 @@ workflow METABAT_WF {
 
     if (params.metabat1) {
             METABAT1(depth_file_and_contigs)
-              set { final_bins }
-        } else {
-        METABAT2(depth_file_and_contigs)
+            | set { final_bins }
+        } 
+    else {
+            METABAT2(depth_file_and_contigs)
             | set { final_bins }
         }
 
