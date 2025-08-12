@@ -54,7 +54,7 @@ NOTE: In addition to columns derived from the tool reports, the script includes 
 | column                | description                                                                              |
 | --------------------- | ---------------------------------------------------------------------------------------- |
 | preqc_genome_name     | Name of the input fasta file minus extension                                             |
-| post_genome_name      | Name of the fasta file output after processing with `seqkit` minus extension             |
+| postqc_genome_name    | Name of the fasta file output after processing with `seqkit` minus extension             |
 | sample_or_strain_name | Name of the fasta file up to the last `_` character                                      |
 | genome_status         | `mag` if the fasta file contains the string `mag` (lower/uppercase), `isolate` otherwise |
 
