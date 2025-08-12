@@ -33,7 +33,7 @@
       },
       "autoqc_config": {
         "default": "null",
-        "help_text": "Configuration file (TSV) to customise filtering of MAGs (fasta), based on metrics in summary report"
+        "help_text": "Optional parameter to filter MAGs that pass QC thresholds specified in the config. When applying this option you must either provide the path to a config or with the string 'default' use the provided config."
       }
     }
   }
