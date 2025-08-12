@@ -4,7 +4,7 @@ process FILTER_METADATA {
     label "mem_500M"
     label "time_30m"
 
-    container 'quay.io/sangerpathogens/pysam:0.0.2'
+    container 'quay.io/sangerpathogens/pandas:2.2.1'
 
     input:
     tuple val(meta), path(metadata_tsv)
@@ -17,12 +17,12 @@ process FILTER_METADATA {
     tuple val(meta), path(filtered_metadata), emit: filtered_metadata
 
     script:
-    filtered_metadata = "filtered_metadata.tsv"
+    filtered_metadata = "${metadata_tsv.getSimpleName()}_filtered.tsv"
     select_opt = select ? "--select ${select.join(' ')}" : ""
     remove_header_opt = remove_header ? "--remove_header" : ""
     drop_duplicates_opt = drop_duplicates_from ? "--drop_duplicates_from ${drop_duplicates_from.join(' ')}" : ""
 
-    filter_script = "${projectDir}/assorted-sub-workflows/combined_input/bin/filter_metadata.py"
+    filter_script = "${projectDir}/assorted-sub-workflows/mixed_input/bin/filter_metadata.py"
 
     """
     ${filter_script} \\
