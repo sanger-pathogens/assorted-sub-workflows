@@ -40,7 +40,7 @@ process MAXBIN2 {
     run_MaxBin.pl -contig ${assembly} \\
         -markerset ${params.maxbin_markers} \\
         -thread ${task.cpus} \\
-        -min_contig_length ${params.min_contig} \\
+        -min_contig_length ${params.maxbin2_min_contig} \\
 	    -out maxbin2/${meta.ID} \\
 	    -abund_list ${depth_dir}/mb2_abund_list.txt
 
