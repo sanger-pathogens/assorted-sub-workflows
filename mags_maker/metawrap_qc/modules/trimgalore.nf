@@ -18,7 +18,7 @@ process TRIMGALORE {
     """
     trim_galore --no_report_file --dont_gzip --paired ${first_read} ${second_read}
     # rename files
-    mv ${meta.ID}_1_val_1.fq ${meta.ID}_trimmed_1.fastq
-    mv ${meta.ID}_2_val_2.fq ${meta.ID}_trimmed_2.fastq
+    mv ${first_read.simpleName}_val_1.fq ${meta.ID}_trimmed_1.fastq
+    mv ${second_read.simpleName}_val_2.fq ${meta.ID}_trimmed_2.fastq
     """
 }
