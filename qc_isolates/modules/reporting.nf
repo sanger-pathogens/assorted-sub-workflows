@@ -19,8 +19,8 @@ process REPORT {
     final_report = "${meta.ID}_final_report.tsv"
     """
     ${command} \\
-        --checkm2 pre_checkm2_report.tsv \\
-        --gunc pre_gunc_report.tsv \\
+        --checkm2 checkm2_report.tsv \\
+        --gunc gunc_report.tsv \\
         --gtdbtk gtdbtk_report.tsv \\
         --config ${report_config} \\
         --output ${final_report}
