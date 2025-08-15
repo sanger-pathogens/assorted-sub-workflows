@@ -7,7 +7,8 @@
             },
             "concot_min_contig": {
                 "default": "1000",
-                "help_text": "Minimum threshold for contig size (kb)."
+                "help_text": "Minimum threshold for contig size (bp)."
+```
             },
             "maxbin2_min_contig": {
                 "default": "1000",
