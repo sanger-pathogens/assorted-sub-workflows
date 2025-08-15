@@ -59,7 +59,7 @@ process CONCOCT {
     script:
     depth_file = "${meta.ID}_depth.txt"
     """
-    concoct -l ${params.min_contig} \\
+    concoct -l ${params.concoct_min_contig} \\
             -t ${task.cpus} \\
 		    --coverage_file ${depths} \\
 		    --composition_file ${split_fasta} \\
@@ -83,9 +83,9 @@ process CUTUP_CLUSTERING {
     tuple val(meta), path(merged_csv), emit: concoct
 
     script:
-    merged_csv = "clustering_gt${params.min_contig}_merged.csv"
+    merged_csv = "clustering_gt${params.concoct_min_contig}_merged.csv"
     """
-    merge_cutup_clustering.py ${meta.ID}_concoct_clustering_gt${params.min_contig}.csv > ${merged_csv}
+    merge_cutup_clustering.py ${meta.ID}_concoct_clustering_gt${params.concoct_min_contig}.csv > ${merged_csv}
     """
 }
 

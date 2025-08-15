@@ -57,7 +57,7 @@ process METABAT1 {
     metabat1 -i ${assembly} \\
         -a ${depth_text} \\
         -o ${meta.ID}_bin \\
-        -m ${params.min_contig} \\
+        -m ${params.metabat_min_contig} \\
         -t ${task.cpus} \\
         --unbinned \\
         --seed ${params.bin_seed}
@@ -82,7 +82,7 @@ process METABAT2 {
     metabat2 -i ${assembly} \\
         -a ${depth_text} \\
         -o metabat/${meta.ID}_bin \\
-        -m ${params.min_contig} \\
+        -m ${params.metabat_min_contig} \\
         -t ${task.cpus} \\
         --unbinned \\
         --seed ${params.bin_seed}
