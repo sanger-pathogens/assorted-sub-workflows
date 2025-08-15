@@ -16,6 +16,17 @@ process SPADES_REASSEMBLE {
     def contigs = "reassembled/contigs.fasta"
     final_name = "${meta.ID}_bin_${fullBinInfo.bin}_${fullBinInfo.level}.fasta"
     """
+    # This is done because if the sra-lite format there is no quality information so --phred-offset needs to be set
+    # Determine phred flag
+
+    if [[ "${params.lock_phred}" == "true" ]]; then
+        phred_flag="--phred-offset 33"
+    elif grep -q '?' <(zcat "${first_read}" | head -n 75); then
+        phred_flag="--phred-offset 33"
+    else
+        phred_flag=""
+    fi
+
     spades.py \\
             --tmp-dir tmp \\
             -t ${task.cpus} \\
@@ -25,7 +36,7 @@ process SPADES_REASSEMBLE {
             -o reassembled \\
             -1 ${first_read} \\
             -2 ${second_read} \\
-            ${params.lock_phred ? "--phred-offset 33" : ""}
+            \${phred_flag}
 
     mv ${contigs} ${final_name}
     """
