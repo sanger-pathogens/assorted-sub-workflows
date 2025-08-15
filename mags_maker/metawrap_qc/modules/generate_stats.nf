@@ -7,7 +7,7 @@ process GENERATE_STATS {
     container 'quay.io/sangerpathogens/metawrap_qc_python:1.0'
 
     input:
-    tuple val(meta), path(trimmed_read_1), path(trimmed_read_2), path(clean_read_1), path(clean_read_2), path(host_read_1), path(host_read_2), path(original_read_1), path(original_read_2)
+    tuple val(meta), path("trimmed_read_1.fq"), path("trimmed_read_2.fq"), path("clean_read_1.fq.gz"), path("clean_read_2.fq.gz"), path("host_read_1.fq.gz"), path("host_read_2.fq.gz"), path("original_read_1.fq.gz"), path("original_read_2.fq.gz")
 
     output:
     path(stats_file), emit: stats_ch
@@ -16,14 +16,14 @@ process GENERATE_STATS {
     stats_file="${meta.ID}_stats.csv"
     """
     # get read numbers (bash quickest way)
-    trimmed_1_reads=\$((`cat $trimmed_read_1 | wc -l` / 4))
-    trimmed_2_reads=\$((`cat $trimmed_read_2 | wc -l` / 4))
-    clean_1_reads=\$((`zcat $clean_read_1 | wc -l` / 4))
-    clean_2_reads=\$((`zcat $clean_read_2 | wc -l` / 4))
-    host_1_reads=\$((`zcat $host_read_1 | wc -l` / 4))
-    host_2_reads=\$((`zcat $host_read_2 | wc -l` / 4))
-    original_1_reads=\$((`zcat $original_read_1 | wc -l` / 4))
-    original_2_reads=\$((`zcat $original_read_2 | wc -l` / 4))
+    trimmed_1_reads=\$((`cat trimmed_read_1.fq | wc -l` / 4))
+    trimmed_2_reads=\$((`cat trimmed_read_2.fq | wc -l` / 4))
+    clean_1_reads=\$((`zcat clean_read_1.fq.gz | wc -l` / 4))
+    clean_2_reads=\$((`zcat clean_read_2.fq.gz | wc -l` / 4))
+    host_1_reads=\$((`zcat host_read_1.fq.gz | wc -l` / 4))
+    host_2_reads=\$((`zcat host_read_2.fq.gz | wc -l` / 4))
+    original_1_reads=\$((`zcat original_read_1.fq.gz | wc -l` / 4))
+    original_2_reads=\$((`zcat original_read_2.fq.gz | wc -l` / 4))
     trimmed_reads_total=\$((\${trimmed_1_reads} + \${trimmed_2_reads}))
     clean_reads_total=\$((\${clean_1_reads} + \${clean_2_reads}))
     host_reads_total=\$((\${host_1_reads} + \${host_2_reads}))
