@@ -11,15 +11,15 @@ process REMOVE_SMALL_CONTIGS {
 
     output:
     tuple val(meta), path(long_scaffolds), emit: long_contigs
+    path("rm_short_contigs.err"), emit: contig_warnings
 
     script:
     command = "${projectDir}/assorted-sub-workflows/mags_maker/assemble/bin/rm_short_contigs.py"
     long_scaffolds = "${meta.ID}_long.scaffolds"
     """
-    ${command} ${params.min_contig} ${contigs} > ${long_scaffolds}
+    ${command} ${params.min_contig} ${contigs} > ${long_scaffolds} 2> rm_short_contigs.err
     """
 }
-
 
 process FIX_MEGAHIT_CONTIG_NAMING {
     tag "${meta.ID}"
@@ -39,7 +39,18 @@ process FIX_MEGAHIT_CONTIG_NAMING {
     command = "${projectDir}/assorted-sub-workflows/mags_maker/assemble/bin/fix_megahit_contig_naming.py"
     long_scaffolds = "${meta.ID}_long.scaffolds"
     """
-    ${command} ${params.min_contig} ${contigs} > ${long_scaffolds}
+    ${command} ${params.min_contig} ${contigs} > ${long_scaffolds} 2> sort_contigs.err
+    status=\${?}
+
+    if [ \$status -gt 0 ]; then
+        echo "[ERROR] sort_contigs.py failed with exit code \$status" >&2
+        cat sort_contigs.err >&2
+        exit \$status
+    else
+        # Warnings only
+        grep -i 'Warning' sort_contigs.err >&2 || true
+    fi
+
     """
 }
 
