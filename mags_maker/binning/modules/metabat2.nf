@@ -62,19 +62,6 @@ process METABAT1 {
         --unbinned \\
         --seed ${params.bin_seed}
 
-    #move stuff out of the bin that isn't to use
-    ## top 3 files are added in later version, we touch the files to avoid a crash 
-
-    #Creating a directory to place these unneeded files, can be published later if users want and the version updates
-    mkdir metabat1_misc
-
-    touch metabat/${meta.ID}_depth.txt
-    mv metabat/${meta.ID}_depth.txt metabat1_misc
-
-    #Touch the files to avoid an error where no unbinned.fa file is made
-    touch metabat/${meta.ID}_bin.unbinned.fa
-    mv metabat/${meta.ID}_bin.unbinned.fa .
-
     # rename remaining fasta rather than fa
     for file in metabat/*.fa; do
         mv "\$file" "\${file%.fa}.fasta"
