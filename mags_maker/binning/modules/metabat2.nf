@@ -63,8 +63,8 @@ process METABAT1 {
         --seed ${params.bin_seed}
 
     # rename remaining fasta rather than fa
-    for file in metabat/*.fa; do
-        mv "\$file" "\${file%.fa}.fasta"
+    for filefa in metabat/*.fa; do
+        mv "\$filefa" "\${filefa%.fa}.fasta"
     done
 
     """
@@ -113,8 +113,8 @@ process METABAT2 {
     mv metabat/${meta.ID}_bin.unbinned.fa .
 
     # rename remaining fasta rather than fa
-    for file in metabat/*.fa; do
-        mv "\$file" "\${file%.fa}.fasta"
+    for filefa in metabat/*.fa; do
+        mv "\$filefa" "\${filefa%.fa}.fasta"
     done
     """
 }
