@@ -50,17 +50,23 @@ process METABAT1 {
     tuple val(meta), path(depth_text), path(assembly)
 
     output:
-    tuple val(meta), path("${meta.ID}_bin"),  emit: depth
+    tuple val(meta), path("metabat/"),  emit: depth
 
     script:
     """
     metabat1 -i ${assembly} \\
         -a ${depth_text} \\
-        -o ${meta.ID}_bin \\
+        -o metabat/${meta.ID}_bin \\
         -m ${params.metabat_min_contig} \\
         -t ${task.cpus} \\
         --unbinned \\
         --seed ${params.bin_seed}
+
+    # rename remaining fasta rather than fa
+    for filefa in metabat/*.fa; do
+        mv "\$filefa" "\${filefa%.fa}.fasta"
+    done
+
     """
 }
 
@@ -107,8 +113,8 @@ process METABAT2 {
     mv metabat/${meta.ID}_bin.unbinned.fa .
 
     # rename remaining fasta rather than fa
-    for file in metabat/*.fa; do
-        mv "\$file" "\${file%.fa}.fasta"
+    for filefa in metabat/*.fa; do
+        mv "\$filefa" "\${filefa%.fa}.fasta"
     done
     """
 }
