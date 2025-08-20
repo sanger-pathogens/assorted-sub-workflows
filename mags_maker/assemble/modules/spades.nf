@@ -37,5 +37,13 @@ metaspades.py ${params.fastspades ? "--only-assembler" : ""} \\
         \${phred_flag}
 
 mv ${contigs} ${meta.ID}_contigs.fasta
+
+status=\${?}
+if [[ \$status -eq 12 ]]; then
+    exit 130  # remap exit 12 to 130 for Nextflow to enable retry strategy
+else
+    exit \$status
+fi
+
 """
 }

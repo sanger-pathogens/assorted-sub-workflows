@@ -39,5 +39,13 @@ process SPADES_REASSEMBLE {
             \${phred_flag}
 
     mv ${contigs} ${final_name}
+
+    status=\${?}
+    if [[ \$status -eq 12 ]]; then
+        exit 130  # remap exit 12 to 130 for Nextflow to enable retry strategy
+    else
+        exit \$status
+    fi
+    
     """
 }
