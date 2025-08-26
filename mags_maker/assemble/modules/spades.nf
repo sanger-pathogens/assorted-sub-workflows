@@ -10,10 +10,10 @@ process METASPADES {
     tuple val(meta), path(first_read), path(second_read)
 
     output:
-    tuple val(meta), path("${meta.ID}_contigs.fasta"), emit: contigs
+    tuple val(meta), path("${meta.ID}_scaffolds.fasta"), emit: contigs
 
 script:
-def contigs = "metaspades/contigs.fasta"
+def contigs = "metaspades/scaffolds.fasta"
 
 """
 # This is done because if the sra-lite format there is no quality information so --phred-offset needs to be set

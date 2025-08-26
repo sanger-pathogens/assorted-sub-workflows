@@ -13,7 +13,7 @@ process SPADES_REASSEMBLE {
     tuple val(meta), path(final_name), emit: contigs
 
     script:
-    def contigs = "reassembled/contigs.fasta"
+    def contigs = "reassembled/scaffolds.fasta"
     final_name = "${meta.ID}_bin_${fullBinInfo.bin}_${fullBinInfo.level}.fasta"
     """
     # This is done because if the sra-lite format there is no quality information so --phred-offset needs to be set
