@@ -39,15 +39,7 @@ workflow METAWRAP_ASSEMBLE {
     if (params.metaspades) {
         METASPADES(reads_ch)
         | REMOVE_SMALL_CONTIGS
-        REMOVE_SMALL_CONTIGS.out.long_contigs.set { metaspades_contigs }
-
-        REMOVE_SMALL_CONTIGS.out.contig_warnings.subscribe { file ->
-            if (file.exists()) {
-                file.readLines().each { line ->
-                    log.info "[REMOVE_SMALL_CONTIGS] $line"
-                }
-            }
-        }
+        | set { metaspades_contigs }
 
         if (params.megahit) {
             BWA_INDEX(metaspades_contigs)
