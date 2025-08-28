@@ -39,7 +39,7 @@ workflow METAWRAP_ASSEMBLE {
     if (params.metaspades) {
         METASPADES(reads_ch)
         | REMOVE_SMALL_CONTIGS
-        REMOVE_SMALL_CONTIGS.out.long_contigs.set { metaspades_contigs }
+        REMOVE_SMALL_CONTIGS.out.long_contigs.set { metaspades_scaffolds }
 
         REMOVE_SMALL_CONTIGS.out.warning_log.subscribe { file ->
             if (file.exists()) {
@@ -50,10 +50,10 @@ workflow METAWRAP_ASSEMBLE {
         }
 
         if (params.megahit) {
-            BWA_INDEX(metaspades_contigs)
-            | set { indexed_contigs }
+            BWA_INDEX(metaspades_scaffolds)
+            | set { indexed_scaffolds }
 
-            reads_ch.join(indexed_contigs)
+            reads_ch.join(indexed_scaffolds)
             | BWA
             | SAM_TO_FASTQ
             | set { final_reads_ch }
@@ -70,12 +70,12 @@ workflow METAWRAP_ASSEMBLE {
     }
 
     if (params.metaspades && params.megahit) {
-        metaspades_contigs.join(megahit_contigs)
+        metaspades_scaffolds.join(megahit_contigs)
         | map { meta, contig1, contig2 -> tuple(meta, [contig1, contig2])}
         | set { final_contigs }
         
     } else if (params.metaspades) {
-        metaspades_contigs
+        metaspades_scaffolds
         | set { final_contigs }
 
     } else if (params.megahit) {

@@ -27,8 +27,7 @@ except IOError as ex:
     print(f"{ex.args[0]}", file=sys.stderr)
     sys.exit(1)
 except Exception as ex:
-    print(f"Unexpected error: {ex.args[0]}", file=sys.stderr)
-    sys.exit(1)
+    print(f"Unexpected error: {ex.args[0]}")
 
 
 min_len = int(sys.argv[1])
