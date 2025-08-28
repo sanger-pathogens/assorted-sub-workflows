@@ -11,15 +11,15 @@ process REMOVE_SMALL_CONTIGS {
 
     output:
     tuple val(meta), path(long_scaffolds), emit: long_contigs
+    path('remove_small_contigs.err'), emit: warning_log
 
     script:
     command = "${projectDir}/assorted-sub-workflows/mags_maker/assemble/bin/rm_short_contigs.py"
     long_scaffolds = "${meta.ID}_long.scaffolds"
     """
-    ${command} ${params.min_contig} ${contigs} > ${long_scaffolds}
+    ${command} ${params.min_contig} ${contigs} > ${long_scaffolds} 2> >(grep "Warning:" > remove_small_contigs.err)
     """
 }
-
 
 process FIX_MEGAHIT_CONTIG_NAMING {
     tag "${meta.ID}"
