@@ -5,9 +5,11 @@ try:
     if len(sys.argv) != 3:
         raise IOError(f"Usage: {sys.argv[0]} <min_len> <filename>\nNumber of args expected {2} given {len(sys.argv)-1}")
 except IOError as ex: 
-    exit(f"{ex.args[0]}")
+    print(f"{ex.args[0]}", file=sys.stderr)
+    sys.exit(1)
 except Exception as ex:
-    print(f"Unexpected error: {ex.args[0]}")
+    print(f"Unexpected error: {ex.args[0]}", file=sys.stderr)
+    sys.exit(1)
 
 
 min_len = int(sys.argv[1])
@@ -22,7 +24,7 @@ with open(filename) as f:
             try:
                 value = int(line.split("_")[3])
             except (IndexError, ValueError):
-                print(f"Warning: Couldn't parse integer from line: {line.strip()}", file=sys.stderr)
+                print(f"Warning: Couldn't parse integer from line: {line.strip()}")
                 continue
 
             if value < min_len:
@@ -33,4 +35,4 @@ with open(filename) as f:
 
 if not contigs_found:
     print(f"Warning: No contigs found longer than {min_len} in {filename}", file=sys.stderr)
-    exit(1)  # Indicate that no valid contigs were found
+    #sys.exit(1)  # Indicate that no valid contigs were found
