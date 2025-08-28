@@ -41,7 +41,7 @@ workflow METAWRAP_ASSEMBLE {
         | REMOVE_SMALL_CONTIGS
         REMOVE_SMALL_CONTIGS.out.long_contigs.set { metaspades_contigs }
 
-        REMOVE_SMALL_CONTIGS.out.contig_warnings.subscribe { file ->
+        REMOVE_SMALL_CONTIGS.out.warning_log.subscribe { file ->
             if (file.exists()) {
                 file.readLines().each { line ->
                     log.info "[REMOVE_SMALL_CONTIGS] $line"
