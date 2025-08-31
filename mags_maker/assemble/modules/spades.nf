@@ -37,5 +37,15 @@ metaspades.py ${params.fastspades ? "--only-assembler" : ""} \\
         \${phred_flag}
 
 mv ${scaffolds} ${meta.ID}_scaffolds.fasta
+
+status=\${?}
+if [ \${status} -gt 0 ] ; then
+    # remap exit 12 memory error to 130 to enable retry strategy
+    grep 'Cannot allocate memory. Error code: 12' spades.log 
+    exit 130
+else
+    exit \$status
+fi
+
 """
 }
