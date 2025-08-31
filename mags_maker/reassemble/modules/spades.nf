@@ -12,10 +12,10 @@ process SPADES_REASSEMBLE {
     tuple val(meta), val(fullBinInfo), path(bin), path(first_read), path(second_read)
 
     output:
-    tuple val(meta), path(final_name), emit: contigs
+    tuple val(meta), path(final_name), emit: scaffolds
 
     script:
-    def contigs = "reassembled/contigs.fasta"
+    def scaffolds = "reassembled/scaffolds.fasta"
     final_name = "${meta.ID}_bin_${fullBinInfo.bin}_${fullBinInfo.level}.fasta"
 
     """
@@ -41,7 +41,6 @@ process SPADES_REASSEMBLE {
             -2 ${second_read} \\
             \${phred_flag}
 
-    mv ${contigs} ${final_name}
-
+    mv ${scaffolds} ${final_name}
     """
 }

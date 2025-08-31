@@ -12,10 +12,10 @@ process METASPADES {
     tuple val(meta), path(first_read), path(second_read)
 
     output:
-    tuple val(meta), path("${meta.ID}_contigs.fasta"), emit: contigs
+    tuple val(meta), path("${meta.ID}_scaffolds.fasta"), emit: scaffolds
 
 script:
-def contigs = "metaspades/contigs.fasta"
+def scaffolds = "metaspades/scaffolds.fasta"
 
 """
 # This is done because if the sra-lite format there is no quality information so --phred-offset needs to be set
@@ -38,7 +38,6 @@ metaspades.py ${params.fastspades ? "--only-assembler" : ""} \\
         -2 ${second_read} \\
         \${phred_flag}
 
-mv ${contigs} ${meta.ID}_contigs.fasta
-
+mv ${scaffolds} ${meta.ID}_scaffolds.fasta
 """
 }
