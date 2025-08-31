@@ -6,6 +6,8 @@ process METASPADES {
 
     container 'quay.io/biocontainers/spades:3.15.5--h95f258a_1'
 
+    errorStrategy { task.exitStatus in [9,12,130,140] ? 'retry' : 'terminate' }
+
     input:
     tuple val(meta), path(first_read), path(second_read)
 
@@ -37,5 +39,6 @@ metaspades.py ${params.fastspades ? "--only-assembler" : ""} \\
         \${phred_flag}
 
 mv ${contigs} ${meta.ID}_contigs.fasta
+
 """
 }

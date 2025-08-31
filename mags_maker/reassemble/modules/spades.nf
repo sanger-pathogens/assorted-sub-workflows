@@ -6,6 +6,8 @@ process SPADES_REASSEMBLE {
 
     container 'quay.io/biocontainers/spades:3.15.5--h95f258a_1'
 
+    errorStrategy { task.exitStatus in [9,12,130,140] ? 'retry' : 'terminate' }
+
     input:
     tuple val(meta), val(fullBinInfo), path(bin), path(first_read), path(second_read)
 
@@ -15,6 +17,7 @@ process SPADES_REASSEMBLE {
     script:
     def contigs = "reassembled/contigs.fasta"
     final_name = "${meta.ID}_bin_${fullBinInfo.bin}_${fullBinInfo.level}.fasta"
+
     """
     # This is done because if the sra-lite format there is no quality information so --phred-offset needs to be set
     # Determine phred flag
@@ -39,5 +42,6 @@ process SPADES_REASSEMBLE {
             \${phred_flag}
 
     mv ${contigs} ${final_name}
+
     """
 }
