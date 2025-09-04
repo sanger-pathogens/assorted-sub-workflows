@@ -15,12 +15,12 @@ process SAM_TO_FASTQ {
     read1 = "${meta.ID}_1.fastq"
     read2 = "${meta.ID}_2.fastq"
 
-    //-f 12 = both reads unmapped
-    //-F 256 no secondary alignments
+    //-f 4 = read unmapped
+    //--rf 192 = read is either first in pair or mate in pair
     """
     samtools view -b \\
-        -f 12 \\
-        -F 256 \\
+        -f 4 \\
+        --rf 192 \\
         -@ ${task.cpus} \\
         ${sam} | \\
     samtools fastq -N \\
