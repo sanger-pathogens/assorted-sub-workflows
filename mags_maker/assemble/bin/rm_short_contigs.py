@@ -49,7 +49,6 @@ with open(filename) as f:
                 break
             else:
                 print(line.strip())
-                print("working")
                 contigs_found = True
 
 if not contigs_found:

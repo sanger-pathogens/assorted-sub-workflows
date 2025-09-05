@@ -41,14 +41,6 @@ workflow METAWRAP_ASSEMBLE {
         | REMOVE_SMALL_CONTIGS
         REMOVE_SMALL_CONTIGS.out.long_contigs.set { metaspades_scaffolds }
 
-        REMOVE_SMALL_CONTIGS.out.warning_log.subscribe { file ->
-            if (file.exists()) {
-                file.readLines().each { line ->
-                    log.info "[REMOVE_SMALL_CONTIGS] $line"
-                }
-            }
-        }
-
         if (params.megahit) {
             BWA_INDEX(metaspades_scaffolds)
             | set { indexed_scaffolds }

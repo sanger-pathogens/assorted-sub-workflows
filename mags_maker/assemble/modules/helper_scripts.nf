@@ -11,13 +11,21 @@ process REMOVE_SMALL_CONTIGS {
 
     output:
     tuple val(meta), path(long_scaffolds), emit: long_contigs
-    path('remove_small_contigs.err'), emit: warning_log
 
     script:
     command = "${projectDir}/assorted-sub-workflows/mags_maker/assemble/bin/rm_short_contigs.py"
     long_scaffolds = "${meta.ID}_long.scaffolds"
+    
     """
     ${command} ${params.min_contig} ${contigs} > ${long_scaffolds} 2> >(grep "Warning:" > remove_small_contigs.err)
+
+    # Exit 166 if there are any warnings where no valid contigs were found, else exit 0
+    
+    if grep -q "Warning: No contigs found longer" remove_small_contigs.err; then
+        exit 166
+    else
+        exit 0
+    fi
     """
 }
 
