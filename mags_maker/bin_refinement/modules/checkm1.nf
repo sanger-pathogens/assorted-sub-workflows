@@ -6,7 +6,7 @@ process CHECKM {
 
     container 'quay.io/biocontainers/checkm-genome:1.2.4--pyhdfd78af_0'
 
-    publishDir mode: 'copy', path: "${params.outdir}/checkm2/", pattern: "${meta.ID}_${bin_name}_checkm2_report.tsv"
+    publishDir mode: 'copy', path: "${params.outdir}/${meta.ID}/checkm1/", pattern: "${meta.ID}_${bin_name}_checkm1_report.tsv"
 
     input:
     tuple val(meta), val(bin_name), path(fastas)
