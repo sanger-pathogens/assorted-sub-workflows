@@ -41,10 +41,6 @@ process PIPELINE_EVENTS_OPEN_BATCH {
 
     script:
     """
-    PIPELINE_EVENTS_DATABASE_HOSTS=<host1:port,host2:port etc>
-    PIPELINE_EVENTS_DATABASE_USER=<the relevant INSERT ONLY username>
-    PIPELINE_EVENTS_DATABASE_PASSWORD=<the relevant INSERT ONLY user ENCRYPTED password>
-    PIPELINE_EVENTS_DATABASE_DBNAME=<the relevant pipeline evenbts database name>
     batchuuid=\$(uuidgen -r)
     send_pipeline_event open --batch_id \${batchuuid} --pipeline_name ${methodname} --pipeline_url ${method_url}
     """
