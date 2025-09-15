@@ -329,21 +329,21 @@ def merge_bins(args) -> None:
             stats_file=stats_file,
             good_bins=good_bins
         )
-    #load the data
-    try:
-        dataset.load_contig_data()
-    except IOError as e:
-        logging.error(f"Failed to load contig data: {e}")
-        sys.exit(1) 
+        #load the data
+        try:
+            dataset.load_contig_data()
+        except IOError as e:
+            logging.error(f"Failed to load contig data: {e}")
+            sys.exit(1) 
 
-    try:
-        dataset.load_stats_data()
-    except IOError as e:
-        logging.error(f"Failed to load stats data: {e}")
-        sys.exit(1)  
-    
-    datasets.append(dataset)
-    all_discard_stats.append(discard_stats)
+        try:
+            dataset.load_stats_data()
+        except IOError as e:
+            logging.error(f"Failed to load stats data: {e}")
+            sys.exit(1)  
+        
+        datasets.append(dataset)
+        all_discard_stats.append(discard_stats)
     
     total_discarded = sum(stats['discarded'] for stats in all_discard_stats)
     total_bins = sum(stats['total'] for stats in all_discard_stats)
