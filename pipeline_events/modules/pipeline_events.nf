@@ -23,6 +23,9 @@ process PIPELINE_GET_METHOD {
     methodshort = (pipelineurl as Path).getSimpleName
     methodurl = workflow.manifest.version == "{{${methodshort}_version}}" ? "${pipelineurl}" : "${pipelineurl}/-/tree/${workflow.manifest.version}"
     methodname = workflow.manifest.name
+    """
+    echo "method url: $methodurl; method name: $methodname, method short name: $methodshort"
+    """
 }
 
 
