@@ -20,7 +20,7 @@ process PIPELINE_GET_METHOD {
     // but version field is only populated with real value when running code deployed on farm
     // when running piepline code straight from repo, version field still has template value so taking hard coded value instead
     pipelineurl = workflow.manifest.homePage
-    methodshort = (pipelineurl as Path).getSimpleName
+    methodshort = (pipelineurl as Path).getSimpleName()
     methodurl = workflow.manifest.version == "{{${methodshort}_version}}" ? "${pipelineurl}" : "${pipelineurl}/-/tree/${workflow.manifest.version}"
     methodname = workflow.manifest.name
     """
