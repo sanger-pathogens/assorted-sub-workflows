@@ -9,11 +9,11 @@ process SAM_TO_FASTQ {
     tuple val(meta), path(sam)
 
     output:
-    tuple val(meta), path("${read1}.gz"), path("${read2}.gz"), emit: fastq_ch
+    tuple val(meta), path("${reads}.gz"), emit: fastq_ch
 
     script:
-    read1 = "${meta.ID}_1.fastq"
-    read2 = "${meta.ID}_2.fastq"
+    reads = "${meta.ID}.fastq"
+
 
     //-f 4 = read unmapped
     //--rf 192 = read is either first in pair or mate in pair
@@ -24,11 +24,10 @@ process SAM_TO_FASTQ {
         -@ ${task.cpus} \\
         ${sam} | \\
     samtools fastq -N \\
-        -1 ${read1} \\
-        -2 ${read2} \\
+        -o ${reads} \\
         -@ ${task.cpus} \\
         -
 
-    gzip ${read1} ${read2}
+    gzip ${reads}
     """
 }

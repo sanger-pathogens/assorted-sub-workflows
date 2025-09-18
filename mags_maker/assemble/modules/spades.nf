@@ -1,6 +1,6 @@
 process METASPADES {
     tag "${meta.ID}"
-    label 'cpu_8'
+    label 'cpu_1'
     label 'mem_32'
     label 'time_12'
 
