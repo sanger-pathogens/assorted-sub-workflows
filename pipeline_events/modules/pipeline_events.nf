@@ -34,7 +34,9 @@ process PIPELINE_EVENTS_OPEN_BATCH {
     label 'mem_1'
     label 'time_from_queue_small'
 
-    container 'gitlab-registry.internal.sanger.ac.uk/sanger-pathogens/pipeline-event-api/pipeline-event-api:v1.0.0'
+    container 'gitlab-registry.internal.sanger.ac.uk/sanger-pathogens/pipeline-event-api/pipeline-event-api:v1.0.1'
+
+    shell
 
     input:
     val(method_url)
@@ -55,7 +57,7 @@ process PIPELINE_EVENTS_CLOSE_BATCH {
     label 'mem_1'
     label 'time_from_queue_small'
 
-    container 'gitlab-registry.internal.sanger.ac.uk/sanger-pathogens/pipeline-event-api/pipeline-event-api:v1.0.0'
+    container 'gitlab-registry.internal.sanger.ac.uk/sanger-pathogens/pipeline-event-api/pipeline-event-api:v1.0.1'
 
     // no input as really we only need to query this once per run based on pipeline own info
     //input:
@@ -76,7 +78,7 @@ process PIPELINE_EVENTS_CREATE_FILE {
     label 'mem_1'
     label 'time_from_queue_small'
 
-    container 'gitlab-registry.internal.sanger.ac.uk/sanger-pathogens/pipeline-event-api/pipeline-event-api:v1.0.0'
+    container 'gitlab-registry.internal.sanger.ac.uk/sanger-pathogens/pipeline-event-api/pipeline-event-api:v1.0.1'
 
     input:
     tuple val(meta), path(resultfile)
