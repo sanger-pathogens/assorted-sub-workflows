@@ -36,8 +36,6 @@ process PIPELINE_EVENTS_OPEN_BATCH {
 
     container 'gitlab-registry.internal.sanger.ac.uk/sanger-pathogens/pipeline-event-api/pipeline-event-api:v1.0.1'
 
-    shell
-
     input:
     val(method_url)
     val(methodname)
@@ -46,8 +44,9 @@ process PIPELINE_EVENTS_OPEN_BATCH {
     env(batchuuid),  emit: batch_uuid
 
     script:
+    batchuuid = UUID.randomUUID().toString()
     """
-    batchuuid=\$(uuidgen -r)
+    #batchuuid=\$(uuidgen -r)
     send_pipeline_event open --batch_id \${batchuuid} --pipeline_name ${methodname} --pipeline_url ${method_url}
     """
 }
