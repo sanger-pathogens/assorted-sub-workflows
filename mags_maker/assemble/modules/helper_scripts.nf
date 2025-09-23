@@ -17,7 +17,8 @@ process REMOVE_SMALL_CONTIGS {
     command = "${projectDir}/assorted-sub-workflows/mags_maker/assemble/bin/rm_short_contigs.py"
     long_scaffolds = "${meta.ID}_long.scaffolds"
     """
-    ${command} ${params.min_contig} ${contigs} > ${long_scaffolds} 2> >(grep "Warning:" > remove_small_contigs.err)
+    min_contig_length=$(echo -e "${params.maxbin2_min_contig}\n${params.concoct_min_contig}\n${params.metabat_min_contig}" | sort | head -n 1)
+    ${command} ${params.min_contig_length} ${contigs} > ${long_scaffolds} 2> >(grep "Warning:" > remove_small_contigs.err)
     """
 }
 
@@ -39,7 +40,8 @@ process FIX_MEGAHIT_CONTIG_NAMING {
     command = "${projectDir}/assorted-sub-workflows/mags_maker/assemble/bin/fix_megahit_contig_naming.py"
     long_scaffolds = "${meta.ID}_long.scaffolds"
     """
-    ${command} ${params.min_contig} ${contigs} > ${long_scaffolds}
+    min_contig_length=$(echo -e "${params.maxbin2_min_contig}\n${params.concoct_min_contig}\n${params.metabat_min_contig}" | sort | head -n 1)
+    ${command} ${params.min_contig_length} ${contigs} > ${long_scaffolds}
     """
 }
 
