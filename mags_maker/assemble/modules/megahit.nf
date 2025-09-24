@@ -1,6 +1,6 @@
 process MEGAHIT {
     tag "${meta.ID}"
-    label 'cpu_1'
+    label params.megahit_deterministic ? 'cpu_1' : 'cpu_8'
     label 'mem_8'
     label 'time_12'
 
