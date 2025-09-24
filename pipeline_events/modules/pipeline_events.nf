@@ -11,9 +11,9 @@ process PIPELINE_GET_METHOD {
     //val(pipeline_manifest) // map
 
     output:
-    env(methodurl),  emit: method_url
-    env(methodname), emit: method_name // might not match what we've decided to put in Shelf, but good way to provide consistent value or auto-populate
-    env(methodshort), emit: method_short // same as above, might be used as a convenient label for searches
+    val(methodurl),  emit: method_url
+    val(methodname), emit: method_name // might not match what we've decided to put in Shelf, but good way to provide consistent value or auto-populate
+    val(methodshort), emit: method_short // same as above, might be used as a convenient label for searches
 
     script:
     // relying on manifest scope from main config file 
@@ -41,7 +41,7 @@ process PIPELINE_EVENTS_OPEN_BATCH {
     val(methodname)
     val(methodshort)
     output:
-    env(batchuuid),  emit: batch_uuid
+    val(batchuuid),  emit: batch_uuid
 
     script:
     batchuuid = UUID.randomUUID().toString()
