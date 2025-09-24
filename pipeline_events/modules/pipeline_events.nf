@@ -46,8 +46,7 @@ process PIPELINE_EVENTS_OPEN_BATCH {
     script:
     batchuuid = UUID.randomUUID().toString()
     """
-    #batchuuid=\$(uuidgen -r)
-    send_pipeline_event open --batch_id \${batchuuid} --pipeline_name ${methodname} --pipeline_url ${method_url}
+    send_pipeline_event open --batch_id ${batchuuid} --pipeline_name ${methodname} --pipeline_url ${method_url}
     """
 }
 
