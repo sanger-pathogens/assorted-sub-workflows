@@ -4,7 +4,7 @@ process MEGAHIT {
     label 'mem_8'
     label 'time_12'
 
-    container 'quay.io/biocontainers/megahit:1.1.3--py36_0'
+    container 'quay.io/biocontainers/megahit:1.2.9--h5ca1c30_6'
 
     input:
     tuple val(meta), path(unmapped_reads)
