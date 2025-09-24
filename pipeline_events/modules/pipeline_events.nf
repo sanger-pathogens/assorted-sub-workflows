@@ -93,7 +93,7 @@ process PIPELINE_EVENTS_CREATE_FILE {
     file_outblob = 'shelf_create_file_out.json'
     runid = meta.ID
     """
-    filemd5=\$(md5sum ${resultfile})
+    filemd5=\$(md5sum ${resultfile} | awk "{print \$1}")
     send_pipeline_event file --batch_id ${batchuuid} --path ${resultfile} --file_type ${file_type} \\
                                 --md5sum \${filemd5} --association RUN --association_id ${runid} \\
                                 --username \$(id -un) --group \$(id -gn)
