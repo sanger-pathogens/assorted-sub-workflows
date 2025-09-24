@@ -89,7 +89,7 @@ process PIPELINE_EVENTS_CREATE_FILE {
     tuple val(meta.ID), path(resultfile),  emit: created_file_id_path
 
     script:
-    filepath = "${output_folder}/${results}"
+    filepath = "${output_folder}/${resultfile}"
     file_outblob = 'shelf_create_file_out.json'
     runid = meta.ID
     """
