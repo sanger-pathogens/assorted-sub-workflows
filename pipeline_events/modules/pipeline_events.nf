@@ -95,7 +95,7 @@ process PIPELINE_EVENTS_CREATE_FILE {
     """
     filemd5=\$(md5sum ${resultfile})
     send_pipeline_event file --batch_id ${batchuuid} --path ${resultfile} --file_type ${file_type} \\
-                                --md5sum ${filemd5} --association RUN --association_id ${runid} \\
+                                --md5sum \${filemd5} --association RUN --association_id ${runid} \\
                                 --username \$USER --group \$(id -gn)
     """
 
