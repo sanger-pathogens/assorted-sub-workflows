@@ -26,6 +26,8 @@ include { QUAST                      } from './modules/quast.nf'
 ##############################################################################################################################################################
 */
 
+params.min_contig = [params.maxbin2_min_contig, params.concoct_min_contig, params.metabat_min_contig].min()
+
 workflow METAWRAP_ASSEMBLE {
     take:
     reads_ch
