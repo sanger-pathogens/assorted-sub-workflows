@@ -85,7 +85,7 @@ process PIPELINE_EVENTS_CREATE_FILE {
 
     output:
     // it would be nice to parse the blob to get the file uuid and at least print it out, maybe all at the end of the pipeline run collecting all blob outputs and doing a bulk print of recorded files
-    tuple val(meta.ID), path(resultfile),  emit: created_file_id_path
+    tuple val(meta.ID), path(resultfilefullpath),  emit: created_file_id_path
 
     script:
     file_outblob = 'shelf_create_file_out.json'
