@@ -79,22 +79,20 @@ process PIPELINE_EVENTS_CREATE_FILE {
     container 'gitlab-registry.internal.sanger.ac.uk/sanger-pathogens/pipeline-event-api/pipeline-event-api:v1.0.1'
 
     input:
-    tuple val(meta), path(resultfile)
+    tuple val(meta), path(resultfilefullpath)
     val(file_type)
     val(batchuuid)
-    val(output_folder)
 
     output:
     // it would be nice to parse the blob to get the file uuid and at least print it out, maybe all at the end of the pipeline run collecting all blob outputs and doing a bulk print of recorded files
     tuple val(meta.ID), path(resultfile),  emit: created_file_id_path
 
     script:
-    filepath = "${output_folder}/${resultfile}"
     file_outblob = 'shelf_create_file_out.json'
     runid = meta.ID
     """
-    filemd5=\$(md5sum ${filepath} | cut -d' ' -f1)
-    send_pipeline_event file --batch_id ${batchuuid} --path ${filepath} --file_type ${file_type} \\
+    filemd5=\$(md5sum ${resultfilefullpath} | cut -d' ' -f1)
+    send_pipeline_event file --batch_id ${batchuuid} --path ${resultfilefullpath} --file_type ${file_type} \\
                                 --md5sum \${filemd5} --association RUN --association_id ${runid} \\
                                 --username \$(id -un) --group \$(id -gn)
     """
