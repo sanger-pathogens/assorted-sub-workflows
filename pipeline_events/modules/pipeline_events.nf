@@ -84,10 +84,10 @@ process PIPELINE_EVENTS_CREATE_FILE {
     val(batchuuid)
 
     output:
-    tuple val(meta.ID), path(resultfilePublishedFullPath),  emit: created_file_id_path
+    tuple val(meta.ID), val(resultfilePublishedFullPath),  emit: created_file_id_path // val(resultfilePublishedFullPath), not path() so no to stage the file that's outside the work folder
+    val(file_type)
 
     script:
-    file_outblob = 'shelf_create_file_out.json'
     runid = meta.ID
     resultfileName = resultfileWorkPath.name.toString()
     resultfilePublishedFullPath = "${resultfilePublishedDir}/${resultfileName}"
