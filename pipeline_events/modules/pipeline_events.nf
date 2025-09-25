@@ -92,7 +92,7 @@ process PIPELINE_EVENTS_CREATE_FILE {
     resultfileName = resultfileWorkPath.name.toString()
     resultfilePublishedFullPath = "${resultfilePublishedDir}/${resultfileName}"
     """
-    filemd5=\$(md5sum ${workfile} | cut -d' ' -f1)
+    filemd5=\$(md5sum ${resultfileWorkPath} | cut -d' ' -f1)
     send_pipeline_event file --batch_id ${batchuuid} --path ${resultfilePublishedFullPath} --file_type ${file_type} \\
                                 --md5sum \${filemd5} --association RUN --association_id ${runid} \\
                                 --username \$(id -un) --group \$(id -gn)
