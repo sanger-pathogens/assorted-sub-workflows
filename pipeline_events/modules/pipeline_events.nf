@@ -79,20 +79,21 @@ process PIPELINE_EVENTS_CREATE_FILE {
     container 'gitlab-registry.internal.sanger.ac.uk/sanger-pathogens/pipeline-event-api/pipeline-event-api:v1.0.2'
 
     input:
-    tuple val(meta), val(resultfilefullpath) // val(), not path() so no to stage file as we need real, already published path
+    tuple val(meta), path(resultfileWorkPath), val(resultfilePublishedDir) // val(resultfilePublishedDir), not path() so no to stage folder
     val(file_type)
     val(batchuuid)
 
     output:
-    // it would be nice to parse the blob to get the file uuid and at least print it out, maybe all at the end of the pipeline run collecting all blob outputs and doing a bulk print of recorded files
-    tuple val(meta.ID), path(resultfilefullpath),  emit: created_file_id_path
+    tuple val(meta.ID), path(resultfilePublishedFullPath),  emit: created_file_id_path
 
     script:
     file_outblob = 'shelf_create_file_out.json'
     runid = meta.ID
+    resultfileName = resultfileWorkPath.name.toString()
+    resultfilePublishedFullPath = "${resultfilePublishedDir}/${resultfileName}"
     """
-    filemd5=\$(md5sum ${resultfilefullpath} | cut -d' ' -f1)
-    send_pipeline_event file --batch_id ${batchuuid} --path ${resultfilefullpath} --file_type ${file_type} \\
+    filemd5=\$(md5sum ${workfile} | cut -d' ' -f1)
+    send_pipeline_event file --batch_id ${batchuuid} --path ${resultfilePublishedFullPath} --file_type ${file_type} \\
                                 --md5sum \${filemd5} --association RUN --association_id ${runid} \\
                                 --username \$(id -un) --group \$(id -gn)
     """
