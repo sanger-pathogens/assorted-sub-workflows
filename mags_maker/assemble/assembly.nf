@@ -26,9 +26,7 @@ include { QUAST                      } from './modules/quast.nf'
 ##############################################################################################################################################################
 */
 
-params.min_contig = [params.maxbin2_min_contig, params.concoct_min_contig, params.metabat_min_contig].min()
-
-workflow METAWRAP_ASSEMBLE {
+workflow METAWRAP_ASSEMBLE {	
     take:
     reads_ch
 
@@ -37,6 +35,7 @@ workflow METAWRAP_ASSEMBLE {
     if (!params.metaspades && !params.megahit) {
         log.warn("have to select at least one of --metaspades or --megahit")
     }
+    
 
     if (params.metaspades) {
         METASPADES(reads_ch)
