@@ -79,7 +79,7 @@ process PIPELINE_EVENTS_CREATE_FILE {
     container 'gitlab-registry.internal.sanger.ac.uk/sanger-pathogens/pipeline-event-api/pipeline-event-api:v1.0.1'
 
     input:
-    tuple val(meta), val(resultfilefullpath)
+    tuple val(meta), val(resultfilefullpath) // val(), not path() so no to stage file as we need real, already published path
     val(file_type)
     val(batchuuid)
 
