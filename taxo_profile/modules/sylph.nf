@@ -2,7 +2,7 @@ process SYLPH_SKETCH {
     tag "${meta.ID}"
     label 'cpu_2'
     label 'mem_2'
-    label 'time_12'
+    label 'time_from_queue_small'
 
     publishDir "${params.outdir}/${meta.ID}/sylph/", pattern: "*.sylsp", mode: 'copy', overwrite: true, enabled: params.save_sylph_sketches
 
@@ -27,7 +27,7 @@ process SYLPH_PROFILE {
     tag "${meta.ID}"
     label 'cpu_2'
     label 'mem_2'
-    label 'time_12'
+    label 'time_from_queue_small'
 
     publishDir "${params.outdir}/${meta.ID}/sylph/", pattern: "*.zip", mode: 'copy', overwrite: true, enabled: true
 
