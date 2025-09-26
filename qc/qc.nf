@@ -16,7 +16,7 @@ include { PASS_OR_FAIL_FASTQC; PASS_OR_FAIL_K2B } from './modules/pass_or_fail.n
 //
 // SUBWORKFLOWS
 //
-include { KRAKEN2BRACKEN } from '../kraken2bracken/subworkflows/kraken2bracken.nf'
+include { TAXO_PROFILE } from '../taxo_profile/taxo_profile.nf'
 
 /*
 ========================================================================================
@@ -37,9 +37,13 @@ workflow QC {
     PASS_OR_FAIL_FASTQC(FASTQC.out.zip, fastqc_pass_criteria, fastqc_no_fail_criteria)
     | set { fastqc_results }
 
-    KRAKEN2BRACKEN(read_ch)
+    TAXO_PROFILE(read_ch)
 
-    KRAKEN2BRACKEN.out.ch_kraken2_style_bracken_reports
+    TAXO_PROFILE.out.ch_kraken2_style_bracken_reports
+    | PASS_OR_FAIL_K2B
+    | set { k2b_results }
+
+    TAXO_PROFILE.out.sylph_report
     | PASS_OR_FAIL_K2B
     | set { k2b_results }
 
@@ -48,7 +52,7 @@ workflow QC {
     | set { results }
 
     emit:
-    results 
+    results
 }
 
 /*
