@@ -26,7 +26,7 @@ include { QUAST                      } from './modules/quast.nf'
 ##############################################################################################################################################################
 */
 
-workflow METAWRAP_ASSEMBLE {
+workflow METAWRAP_ASSEMBLE {	
     take:
     reads_ch
 
@@ -35,6 +35,7 @@ workflow METAWRAP_ASSEMBLE {
     if (!params.metaspades && !params.megahit) {
         log.warn("have to select at least one of --metaspades or --megahit")
     }
+    
 
     if (params.metaspades) {
         METASPADES(reads_ch)

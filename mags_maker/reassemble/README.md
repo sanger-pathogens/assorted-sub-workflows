@@ -13,7 +13,7 @@ This pipeline refines bins by aligning sequencing reads back to their correspond
 ### Parameters
 - `--strict_max` (Strict bin mismatch threshold default: 2)
 - `--permissive_max` (Permissive bin mismatch threshold default: 5)
-- `--min_contig` (Minimum threshold for contig size kb default: 1500)
+- `--min_contig` (Minimum threshold for contig size (kb) default: 1000 (taken as the lowest tool specific threshold with MaxBin2, CONCOCT or MetaBAT2))
 - `--min_completeness` (Minimum bin completeness threshold % default: 50)
 - `--max_contamination` (Maximum bin contamination threshod % default: 5)
 - `--checkm2_db` (Checkm2 database path default: /data/pam/software/checkm2_db/uniref100.KO.1.dmnd)
