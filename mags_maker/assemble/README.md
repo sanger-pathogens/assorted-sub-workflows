@@ -11,7 +11,7 @@ By default, this workflow assembles sequencing reads using metaSPAdes v3.14. Rea
 
 ### Parameters
 - `--assembly_stats` (Generate assembly statistics default: false)
-- `--min_contig` (Minimum threshold for contig size (kb) default: 1000 (derived from lowest tool specific threshold parameters: maxbin2_min_contig, concoct_min_contig, metabat_min_contig))
+- `--min_contig` (Minimum threshold for contig size (kb) default: 1000 (taken as the lowest tool specific threshold with MaxBin2, CONCOCT or MetaBAT2)
 - `--fastspades` (Run SPAdes assembly module only default: null)
 - `--lock_phred` (Set PHRED quality offset to 33 (SPAdes option) default: null)
 - `--metaspades` (Run metaSPAdes assembly default: true)
