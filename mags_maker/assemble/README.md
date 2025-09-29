@@ -16,7 +16,7 @@ By default, this workflow assembles sequencing reads using metaSPAdes v3.14. Rea
 - `--lock_phred` (Set PHRED quality offset to 33 (SPAdes option) default: null)
 - `--metaspades` (Run metaSPAdes assembly default: true)
 - `--megahit` (Run MEGAHIT assembly default: true)
-- `--megahit_deterministic` (Run MEGAHIT assembly deterministically using only 1 cpu default: false)
+- `--megahit_deterministic` (Run MEGAHIT assembly deterministically, please see "Running Megahit Determinstically" section below for runtime impacts default: false)
 - `--output_transposed` (Output transposed quast reports default: false)
 
 ### Input
@@ -33,3 +33,6 @@ All dependencies are contained in runtime containers.
 If using a sra-lite format reads, or other formats not containing quality scores, the pipeline will attempt to automatically override the phred quality offset to 33.
 If the pipeline is unable to automatically detect the lack of quality score before assembly steps it will fail the sample, set --lock_phred to provide a --phred_lock 33 to spades to address these failiures case. 
 
+### Running Megahit determinstically
+
+Running MEGAHIT in deterministic mode requires restricting execution to a single CPU (default: 8). This increases MEGAHIT runtime by approximately 7.5×, which can substantially extend the total pipeline runtime depending on sample count and input size. For example, assembling 20 low-depth metagenomic samples deterministically adds roughly 6 hours to the overall pipeline runtime.
