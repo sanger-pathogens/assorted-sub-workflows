@@ -35,4 +35,4 @@ If the pipeline is unable to automatically detect the lack of quality score befo
 
 ### Running Megahit determinstically
 
-Running MEGAHIT in deterministic mode requires restricting execution to a single CPU (default: 8). This increases MEGAHIT runtime by approximately 7.5×, which can substantially extend the total pipeline runtime depending on sample count and input size. For example, assembling 20 low-depth metagenomic samples deterministically adds roughly 6 hours to the overall pipeline runtime.
+Running MEGAHIT deterministically requires restricting execution to a single CPU (default: 8). This increases MEGAHIT runtime by approximately 7.5×, which can extend the total pipeline runtime depending on the number and size of samples inputted. For example, assembling 20 low-depth metagenomic samples deterministically adds roughly 6 hours to the overall pipeline runtime.
