@@ -19,7 +19,7 @@ process SYLPH_SKETCH {
     reads2 = ${meta.ID}.2.fq
 
     """
-    sylph sketch --threads ${task.cpu} -1 ${read_1} -2 ${read_2} -d paired_sketches
+    sylph sketch --threads ${task.cpu} -1 ${read_1} -2 ${read_2} -k ${params.sketch_size} -d paired_sketches
     """
 }
 
@@ -41,6 +41,6 @@ process SYLPH_PROFILE {
 
     script:
     """
-    sylph profile --threads ${task.cpu} -o ${meta.ID}_sylph_profile.tsv ${sketch} ${params.sylph_db}
+    sylph profile --threads ${task.cpu} -o ${meta.ID}_sylph_profile.tsv -k ${params.sketch_size} ${sketch} ${params.sylph_db}
     """
 }
