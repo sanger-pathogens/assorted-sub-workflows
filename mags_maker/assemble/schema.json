@@ -6,8 +6,8 @@
                 "help_text": "Generate assembly statistics."
             },
             "min_contig": {
-                "default": "1500",
-                "help_text": "Minimum threshold for contig size (kb)."
+                "default": "1000",
+                "help_text": "Minimum threshold for contig size (kb) taken as the lowest tool specific threshold with MaxBin2, CONCOCT or MetaBAT2."
             },
             "fastspades":{
                 "default": "null",
