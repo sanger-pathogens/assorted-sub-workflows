@@ -25,6 +25,10 @@
                 "default": "true",
                 "help_text": "Run MEGAHIT assembly."
             },
+            "megahit_deterministic": {
+                "default": "false",
+                "help_text": "Run MEGAHIT assembly deterministically, please see 'Further information' in README for runtime impacts."
+            },
             "output_transposed": {
                 "default": "false",
                 "help_text": "Output transposed quast reports."
