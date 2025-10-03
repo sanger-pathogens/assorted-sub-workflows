@@ -7,16 +7,15 @@
             },
             "concot_min_contig": {
                 "default": "1000",
-                "help_text": "Minimum threshold for contig size (bp)."
-```
+                "help_text": "Minimum threshold for contig size (bp). The lowest accepted value is 500."
             },
             "maxbin2_min_contig": {
                 "default": "1000",
-                "help_text": "Minimum threshold for contig size (kb)."
+                "help_text": "Minimum threshold for contig size (kb). The lowest accepted value is 500."
             },
             "metabat_min_contig": {
                 "default": "1500",
-                "help_text": "Minimum threshold for contig size (kb)."
+                "help_text": "Minimum threshold for contig size (kb). The lowest accepted value is 1500."
             },
             "maxbin_markers":{
                 "default": "140",
