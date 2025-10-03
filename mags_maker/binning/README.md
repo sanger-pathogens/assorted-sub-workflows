@@ -11,9 +11,9 @@ The script uses metaBAT2 (optional parameter --matabat1) CONCOCT and MaxBin2 to 
 
 ### Parameters
 - `--bin_seed` (Set a fixed seed for metaBAT1/2 and CONCOCT default: 1234)
-- `--maxbin2_min_contig` (Minimum threshold for contig size (kb) for MaxBin2 default: 1000)
-- `--concoct_min_contig` (Minimum threshold for contig size (kb) for concoct default: 1000)
-- `--metabat_min_contig` (Minimum threshold for contig size (kb) for metabat default: 1500)
+- `--maxbin2_min_contig` (Minimum threshold for contig size (kb) for MaxBin2. The lowest accepted value is 500. default: 1000)
+- `--concoct_min_contig` (Minimum threshold for contig size (kb) for concoct. The lowest accepted value is 500. default: 1000)
+- `--metabat_min_contig` (Minimum threshold for contig size (kb) for metabat. The lowest accepted value is 1500. default: 1500)
 - `--maxbin_markers` (Marker set to choose from 107 marker genes present in >95% of bacteria, or 40 marker gene sets that are universal among bacteria and archaea default: 140??)
 - `--metabat1` (Run metaBAT1 default: null, uses metaBAT2)
 - `--keep_unbinned` (Keep unbinned contigs default: false)
