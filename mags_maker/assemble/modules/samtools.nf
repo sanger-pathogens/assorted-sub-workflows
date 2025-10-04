@@ -1,4 +1,5 @@
 process SAM_TO_FASTQ {
+    tag "${meta.ID}"
     label 'cpu_2'
     label 'mem_100M'
     label 'time_30m'
