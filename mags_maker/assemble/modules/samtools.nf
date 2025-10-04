@@ -24,10 +24,8 @@ process SAM_TO_FASTQ {
         --rf 192 \\
         -@ ${task.cpus} \\
         ${sam} | \\
-    samtools fastq -N \\
-        -o ${reads} \\
-        -@ ${task.cpus} \\
-        -
+    awk -F \$'\t' 'NF >= 11 {print ">"\$1; print \$10; print "+"; print \$11}' \\
+    > ${reads}
 
     gzip ${reads}
     """
