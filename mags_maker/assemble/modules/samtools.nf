@@ -19,7 +19,7 @@ process SAM_TO_FASTQ {
     //-f 4 = read unmapped
     //--rf 192 = read is either first in pair or mate in pair
     """
-    samtools view -b \\
+    samtools view \\
         -f 4 \\
         --rf 192 \\
         -@ ${task.cpus} \\
