@@ -42,13 +42,12 @@ process SPADES_REASSEMBLE {
 
     status=\${?}
     if [ \${status} -gt 0 ] ; then
-        # remap any error unable to allocate OS memory to exit code 130 for retry
-        grep 'error: unable to allocate OS memory' spades.log 
+        # remap exit 12 memory error to 130 to enable retry strategy
+        grep 'Cannot allocate memory. Error code: 12' spades.log 
         exit 130
     else
         exit \$status
     fi
-
 
     """
 }
