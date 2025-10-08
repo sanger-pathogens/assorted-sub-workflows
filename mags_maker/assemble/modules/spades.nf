@@ -40,8 +40,8 @@ mv ${scaffolds} ${meta.ID}_scaffolds.fasta
 
 status=\${?}
 if [ \${status} -gt 0 ] ; then
-    # remap exit 12 memory error to 130 to enable retry strategy
-    grep 'Cannot allocate memory. Error code: 12' spades.log 
+    # remap any error unable to allocate OS memory to exit code 130 for retry
+    grep 'error: unable to allocate OS memory' spades.log 
     exit 130
 else
     exit \$status
