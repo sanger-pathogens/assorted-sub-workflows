@@ -51,7 +51,7 @@ class InvalidConfig(ValueError):
 
 
 def validate_config(config: dict) -> None:
-    valid_tools = {"GUNC", "CHECKM2", "GTDBTK"}
+    valid_tools = {"GUNC", "CHECKM2", "GTDBTK", "QUAST_SUMMARY"}
     expected_tools = valid_tools & config.keys()
     unexpected_tools = set(config.keys()) - valid_tools
     if expected_tools == set():
@@ -138,6 +138,12 @@ def parse_args():
         type=Path, 
         required=True, 
         help="Path to GTDBTk TSV"
+    )
+    parser.add_argument(
+        "--quast", 
+        type=Path, 
+        required=True, 
+        help="Path to QUAST_SUMMARY TSV"
     )
     parser.add_argument(
         "--config", 
