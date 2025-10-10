@@ -140,7 +140,7 @@ def parse_args():
         help="Path to GTDBTk TSV"
     )
     parser.add_argument(
-        "--quast", 
+        "--quast_summary", 
         type=Path, 
         required=True, 
         help="Path to QUAST_SUMMARY TSV"
