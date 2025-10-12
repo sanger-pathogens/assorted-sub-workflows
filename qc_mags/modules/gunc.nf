@@ -18,7 +18,7 @@ process GUNC {
     report_tsv = "${meta.ID}_gunc.tsv"
     """
     mkdir ${meta.ID}_gunc
-    gunc run -r ${params.gunc_db} -d fastas -o ${meta.ID}_gunc -t ${task.cpus}
+    gunc run -r ${params.gunc_db} -d fastas --file_suffix ".${params.fasta_ext}" -o ${meta.ID}_gunc -t ${task.cpus}
 
     mv ${meta.ID}_gunc/GUNC.gtdb_95.maxCSS_level.tsv ${report_tsv}
     """
