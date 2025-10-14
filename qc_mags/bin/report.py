@@ -179,7 +179,7 @@ def main():
         "gtdbtk": [None, "gtdbtk"],
         "quast_summary": [None, "quast_summary"],
         "post_qc_checkm2": ["postqc", "checkm2"],
-        "post_qc_gunc": ["postqc", "checkm2"]
+        "post_qc_gunc": ["postqc", "gunc"]
     }
 
     dfs = []
