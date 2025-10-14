@@ -15,21 +15,18 @@ process SYLPH_SKETCH {
     tuple val(meta), path("paired_sketches/${meta.ID}.sylsp"), emit: sketch
 
     script:
-    reads1 = ${meta.ID}.1.fq
-    reads2 = ${meta.ID}.2.fq
-
     """
-    sylph sketch --threads ${task.cpu} -1 ${read_1} -2 ${read_2} -k ${params.sketch_size} -d paired_sketches
+    sylph sketch -t ${task.cpus} -1 ${read_1} -2 ${read_2} -k ${params.sketch_size} -S ${meta.ID} -d paired_sketches
     """
 }
 
 process SYLPH_PROFILE {
     tag "${meta.ID}"
     label 'cpu_2'
-    label 'mem_2'
+    label 'mem_20'
     label 'time_from_queue_small'
 
-    publishDir "${params.outdir}/${meta.ID}/sylph/", pattern: "*.zip", mode: 'copy', overwrite: true, enabled: true
+    publishDir "${params.outdir}/${meta.ID}/sylph/", pattern: "*.tsv", mode: 'copy', overwrite: true, enabled: true
 
     container 'gitlab-registry.internal.sanger.ac.uk/sanger-pathogens/docker-images/sylph:0.8.1--ha6fb395_0'
 
@@ -41,6 +38,6 @@ process SYLPH_PROFILE {
 
     script:
     """
-    sylph profile --threads ${task.cpu} -o ${meta.ID}_sylph_profile.tsv -k ${params.sketch_size} ${sketch} ${params.sylph_db}
+    sylph profile -t ${task.cpus} -o ${meta.ID}_sylph_profile.tsv -k ${params.sketch_size} ${sketch} ${params.sylph_db}
     """
 }
