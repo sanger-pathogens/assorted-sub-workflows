@@ -1,4 +1,5 @@
 process SAM_TO_FASTQ {
+    tag "${meta.ID}"
     label 'cpu_2'
     label 'mem_100M'
     label 'time_30m'
@@ -18,15 +19,13 @@ process SAM_TO_FASTQ {
     //-f 4 = read unmapped
     //--rf 192 = read is either first in pair or mate in pair
     """
-    samtools view -b \\
+    samtools view \\
         -f 4 \\
         --rf 192 \\
         -@ ${task.cpus} \\
         ${sam} | \\
-    samtools fastq -N \\
-        -o ${reads} \\
-        -@ ${task.cpus} \\
-        -
+    awk -F \$'\t' 'NF >= 11 {print ">"\$1; print \$10; print "+"; print \$11}' \\
+    > ${reads}
 
     gzip ${reads}
     """
