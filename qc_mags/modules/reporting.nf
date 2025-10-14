@@ -24,7 +24,7 @@ process REPORT {
         --post_qc_checkm2 post_checkm2_report.tsv \\
         --post_qc_gunc post_gunc_report.tsv \\
         --gtdbtk gtdbtk_report.tsv \\
-        --quast quast_summary_report.tsv \\
+        --quast_summary quast_summary_report.tsv \\
         --config ${report_config} \\
         --output ${final_report}
     """

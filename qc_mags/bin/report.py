@@ -147,20 +147,23 @@ def parse_args():
         "--pre_qc_gunc", type=Path, required=True, help="Path to pre-QC GUNC TSV"
     )
     parser.add_argument(
-        "--post_qc_checkm2",
-        type=Path,
-        required=True,
-        help="Path to post-QC CheckM2 TSV",
+        "--post_qc_checkm2", type=Path, required=True, help="Path to post-QC CheckM2 TSV",
     )
     parser.add_argument(
         "--post_qc_gunc", type=Path, required=True, help="Path to post-QC GUNC TSV"
     )
-    parser.add_argument("--quast", type=Path, required=True, help="Path to QUAST_SUMMARY TSV")
-    parser.add_argument("--gtdbtk", type=Path, required=True, help="Path to GTDBTK TSV")
+    parser.add_argument(
+        "--gtdbtk", type=Path, required=True, help="Path to GTDBTK TSV"
+    )
+    parser.add_argument(
+        "--quast_summary", type=Path, required=True, help="Path to QUAST_SUMMARY TSV"
+    )
     parser.add_argument(
         "--config", type=Path, required=True, help="Path to report configuration file"
     )
-    parser.add_argument("--output", type=Path, required=True, help="Output TSV path")
+    parser.add_argument(
+        "--output", type=Path, required=True, help="Output TSV path"
+    )
     return parser.parse_args()
 
 
@@ -171,16 +174,18 @@ def main():
     config = read_config(args.config)
 
     args_qc_stage = {
-        "pre_qc_checkm2": "preqc",
-        "pre_qc_gunc": "preqc",
-        "gtdbtk": None,
-        "post_qc_checkm2": "postqc",
-        "post_qc_gunc": "postqc",
+        "pre_qc_checkm2": ["preqc", "checkm2"],
+        "pre_qc_gunc": ["preqc", "gunc"],
+        "gtdbtk": [None, "gtdbtk"],
+        "quast_summary": [None, "quast_summary"],
+        "post_qc_checkm2": ["postqc", "checkm2"],
+        "post_qc_gunc": ["postqc", "checkm2"]
     }
 
     dfs = []
-    for arg, qc_stage in args_qc_stage.items():
-        tool = arg.rsplit("_", maxsplit=1)[-1]
+    for arg, qc in args_qc_stage.items():
+        qc_stage = qc[0]
+        tool = qc[1]
         df = process_input_report(
             read_tsv(vars(args)[arg], arg), config, tool, qc_stage
         )
