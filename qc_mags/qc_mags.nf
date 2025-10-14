@@ -3,8 +3,8 @@ include { CHECKM2 as PRE_CHECKM2;
 include { GTDBTK                           } from './modules/gtdbtk.nf'
 include { GUNC as PRE_GUNC;
           GUNC                             } from './modules/gunc.nf'
-include { QUAST                            } from './modules/quast.nf'
-include { QUAST_SUMMARY                    } from './modules/quast_summary.nf'
+include { QUAST;                         
+          QUAST_SUMMARY                    } from './modules/quast.nf'
 include { MDMCLEANER                       } from './modules/mdmcleaner.nf'
 include { SEQKIT                           } from './modules/seqkit.nf'
 include { REPORT                           } from './modules/reporting.nf'
