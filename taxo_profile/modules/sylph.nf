@@ -16,7 +16,8 @@ process SYLPH_SKETCH {
 
     script:
     """
-    sylph sketch -t ${task.cpus} -1 ${read_1} -2 ${read_2} -k ${params.sketch_size} -S ${meta.ID} -d paired_sketches
+    sylph sketch -t ${task.cpus} -1 ${read_1} -2 ${read_2} -k ${params.sketch_size} -d paired_sketches
+    mv paired_sketches/${meta.ID}_1.fastq.gz.paired.sylsp paired_sketches/${meta.ID}.sylsp
     """
 }
 
