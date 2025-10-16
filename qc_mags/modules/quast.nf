@@ -15,7 +15,7 @@ process QUAST {
     tuple val(meta), path(report_tsv), emit: results
 
     script:
-    report_tsv = "${meta.ID}_quast_summary.tsv"
+    report_tsv = "${meta.ID}_quast_report.tsv"
     """
     quast.py fastas/*.${params.fasta_ext} -o quast --no-html --no-plots
 
