@@ -12,14 +12,14 @@ process QUAST {
     tuple val(meta), path(fastas, stageAs: "fastas/*")
 
     output:
-    tuple val(meta), path(report_tsv), emit: results
+    tuple val(meta), path(quast_report), emit: results
 
     script:
-    report_tsv = "${meta.ID}_quast_report.tsv"
+    quast_report = "${meta.ID}_quast_report.tsv"
     """
     quast.py fastas/*.${params.fasta_ext} -o quast --no-html --no-plots
 
-    mv quast/transposed_report.tsv ${report_tsv}
+    mv quast/transposed_report.tsv ${quast_report}
     """
 }
 
