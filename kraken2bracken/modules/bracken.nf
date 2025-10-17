@@ -90,7 +90,7 @@ process BRACKEN {
     /usr/local/bin/src/est_abundance.py -i ${kraken2_sample_report} \
                                         -k ${kmer_distrib} \
                                         -o ${meta.ID}.bracken \
-                                        -l ${params.classification_level} \
+                                        -l ${params.bracken_classification_level} \
                                         -t ${params.threshold}
     """
 }
