@@ -43,9 +43,9 @@ workflow QC {
     | PASS_OR_FAIL_K2B
     | set { k2b_results }
 
-    TAXO_PROFILE.out.sylph_report
-    | PASS_OR_FAIL_K2B
-    | set { k2b_results }
+    TAXO_PROFILE.out.sylphtax_mpa_report
+    | PASS_OR_FAIL_SYLPH
+    | set { sylph_results }
 
     fastqc_results
     | join(k2b_results)
