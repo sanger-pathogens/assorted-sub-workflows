@@ -186,9 +186,9 @@ def main():
     for arg, qc in args_qc_stage.items():
         qc_stage = qc[0]
         tool = qc[1]
-        df = process_input_report(
-            read_tsv(vars(args)[arg], arg), config, tool, qc_stage
-        )
+        df = read_tsv(vars(args)[arg], arg)
+        df = process_input_report(df, config, tool, qc_stage)
+
         if qc_stage == "postqc":
             df = process_postqc_genome_name(df)
         dfs.append(df)
