@@ -6,10 +6,11 @@ process QUAST {
 
     container   'quay.io/biocontainers/quast:5.3.0--py39pl5321heaaa4ec_0'
 
-    publishDir mode: 'copy', path: "${params.outdir}/quast/"
+    publishDir mode: 'copy', path: "${params.outdir}/${qc_stage}/quast/", enabled: !(params.skip_raw_reports)
 
     input:
     tuple val(meta), path(fastas, stageAs: "fastas/*")
+    val(qc_stage)
 
     output:
     tuple val(meta), path(quast_report), emit: results
@@ -31,10 +32,11 @@ process QUAST_SUMMARY {
 
     container 'quay.io/sangerpathogens/pandas:2.2.1'
 
-    publishDir mode: 'copy', path: "${params.outdir}/quast_summary/"
+    publishDir mode: 'copy', path: "${params.outdir}/${qc_stage}/quast_summary/", enabled: !(params.skip_raw_reports)
 
     input:
     tuple val(meta), path(quast_report)
+    val(qc_stage)
 
     output:
     tuple val(meta), path(report_tsv), emit: results

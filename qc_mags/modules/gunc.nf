@@ -6,10 +6,11 @@ process GUNC {
 
     container  'quay.io/biocontainers/gunc:1.0.6--pyhdfd78af_0'
 
-    publishDir mode: 'copy', path: "${params.outdir}/gunc/"
+    publishDir mode: 'copy', path: "${params.outdir}/${qc_stage}/gunc/", enabled: !(params.skip_raw_reports)
 
     input:
     tuple val(meta), path(fastas, stageAs: "fastas/*")
+    val(qc_stage)
 
     output:
     tuple val(meta), path(report_tsv), emit: results
