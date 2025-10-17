@@ -17,7 +17,7 @@ process QUAST {
     script:
     quast_report = "${meta.ID}_quast_report.tsv"
     """
-    quast.py fastas/*.${params.fasta_ext} -o quast --no-html --no-plots
+    quast.py fastas/*.${params.fasta_ext} -o quast --no-html --no-plots --min-contig
 
     mv quast/transposed_report.tsv ${quast_report}
     """
