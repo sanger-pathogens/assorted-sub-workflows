@@ -17,6 +17,6 @@ process SEQKIT {
     script:
     finalName = "cleaned_${fasta.getBaseName()}" 
     """
-    seqkit seq ${fasta} -m 1000 > ${finalName}
+    seqkit seq ${fasta} -m ${params.min_contig_length} > ${finalName}
     """
 }
