@@ -21,12 +21,12 @@ def read_quast_tsv(file_path: Path):
     try:
         quast_df = pd.read_csv(file_path, sep='\t')
         logging.info(f'File read successfully -> {file_path}')
-    except IOError as e:
-        logging.error(f'Error reading file: {file_path} -> {e}')
-        sys.exit(1)
+    except FileNotFoundError as e:
+        logging.error(f'File not found: {file_path} -> {e}')
+        raise
     except Exception as e:
         logging.error(f'An unknown exception occurred: {file_path} -> {e}')
-        sys.exit(1)
+        raise
     return quast_df
 
 
