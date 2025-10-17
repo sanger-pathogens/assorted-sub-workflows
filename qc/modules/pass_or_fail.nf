@@ -60,7 +60,6 @@ process PASS_OR_FAIL_SYLPH {
     tuple val(meta), env(pass_or_fail), emit: pass_or_fail
 
     script:
-    // need adapting to sylph output
     """
     top_genus_abun=\$(grep -P '|g__[^|]\+\t' ${report} | cut -f2 | sort -n | tail -1)
     top_species_abun=\$(grep -P '|s__[^|]\+\t' ${report} | cut -f2 | sort -n | tail -1)
