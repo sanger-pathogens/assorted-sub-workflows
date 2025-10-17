@@ -21,10 +21,14 @@ def read_quast_tsv(file_path: Path):
     try:
         quast_df = pd.read_csv(file_path, sep='\t')
         logging.info(f'File read successfully -> {file_path}')
-    except Exception as e:
+    except IOError as e:
         logging.error(f'Error reading file: {file_path} -> {e}')
         sys.exit(1)
+    except Exception as e:
+        logging.error(f'An unknown exception occurred: {file_path} -> {e}')
+        sys.exit(1)
     return quast_df
+
 
 
 def calculate_small_contigs(df):
