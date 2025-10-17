@@ -6,10 +6,11 @@ process GTDBTK {
 
     container  'quay.io/biocontainers/gtdbtk:2.4.1--pyhdfd78af_1'
 
-    publishDir mode: 'copy', path: "${params.outdir}/gtdbtk/"
+    publishDir mode: 'copy', path: "${params.outdir}/${qc_stage}/gtdbtk/", enabled: !(params.skip_raw_reports)
 
     input:
     tuple val(meta), path(fastas, stageAs: "fastas/*")
+    val(qc_stage)
 
     output:
     tuple val(meta), path(report_tsv), emit: results

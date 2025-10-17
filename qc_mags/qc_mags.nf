@@ -29,7 +29,10 @@ workflow QC_MAGS {
     fastas  // [meta, [1.fasta, 2.fasta, ...]]
 
     main:
+    pre_qc = Channel.value("pre_qc")
+    
     fastas
+    | combine(pre_qc)
     | (PRE_CHECKM2 & PRE_GUNC & GTDBTK & QUAST)
 
     QUAST.out.results | QUAST_SUMMARY
@@ -49,7 +52,10 @@ workflow QC_MAGS {
     }
     | set { postqc_fastas }
 
+    post_qc = Channel.value("post_qc")
+
     postqc_fastas
+    | combine(post_qc)
     | (CHECKM2 & GUNC)
 
     PRE_CHECKM2.out.results
