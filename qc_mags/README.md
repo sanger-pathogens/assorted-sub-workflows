@@ -28,6 +28,7 @@ Several parameters set paths to various databases used by pipeline tools:
 Other parameters:
 
 - `--fasta_ext` (default: `fa`): Set the expected extension of fasta files in the input directories.
+- `--min_contig_length` (default: 1000): Retain contigs longer than or equal to the specified minimum length in final MAG fasta files.
 - `--report_config` (default: [`./assets/report_config.json`](./assets/report_config.json)). See [Report configuration](#report-configuration) for more details.
 - `--autoqc_config` (default: null) Optional parameter to filter MAGs that pass QC thresholds specified in the config. When applying this option you must either provide the path to a config or with the string "default" use the provided config at `./assorted-sub-workflows/qc_mags/assets/autoqc_config.json`. See [AutoQC configuration](#autoqc-configuration) for more details.
 
