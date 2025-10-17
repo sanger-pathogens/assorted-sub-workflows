@@ -28,6 +28,7 @@ workflow TAXO_PROFILE {
     read_ch // meta, read_1, read_2
 
     main:
+     
     if (params.sylph_profile){
         SYLPH_SKETCH(read_ch)
         | SYLPH_PROFILE

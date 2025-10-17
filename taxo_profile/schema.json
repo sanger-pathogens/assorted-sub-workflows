@@ -1,0 +1,41 @@
+{
+    "params": {
+        "taxo profile Subworkflow Options": {
+            "sylph_profile": {
+                "default": "true",
+                "help_text": "Run sylph profiling."
+            },
+            "sylph_db":{
+                "default": "/data/pam/software/sylph/gtdb-r226-c200-dbv1/gtdb-r226-c200-dbv1.syldb",
+                "help_text": "Pathway to sylph database."
+            },
+            "save_sylph_sketches":{
+                "default": "false",
+                "help_text": "Keep sylph sketches."
+            },
+            "sketch_size": {
+                "default": "31",
+                "help_text": "Value of k. Only k = 21, 31 are currently supported."
+            },
+            "bracken_profile":{
+                "default": "null",
+                "help_text": "Run Kraken2–Bracken for taxonomic classification."
+            },
+            "kraken2_db":{
+                "default": "/data/pam/software/kraken2/standard/k2_standard_20250402",
+                "help_text": "Pathway to Kraken2 database."
+            },
+            "classification_level": {
+                "default": "G",
+                "help_text": "Taxonomic rank to analyze for Bracken (Options: 'D', 'P', 'C', 'O', 'F', 'G', 'S'"
+            },
+            "read_len": {
+                "default": "150",
+                "help_text": "Ideal length of reads in the sample"
+            }
+        }
+    }
+}
+
+
+
