@@ -59,7 +59,7 @@ process SYLPHTAX_TAXPROF {
     tuple val(meta), path(sylph_report)
 
     output:
-    path "${meta.ID}_sylphtax_profile.sylphmpa", emit: sylphtax_mpa_report
+    tuple val(meta), path "${meta.ID}_sylphtax_profile.sylphmpa", emit: sylphtax_mpa_report
 
     script:
     """

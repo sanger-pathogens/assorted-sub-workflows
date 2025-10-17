@@ -49,6 +49,7 @@ workflow QC {
 
     fastqc_results
     | join(k2b_results)
+    | join(sylph_results)
     | set { results }
 
     emit:
