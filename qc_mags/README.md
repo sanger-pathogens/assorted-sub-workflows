@@ -31,6 +31,7 @@ Other parameters:
 - `--report_config` (default: [`./assets/report_config.json`](./assets/report_config.json)). See [Report configuration](#report-configuration) for more details.
 - `--autoqc_config` (default: null) Optional parameter to filter MAGs that pass QC thresholds specified in the config. When applying this option you must either provide the path to a config or with the string "default" use the provided config at `./assorted-sub-workflows/qc_mags/assets/autoqc_config.json`. See [AutoQC configuration](#autoqc-configuration) for more details.
 - `--min-contig` (default: 500)  
+- `--skip_raw_reports` (default: false) Skip publishing raw reports from various QC tools, keeping only final summary reports.  
 
 ## Configuration
 
