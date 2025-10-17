@@ -12,13 +12,39 @@ process QUAST {
     tuple val(meta), path(fastas, stageAs: "fastas/*")
 
     output:
-    tuple val(meta), path(report_tsv), emit: results
+    tuple val(meta), path(quast_report), emit: results
 
     script:
-    report_tsv = "${meta.ID}_quast_summary.tsv"
+    quast_report = "${meta.ID}_quast_report.tsv"
     """
     quast.py fastas/*.${params.fasta_ext} -o quast --no-html --no-plots
 
-    mv quast/transposed_report.tsv ${report_tsv}
+    mv quast/transposed_report.tsv ${quast_report}
+    """
+}
+
+process QUAST_SUMMARY {
+    tag "${meta.ID}"
+    label "cpu_1"
+    label "mem_1"
+    label "time_1"
+
+    container 'quay.io/sangerpathogens/pandas:2.2.1'
+
+    publishDir mode: 'copy', path: "${params.outdir}/quast_summary/"
+
+    input:
+    tuple val(meta), path(quast_report)
+
+    output:
+    tuple val(meta), path(report_tsv), emit: results
+
+    script:
+    command = "${projectDir}/assorted-sub-workflows/qc_isolates/bin/quast_summary.py"
+    report_tsv = "${meta.ID}_quast_summary.tsv"
+    """
+    ${command} \\
+        --input ${quast_report} \\
+        --output ${report_tsv}
     """
 }
