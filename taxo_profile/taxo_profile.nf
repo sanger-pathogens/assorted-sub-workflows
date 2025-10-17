@@ -33,6 +33,10 @@ workflow TAXO_PROFILE {
         SYLPH_SKETCH(read_ch)
         | SYLPH_PROFILE
         | set { sylph_report }
+
+        SYLPH_PROFILE.out.sylph_report
+        | SYLPHTAX_TAXPROF
+        | set { sylphtax_mpa_report }
     } else {
         sylph_report = channel.empty()
     }
@@ -45,6 +49,7 @@ workflow TAXO_PROFILE {
 
     emit:
     sylph_report
+    sylphtax_mpa_report
     ch_kraken2_style_bracken_reports
 }
 
