@@ -10,7 +10,9 @@
 //
 // MODULES
 //
-include { SYLPH_PROFILE; SYLPH_SKETCH } from './modules/sylph.nf'
+include { SYLPH_SKETCH 
+          SYLPH_PROFILE
+          SYLPHTAX_TAXPROF } from './modules/sylph.nf'
 
 //
 // SUBWORKFLOWS
@@ -28,7 +30,7 @@ workflow TAXO_PROFILE {
     read_ch // meta, read_1, read_2
 
     main:
-     
+    
     if (params.sylph_profile){
         SYLPH_SKETCH(read_ch)
         | SYLPH_PROFILE
@@ -39,6 +41,7 @@ workflow TAXO_PROFILE {
         | set { sylphtax_mpa_report }
     } else {
         sylph_report = channel.empty()
+        sylphtax_mpa_report = channel.empty()
     }
     if (params.bracken_profile){
         KRAKEN2BRACKEN(read_ch)
