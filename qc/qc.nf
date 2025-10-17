@@ -11,7 +11,9 @@
 // MODULES
 //
 include { FASTQC } from './modules/fastqc.nf'
-include { PASS_OR_FAIL_FASTQC; PASS_OR_FAIL_K2B } from './modules/pass_or_fail.nf'
+include { PASS_OR_FAIL_FASTQC
+          PASS_OR_FAIL_K2B
+          PASS_OR_FAIL_SYLPH } from './modules/pass_or_fail.nf'
 
 //
 // SUBWORKFLOWS
