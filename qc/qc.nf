@@ -70,10 +70,8 @@ workflow QC {
     | map { flat_list ->
         flat_list.collate(4) }
     | set { results }
-    
-    results.view()
 
-    RESULTS(results)
+    REPORT(results)
 
     emit:
     multiqc_input
