@@ -42,36 +42,40 @@ workflow QC {
 
     TAXO_PROFILE(read_ch)
 
-    if (params.bracken_profile) {
-        FASTQC.out.zip.collect{it[1,2]}
+    FASTQC.out.zip.collect{it[1,2]}
         | mix(TAXO_PROFILE.out.ch_kraken2_style_bracken_reports.collect{it[1]})
         | collect
         | set { multiqc_input }
-    }
+
+    pass_fail_channel = fastqc_results.map { entry -> [entry[0].ID, entry[1]] }
+
+    if (params.bracken_profile) {
+
+        TAXO_PROFILE.out.ch_kraken2_style_bracken_reports
+        | PASS_OR_FAIL_K2B
+        | set { k2b_results }
+
+        pass_fail_channel = pass_fail_channel.join(k2b_results.map { entry -> [entry[0].ID, entry[1]] })
     
-    else {
-        FASTQC.out.zip.collect { it[1,2] }
-        | collect
-        | set { multiqc_input }
     }
 
-    TAXO_PROFILE.out.ch_kraken2_style_bracken_reports
-    | PASS_OR_FAIL_K2B
-    | set { k2b_results }
+    if (params.sylph_profile) {
+        
+        TAXO_PROFILE.out.sylphtax_mpa_report
+            | PASS_OR_FAIL_SYLPH
+            | set { sylph_results }
 
-    TAXO_PROFILE.out.sylphtax_mpa_report
-    | PASS_OR_FAIL_SYLPH
-    | set { sylph_results }
+        pass_fail_channel = pass_fail_channel.join(sylph_results.map { entry -> [entry[0].ID, entry[1]] })
 
-    fastqc_results
-    | join(k2b_results)
-    | join(sylph_results)
-    | collect
-    | map { flat_list ->
-        flat_list.collate(4) }
-    | set { results }
+    }
 
-    REPORT(results)
+    // map dynamic number of columns into a list of sample lists for reporting
+    pass_fail_channel = pass_fail_channel.collect()
+                        .map { flat -> 
+                        int numCols = 2 + (params.bracken_profile ? 1 : 0) + (params.sylph_profile ? 1 : 0)
+                        flat.collate(numCols) }
+    
+    REPORT(pass_fail_channel)
 
     emit:
     multiqc_input

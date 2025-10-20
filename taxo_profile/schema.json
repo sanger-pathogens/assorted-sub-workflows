@@ -27,7 +27,7 @@
             },
             "classification_level": {
                 "default": "G",
-                "help_text": "Taxonomic rank to analyze for Bracken (Options: 'D', 'P', 'C', 'O', 'F', 'G', 'S'"
+                "help_text": "Taxonomic rank to analyze for Bracken (Options: 'D', 'P', 'C', 'O', 'F', 'G', 'S'). Cannot check the accuracy of classification at species level if bracken classification level is not set to 'S' (species)"
             },
             "read_len": {
                 "default": "150",
