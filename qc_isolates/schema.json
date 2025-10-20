@@ -23,6 +23,10 @@
       "report_config": {
         "default": "./assorted-sub-workflows/qc_isolates/assets/report_config.json",
         "help_text": "Configuration file (JSON) to customise summary report"
+      },
+      "min_contig": {
+        "default": 0 ,
+        "help_text": "Configure the lower threshold for a contig level (in bp). Shorter contigs won't be taken into account, unless required in specific metrics."
       }
     }
   }

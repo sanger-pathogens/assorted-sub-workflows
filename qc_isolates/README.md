@@ -26,6 +26,7 @@ Other parameters:
 
 - `--fasta_ext` (default: `fa`): Set the expected extension of fasta files in the input directories.
 - `--report_config` (default: [`./assets/report_config.json`](./assets/report_config.json)). See [configuration](#configuration) for more details.
+- `--min-contig` (default: 500)  
 
 ## Report configuration
 
