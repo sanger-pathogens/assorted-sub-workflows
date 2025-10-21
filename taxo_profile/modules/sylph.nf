@@ -26,7 +26,7 @@ process SYLPH_PROFILE {
     label 'mem_20'
     label 'time_from_queue_small'
 
-    publishDir "${params.outdir}/${meta.ID}/sylph/", pattern: "*.tsv", mode: 'copy', overwrite: true, enabled: true
+    publishDir "${params.outdir}/${meta.ID}/sylph/", pattern: "*.tsv", mode: 'copy', overwrite: true
 
     container 'gitlab-registry.internal.sanger.ac.uk/sanger-pathogens/docker-images/sylph:0.8.1--ha6fb395_0'
 
