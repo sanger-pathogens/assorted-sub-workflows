@@ -44,7 +44,7 @@ process SYLPH_PROFILE {
 
 process SYLPHTAX_TAXPROF {
     tag "${meta.ID}"
-    label 'cpu_2'
+    label 'cpu_1'
     label 'mem_2'
     label 'time_from_queue_small'
 
