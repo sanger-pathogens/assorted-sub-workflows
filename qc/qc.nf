@@ -47,7 +47,8 @@ workflow QC {
         | collect
         | set { multiqc_input }
 
-    pass_fail_channel = fastqc_results.map { entry -> [entry[0].ID, entry[1]] }
+
+    pass_fail_channel = fastqc_results.map { sample_pass_fail -> [sample_pass_fail[0].ID, sample_pass_fail[1]] } // Sample ID, Pass/Fail status e.g [ERR14241855, pass] 
 
     if (params.bracken_profile) {
 
@@ -55,7 +56,7 @@ workflow QC {
         | PASS_OR_FAIL_K2B
         | set { k2b_results }
 
-        pass_fail_channel = pass_fail_channel.join(k2b_results.map { entry -> [entry[0].ID, entry[1]] })
+        pass_fail_channel = pass_fail_channel.join(k2b_results.map { sample_pass_fail -> [sample_pass_fail[0].ID, sample_pass_fail[1]] })
     
     }
 
@@ -65,7 +66,7 @@ workflow QC {
             | PASS_OR_FAIL_SYLPH
             | set { sylph_results }
 
-        pass_fail_channel = pass_fail_channel.join(sylph_results.map { entry -> [entry[0].ID, entry[1]] })
+        pass_fail_channel = pass_fail_channel.join(sylph_results.map { sample_pass_fail -> [sample_pass_fail[0].ID, sample_pass_fail[1]] })
 
     }
 
