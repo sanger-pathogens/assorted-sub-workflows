@@ -60,7 +60,6 @@ process SYLPHTAX_TAXPROF {
 
     script:
     """
-    echo "${meta.ID}"
     sylph-tax taxprof ${sylph_report} -t ${params.sylphtax_db_tag}
     mv ${meta.ID}.sylphmpa ${meta.ID}_sylphtax_profile.sylphmpa
     """
