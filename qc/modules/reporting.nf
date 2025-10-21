@@ -6,7 +6,7 @@ process REPORT {
     publishDir "${params.outdir}/qc_pass_fail_summary/", pattern: "sample_pass_fail_qc_summary.tsv", mode: 'copy', overwrite: true, enabled: true
 
     input:
-    val pass_fail_channel
+    val(pass_fail_channel)
 
     output:
     path("sample_pass_fail_qc_summary.tsv")
