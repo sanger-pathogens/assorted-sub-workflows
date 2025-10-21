@@ -12,11 +12,11 @@ process SYLPH_SKETCH {
     tuple val(meta), path(read_1), path(read_2)
 
     output:
-    tuple val(meta), path("paired_sketches/${meta.ID}.paired.sylsp"), emit: sketch
+    tuple val(meta), path("${meta.ID}.paired.sylsp"), emit: sketch
 
     script:
     """
-    sylph sketch -t ${task.cpus} -1 ${read_1} -2 ${read_2} -k ${params.sketch_size} -S ${meta.ID} -d paired_sketches
+    sylph sketch -t ${task.cpus} -1 ${read_1} -2 ${read_2} -k ${params.sketch_size} -S ${meta.ID} -d ./
     """
 }
 
