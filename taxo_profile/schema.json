@@ -7,7 +7,7 @@
             },
             "sylph_db":{
                 "default": "/data/pam/software/sylph/gtdb-r226-c200-dbv1/gtdb-r226-c200-dbv1.syldb",
-                "help_text": "Pathway to sylph database."
+                "help_text": "Path to sylph database."
             },
             "save_sylph_sketches":{
                 "default": "false",
