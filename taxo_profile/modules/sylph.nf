@@ -48,7 +48,7 @@ process SYLPHTAX_TAXPROF {
     label 'mem_2'
     label 'time_from_queue_small'
 
-    publishDir "${params.outdir}/${meta.ID}/sylph/", pattern: "*.sylphmpa", mode: 'copy', overwrite: true, enabled: true
+    publishDir "${params.outdir}/${meta.ID}/sylph/", pattern: "*.sylphmpa", mode: 'copy', overwrite: true
 
     container 'gitlab-registry.internal.sanger.ac.uk/sanger-pathogens/docker-images/sylph-tax:1.2.0'
 
