@@ -53,7 +53,7 @@ class InvalidConfig(ValueError):
 
 
 def validate_config(config: dict) -> None:
-    valid_tools = {"GUNC", "CHECKM2", "GTDBTK"}
+    valid_tools = {"GUNC", "CHECKM2", "GTDBTK", "QUAST_SUMMARY"}
     expected_tools = valid_tools & config.keys()
     unexpected_tools = set(config.keys()) - valid_tools
     if expected_tools == set():
@@ -147,19 +147,23 @@ def parse_args():
         "--pre_qc_gunc", type=Path, required=True, help="Path to pre-QC GUNC TSV"
     )
     parser.add_argument(
-        "--post_qc_checkm2",
-        type=Path,
-        required=True,
-        help="Path to post-QC CheckM2 TSV",
+        "--post_qc_checkm2", type=Path, required=True, help="Path to post-QC CheckM2 TSV",
     )
     parser.add_argument(
         "--post_qc_gunc", type=Path, required=True, help="Path to post-QC GUNC TSV"
     )
-    parser.add_argument("--gtdbtk", type=Path, required=True, help="Path to GTDBTK TSV")
+    parser.add_argument(
+        "--gtdbtk", type=Path, required=True, help="Path to GTDBTK TSV"
+    )
+    parser.add_argument(
+        "--quast_summary", type=Path, required=True, help="Path to QUAST_SUMMARY TSV"
+    )
     parser.add_argument(
         "--config", type=Path, required=True, help="Path to report configuration file"
     )
-    parser.add_argument("--output", type=Path, required=True, help="Output TSV path")
+    parser.add_argument(
+        "--output", type=Path, required=True, help="Output TSV path"
+    )
     return parser.parse_args()
 
 
@@ -170,19 +174,21 @@ def main():
     config = read_config(args.config)
 
     args_qc_stage = {
-        "pre_qc_checkm2": "preqc",
-        "pre_qc_gunc": "preqc",
-        "gtdbtk": None,
-        "post_qc_checkm2": "postqc",
-        "post_qc_gunc": "postqc",
+        "pre_qc_checkm2": ["preqc", "checkm2"],
+        "pre_qc_gunc": ["preqc", "gunc"],
+        "gtdbtk": [None, "gtdbtk"],
+        "quast_summary": [None, "quast_summary"],
+        "post_qc_checkm2": ["postqc", "checkm2"],
+        "post_qc_gunc": ["postqc", "gunc"]
     }
 
     dfs = []
-    for arg, qc_stage in args_qc_stage.items():
-        tool = arg.rsplit("_", maxsplit=1)[-1]
-        df = process_input_report(
-            read_tsv(vars(args)[arg], arg), config, tool, qc_stage
-        )
+    for arg, qc in args_qc_stage.items():
+        qc_stage = qc[0]
+        tool = qc[1]
+        df = read_tsv(vars(args)[arg], arg)
+        df = process_input_report(df, config, tool, qc_stage)
+
         if qc_stage == "postqc":
             df = process_postqc_genome_name(df)
         dfs.append(df)

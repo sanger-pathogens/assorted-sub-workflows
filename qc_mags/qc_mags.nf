@@ -3,6 +3,8 @@ include { CHECKM2 as PRE_CHECKM2;
 include { GTDBTK                           } from './modules/gtdbtk.nf'
 include { GUNC as PRE_GUNC;
           GUNC                             } from './modules/gunc.nf'
+include { QUAST;                         
+          QUAST_SUMMARY                    } from './modules/quast.nf'
 include { MDMCLEANER                       } from './modules/mdmcleaner.nf'
 include { SEQKIT                           } from './modules/seqkit.nf'
 include { REPORT                           } from './modules/reporting.nf'
@@ -28,7 +30,9 @@ workflow QC_MAGS {
 
     main:
     fastas
-    | (PRE_CHECKM2 & PRE_GUNC & GTDBTK)
+    | (PRE_CHECKM2 & PRE_GUNC & GTDBTK & QUAST)
+
+    QUAST.out.results | QUAST_SUMMARY
 
     fastas
     | MDMCLEANER
@@ -53,6 +57,7 @@ workflow QC_MAGS {
     | join(CHECKM2.out.results)
     | join(GUNC.out.results)
     | join(GTDBTK.out.results)
+    | join(QUAST_SUMMARY.out.results)
     | combine(Channel.fromPath(params.report_config))
     | REPORT
 
