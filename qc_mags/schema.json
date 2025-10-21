@@ -34,7 +34,10 @@
       "autoqc_config": {
         "default": "null",
         "help_text": "Optional parameter to filter MAGs that pass QC thresholds specified in the config. When applying this option you must either provide the path to a config or with the string 'default' use the provided config."
-      }
+      },
+      "min_contig": {
+        "default": 0 ,
+        "help_text": "Configure the lower threshold for a contig level (in bp). Shorter contigs won't be taken into account, unless required in specific metrics."
     }
   }
 }
