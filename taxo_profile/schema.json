@@ -31,7 +31,7 @@
             },
             "read_len": {
                 "default": "150",
-                "help_text": "Ideal length of reads in the sample"
+                "help_text": "Expected length of reads in the sample"
             }
         }
     }
