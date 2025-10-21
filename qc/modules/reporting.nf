@@ -3,7 +3,7 @@ process REPORT {
     label 'mem_2'
     label 'time_30m'
 
-    publishDir "${params.outdir}/qc_pass_fail_summary/", pattern: "sample_pass_fail_qc_summary.tsv", mode: 'copy', overwrite: true, enabled: true
+    publishDir "${params.outdir}/qc_pass_fail_summary/", pattern: "sample_pass_fail_qc_summary.tsv", mode: 'copy', overwrite: true
 
     input:
     val(pass_fail_channel)
