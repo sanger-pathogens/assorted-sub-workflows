@@ -20,6 +20,10 @@
             "bracken_profile":{
                 "default": "null",
                 "help_text": "Run Kraken2–Bracken for taxonomic classification."
+            },
+            "sylphtax_db_tag": {
+                "default": "/data/pam/software/sylph-tax/v1/gtdb_r226_metadata.tsv",
+                "help_text": "Path to taxonomy metadata for sylph (list of sylph-tax identifiers)"
             }
         }
     },
