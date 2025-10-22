@@ -21,21 +21,27 @@
                 "default": "null",
                 "help_text": "Run Kraken2–Bracken for taxonomic classification."
             },
-            "kraken2_db":{
+            "sylphtax_db_tag": {
+                "default": "/data/pam/software/sylph-tax/v1/gtdb_r226_metadata.tsv",
+                "help_text": "Path to taxonomy metadata for sylph (list of sylph-tax identifiers)"
+            }
+        }
+    },
+    "overwrite_params": {
+
+            "kraken2_db": {
                 "default": "/data/pam/software/kraken2/standard/k2_standard_20250402",
                 "help_text": "Pathway to Kraken2 database."
             },
-            "classification_level": {
-                "default": "G",
+            "bracken_classification_level": {
+                "default": "S",
                 "help_text": "Taxonomic rank to analyze for Bracken (Options: 'D', 'P', 'C', 'O', 'F', 'G', 'S'). Cannot check the accuracy of classification at species level if bracken classification level is not set to 'S' (species)"
             },
             "read_len": {
                 "default": "150",
                 "help_text": "Expected length of reads in the sample"
-            }
-        }
+            }  
     }
 }
-
 
 

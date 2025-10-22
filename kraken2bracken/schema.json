@@ -22,7 +22,7 @@
                 "default": null,
                 "help_text": "Ideal length of reads in sample"
             },
-            "classification_level": {
+            "bracken_classification_level": {
                 "default": "S",
                 "help_text": "Taxonomic rank to analyze for Bracken (Options: 'D', 'P', 'C', 'O', 'F', 'G', 'S')"
             },
@@ -37,7 +37,7 @@
             "enable_building": {
                 "default": false,
                 "help_text": "Include this flag to enable automatic building of kraken2 db if not found on disc"
-            },
+            }
         }
     }
 }
