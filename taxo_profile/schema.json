@@ -3,7 +3,7 @@
         "taxo profile Subworkflow Options": {
             "sylph_profile": {
                 "default": "true",
-                "help_text": "Run sylph profiling."
+                "help_text": "Run sylph taxonomic classification."
             },
             "sylph_db":{
                 "default": "/data/pam/software/sylph/gtdb-r226-c200-dbv1/gtdb-r226-c200-dbv1.syldb",
@@ -23,7 +23,7 @@
             },
             "bracken_profile":{
                 "default": "false",
-                "help_text": "Run Kraken2–Bracken for taxonomic classification."
+                "help_text": "Run Kraken2Bracken taxonomic classification."
             }
         }
     },
