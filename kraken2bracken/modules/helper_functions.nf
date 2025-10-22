@@ -91,7 +91,7 @@ def validate_parameters() {
     errors += validate_kraken2_db_for_bracken_build("--kraken2_db", params.kraken2_db)
     errors += validate_number_param("--read_len", params.read_len)
     errors += validate_number_param("--kmer_len", params.kmer_len)
-    errors += validate_choice_param("--classification_level", params.classification_level, ['D','P','C','O','F','G','S'])
+    errors += validate_choice_param("--bracken_classification_level", params.bracken_classification_level, ['D','P','C','O','F','G','S'])
     errors += validate_number_param("--threshold", params.threshold)
     errors += validate_choice_param("--get_classified_reads", params.get_classified_reads, [true, false])
     errors += validate_number_param("--kraken2_threads", params.kraken2_threads)
