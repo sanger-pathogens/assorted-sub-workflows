@@ -36,12 +36,12 @@ All relevant files are currently published in sample and process-specific direct
 
    Example:
    ```bash
-   nextflow run . --input ./test_data/inputs/test_manifest.csv --read_len 150 --threshold 1 --classification_level 'G' --kraken2_threads 10 --outdir my_output
+   nextflow run . --input ./test_data/inputs/test_manifest.csv --read_len 150 --threshold 1 --bracken_classification_level 'S' --kraken2_threads 10 --outdir my_output
    ```
 
    It is good practice to submit a dedicated job for the nextflow master process (use the `oversubscribed` queue):
    ```bash
-   bsub -o output.o -e error.e -q oversubscribed -R "select[mem>4000] rusage[mem=4000]" -M4000 nextflow run . --input ./test_data/inputs/test_manifest.csv --read_len 150 --threshold 1 --classification_level 'G' --kraken2_threads 10 --outdir my_output
+   bsub -o output.o -e error.e -q oversubscribed -R "select[mem>4000] rusage[mem=4000]" -M4000 nextflow run . --input ./test_data/inputs/test_manifest.csv --read_len 150 --threshold 1 --bracken_classification_level 'G' --kraken2_threads 10 --outdir my_output
    ```
 
    See [usage](#usage) for all available pipeline options.
@@ -75,18 +75,18 @@ Please run scripts with `-h` option for information on usage.
 Usage:
     nextflow run main.nf
 Options:
-    --input                      Manifest containing per-sample paths to .fastq.gz files (mandatory)
-    --kraken2_db                 Path to Kraken2 database (mandatory)
-    --read_len                   Ideal length of reads in sample (mandatory)
-    --kmer_len                   Length of kmers [Default: 35] (optional)
-    --classification_level       Taxonomic rank to analyze for bracken2. Available options are 'D','P','C','O','F','G','S' [Default: 'S'] (optional)
-    --threshold                  Minimum number of reads required for a classification at the specified classification_level [Default: 10] (optional)
-    --get_classified_reads       Generate .fastq.gz files containing classified and unclassified reads for each sample [Default: False] (optional)
-    --kraken2_threads            Threads to use for kraken2 [Default: 4] (optional)
-    --bracken_threads            Threads to use for bracken [Default: 4] (optional)
-    --outdir                     Specify output directory [Default: ./results] (optional)
-    --enable_building            allow for the building of new kmer indexes should the requested not exist. default: false
-    --help                       Print this help message (optional)
+    --input                            Manifest containing per-sample paths to .fastq.gz files (mandatory)
+    --kraken2_db                       Path to Kraken2 database (mandatory)
+    --read_len                         Ideal length of reads in sample (mandatory)
+    --kmer_len                         Length of kmers [Default: 35] (optional)
+    --bracken_classification_level     Taxonomic rank to analyze for bracken2. Available options are 'D','P','C','O','F','G','S' [Default: 'S'] (optional)
+    --threshold                        Minimum number of reads required for a classification at the specified classification_level [Default: 10] (optional)
+    --get_classified_reads             Generate .fastq.gz files containing classified and unclassified reads for each sample [Default: False] (optional)
+    --kraken2_threads                  Threads to use for kraken2 [Default: 4] (optional)
+    --bracken_threads                  Threads to use for bracken [Default: 4] (optional)
+    --outdir                           Specify output directory [Default: ./results] (optional)
+    --enable_building                  allow for the building of new kmer indexes should the requested not exist. default: false
+    --help                             Print this help message (optional)
 ```
 
 ## Credits

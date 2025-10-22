@@ -34,8 +34,22 @@
                 "help_text": "Expected length of reads in the sample"
             }
         }
+    },
+    "overwrite_params": {
+
+            "kraken2_db": {
+                "default": "/data/pam/software/kraken2/standard/k2_standard_20250402",
+                "help_text": "Pathway to Kraken2 database."
+            },
+            "bracken_classification_level": {
+                "default": "S",
+                "help_text": "Taxonomic rank to analyze for Bracken (Options: 'D', 'P', 'C', 'O', 'F', 'G', 'S'). Cannot check the accuracy of classification at species level if bracken classification level is not set to 'S' (species)"
+            },
+            "read_len": {
+                "default": 150,
+                "help_text": "Expected length of reads in the sample"
+            }  
     }
 }
-
 
 
