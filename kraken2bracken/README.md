@@ -41,7 +41,7 @@ All relevant files are currently published in sample and process-specific direct
 
    It is good practice to submit a dedicated job for the nextflow master process (use the `oversubscribed` queue):
    ```bash
-   bsub -o output.o -e error.e -q oversubscribed -R "select[mem>4000] rusage[mem=4000]" -M4000 nextflow run . --input ./test_data/inputs/test_manifest.csv --read_len 150 --threshold 1 --bracken_classification_level 'G' --kraken2_threads 10 --outdir my_output
+   bsub -o output.o -e error.e -q oversubscribed -R "select[mem>4000] rusage[mem=4000]" -M4000 nextflow run . --input ./test_data/inputs/test_manifest.csv --read_len 150 --threshold 1 --bracken_classification_level 'S' --kraken2_threads 10 --outdir my_output
    ```
 
    See [usage](#usage) for all available pipeline options.
