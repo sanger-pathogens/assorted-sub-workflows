@@ -40,6 +40,7 @@ process PIPELINE_EVENTS_OPEN_BATCH {
     val(method_url)
     val(methodname)
     val(methodshort)
+
     output:
     val(batchuuid),  emit: batch_uuid
 
@@ -56,10 +57,6 @@ process PIPELINE_EVENTS_CLOSE_BATCH {
     label 'time_from_queue_small'
 
     container 'gitlab-registry.internal.sanger.ac.uk/sanger-pathogens/pipeline-event-api/pipeline-event-api:v1.0.2'
-
-    // no input as really we only need to query this once per run based on pipeline own info
-    //input:
-    //val(pipeline_manifest) // map
 
     input:
     val(batchuuid)

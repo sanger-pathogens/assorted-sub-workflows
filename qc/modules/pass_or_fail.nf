@@ -39,10 +39,46 @@ process PASS_OR_FAIL_K2B {
 
     script:
     """
-    top_genus_abun=\$(grep -P 'G\t' ${report} | cut -f1 | sort -n | tail -1)
-    top_species_abun=\$(grep -P 'S\t' ${report} | cut -f1 | sort -n | tail -1)
-    genus_check=\$(echo "\$top_genus_abun < ${params.genus_abundance_threshold}" | bc)
-    species_check=\$(echo "\$top_species_abun < ${params.species_abundance_threshold}" | bc)
-    pass_or_fail=\$(if [ \$genus_check -eq 1 ] || [ \$species_check -eq 1 ]; then echo 'fail'; else echo 'pass'; fi)
+    if [[ "${params.bracken_profile}" == "true" ]]; then
+        top_genus_abun=\$(grep -P 'G\t' ${report} | cut -f1 | sort -n | tail -1)
+        genus_check=\$(echo "\$top_genus_abun < ${params.genus_abundance_threshold}" | bc)
+        if [ "${params.bracken_classification_level}" == "S" ] ; then
+            top_species_abun=\$(grep -P 'S\t' ${report} | cut -f1 | sort -n | tail -1)
+            species_check=\$(echo "\$top_species_abun < ${params.species_abundance_threshold}" | bc)
+        else
+            echo "Cannot check the accuracy of classification at species level if bracken classification level is not set to 'S' (species)"
+            species_check=1
+        fi
+        pass_or_fail=\$(if [ \$genus_check -eq 1 ] || [ \$species_check -eq 1 ]; then echo 'fail'; else echo 'pass'; fi)
+    else
+        pass_or_fail=\$(echo "NA")
+    fi  
+    """
+}
+
+process PASS_OR_FAIL_SYLPH {
+    tag "${meta.ID}"
+    label 'cpu_1'
+    label 'mem_1'
+    label 'time_30m'
+
+    input:
+    tuple val(meta), path(report)
+
+    output:
+    tuple val(meta), env(pass_or_fail), emit: pass_or_fail
+
+    script:
+    """
+    if [ "${params.sylph_profile}" = "true" ]; then
+        top_genus_abun=\$(grep -P '|g__[^|]\\+\\t' ${report} | cut -f2 | sort -n | tail -1)
+        top_species_abun=\$(grep -P '|s__[^|]\\+\\t' ${report} | cut -f2 | sort -n | tail -1)
+        genus_check=\$(echo "\$top_genus_abun < ${params.genus_abundance_threshold}" | bc)
+        species_check=\$(echo "\$top_species_abun < ${params.species_abundance_threshold}" | bc)
+        pass_or_fail=\$(if [ \$genus_check -eq 1 ] || [ \$species_check -eq 1 ]; then echo 'fail'; else echo 'pass'; fi)
+
+    else
+        pass_or_fail=\$(echo "NA")
+    fi 
     """
 }
