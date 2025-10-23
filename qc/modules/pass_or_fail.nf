@@ -71,8 +71,8 @@ process PASS_OR_FAIL_SYLPH {
     script:
     """
     if [ "${params.sylph_profile}" = "true" ]; then
-        top_genus_abun=\$(grep -P '|g__[^|]\\+\\t' ${report} | cut -f2 | sort -n | tail -1)
-        top_species_abun=\$(grep -P '|s__[^|]\\+\\t' ${report} | cut -f2 | sort -n | tail -1)
+        top_genus_abun=\$(grep -P '\|g__[^|]\\+\\t' ${report} | cut -f2 | sort -n | tail -1)
+        top_species_abun=\$(grep -P '\|s__[^|]\\+\\t' ${report} | cut -f2 | sort -n | tail -1)
         genus_check=\$(echo "\$top_genus_abun < ${params.genus_abundance_threshold}" | bc)
         species_check=\$(echo "\$top_species_abun < ${params.species_abundance_threshold}" | bc)
         pass_or_fail=\$(if [ \$genus_check -eq 1 ] || [ \$species_check -eq 1 ]; then echo 'fail'; else echo 'pass'; fi)
