@@ -19,7 +19,13 @@ process GTDBTK {
     """
     export GTDBTK_DATA_PATH="${params.gtdbtk_db}"
 
-    gtdbtk classify_wf --genome_dir fastas -x ${params.fasta_ext} --skip_ani_screen --cpus ${task.cpus} --out_dir gtdbtk_outdir --scratch_dir ${tmp_dir}
+    temp_file_storage=\$(mktemp -d -p "${params.temp_file_storage}" gtdbtk_scratch_XXXXXXXX)
+
+    ###add this in after the run works:
+    ###cleanup() { rm -rf "\$temp_file_storage"; }
+    ###trap cleanup EXIT
+
+    gtdbtk classify_wf --genome_dir fastas -x ${params.fasta_ext} --skip_ani_screen --cpus ${task.cpus} --out_dir gtdbtk_outdir --scratch_dir "\$temp_file_storage"
 
     cp gtdbtk_outdir/gtdbtk.bac*.summary.tsv ${report_tsv}
     """
