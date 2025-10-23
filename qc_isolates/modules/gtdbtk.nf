@@ -27,7 +27,7 @@ process GTDBTK {
     fi
 
     temp_file_storage=\$(mktemp -d -p "${params.temp_file_storage}" gtdbtk_temp_XXXXXXXX)
-    echo "GTDB-Tk scratch dir: $temp_file_storage" >&2
+    echo "GTDB-Tk scratch dir: \$temp_file_storage" >&2
 
     ###add this in after the run works:
     ###cleanup() { rm -rf "\$temp_file_storage"; }
