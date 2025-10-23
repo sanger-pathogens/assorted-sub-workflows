@@ -136,3 +136,36 @@ process PIPELINE_EVENTS_CREATE_BATCH_MANIFEST_FILE {
 
     
 }
+
+workflow PIPELINE_EVENTS_INIT {
+
+    main:
+    PIPELINE_GET_METHOD() 
+    | PIPELINE_EVENTS_OPEN_BATCH
+    | PIPELINE_EVENTS_CREATE_BATCH_MANIFEST_FILE 
+
+    emit:
+    batch_uuid = PIPELINE_EVENTS_OPEN_BATCH.out.batch_uuid
+    batch_manifest = PIPELINE_EVENTS_CREATE_BATCH_MANIFEST_FILE.out.created_file_path
+}
+
+
+workflow PIPELINE_EVENTS_END {
+
+    take:
+    batch_uuid
+    batch_manifest
+    created_file_id_paths
+
+    main:
+    created_file_id_paths
+    .map{ runid, filepath -> filepath }
+    .mix(batch_manifest)
+    .count()
+    .set{ created_file_count }
+
+    PIPELINE_EVENTS_CLOSE_BATCH(batch_uuid, created_file_id_paths)
+
+    emit:
+    created_file_id_paths
+}
