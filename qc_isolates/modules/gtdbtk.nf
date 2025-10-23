@@ -17,9 +17,17 @@ process GTDBTK {
     script:
     report_tsv = "${meta.ID}_gtdbtk_summary.tsv"
     """
+    set -euo pipefail
     export GTDBTK_DATA_PATH="${params.gtdbtk_db}"
 
-    temp_file_storage=\$(mktemp -d -p "${params.temp_file_storage}" gtdbtk_scratch_XXXXXXXX)
+    if [ ! -d "${params.temp_file_storage}" ]; then
+    echo "Creating temp storage parent: ${params.temp_file_storage}"
+    mkdir -p "${params.temp_file_storage}"
+    
+    fi
+
+    temp_file_storage=\$(mktemp -d -p "${params.temp_file_storage}" gtdbtk_temp_XXXXXXXX)
+    echo "GTDB-Tk scratch dir: $temp_file_storage" >&2
 
     ###add this in after the run works:
     ###cleanup() { rm -rf "\$temp_file_storage"; }
@@ -31,3 +39,4 @@ process GTDBTK {
     """
 
 }
+
