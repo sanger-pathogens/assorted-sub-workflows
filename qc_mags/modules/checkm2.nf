@@ -6,10 +6,11 @@ process CHECKM2 {
 
     container  'quay.io/biocontainers/checkm2:1.0.2--pyh7cba7a3_0'
 
-    publishDir mode: 'copy', path: "${params.outdir}/checkm2/"
+    publishDir mode: 'copy', path: "${params.outdir}/${qc_stage}/checkm2/", enabled: !(params.skip_raw_reports)
 
     input:
     tuple val(meta), path(fastas, stageAs: "fastas/*")
+    val(qc_stage)
 
     output:
     tuple val(meta), path(report_tsv), emit: results

@@ -29,10 +29,14 @@ workflow QC_MAGS {
     fastas  // [meta, [1.fasta, 2.fasta, ...]]
 
     main:
-    fastas
-    | (PRE_CHECKM2 & PRE_GUNC & GTDBTK & QUAST)
+    pre_qc = Channel.value("pre_qc")
+    
+    PRE_CHECKM2(fastas, pre_qc)
+    PRE_GUNC(fastas, pre_qc)
+    GTDBTK(fastas, pre_qc)
+    QUAST(fastas, pre_qc)
 
-    QUAST.out.results | QUAST_SUMMARY
+    QUAST_SUMMARY(QUAST.out.results, pre_qc)
 
     fastas
     | MDMCLEANER
@@ -49,8 +53,10 @@ workflow QC_MAGS {
     }
     | set { postqc_fastas }
 
-    postqc_fastas
-    | (CHECKM2 & GUNC)
+    post_qc = Channel.value("post_qc")
+
+    CHECKM2(postqc_fastas, post_qc)
+    GUNC(postqc_fastas, post_qc)
 
     PRE_CHECKM2.out.results
     | join(PRE_GUNC.out.results)

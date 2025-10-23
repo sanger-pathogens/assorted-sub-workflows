@@ -38,6 +38,11 @@
       "min_contig": {
         "default": 0 ,
         "help_text": "Configure the lower threshold for a contig level (in bp). Shorter contigs won't be taken into account, unless required in specific metrics."
+      },
+      "skip_raw_reports": {
+        "default": "false",
+        "help_text": "Skip publishing raw reports from various QC tools, keeping only final summary reports."
+      }
     }
   }
 }
