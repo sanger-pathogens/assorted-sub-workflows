@@ -27,7 +27,6 @@ process PIPELINE_GET_METHOD {
     Map pipeline_mani_params = workflow.manifest as Map + params as Map
     """
     echo "method url: $methodurl; method name: $methodname, method short name: $methodshort"
-    echo -e "pipeline manifest and run parameters:\n${pipeline_mani_params_json}"
     """
 }
 
