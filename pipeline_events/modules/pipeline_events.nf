@@ -161,11 +161,14 @@ workflow PIPELINE_EVENTS_END {
     created_file_id_paths
     .map{ runid, filepath -> filepath }
     .mix(batch_manifest)
+    .set { all_created_file_paths }
+
+    all_created_file_paths
     .count()
     .set{ created_file_count }
 
-    PIPELINE_EVENTS_CLOSE_BATCH(batch_uuid, created_file_id_paths)
+    PIPELINE_EVENTS_CLOSE_BATCH(batch_uuid, created_file_count)
 
     emit:
-    created_file_id_paths
+    all_created_file_paths
 }
