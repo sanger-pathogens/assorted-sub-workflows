@@ -18,5 +18,10 @@ process SEQKIT {
     finalName = "cleaned_${fasta.getBaseName()}" 
     """
     seqkit seq ${fasta} -m ${params.min_contig} > ${finalName}
+
+    if [[ ! -s ${finalName} ]]; then
+        ## If the fasta file output is empty
+        exit 3
+    fi
     """
 }
