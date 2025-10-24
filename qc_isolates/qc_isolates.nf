@@ -1,5 +1,6 @@
 include { CHECKM2                   } from './modules/checkm2.nf'
-include { GTDBTK                    } from './modules/gtdbtk.nf'
+include { GTDBTK;
+          skip_GTDBTK               } from './modules/gtdbtk.nf'
 include { GUNC                      } from './modules/gunc.nf'
 include { QUAST;                         
           QUAST_SUMMARY             } from './modules/quast.nf'
@@ -11,8 +12,13 @@ workflow QC_ISOLATES {
     fastas
 
     main:
-    fastas
-    | (GTDBTK & QUAST) 
+    if (params.gtdbtk_silence) {
+        fastas
+        | (skip_GTDBTK & QUAST) 
+    } else {
+        fastas
+        | (GTDBTK & QUAST) 
+    }
 
     QUAST.out.results | QUAST_SUMMARY
 
