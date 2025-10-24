@@ -20,8 +20,7 @@ process SEQKIT {
     seqkit seq ${fasta} -m ${params.min_contig} > ${finalName}
 
     if [[ ! -s ${finalName} ]]; then
-        ## If the fasta file output is empty
-        exit 3
+        echo "Assembly (fasta) ${finalName} is empty after filtering contigs < ${params.min_contig} bp" 1>&2 && exit 3
     fi
     """
 }
