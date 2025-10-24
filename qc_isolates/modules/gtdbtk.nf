@@ -1,10 +1,11 @@
 process GTDBTK {
     tag "${meta.ID}"
     label "cpu_8"
-    label "mem_120"
     label "time_12"
 
-    container  'quay.io/biocontainers/gtdbtk:2.4.1--pyhdfd78af_1'
+    label { params.temp_file_storage ? 'mem_16' : 'mem_120' }
+
+    container 'quay.io/biocontainers/gtdbtk:2.4.1--pyhdfd78af_1'
 
     publishDir mode: 'copy', path: "${params.outdir}/gtdbtk/"
 
@@ -15,25 +16,32 @@ process GTDBTK {
     tuple val(meta), path(report_tsv), emit: results
 
     script:
+    def scratch_dir_base = params.temp_file_storage
+    def use_scratch = (scratch_dir_base != null)
+
+    def scratch_setup = use_scratch ? """
+        [[ -d "${scratch_dir_base}" ]] || { echo "Creating scratch base: ${scratch_dir_base}"; mkdir -p "${scratch_dir_base}"; }
+        SCRATCH_DIR=\$(mktemp -d -p "${scratch_dir_base}" gtdbtk_temp_XXXXXXXX)
+        echo "GTDB-Tk scratch dir: \$SCRATCH_DIR" >&2
+        cleanup() { rm -rf "\$SCRATCH_DIR"; }
+        trap cleanup EXIT
+
+
+    """ : """
+        echo "GTDB-Tk running WITHOUT --scratch_dir" >&2
+        SCRATCH_DIR=""
+    """
+
     report_tsv = "${meta.ID}_gtdbtk_summary.tsv"
+
     """
     set -euo pipefail
     export GTDBTK_DATA_PATH="${params.gtdbtk_db}"
 
-    if [ ! -d "${params.temp_file_storage}" ]; then
-    echo "Creating temp storage parent: ${params.temp_file_storage}"
-    mkdir -p "${params.temp_file_storage}"
-    
-    fi
+    ${scratch_setup}
 
-    temp_file_storage=\$(mktemp -d -p "${params.temp_file_storage}" gtdbtk_temp_XXXXXXXX)
-    echo "GTDB-Tk scratch dir: \$temp_file_storage" >&2
-
-    ###add this in after the run works:
-    ###cleanup() { rm -rf "\$temp_file_storage"; }
-    ###trap cleanup EXIT
-
-    gtdbtk classify_wf --genome_dir fastas -x ${params.fasta_ext} --skip_ani_screen --cpus ${task.cpus} --out_dir gtdbtk_outdir --scratch_dir "\$temp_file_storage"
+    gtdbtk classify_wf --genome_dir fastas -x ${params.fasta_ext} --skip_ani_screen --cpus ${task.cpus} --out_dir gtdbtk_outdir \\
+        $( [ -n "\$SCRATCH_DIR" ] && echo "--scratch_dir \$SCRATCH_DIR" )
 
     cp gtdbtk_outdir/gtdbtk.bac*.summary.tsv ${report_tsv}
     """
