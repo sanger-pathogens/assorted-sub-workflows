@@ -47,7 +47,7 @@ workflow QC_MAGS {
     }
     | transpose
     | SEQKIT
-    | groupTuple
+    | groupTuple(remainder: true)
     | map { group_key, meta, fasta_list ->
         [ meta.first(), fasta_list ]
     }
