@@ -4,7 +4,7 @@ process PIPELINE_GET_METHOD {
     // prpepare Shelf tracking of output files - to apply once for the whole pipeline run
     label 'cpu_1'
     label 'mem_1'
-    label 'time_from_queue_small'
+    label 'time_queue_from_small'
 
     // no input as really we only need to query this once per run based on pipeline own info
     //input:
@@ -35,7 +35,7 @@ process PIPELINE_GET_METHOD {
 process PIPELINE_EVENTS_OPEN_BATCH {
     label 'cpu_1'
     label 'mem_1'
-    label 'time_from_queue_small'
+    label 'time_queue_from_small'
 
     container 'gitlab-registry.internal.sanger.ac.uk/sanger-pathogens/pipeline-event-api/pipeline-event-api:v1.0.2'
 
@@ -65,7 +65,7 @@ process PIPELINE_EVENTS_OPEN_BATCH {
 process PIPELINE_EVENTS_CLOSE_BATCH {
     label 'cpu_1'
     label 'mem_1'
-    label 'time_from_queue_small'
+    label 'time_queue_from_small'
 
     container 'gitlab-registry.internal.sanger.ac.uk/sanger-pathogens/pipeline-event-api/pipeline-event-api:v1.0.2'
 
@@ -82,7 +82,7 @@ process PIPELINE_EVENTS_CLOSE_BATCH {
 process PIPELINE_EVENTS_CREATE_FILE {
     label 'cpu_1'
     label 'mem_1'
-    label 'time_from_queue_small'
+    label 'time_queue_from_small'
 
     container 'gitlab-registry.internal.sanger.ac.uk/sanger-pathogens/pipeline-event-api/pipeline-event-api:v1.0.2'
 
@@ -112,7 +112,7 @@ process PIPELINE_EVENTS_CREATE_FILE {
 process PIPELINE_EVENTS_CREATE_BATCH_MANIFEST_FILE {
     label 'cpu_1'
     label 'mem_1'
-    label 'time_from_queue_small'
+    label 'time_queue_from_small'
 
     container 'gitlab-registry.internal.sanger.ac.uk/sanger-pathogens/pipeline-event-api/pipeline-event-api:v1.0.2'
 
