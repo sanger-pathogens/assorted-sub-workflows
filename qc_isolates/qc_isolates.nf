@@ -12,7 +12,7 @@ workflow QC_ISOLATES {
     fastas
 
     main:
-    if (params.gtdbtk_silence) {
+    if (params.skip_gtdbtk) {
         fastas
         | (skip_GTDBTK & QUAST) 
     } else {
