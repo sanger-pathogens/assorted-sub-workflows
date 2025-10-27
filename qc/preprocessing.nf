@@ -1,10 +1,12 @@
-include {TRIMMOMATIC} from "../modules/trimmomatic.nf"
-include {FASTQ2FASTA} from "../modules/fastq2fasta.nf"
-include {TRF} from "../modules/trf.nf"
-include {RMREPEATFROMFASTQ} from "../modules/rmRepeatFromFq.nf"
-include {SRA_HUMAN_SCRUBBER} from "../modules/scrubber.nf"
-include {COMPRESS_READS; RENAME_READS} from "../modules/helper_processes.nf"
-include {SEQTK_MERGEPE; SEQTK_SPLIT} from "../modules/seqtk.nf"
+include { TRIMMOMATIC        } from "/modules/trimmomatic.nf"
+include { FASTQ2FASTA        } from "/modules/fastq2fasta.nf"
+include { TRF                } from "/modules/trf.nf"
+include { RMREPEATFROMFASTQ  } from "/modules/rmRepeatFromFq.nf"
+include { SRA_HUMAN_SCRUBBER } from "/modules/scrubber.nf"
+include { COMPRESS_READS; 
+          RENAME_READS       } from "/modules/helper_processes.nf"
+include { SEQTK_MERGEPE; 
+          SEQTK_SPLIT        } from "/modules/seqtk.nf"
 
 workflow PREPROCESSING {
     /*
