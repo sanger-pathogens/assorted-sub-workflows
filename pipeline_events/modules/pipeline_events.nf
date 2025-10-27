@@ -24,8 +24,9 @@ process PIPELINE_GET_METHOD {
     methodshort = (pipelineurl as Path).getSimpleName()
     methodurl = workflow.manifest.version == "{{${methodshort}_version}}" ? "${pipelineurl}" : "${pipelineurl}/-/tree/${workflow.manifest.version}"
     methodname = workflow.manifest.name
-    println workflow.manifest
-    Map pipeline_mani_params = workflow.manifest as Map + params as Map
+    // println workflow.manifest
+    // Map pipeline_mani_params = workflow.manifest as Map + params as Map
+    Map pipeline_mani_params = params as Map
     """
     echo "method url: $methodurl; method name: $methodname, method short name: $methodshort"
     """
