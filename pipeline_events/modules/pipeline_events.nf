@@ -37,7 +37,7 @@ process PIPELINE_EVENTS_OPEN_BATCH {
     label 'mem_1'
     label 'time_queue_from_small'
 
-    container 'gitlab-registry.internal.sanger.ac.uk/sanger-pathogens/pipeline-event-api/pipeline-event-api:v1.0.2'
+    container "${params.pipeline_events_container}"
 
     publishDir "${params.outdir}/pipeline_info/", pattern: "*.json", mode: 'copy', overwrite: true
 
@@ -67,7 +67,7 @@ process PIPELINE_EVENTS_CLOSE_BATCH {
     label 'mem_1'
     label 'time_queue_from_small'
 
-    container 'gitlab-registry.internal.sanger.ac.uk/sanger-pathogens/pipeline-event-api/pipeline-event-api:v1.0.2'
+    container "${params.pipeline_events_container}"
 
     input:
     val(batchuuid)
@@ -84,7 +84,7 @@ process PIPELINE_EVENTS_CREATE_FILE {
     label 'mem_1'
     label 'time_queue_from_small'
 
-    container 'gitlab-registry.internal.sanger.ac.uk/sanger-pathogens/pipeline-event-api/pipeline-event-api:v1.0.2'
+    container "${params.pipeline_events_container}"
 
     input:
     tuple val(meta), path(resultfileWorkPath), val(resultfilePublishedDir) // val(resultfilePublishedDir), not path() so no to stage folder
@@ -114,7 +114,7 @@ process PIPELINE_EVENTS_CREATE_BATCH_MANIFEST_FILE {
     label 'mem_1'
     label 'time_queue_from_small'
 
-    container 'gitlab-registry.internal.sanger.ac.uk/sanger-pathogens/pipeline-event-api/pipeline-event-api:v1.0.2'
+    container "${params.pipeline_events_container}"
 
     input:
     val(batchuuid)
