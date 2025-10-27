@@ -2,6 +2,12 @@
 
 
 process FASTQ2FASTA {
+
+    label 'mem_1'
+    label 'time_1'
+    label 'cpu_1'
+    tag {meta.ID}
+    container "quay.io/gsu-pipelines/rvi-vp-basecontainer"
     /*
     *             Process: fastq_to_fasta
 
@@ -35,18 +41,16 @@ process FASTQ2FASTA {
 
     * --------------------------------------------------------------
     */
-    tag {meta.id}
-    container "quay.io/gsu-pipelines/rvi-vp-basecontainer"
 
     input:
         tuple val(meta), path(fastq_1), path(fastq_2) 
 
     output:
-        tuple val(meta), path("${meta.id}_1.fasta"), path("${meta.id}_2.fasta")
+        tuple val(meta), path("${meta.ID}_1.fasta"), path("${meta.ID}_2.fasta")
 
     script:
     """
-    ${params.script_src_path}fastq2fasta.py ${fastq_1} -o ${meta.id}_1.fasta
-    ${params.script_src_path}fastq2fasta.py ${fastq_2} -o ${meta.id}_2.fasta
+    ${params.script_src_path}fastq2fasta.py ${fastq_1} -o ${meta.ID}_1.fasta
+    ${params.script_src_path}fastq2fasta.py ${fastq_2} -o ${meta.ID}_2.fasta
     """
 }
