@@ -1,6 +1,3 @@
-
-
-
 process FASTQ2FASTA {
 
     label 'mem_1'
