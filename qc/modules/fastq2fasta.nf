@@ -1,4 +1,4 @@
-params.script_src_path="${projectDir}/rvi_toolbox/bin/" 
+
 
 
 process FASTQ2FASTA {

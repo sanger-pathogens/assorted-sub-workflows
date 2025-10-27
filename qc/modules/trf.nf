@@ -1,6 +1,3 @@
-// those are the default option used by kneaddata
-params.trf_cli_options= '2 7 7 80 10 50 500 -h -ngs' //"2 5 7 80 10 50 2000 -h -ngs"
-
 process TRF {
     tag "${meta.id}"
     label 'mem_1'

@@ -1,10 +1,3 @@
-// this default script path should work out of the box on any pipeline.
-params.script_src_path="${projectDir}/rvi_toolbox/bin/" 
-
-// NOTE: the main reason this param was added is to allow to run tests under
-//       rvi_toolbox dir
-
-
 process RMREPEATFROMFASTQ {
     tag "${meta.id}"
     publishDir enabled: params.debug_preproc_output, "${params.results_dir}/${meta.id}/preprocessing/", mode: "copy", pattern:"*.{trf,fastq}"
