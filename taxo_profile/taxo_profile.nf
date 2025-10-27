@@ -46,14 +46,17 @@ workflow TAXO_PROFILE {
     if (params.bracken_profile){
         KRAKEN2BRACKEN(read_ch)
         ch_kraken2_style_bracken_reports = KRAKEN2BRACKEN.out.ch_kraken2_style_bracken_reports
+        ch_mpa_abundance_reports = KRAKEN2BRACKEN.out.ch_mpa_abundance_reports
     } else {
         ch_kraken2_style_bracken_reports = channel.empty()
+        ch_mpa_abundance_reports = channel.empty()
     }
 
     emit:
     sylph_report
     sylphtax_mpa_report
     ch_kraken2_style_bracken_reports
+    ch_mpa_abundance_reports
 }
 
 /*

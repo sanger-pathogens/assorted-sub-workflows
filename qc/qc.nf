@@ -80,6 +80,10 @@ workflow QC {
 
     emit:
     multiqc_input
+    kraken2_style_bracken_reports = TAXO_PROFILE.out.ch_kraken2_style_bracken_reports
+    bracken_mpa_reports = TAXO_PROFILE.out.ch_mpa_abundance_reports
+    sylphtax_mpa_report = TAXO_PROFILE.out.sylphtax_mpa_report
+    qc_summary = REPORT.out.qc_summary
 }
 
 /*
