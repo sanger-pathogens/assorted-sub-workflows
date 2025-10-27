@@ -1,14 +1,15 @@
 process TRIMMOMATIC {
-    tag "${meta.id}"
+    tag "${meta.ID}"
     label 'mem_1'
     label 'time_1'
-    cpus params.trimmomatic_threads
+    label 'cpu_4'
+    // cpus params.trimmomatic_threads
 
     container "quay.io/biocontainers/trimmomatic:0.39--1"
 
     // publish only the gz version
-    publishDir enabled: params.debug_preproc_output, mode: 'copy', failOnError: true, pattern: "${output_1_gz}", path: "${params.results_dir}/${meta.id}/preprocessing/trimmed_reads/"
-    publishDir enabled: params.debug_preproc_output, mode: 'copy', failOnError: true, pattern: "${output_2_gz}", path: "${params.results_dir}/${meta.id}/preprocessing/trimmed_reads/"
+    publishDir enabled: params.debug_preproc_output, mode: 'copy', failOnError: true, pattern: "${output_1_gz}", path: "${params.results_dir}/${meta.ID}/preprocessing/trimmed_reads/"
+    publishDir enabled: params.debug_preproc_output, mode: 'copy', failOnError: true, pattern: "${output_2_gz}", path: "${params.results_dir}/${meta.ID}/preprocessing/trimmed_reads/"
 
     input:
     tuple val(meta), path(extracted_R1), path(extracted_R2)
@@ -18,14 +19,14 @@ process TRIMMOMATIC {
     tuple val(meta), path(output_1_gz), path(output_2_gz)
 
     script:
-    output_1="${meta.id}_trimmed_1.fastq"
-    output_2="${meta.id}_trimmed_2.fastq"
+    output_1="${meta.ID}_trimmed_1.fastq"
+    output_2="${meta.ID}_trimmed_2.fastq"
     output_1_gz = "${output_1}.gz"
     output_2_gz = "${output_2}.gz"
-    output_1_unpaired="${meta.id}_trimmed_unpaired_1.fastq"
-    output_2_unpaired="${meta.id}_trimmed_unpaired_2.fastq"
+    output_1_unpaired="${meta.ID}_trimmed_unpaired_1.fastq"
+    output_2_unpaired="${meta.ID}_trimmed_unpaired_2.fastq"
     """
-    trimmomatic PE -phred33 -threads ${params.trimmomatic_threads} ${extracted_R1} ${extracted_R2} \
+    trimmomatic PE -phred33 -threads ${task.cpus} ${extracted_R1} ${extracted_R2} \
     ${output_1} ${output_1_unpaired} \
     ${output_2} ${output_2_unpaired} \
     ${params.trimmomatic_options}
