@@ -9,7 +9,7 @@ process REPORT {
     val(pass_fail_channel)
 
     output:
-    path("sample_pass_fail_qc_summary.tsv")
+    path("sample_pass_fail_qc_summary.tsv"), emit: qc_summary
 
     script:
 
