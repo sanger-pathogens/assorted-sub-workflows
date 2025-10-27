@@ -12,15 +12,12 @@ workflow QC_ISOLATES {
 
     main:
     fastas
-    | (GTDBTK & QUAST) 
-
-    QUAST.out.results | QUAST_SUMMARY
-
-    fastas
     | (SEQKIT)
 
     SEQKIT.out.results
-    | (CHECKM2 & GUNC)
+    | (CHECKM2 & GUNC & GTDBTK & QUAST)
+
+    QUAST.out.results | QUAST_SUMMARY
  
     CHECKM2.out.results
     | join(GUNC.out.results)
