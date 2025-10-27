@@ -137,6 +137,26 @@ process PIPELINE_EVENTS_CREATE_BATCH_MANIFEST_FILE {
     
 }
 
+process ADD_RESULTFILE_PATH {
+    label 'cpu_1'
+    label 'mem_1'
+    label 'local'
+
+    input:
+    tuple val(meta), path(resultfileWorkPath)
+    val(outputfoldertag)
+
+    output:
+    tuple val(meta), path(resultfileWorkPath), val(resultfilePublishedDir)
+
+    script:
+    if ("${params.save_method}" == "flat" & "${outputfoldertag}".endsWith("fastqs")){
+        resultfilePublishedDir = "${params.outdir}/${outputfoldertag}"
+    } else {
+        resultfilePublishedDir = "${params.outdir}/${meta.ID}/${outputfoldertag}"
+    }
+}
+
 workflow PIPELINE_EVENTS_INIT {
 
     main:
