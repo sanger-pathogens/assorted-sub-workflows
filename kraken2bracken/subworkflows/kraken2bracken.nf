@@ -104,14 +104,11 @@ workflow KRAKEN2BRACKEN{
         .map { meta, report -> report }
         .unique{ it -> it.name }
         .collect()
-        .dump(tag: 'mpa_abundance_reports')
-        .set { ch_mpa_abundance_reports }
-    GENERATE_ABUNDANCE_SUMMARY(
-        ch_mpa_abundance_reports
-    )
+        | GENERATE_ABUNDANCE_SUMMARY
 
     emit:
     ch_kraken2_style_bracken_reports = BRACKEN.out.kraken_style_bracken_report
+    ch_mpa_abundance_reports = KREPORT2MPA.out.mpa_abundance_report
     kraken2_report_for_multiqc = ch_kraken2_report_and_kmer_distrib
 }
 
