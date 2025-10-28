@@ -7,10 +7,10 @@ process SEQTK_MERGEPE {
     container 'quay.io/biocontainers/seqtk:1.4--he4a0461_2'
 
     input:
-        tuple val(meta), path(read_1), path(read_2)
+    tuple val(meta), path(read_1), path(read_2)
 
     output:
-        tuple val(meta), path("${meta.ID}_interleaved.fq")
+    tuple val(meta), path("${meta.ID}_interleaved.fq")
 
     script:
 
@@ -27,14 +27,14 @@ process SEQTK_SPLIT{
 
     container 'quay.io/biocontainers/seqtk:1.4--he4a0461_2'
 
-    publishDir enabled: params.debug_preproc_output, "${params.results_dir}/${meta.ID}/preprocessing/", mode: "copy", pattern:"*.fq"
+    publishDir enabled: params.debug_preproc_output, "${params.outdir}/${meta.ID}/preprocessing/", mode: "copy", pattern:"*.fq"
 
     input:
-        tuple val(meta), path(interleaved_fq)
-        val(suffix)
+    tuple val(meta), path(interleaved_fq)
+    val(suffix)
 
     output:
-        tuple val(meta), path("${meta.ID}_${suffix}_split_1.fq"), path("${meta.ID}_${suffix}_split_2.fq")
+    tuple val(meta), path("${meta.ID}_${suffix}_split_1.fq"), path("${meta.ID}_${suffix}_split_2.fq")
 
     script:
     

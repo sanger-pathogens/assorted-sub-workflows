@@ -8,8 +8,8 @@ process TRIMMOMATIC {
     container "quay.io/biocontainers/trimmomatic:0.39--1"
 
     // publish only the gz version
-    publishDir enabled: params.debug_preproc_output, mode: 'copy', failOnError: true, pattern: "${output_1_gz}", path: "${params.results_dir}/${meta.ID}/preprocessing/trimmed_reads/"
-    publishDir enabled: params.debug_preproc_output, mode: 'copy', failOnError: true, pattern: "${output_2_gz}", path: "${params.results_dir}/${meta.ID}/preprocessing/trimmed_reads/"
+    publishDir enabled: params.debug_preproc_output, mode: 'copy', failOnError: true, pattern: "${output_1_gz}", path: "${params.outdir}/${meta.ID}/preprocessing/trimmed_reads/"
+    publishDir enabled: params.debug_preproc_output, mode: 'copy', failOnError: true, pattern: "${output_2_gz}", path: "${params.outdir}/${meta.ID}/preprocessing/trimmed_reads/"
 
     input:
     tuple val(meta), path(extracted_R1), path(extracted_R2)

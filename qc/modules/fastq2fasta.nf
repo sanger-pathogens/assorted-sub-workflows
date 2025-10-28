@@ -40,10 +40,10 @@ process FASTQ2FASTA {
     */
 
     input:
-        tuple val(meta), path(fastq_1), path(fastq_2) 
+    tuple val(meta), path(fastq_1), path(fastq_2) 
 
     output:
-        tuple val(meta), path("${meta.ID}_1.fasta"), path("${meta.ID}_2.fasta")
+    tuple val(meta), path("${meta.ID}_1.fasta"), path("${meta.ID}_2.fasta")
 
     script:
     """

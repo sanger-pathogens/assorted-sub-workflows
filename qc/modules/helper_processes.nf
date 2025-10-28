@@ -4,7 +4,7 @@ process COMPRESS_READS {
     label 'cpu_1'
     label 'time_queue_from_small_slow2'
 
-    publishDir "${params.results_dir}/${meta.ID}/preprocessing/", mode: "copy"
+    publishDir "${params.outdir}/${meta.ID}/preprocessing/", mode: "copy"
     
     input:
     tuple val(meta), path(read_1), path(read_2)
@@ -27,7 +27,7 @@ process RENAME_READS {
     label 'cpu_1'
     label 'time_30m'
 
-    publishDir "${params.results_dir}/${meta.id}/preprocessing/", mode: "copy"
+    publishDir "${params.outdir}/${meta.id}/preprocessing/", mode: "copy"
 
     input:
     tuple val(meta), path(reads_1), path(reads_2)
