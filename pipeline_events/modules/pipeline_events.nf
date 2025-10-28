@@ -15,7 +15,7 @@ process PIPELINE_GET_METHOD {
     val(methodurl),  emit: method_url
     val(methodname), emit: method_name // might not match what we've decided to put in Shelf, but good way to provide consistent value or auto-populate
     val(methodshort), emit: method_short // same as above, might be used as a convenient label for searches
-    val(pipeline_mani_params), emit: pipeline_manifest_params
+    // val(pipeline_mani_params), emit: pipeline_manifest_params
 
     script:
     // relying on manifest scope from main config file 
@@ -27,7 +27,7 @@ process PIPELINE_GET_METHOD {
     methodname = workflow.manifest.name
     // println workflow.manifest
     // Map pipeline_mani_params = workflow.manifest as Map + params as Map
-    Map pipeline_mani_params = params as Map
+    // Map pipeline_mani_params = params as Map
     """
     echo "method url: $methodurl; method name: $methodname, method short name: $methodshort"
     """
@@ -47,7 +47,7 @@ process PIPELINE_EVENTS_OPEN_BATCH {
     val(method_url)
     val(methodname)
     val(methodshort)
-    val(pipeline_mani_params)
+    // val(pipeline_mani_params)
 
     output:
     val(batchuuid),  emit: batch_uuid
@@ -55,6 +55,7 @@ process PIPELINE_EVENTS_OPEN_BATCH {
 
     script:
     batchuuid = UUID.randomUUID().toString()
+    Map pipeline_mani_params = params as Map
     pipeline_mani_params["batchuuid"] = batchuuid
     pipeline_mani_params_json = new JsonBuilder(pipeline_mani_params).toPrettyString()
     batch_mani_params_out = "pipeline_manifest_run_params_batch_${batchuuid}.json"
@@ -163,7 +164,7 @@ process ADD_RESULTFILE_PATH {
         resultfilePublishedDirAbsPath = file(resultfilePublishedDirRelPath).toAbsolutePath().toString()
     }
     """
-    echo "file path to track: ${resultfilePublishedDirRelPath}"
+    echo "file path to track: ${resultfilePublishedDirAbsPath}"
     """
 }
 
