@@ -23,7 +23,7 @@ process SPLIT_READS {
     tag "${meta.ID}"
     label 'cpu_1'
     label 'mem_1'
-    label 'time_1'
+    label 'time_12'
 
     container 'quay.io/sangerpathogens/python-curl:3.11'
 
