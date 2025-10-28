@@ -4,13 +4,13 @@ process SRA_HUMAN_SCRUBBER {
     label "mem_10"
     label "time_queue_form_normal"
 
+    container "quay.io/biocontainers/sra-human-scrubber:1.0.2021_05_05--hdfd78af_0"
 
-    container "quay.io/gsu-pipelines/rvi-pp-sra-human-scrubber:v1.0"
     input:
-        tuple val(meta), path(interleaved_fastq)
+    tuple val(meta), path(interleaved_fastq)
 
     output:
-        tuple val(meta), path("${meta.ID}_interleaved_clean.fastq") //path("${meta.ID}_1_clean.fastq"), path("${meta.ID}_2_clean.fastq")
+    tuple val(meta), path("${meta.ID}_interleaved_clean.fastq") //path("${meta.ID}_1_clean.fastq"), path("${meta.ID}_2_clean.fastq")
 
     script:
     """
