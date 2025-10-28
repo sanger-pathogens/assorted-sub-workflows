@@ -19,7 +19,7 @@ process GTDBTK {
     report_tsv = "${meta.ID}_gtdbtk_summary.tsv"
 
     """
-    if [[ ! -z ${params.temp_file_storage} ]]; then
+    if [[ -n ${params.temp_file_storage} && "${params.temp_file_storage}" != "null" ]]; then
         [[ -d "${params.temp_file_storage}" ]] || { echo "Creating scratch base: ${params.temp_file_storage}"; mkdir -p "${params.temp_file_storage}"; }
         SCRATCH_DIR=\$(mktemp -d -p "${params.temp_file_storage}" gtdbtk_temp_XXXXXXXX)
         echo "GTDB-Tk scratch dir: \$SCRATCH_DIR" >&2
