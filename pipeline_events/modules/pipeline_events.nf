@@ -60,7 +60,7 @@ process PIPELINE_EVENTS_OPEN_BATCH {
     batch_mani_params_json = new JsonBuilder(batch_mani_params).toPrettyString()
     batch_mani_params_out = "pipeline_manifest_run_params_batch_${batchuuid}.json"
     """
-    echo "${pipeline_mani_params_json}" > ${batch_mani_params_out}
+    echo "${batch_mani_params_json}" > ${batch_mani_params_out}
     send_pipeline_event open --batch_id ${batchuuid} --pipeline_name ${methodname} --pipeline_url ${method_url}
     """
 }
