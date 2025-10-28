@@ -1,4 +1,5 @@
-import groovy.json.JsonBuilder
+import groovy.json.JsonBuilder;
+import java.nio.file.LinkOption;
 
 process PIPELINE_GET_METHOD {
     // prpepare Shelf tracking of output files - to apply once for the whole pipeline run
@@ -148,13 +149,18 @@ process ADD_RESULTFILE_PATH {
     val(outputfoldertag)
 
     output:
-    tuple val(meta), path(resultfileWorkPath), val(resultfilePublishedDir)
+    tuple val(meta), path(resultfileWorkPath), val(resultfilePublishedDirAbsPath)
 
     script:
     if ("${params.save_method}" == "flat" & "${outputfoldertag}".endsWith("fastqs")){
-        resultfilePublishedDir = "${params.outdir}/${outputfoldertag}"
+        resultfilePublishedDirRelPath = "${params.outdir}/${outputfoldertag}"
     } else {
-        resultfilePublishedDir = "${params.outdir}/${meta.ID}/${outputfoldertag}"
+        resultfilePublishedDirRelPath = "${params.outdir}/${meta.ID}/${outputfoldertag}"
+    }
+    if (!params.pipeline_events_follow_links) {
+        resultfilePublishedDirAbsPath = file(resultfilePublishedDirRelPath).toRealPath(LinkOption.NOFOLLOW_LINKS).toString()
+    } else {
+        resultfilePublishedDirAbsPath = file(resultfilePublishedDirRelPath).toAbsolutePath().toString()
     }
 }
 
