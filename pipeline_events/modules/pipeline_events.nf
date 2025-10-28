@@ -121,17 +121,17 @@ process PIPELINE_EVENTS_CREATE_BATCH_MANIFEST_FILE {
 
     input:
     val(batchuuid)
-    path(batch_manifest_params)
+    path(batchManifestfileWorkPath)
 
     output:
     tuple val(meta.ID), val(batchManifestfilePublishedFullPath),  emit: created_file_path // val(batchManifestfilePublishedFullPath), not path() so no to stage the file that's outside the work folder
     val(file_type)
 
     script:
-    batchManifestfileName = batch_manifest_params.name.toString()
+    batchManifestfileName = batchManifestfileWorkPath.name.toString()
     batchManifestfilePublishedFullPath = "${params.outdir}/pipeline_info/${batchManifestfileName}"
     """
-    filemd5=\$(md5sum ${batchManifestfilePublishedFullPath} | cut -d' ' -f1)
+    filemd5=\$(md5sum ${batchManifestfileWorkPath} | cut -d' ' -f1)
     send_pipeline_event file --batch_id ${batchuuid} --path ${batchManifestfilePublishedFullPath} --file_type "batch_manifest" \\
                                 --md5sum \${filemd5} \\
                                 --username \$(id -un) --group \$(id -gn)
