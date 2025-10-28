@@ -27,6 +27,14 @@
       "min_contig": {
         "default": 0 ,
         "help_text": "Configure the lower threshold for a contig level (in bp). Shorter contigs won't be taken into account, unless required in specific metrics."
+      },
+      "temp_file_storage": {
+        "default": "null",
+        "help_text": "Specify a directory where GTDBTk can store temporary files during processing (see README for more information). Options are '/dev/shm', '/tmp'. If 'null' work directory will be utilised."
+      },
+      "tmp_space": {
+        "default": "30GB",
+        "help_text": "Temporary space required for running the workflow (see README for more information)."
       }
     }
   }
