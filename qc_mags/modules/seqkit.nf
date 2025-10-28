@@ -18,5 +18,9 @@ process SEQKIT {
     finalName = "cleaned_${fasta.getBaseName()}" 
     """
     seqkit seq ${fasta} -m ${params.min_contig} > ${finalName}
+
+    if [[ ! -s ${finalName} ]]; then
+        echo "Assembly (fasta) ${finalName} is empty after filtering contigs < ${params.min_contig} bp" 1>&2 && exit 3
+    fi
     """
 }

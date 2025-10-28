@@ -106,3 +106,9 @@ Please note - if you add the parameter `--autoqc_config` but do not supply eithe
 ### Dependencies
 
 All dependencies are containerised. The [report.py](./bin/report.py) is used for the `REPORTING` process to generate the TSV summary.
+
+### Troubleshooting
+
+If a process in the pipeline fails with a non-zero exit code that is not recognised as a signal that memory or runtime limits were reached, the process will not be re-run and will be ignored. To understand why it has been ignored, please check the process-specific log file `.command.log` in the work directory of the affected process.
+
+On the Sanger farm (HPC), a post-run script is available to automatically show the end of these log files (where informative messages can often be found) and return affected sample identifiers. See [here](https://ssg-confluence.internal.sanger.ac.uk/spaces/PaMI/pages/181078206/General+pipeline+info#Generalpipelineinfo-Usingthepipelinetracefile) for more details.
