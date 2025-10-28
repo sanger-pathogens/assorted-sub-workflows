@@ -162,6 +162,9 @@ process ADD_RESULTFILE_PATH {
     } else {
         resultfilePublishedDirAbsPath = file(resultfilePublishedDirRelPath).toAbsolutePath().toString()
     }
+    """
+    echo "file path to track: ${resultfilePublishedDirRelPath}"
+    """
 }
 
 workflow PIPELINE_EVENTS_INIT {
