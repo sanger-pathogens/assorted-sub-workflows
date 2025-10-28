@@ -131,8 +131,8 @@ process PIPELINE_EVENTS_CREATE_BATCH_MANIFEST_FILE {
     batchManifestfileName = batch_manifest_params.name.toString()
     batchManifestfilePublishedFullPath = "${params.outdir}/pipeline_info/${batchManifestfileName}"
     """
-    filemd5=\$(md5sum ${resultfileWorkPath} | cut -d' ' -f1)
-    send_pipeline_event file --batch_id ${batchuuid} --path ${resultfilePublishedFullPath} --file_type "batch_manifest" \\
+    filemd5=\$(md5sum ${batchManifestfilePublishedFullPath} | cut -d' ' -f1)
+    send_pipeline_event file --batch_id ${batchuuid} --path ${batchManifestfilePublishedFullPath} --file_type "batch_manifest" \\
                                 --md5sum \${filemd5} \\
                                 --username \$(id -un) --group \$(id -gn)
     """
