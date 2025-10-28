@@ -32,7 +32,7 @@
         "default": "null",
         "help_text": "Specify a directory where GTDBTk can store temporary files during processing (see README for more information). Options are '/dev/shm', '/tmp'. If 'null' work directory will be utilised."
       },
-      "tmp_space": {
+      "temp_space": {
         "default": "30GB",
         "help_text": "Temporary space required for running the workflow (see README for more information)."
       }
