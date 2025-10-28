@@ -66,8 +66,7 @@ NOTE: In addition to columns derived from the tool reports, the script includes 
 
 ### GTDB-Tk runtime
 
-- Runtime and memory can be reduced for GTDB-Tk classficiation by specifying the `--temp_file_storage` option with either `/tmp` or `/dev/shm`. Writing these file to disk instead of keeping everything in memory reduces peak RAM usage by up to 89% and can improve runtime by up to 10%. This often allows the job to run with a smaller memory request, meaning it can start faster on cluster schedulers. 
-- From testing 
+- Runtime and memory can be reduced for GTDB-Tk classficiation by specifying the `--temp_file_storage` option with either `/tmp` or `/dev/shm`. Writing these files to disk instead of keeping everything in memory reduces peak RAM usage by up to 89% and can improve runtime by up to 10%. This often allows the job to run with a smaller memory request, meaning it can start faster on cluster schedulers. 
 - If you know the size of your samples you can request a specific temp memory using `--tmp_space <XX>GB`. This lets you reserve a specific amount of temporary memory/disk space.
 ### Dependencies
 
