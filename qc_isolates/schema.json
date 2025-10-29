@@ -34,7 +34,7 @@
       },
       "temp_space": {
         "default": "30GB",
-        "help_text": "Temporary space required for running the workflow (see README for more information)."
+        "help_text": "Request a specific amount of temporary working space to reserve for GTDB-Tk."
       }
     }
   }
