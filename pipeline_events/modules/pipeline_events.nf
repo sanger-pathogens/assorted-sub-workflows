@@ -87,7 +87,7 @@ process PIPELINE_EVENTS_CLOSE_BATCH {
     """
 }
 
-process GET_RESULTFILE_PATH {
+process GATHER_RESULTFILE_INFO {
     label 'cpu_1'
     label 'mem_1'
     label 'local'
@@ -129,7 +129,7 @@ process PIPELINE_EVENTS_CREATE_FILE {
     tuple val(meta), path(resultfileWorkPath), val(resultfilePublishedDir), val(file_type), val(batchuuid) // val(resultfilePublishedDir), not path() so not to stage folder
 
     output:
-    tuple val(outid), val(resultfilePublishedFullPath), val(file_type),  emit: created_file_id_path // val(resultfilePublishedFullPath), not path() so not to stage the file that's outside the work folder
+    tuple val(outid), val(resultfilePublishedFullPath), val(file_type),  emit: created_file_info // val(resultfilePublishedFullPath), not path() so not to stage the file that's outside the work folder
 
     script:
     runid = meta.ID
@@ -156,12 +156,12 @@ workflow PIPELINE_EVENTS_INIT {
 
     batch_uuid = PIPELINE_EVENTS_OPEN_BATCH.out.batch_uuid
     
-    GET_RESULTFILE_PATH(PIPELINE_EVENTS_OPEN_BATCH.out.batch_manifest_params, "pipeline_info", "batch_manifest", batch_uuid)
+    GATHER_RESULTFILE_INFO(PIPELINE_EVENTS_OPEN_BATCH.out.batch_manifest_params, "pipeline_info", "batch_manifest", batch_uuid)
     | PIPELINE_EVENTS_CREATE_FILE
 
     emit:
     batch_uuid
-    batch_manifest = PIPELINE_EVENTS_CREATE_FILE.out.created_file_id_path
+    batch_manifest = PIPELINE_EVENTS_CREATE_FILE.out.created_file_info
 }
 
 
@@ -170,10 +170,10 @@ workflow PIPELINE_EVENTS_END {
     take:
     batch_uuid
     batch_manifest
-    created_file_id_paths
+    created_file_infos
 
     main:
-    created_file_id_paths
+    created_file_infos
     .map{ runid, filepath, filetype -> filepath }
     .mix(batch_manifest)
     .set { all_created_file_paths }
@@ -185,5 +185,5 @@ workflow PIPELINE_EVENTS_END {
     PIPELINE_EVENTS_CLOSE_BATCH(batch_uuid, created_file_count)
 
     emit:
-    all_created_file_paths
+    all_created_file_infos
 }
