@@ -27,15 +27,15 @@ process PIPELINE_GET_METHOD {
     methodurl = workflow.manifest.version == "{{${methodshort}_version}}" ? "${pipelineurl}" : "${pipelineurl}/-/tree/${workflow.manifest.version}"
     methodname = workflow.manifest.name
     // workflow.manifest does not have a toMap() method, so building map manually; need to cast to ReflectField to avoid conflict with groovy Field
-    Map pipeline_manifest = [:]
+    LinkedHashMap pipeline_manifest = [:]
     ReflectField[] fields = workflow.manifest.getClass().getFields();
     for(ReflectField f : fields){
         Object v = f.get(workflow.manifest);
         pipeline_manifest[f.getName()] = v;
     }
-    Map pipeline_mani_params = [:]
+    LinkedHashMap pipeline_mani_params = [:]
     pipeline_mani_params["pipeline_manifest"] = pipeline_manifest
-    pipeline_mani_params["params"] = params as Map
+    pipeline_mani_params["params"] = params as LinkedHashMap
     """
     echo "method url: $methodurl; method name: $methodname, method short name: $methodshort"
     """
