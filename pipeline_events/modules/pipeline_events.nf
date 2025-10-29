@@ -1,5 +1,4 @@
 import groovy.json.JsonBuilder;
-import java.nio.file.LinkOption;
 import java.lang.reflect.Field as ReflectField;
 
 process PIPELINE_GET_METHOD {
@@ -104,7 +103,8 @@ process GATHER_RESULTFILE_INFO {
     // could be exec block here maybe, given shell script is there purely to avoid returning last declared variable
     script:
     if (!params.pipeline_events_follow_links) {
-        outDirAbsPath = file(params.outdir).toRealPath(LinkOption.NOFOLLOW_LINKS).toString()
+        pwd = file(System.getenv("PWD"))
+        outDirAbsPath = pwd.resolve(params.outdir).normalize().toString()
     } else {
         outDirAbsPath = file(params.outdir).toAbsolutePath().toString()
     }
