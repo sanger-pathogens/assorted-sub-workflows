@@ -21,7 +21,7 @@ process SEQKIT {
 
     for fasta in fastas/*.${params.fasta_ext}; do
         base=\$(basename "\$fasta")
-        seqkit seq "\$fasta" -m ${params.min_contig} > fasta_out/filtered_\$base
+        seqkit seq "\$fasta" -m ${params.min_contig} > fasta_out/\$base
     done
     """
 }
