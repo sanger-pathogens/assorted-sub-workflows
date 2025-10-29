@@ -28,7 +28,7 @@ Other parameters:
 - `--report_config` (default: [`./assets/report_config.json`](./assets/report_config.json)). See [configuration](#configuration) for more details.
 - `--min-contig` (default: 1000)  
 - `--temp_file_storage` (default: `null`): Specify a directory where GTDB-Tk can store temporary files during processing. Options are '/dev/shm', '/tmp'. See [GTDB-Tk runtime](#gdtbk-runtime) for more details.
-- `--tmp_space` (default: `30GB`): Request a specific size of tmp file. See [GTDB-Tk runtime](#gdtbk-runtime) for more details.
+- `--temp_space` (default: `30GB`): Request a specific amount of temporary working space to reserve for GTDB-Tk. See [GTDB-Tk runtime](#gdtbk-runtime) for more details.
 
 ## Report configuration
 
