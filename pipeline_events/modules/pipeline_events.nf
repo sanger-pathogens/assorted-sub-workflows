@@ -1,5 +1,4 @@
 import groovy.json.JsonBuilder;
-import java.lang.reflect.Field as ReflectField;
 
 process PIPELINE_GET_METHOD {
     // prpepare Shelf tracking of output files - to apply once for the whole pipeline run
@@ -23,13 +22,8 @@ process PIPELINE_GET_METHOD {
     methodshort = (pipelineurl as Path).getSimpleName()
     methodurl = workflow.manifest.version == "{{${methodshort}_version}}" ? "${pipelineurl}" : "${pipelineurl}/-/tree/${workflow.manifest.version}"
     methodname = workflow.manifest.name
-    // workflow.manifest does not have a toMap() method, so building map manually; need to cast to ReflectField to avoid conflict with groovy Field
-    LinkedHashMap pipeline_manifest = [:]
-    ReflectField[] fields = workflow.manifest.getClass().getFields();
-    for(ReflectField f : fields){
-        Object v = f.get(workflow.manifest);
-        pipeline_manifest[f.getName()] = v;
-    }
+    // Collect pipeline metadata into a map
+    pipeline_manifest = workflow.manifest.toMap()
     pipeline_mani_params = [:] // https://www.nextflow.io/docs/latest/reference/syntax.html#variable-declaration "Variables declared in the process script, exec, and stub sections exist only in their respective section, with one exception – variables declared without the def keyword also exist in the output section"
     pipeline_mani_params["pipeline_manifest"] = pipeline_manifest
     pipeline_mani_params["params"] = params as LinkedHashMap
