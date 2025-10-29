@@ -181,7 +181,7 @@ workflow PIPELINE_EVENTS_END {
 
     all_created_file_infos
     .groupTuple(by: 2)
-    .map { file_id_paths, file_type -> [file_type, file_id_paths.size()] }
+    .map { ids, file_id_paths, file_type -> [file_type, file_id_paths.size()] }
     .tap { created_file_count_per_type }
     .subscribe { file_count_per_type -> log.info("Created file counts per type: ${file_count_per_type}") }
 
