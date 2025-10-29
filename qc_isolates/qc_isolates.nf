@@ -3,7 +3,6 @@ include { GTDBTK                    } from './modules/gtdbtk.nf'
 include { GUNC                      } from './modules/gunc.nf'
 include { QUAST;                         
           QUAST_SUMMARY             } from './modules/quast.nf'
-include { SEQKIT                    } from './modules/seqkit.nf'
 include { REPORT                    } from './modules/reporting.nf'
 
 workflow QC_ISOLATES {
