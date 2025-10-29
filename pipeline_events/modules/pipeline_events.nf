@@ -6,7 +6,7 @@ process PIPELINE_GET_METHOD {
     // prpepare Shelf tracking of output files - to apply once for the whole pipeline run
     label 'cpu_1'
     label 'mem_1'
-    label 'time_queue_from_small'
+    label 'local'
 
     // no input as really we only need to query this once per run based on pipeline own info
     //input:
@@ -138,7 +138,8 @@ process PIPELINE_EVENTS_CREATE_FILE {
     outid = (runid == null) ? batchuuid : runid
     resultfileName = resultfileWorkPath.name.toString()
     resultfilePublishedFullPath = "${resultfilePublishedDir}/${resultfileName}"
-    runassociationOptString = (file_type == "batch_manifest") ? "" : "--association RUN --association_id ${runid}"
+    // runassociationOptString = (file_type == "batch_manifest") ? "" : "--association RUN --association_id ${runid}"
+    runassociationOptString = "--association RUN --association_id ${runid}" // in waiting for the API to allow not using these options for batch_manifest type
     """
     filemd5=\$(md5sum ${resultfileWorkPath} | cut -d' ' -f1)
     send_pipeline_event file --batch_id ${batchuuid} --path ${resultfilePublishedFullPath} --file_type ${file_type} \\
