@@ -66,9 +66,9 @@ process PIPELINE_EVENTS_OPEN_BATCH {
     // Map batch_mani_params = params as Map
     batch_mani_params["batchuuid"] = batchuuid
     batch_mani_params_json = new JsonBuilder(batch_mani_params).toPrettyString()
-    batch_mani_params_out = file(task.workDir.resolve("pipeline_manifest_run_params_batch_${batchuuid}.json"))
-    batch_mani_params_out.text = batch_mani_params_json
+    batch_mani_params_out = "pipeline_manifest_run_params_batch_${batchuuid}.json"
     """
+    echo '${batch_mani_params_json}' > ${batch_mani_params_out}
     send_pipeline_event open --batch_id ${batchuuid} --pipeline_name ${methodname} --pipeline_url ${method_url}
     """
 }
