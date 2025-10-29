@@ -161,7 +161,7 @@ workflow PIPELINE_EVENTS_INIT {
 
     emit:
     batch_uuid
-    batch_manifest = PIPELINE_EVENTS_CREATE_FILE.out.created_file_info
+    batch_manifest_info = PIPELINE_EVENTS_CREATE_FILE.out.created_file_info
 }
 
 
@@ -169,16 +169,17 @@ workflow PIPELINE_EVENTS_END {
 
     take:
     batch_uuid
-    batch_manifest
+    batch_manifest_info
     created_file_infos
 
     main:
     created_file_infos
+    .mix(batch_manifest_info)
+    .tap{ all_created_file_infos }
     .map{ runid, filepath, filetype -> filepath }
-    .mix(batch_manifest)
-    .set { all_created_file_infos }
+    .set { all_created_file_paths }
 
-    all_created_file_infos
+    all_created_file_paths
     .count()
     .tap{ created_file_count }
     .subscribe{ log.info("Total created file count: ${it}") }
@@ -192,6 +193,7 @@ workflow PIPELINE_EVENTS_END {
     PIPELINE_EVENTS_CLOSE_BATCH(batch_uuid, created_file_count)
 
     emit:
+    all_created_file_paths
     all_created_file_infos
     created_file_count
     created_file_count_per_type
