@@ -95,10 +95,13 @@ process GET_RESULTFILE_PATH {
     input:
     tuple val(meta), path(resultfileWorkPath)
     val(outputfoldertag)
+    val(file_type)
+    val(batchuuid)
 
     output:
-    tuple val(meta), path(resultfileWorkPath), val(resultfilePublishedDirAbsPath),  emit: resultfile_publisheddir
+    tuple val(meta), path(resultfileWorkPath), val(resultfilePublishedDirAbsPath), val(file_type), val(batchuuid), emit: file_info
 
+    // could be exec block here maybe, given shell script is there purely to avoid returning last declared variable
     script:
     if (!params.pipeline_events_follow_links) {
         outDirAbsPath = file(params.outdir).toRealPath(LinkOption.NOFOLLOW_LINKS).toString()
@@ -123,8 +126,7 @@ process PIPELINE_EVENTS_CREATE_FILE {
     container "${params.pipeline_events_container}"
 
     input:
-    tuple val(meta), path(resultfileWorkPath), val(resultfilePublishedDir), val(file_type) // val(resultfilePublishedDir), not path() so not to stage folder
-    val(batchuuid)
+    tuple val(meta), path(resultfileWorkPath), val(resultfilePublishedDir), val(file_type), val(batchuuid) // val(resultfilePublishedDir), not path() so not to stage folder
 
     output:
     tuple val(outid), val(resultfilePublishedFullPath), val(file_type),  emit: created_file_id_path // val(resultfilePublishedFullPath), not path() so not to stage the file that's outside the work folder
@@ -151,13 +153,14 @@ workflow PIPELINE_EVENTS_INIT {
     main:
     PIPELINE_GET_METHOD() 
     | PIPELINE_EVENTS_OPEN_BATCH
-    
-    GET_RESULTFILE_PATH(PIPELINE_EVENTS_OPEN_BATCH.out.batch_manifest_params, "pipeline_info")
 
-    PIPELINE_EVENTS_CREATE_FILE(GET_RESULTFILE_PATH.out.resultfile_publisheddir, "batch_manifest", PIPELINE_EVENTS_OPEN_BATCH.out.batch_uuid)
+    batch_uuid = PIPELINE_EVENTS_OPEN_BATCH.out.batch_uuid
+    
+    GET_RESULTFILE_PATH(PIPELINE_EVENTS_OPEN_BATCH.out.batch_manifest_params, "pipeline_info", "batch_manifest", batch_uuid)
+    | PIPELINE_EVENTS_CREATE_FILE
 
     emit:
-    batch_uuid = PIPELINE_EVENTS_OPEN_BATCH.out.batch_uuid
+    batch_uuid
     batch_manifest = PIPELINE_EVENTS_CREATE_FILE.out.created_file_id_path
 }
 
