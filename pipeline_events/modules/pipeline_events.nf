@@ -25,11 +25,12 @@ process PIPELINE_GET_METHOD {
     methodshort = (pipelineurl as Path).getSimpleName()
     methodurl = workflow.manifest.version == "{{${methodshort}_version}}" ? "${pipelineurl}" : "${pipelineurl}/-/tree/${workflow.manifest.version}"
     methodname = workflow.manifest.name
+    // workflow.manifest does not have a toMap() method, so building map manually
     Map pipeline_manifest = [:]
     Field[] fields = workflow.manifest.getClass().getDeclaredFields();
     for(Field f : fields){
         Object v = f.get(workflow.manifest);
-        pipeline_mani_params[f.getName()] = v;
+        pipeline_manifest[f.getName()] = v;
     }
     Map pipeline_mani_params = [:]
     pipeline_mani_params["pipeline_manifest"] = pipeline_manifest
