@@ -103,15 +103,15 @@ process GET_RESULTFILE_PATH {
     tuple val(meta), path(resultfileWorkPath), val(resultfilePublishedDirAbsPath),  emit: resultfile_publisheddir
 
     script:
-    if (("${params.save_method}" == "flat" & "${outputfoldertag}".endsWith("fastqs")) | (meta.ID == null)){
-        resultfilePublishedDirRelPath = "${params.outdir}/${outputfoldertag}"
-    } else {
-        resultfilePublishedDirRelPath = "${params.outdir}/${meta.ID}/${outputfoldertag}"
-    }
     if (!params.pipeline_events_follow_links) {
-        resultfilePublishedDirAbsPath = file(resultfilePublishedDirRelPath).toRealPath(LinkOption.NOFOLLOW_LINKS).toString()
+        outDirAbsPath = file(params.outdir).toRealPath(LinkOption.NOFOLLOW_LINKS).toString()
     } else {
-        resultfilePublishedDirAbsPath = file(resultfilePublishedDirRelPath).toAbsolutePath().toString()
+        outDirAbsPath = file(params.outdir).toAbsolutePath().toString()
+    }
+    if (("${params.save_method}" == "flat" & "${outputfoldertag}".endsWith("fastqs")) | (meta.ID == null)){
+        resultfilePublishedDirAbsPath = "${outDirAbsPath}/${outputfoldertag}"
+    } else {
+        resultfilePublishedDirAbsPath = "${outDirAbsPath}/${meta.ID}/${outputfoldertag}"
     }
     """
     echo "file path to track: ${resultfilePublishedDirAbsPath}"
