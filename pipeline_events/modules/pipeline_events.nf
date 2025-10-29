@@ -27,6 +27,7 @@ process PIPELINE_GET_METHOD {
     pipeline_mani_params = [:] // https://www.nextflow.io/docs/latest/reference/syntax.html#variable-declaration "Variables declared in the process script, exec, and stub sections exist only in their respective section, with one exception – variables declared without the def keyword also exist in the output section"
     pipeline_mani_params["pipeline_manifest"] = pipeline_manifest
     pipeline_mani_params["params"] = params as LinkedHashMap
+    pipeline_mani_params["PWD"] =  System.getenv("PWD")
     """
     echo "method url: $methodurl; method name: $methodname, method short name: $methodshort"
     """
