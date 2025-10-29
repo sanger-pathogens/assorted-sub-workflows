@@ -101,7 +101,7 @@ process GET_RESULTFILE_PATH {
     tuple val(meta), path(resultfileWorkPath), val(resultfilePublishedDirAbsPath),  emit: resultfile_publisheddir
 
     script:
-    if ("${params.save_method}" == "flat" & "${outputfoldertag}".endsWith("fastqs")) | (meta.ID == null){
+    if (("${params.save_method}" == "flat" & "${outputfoldertag}".endsWith("fastqs")) | (meta.ID == null)){
         resultfilePublishedDirRelPath = "${params.outdir}/${outputfoldertag}"
     } else {
         resultfilePublishedDirRelPath = "${params.outdir}/${meta.ID}/${outputfoldertag}"
