@@ -15,7 +15,7 @@ process TRIMMOMATIC {
     tuple val(meta), path(extracted_R1), path(extracted_R2)
 
     output:
-    tuple val(meta), path(output_1), path(output_2), emit: paired_channel
+    tuple val(meta), path(output_1), path(output_2), emit: results
     tuple val(meta), path(output_1_gz), path(output_2_gz)
 
     script:
