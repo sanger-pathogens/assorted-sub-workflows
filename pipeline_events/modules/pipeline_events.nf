@@ -27,7 +27,7 @@ process PIPELINE_GET_METHOD {
     methodname = workflow.manifest.name
     // workflow.manifest does not have a toMap() method, so building map manually
     Map pipeline_manifest = [:]
-    Field[] fields = workflow.manifest.getClass().getDeclaredFields();
+    Field[] fields = workflow.manifest.getClass().getFields();
     for(Field f : fields){
         Object v = f.get(workflow.manifest);
         pipeline_manifest[f.getName()] = v;
