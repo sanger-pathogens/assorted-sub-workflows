@@ -187,7 +187,7 @@ workflow PIPELINE_EVENTS_INIT {
 
     emit:
     batch_uuid = PIPELINE_EVENTS_OPEN_BATCH.out.batch_uuid
-    batch_manifest = PIPELINE_EVENTS_CREATE_FILE.out.created_file_path
+    batch_manifest = PIPELINE_EVENTS_CREATE_FILE.out.created_file_id_path
 }
 
 
