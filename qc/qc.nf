@@ -4,6 +4,8 @@ include { TRIMMOMATIC         } from "/modules/trimmomatic.nf"
 include { FASTQ2FASTA         } from "/modules/fastq2fasta.nf"
 include { TRF                 } from "/modules/trf.nf"
 include { RMREPEATFROMFASTQ   } from "/modules/rmRepeatFromFq.nf"
+include { COMPRESS_READS; 
+          RENAME_READS        } from "/modules/helper_processes.nf"
 include { FASTQC              } from './modules/fastqc.nf'
 include { PASS_OR_FAIL_FASTQC
           PASS_OR_FAIL_K2B
