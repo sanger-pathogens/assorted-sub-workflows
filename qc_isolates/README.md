@@ -67,7 +67,7 @@ NOTE: In addition to columns derived from the tool reports, the script includes 
 ### GTDB-Tk runtime
 
 - Runtime and memory can be reduced for GTDB-Tk classficiation by specifying the `--temp_file_storage` option with either `/tmp` or `/dev/shm`. Writing these files to disk instead of keeping everything in memory reduces peak RAM usage by up to 89% and can improve runtime by up to 10%. This often allows the job to run with a smaller memory request, meaning it can start faster on cluster schedulers. 
-- If you know the size of your samples you can request a specific temp memory using `--tmp_space <XX>GB`. This lets you reserve a specific amount of temporary memory/disk space. Note that due to a know bug reported in the farm documentation, request half the memory you require as LSF double-accounts /tmp use see [here](https://sanger-openstack.slack.com/archives/G0121LP6L9J/p1748614657196859).
+- If you know the size of your samples you can request a specific temp memory using `--tmp_space <XX>GB`. This lets you reserve a specific amount of temporary memory/disk space. Note that due to a know bug reported in the farm documentation, request half the memory you require as LSF double-accounts /tmp use see [here](https://ssg-confluence.internal.sanger.ac.uk/spaces/FARM/pages/101361225/Useful+LSF+resources#UsefulLSFresources-Resources).
 
 ### Dependencies
 
