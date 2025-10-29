@@ -1,5 +1,6 @@
 import groovy.json.JsonBuilder;
 import java.nio.file.LinkOption;
+import java.lang.reflect.Field as ReflectField;
 
 process PIPELINE_GET_METHOD {
     // prpepare Shelf tracking of output files - to apply once for the whole pipeline run
@@ -25,10 +26,10 @@ process PIPELINE_GET_METHOD {
     methodshort = (pipelineurl as Path).getSimpleName()
     methodurl = workflow.manifest.version == "{{${methodshort}_version}}" ? "${pipelineurl}" : "${pipelineurl}/-/tree/${workflow.manifest.version}"
     methodname = workflow.manifest.name
-    // workflow.manifest does not have a toMap() method, so building map manually
+    // workflow.manifest does not have a toMap() method, so building map manually; need to cast to ReflectField to avoid conflict with groovy Field
     Map pipeline_manifest = [:]
-    Field[] fields = workflow.manifest.getClass().getFields();
-    for(Field f : fields){
+    ReflectField[] fields = workflow.manifest.getClass().getFields();
+    for(ReflectField f : fields){
         Object v = f.get(workflow.manifest);
         pipeline_manifest[f.getName()] = v;
     }
