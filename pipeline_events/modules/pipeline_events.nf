@@ -169,20 +169,20 @@ workflow PIPELINE_EVENTS_END {
     main:
     created_file_infos
     .mix(batch_manifest_info)
-    .tap{ all_created_file_infos }
-    .map{ runid, filepath, filetype -> filepath }
+    .tap { all_created_file_infos }
+    .map { runid, filepath, filetype -> filepath }
     .set { all_created_file_paths }
 
     all_created_file_paths
     .count()
-    .tap{ created_file_count }
-    .subscribe{ log.info("Total created file count: ${it}") }
+    .tap { created_file_count }
+    .subscribe{ file_count -> log.info("Total created file count: ${file_count}") }
 
     all_created_file_infos
     .groupTuple(by: 2)
-    .map({ file_id_paths, file_type, -> [file_type, file_id_paths.size()] })
-    .tap{ created_file_count_per_type }
-    .subscribe{ log.info("Created file counts per type: ${it}") }
+    .map { file_id_paths, file_type -> [file_type, file_id_paths.size()] }
+    .tap { created_file_count_per_type }
+    .subscribe { file_count_per_type -> log.info("Created file counts per type: ${file_count_per_type}") }
 
     PIPELINE_EVENTS_CLOSE_BATCH(batch_uuid, created_file_count)
 
