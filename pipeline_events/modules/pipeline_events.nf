@@ -9,8 +9,6 @@ process PIPELINE_GET_METHOD {
     label 'local'
 
     // no input as really we only need to query this once per run based on pipeline own info
-    //input:
-    //val(pipeline_manifest) // map
 
     output:
     val(methodurl),  emit: method_url
@@ -63,7 +61,6 @@ process PIPELINE_EVENTS_OPEN_BATCH {
 
     script:
     batchuuid = UUID.randomUUID().toString()
-    // Map batch_mani_params = params as Map
     batch_mani_params["batchuuid"] = batchuuid
     batch_mani_params_json = new JsonBuilder(batch_mani_params).toPrettyString()
     batch_mani_params_out = "pipeline_manifest_run_params_batch_${batchuuid}.json"
@@ -126,8 +123,7 @@ process PIPELINE_EVENTS_CREATE_FILE {
     container "${params.pipeline_events_container}"
 
     input:
-    tuple val(meta), path(resultfileWorkPath), val(resultfilePublishedDir) // val(resultfilePublishedDir), not path() so not to stage folder
-    val(file_type)
+    tuple val(meta), path(resultfileWorkPath), val(resultfilePublishedDir), val(file_type) // val(resultfilePublishedDir), not path() so not to stage folder
     val(batchuuid)
 
     output:
@@ -149,31 +145,6 @@ process PIPELINE_EVENTS_CREATE_FILE {
 
     
 }
-
-// process PIPELINE_EVENTS_CREATE_BATCH_MANIFEST_FILE {
-//     label 'cpu_1'
-//     label 'mem_1'
-//     label 'time_queue_from_small'
-
-//     container "${params.pipeline_events_container}"
-
-//     input:
-//     tuple val(batch_mani_params), path(batchManifestfileWorkPath), val(batchManifestfilePublishedDir) // val(batchManifestfilePublishedDir), not path() so not to stage folder
-//     val(batchuuid)
-
-//     output:
-//     tuple val(batchuuid), val(batchManifestfilePublishedFullPath), val(file_type),  emit: created_file_path // val(batchManifestfilePublishedFullPath), not path() so not to stage the file that's outside the work folder
-
-//     script:
-//     batchManifestfileName = batchManifestfileWorkPath.name.toString()
-//     batchManifestfilePublishedFullPath = "${batchManifestfilePublishedDir}/${batchManifestfileName}"
-//     """
-//     filemd5=\$(md5sum ${batchManifestfileWorkPath} | cut -d' ' -f1)
-//     send_pipeline_event file --batch_id ${batchuuid} --path ${batchManifestfilePublishedFullPath} --file_type "batch_manifest" \\
-//                                 --md5sum \${filemd5} \\
-//                                 --username \$(id -un) --group \$(id -gn)
-//     """
-// }
 
 workflow PIPELINE_EVENTS_INIT {
 
