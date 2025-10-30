@@ -1,11 +1,16 @@
 #!/usr/bin/env nextflow
 
-include { TRIMMOMATIC         } from "/modules/trimmomatic.nf"
-include { FASTQ2FASTA         } from "/modules/fastq2fasta.nf"
-include { TRF                 } from "/modules/trf.nf"
-include { RMREPEATFROMFASTQ   } from "/modules/rmRepeatFromFq.nf"
+include { TRIMMOMATIC        } from "./modules/trimmomatic.nf"
+include { FASTQ2FASTA        } from "./modules/fastq2fasta.nf"
+include { TRF                } from "./modules/trf.nf"
+include { RMREPEATFROMFASTQ  } from "./modules/rmRepeatFromFq.nf"
+include { BMTAGGER           } from "./modules/bmtagger.nf"
+include { FILTER_HOST_READS; 
+          GET_HOST_READS     } from './modules/filter_reads.nf'
+include { GENERATE_STATS     } from './modules/generate_stats.nf'
+include { COLLATE_STATS      } from './modules/collate_stats.nf'
 include { COMPRESS_READS; 
-          RENAME_READS        } from "/modules/helper_processes.nf"
+          RENAME_READS       } from "./modules/helper_processes.nf"
 include { FASTQC              } from './modules/fastqc.nf'
 include { PASS_OR_FAIL_FASTQC
           PASS_OR_FAIL_K2B
@@ -20,12 +25,12 @@ workflow QC {
     main:
     if (params.run_trimmomatic){
         TRIMMOMATIC(reads_ch)
-        trimm_out_ch = TRIMMOMATIC.out.results // tuple (meta, read_trim_1, read_trim_2)
+        trimm_Out_ch = TRIMMOMATIC.out.results // tuple (meta, read_trim_1, read_trim_2)
     }
 
     if (params.run_trf){
         if (params.run_trimmomatic){
-            fastq2fasta_in_ch = trimm_out_ch
+            fastq2fasta_in_ch = trimm_Out_ch
         } else {
             fastq2fasta_in_ch = reads_ch
         }
@@ -43,42 +48,80 @@ workflow QC {
             meta, trf_out_1, trf_out_2 -> 
             tuple (meta.id,[trf_out_1, trf_out_2])
         }
-        | set {trf_ch}  // tuple (meta.id, [trfs_out])
+        | set {trf_Out_ch}  // tuple (meta.id, [trfs_out])
 
         fqs_ch // tuple (meta.id, meta, [fqs])
-        | join(trf_ch) // tuple (meta.id, meta, [fqs], [trfs_out])
+        | join(trf_Out_ch) // tuple (meta.id, meta, [fqs], [trfs_out])
         | map {id, meta, fqs, trfs -> tuple(meta, fqs[0], fqs[1], trfs[0], trfs[1])}
-        | set {rmRepeat_in_ch}
+        | set {rmRepeat_In_ch}
 
-        RMREPEATFROMFASTQ(rmRepeat_in_ch)
+        RMREPEATFROMFASTQ(rmRepeat_In_ch)
         RMREPEATFROMFASTQ.out.fastqs
-            | set {rmRepeat_out_ch} // tuple (meta, trf_fq_1, trf_fq_2)
+            | set {rmRepeat_Out_ch} // tuple (meta, trf_fq_1, trf_fq_2)
     }
 
-    // introduce bm tagger
-    // | set {bmTag_out_ch}
 
-    out_ch = reads_ch
-
-    if ((params.run_trimmomatic) && (!params.run_trf) && (!params.run_hrr)){
-        out_ch = trimm_out_ch // tuple (meta, reads_trim_1, reads_trim_2)
-    }
-    if ((params.run_trf) && (!params.run_hrr)){
-        out_ch = rmRepeat_out_ch // tuple (meta, trf_fq_1, trf_fq_2)
-    }
+    // run bmtagger
     if (params.run_hrr){
-        out_ch = bmTag_out_ch // tuple (meta, reads_clean_1, reads_clean_2)
+
+        // if only scrubber is on
+        if ((!params.run_trimmomatic) && (!params.run_trf)){
+            bmtagger_In_ch = reads_ch
+        }
+
+        // if trimmomatic and no trf
+        if ((params.run_trimmomatic) && (!params.run_trf)){
+            bmtagger_In_ch = trimmomatic_Out_ch
+        }
+
+        // if trf is true
+        if (params.run_trf){
+            bmtagger_In_ch = trf_Out_ch
+        }
+
+            // run hrr
+        BMTAGGER(bmtagger_In_ch)
+        | set {bmtagger_Out_ch}
+
+        FILTER_HOST_READS(bmtagger_Out_ch.data_ch, bmtagger_Out_ch.bmtagger_list_ch)
+        | set { filtered_reads_Out_ch }
+
+        GET_HOST_READS(bmtagger_Out_ch.data_ch, bmtagger_Out_ch.bmtagger_list_ch)
+        | set { host_reads_Out_ch }
+
+        filtered_reads_Out_ch.data_ch
+        | join(filtered_reads_Out_ch.cleaned_ch)
+        | join(host_reads_Out_ch.host_ch)
+        | join(reads_ch)
+        | GENERATE_STATS
+
+        COLLATE_STATS(GENERATE_STATS.out.stats_ch.collect())
     }
 
+    // setup output channel
+    // if trimmomatics on, trf off and scrubber off
+    if ((params.run_trimmomatic) && (!params.run_trf) && (!params.run_hrr)){
+        cleaned_reads_ch = trimmomatic_Out_ch // tuple (meta, reads_trim_1, reads_trim_2)
+    }
+    // if trf on, scrubber off
+    if ((params.run_trf) && (!params.run_hrr)){
+        cleaned_reads_ch = trf_Out_ch // tuple (meta, trf_fq_1, trf_fq_2)
+    }
+    // if scrubber on
+    if (params.run_hrr){
+        cleaned_reads_ch = filtered_reads_Out_ch.cleaned_ch // tuple (meta, reads_clean_1, reads_clean_2)
+    }
+
+    // publish compressed clean reads
     if (params.publish_clean_reads){
         if (params.compress_clean_reads){
-            COMPRESS_READS(out_ch)
+            COMPRESS_READS(cleaned_reads_ch)
         } else {
-            RENAME_READS(out_ch)
+            RENAME_READS(cleaned_reads_ch)
         }
     }
-
-    FASTQC(out_ch) 
+    
+    FASTQC(cleaned_reads_ch) 
 
     fastqc_pass_criteria = file(params.fastqc_pass_criteria, checkIfExists: true)
     fastqc_no_fail_criteria = file(params.fastqc_no_fail_criteria, checkIfExists: true)
@@ -86,7 +129,7 @@ workflow QC {
     PASS_OR_FAIL_FASTQC(FASTQC.out.zip, fastqc_pass_criteria, fastqc_no_fail_criteria)
     | set { fastqc_results }
 
-    TAXO_PROFILE(bmTag_out_ch)
+    TAXO_PROFILE(cleaned_reads_ch)
 
     FASTQC.out.zip.collect{it[1,2]}
         | mix(TAXO_PROFILE.out.ch_kraken2_style_bracken_reports.collect{it[1]})
