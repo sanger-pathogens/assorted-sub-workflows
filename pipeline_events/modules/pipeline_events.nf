@@ -176,13 +176,33 @@ workflow PIPELINE_EVENTS_END {
 
     all_created_file_paths
     .count()
-    .tap { created_file_count }
+    .set { created_file_count }
+
+    created_file_count
     .subscribe{ file_count -> log.info("Total count of file tracked in Pipeline Events Database: ${file_count}") }
 
     all_created_file_infos
-    .groupTuple(by: 2)
-    .map { ids, file_id_paths, file_type -> [file_type, file_id_paths.size()] }
-    .tap { created_file_count_per_type }
+    .collect { id, file_path, file_type -> [[id, file_path, file_type]] }
+    .map { infos -> 
+        def file_type_count = [:]
+        infos.each { id, file_path, file_type ->
+            if (!file_type_count.containsKey(file_type)) {
+                file_type_count[file_type] = 0
+            }
+            file_type_count[file_type] += 1
+        }
+        [infos, file_type_count]
+    }
+    .flatMap { infos, file_type_count -> 
+        infos.each { id, file_path, file_type ->
+            [ groupKey(file_type, file_type_count[file_type]), id, file_path, file_type ]
+        }
+    }
+    .groupTuple()
+    .map { ids, file_id_paths, file_type -> [file_type.first(), file_id_paths.size()] }
+    .set { created_file_count_per_type }
+    
+    created_file_count_per_type
     .subscribe { file_count_per_type -> log.info("Count of file tracked in Pipeline Events Database per file type: ${file_count_per_type}") }
 
     PIPELINE_EVENTS_CLOSE_BATCH(batch_uuid, created_file_count)
