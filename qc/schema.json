@@ -34,10 +34,6 @@
                 "default": "false",
                 "help_text": "Enable publishing of intermediate output for pre-processing."
             },
-            "compress_clean_reads": {
-                "default": "false",
-                "help_text": "Compress the clean reads files using gzip."
-            },
             "preprocessing_mnf": {
                 "default": "null",
                 "help_text": "(optional) input manifest file for running workflow in isolation."
@@ -67,11 +63,22 @@
                 "help_text": "TRF command line options"
             }
         },
-        "scrubber Options": {
-            "run_hrr": {
+        "Bmtagger Options": {
+            "run_bmtagger": {
                 "default": "true",
-                "help_text": "Run RSA-Human-Scrubble"
-            }
+                "help_text": "Run bmtagger for read removal"
+            },
+            "publish_host_data": {
+                "default": "false",
+                "help_text": "Publish the reads determined to originate from the host organism."
+            },
+            "bmtagger_db": {
+                "default": "/data/pam/software/bmtagger",
+                "help_text": "Path to directory containing BMTagger database."
+            },
+            "bmtagger_host":{
+                "default": "T2T-CHM13v2.0",
+                "help_text": "Reference genome version used for host read filtering."
         }
     }
 }

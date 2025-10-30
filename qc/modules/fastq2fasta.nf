@@ -47,7 +47,19 @@ process FASTQ2FASTA {
 
     script:
     """
-    ${params.script_src_path}fastq2fasta.py ${fastq_1} -o ${meta.ID}_1.fasta
-    ${params.script_src_path}fastq2fasta.py ${fastq_2} -o ${meta.ID}_2.fasta
+    if [ ${params.run_trimmomatic} != true ] ; then
+      gzip -c ${fastq_1} > ${fastq_1}.tmp.gz
+      gzip -c ${fastq_2} > ${fastq_2}.tmp.gz
+      mv ${fastq_1}.tmp.gz ${fastq_1}.fastq.gz
+      mv ${fastq_2}.tmp.gz ${fastq_2}.fastq.gz
+      fastq_qz_1=${fastq_1}.fastq.gz
+      fastq_qz_2=${fastq_2}.fastq.gz
+    else
+      fastq_qz_1=${fastq_1}.fastq.gz
+      fastq_qz_2=${fastq_2}.fastq.gz
+    fi
+
+    ${params.script_src_path}fastq2fasta.py \${fastq_qz_1} -o ${meta.ID}_1.fasta
+    ${params.script_src_path}fastq2fasta.py \${fastq_qz_2} -o ${meta.ID}_2.fasta
     """
 }
