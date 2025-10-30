@@ -27,7 +27,7 @@ process RENAME_READS {
     label 'cpu_1'
     label 'time_30m'
 
-    publishDir "${params.outdir}/${meta.id}/preprocessing/", mode: "copy"
+    publishDir "${params.outdir}/${meta.ID}/preprocessing/", mode: "copy"
 
     input:
     tuple val(meta), path(reads_1), path(reads_2)

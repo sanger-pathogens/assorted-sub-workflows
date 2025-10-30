@@ -16,7 +16,7 @@ process TRIMMOMATIC {
 
     output:
     tuple val(meta), path(output_1), path(output_2), emit: trimmed_fastqs
-    tuple val(meta), path(output_1_gz), path(output_2_gz)
+    tuple val(meta), path(output_1_gz), path(output_2_gz), emit: trimmed_fastqs_gz
 
     script:
     output_1="${meta.ID}_trimmed_1.fastq"

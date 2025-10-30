@@ -61,7 +61,7 @@ workflow PREPROCESSING {
                 | set {rmTRFfromFq_In_ch}
             RMREPEATFROMFASTQ(rmTRFfromFq_In_ch)
             RMREPEATFROMFASTQ.out.fastqs
-                | set {trf_Out_ch} // tuple (meta, trf_fq_1, trf_fq_2)
+                | set {trf_Out_ch} // tuple (meta, trf_fq_gz_1, trf_fq_gz_2)
         }
 
         // run bmtagger
@@ -82,8 +82,7 @@ workflow PREPROCESSING {
                 hrr_In_ch = trf_Out_ch
             }
 
-            hrr_In_ch.view()
-             // run hrr
+            // run hrr
             BMTAGGER(hrr_In_ch)
             | set {bmtagger_out_ch}
 
@@ -105,15 +104,15 @@ workflow PREPROCESSING {
         // setup output channel
         // if trimmomatics on, trf off and scrubber off
         if ((params.run_trimmomatic) && (!params.run_trf) && (!params.run_hrr)){
-            out_ch = trimmomatic_Out_ch // tuple (meta, reads_trim_1, reads_trim_2)
+            out_ch = trimmomatic_Out_ch.trimmed_fastqs_gz // tuple (meta, reads_trim_1.gz, reads_trim_2.gz)
         }
         // if trf on, scrubber off
         if ((params.run_trf) && (!params.run_hrr)){
-            out_ch = trf_Out_ch // tuple (meta, trf_fq_1, trf_fq_2)
+            out_ch = trf_Out_ch.fastqs_gz // tuple (meta, trf_fq_1.gz, trf_fq_2.gz)
         }
         // if scrubber on
         if (params.run_hrr){
-            out_ch = filtered_reads_ch.cleaned_ch // tuple (meta, reads_clean_1, reads_clean_2)
+            out_ch = filtered_reads_ch.cleaned_ch // tuple (meta, reads_clean_1.gz, reads_clean_2.gz)
         }
 
         // publish compressed clean reads

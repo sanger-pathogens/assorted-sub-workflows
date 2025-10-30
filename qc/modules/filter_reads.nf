@@ -3,8 +3,6 @@ process FILTER_HOST_READS {
     label 'cpu_1'
     label 'mem_1'
     label 'time_1'
-
-    publishDir "${params.outdir}/cleaned_reads", mode: 'copy', overwrite: true, pattern: "*_clean*.fastq.gz"
     
     container 'quay.io/sangerpathogens/metawrap_qc_python:1.0'
 
