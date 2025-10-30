@@ -12,7 +12,7 @@ process TRF {
     tuple val(meta), path(fasta_R1), path(fasta_R2)
 
     output:
-    tuple val(meta), path("${meta.ID}_1.trf"), path("${meta.ID}_2.trf"), emit: paired_trf
+    tuple val(meta), path("${meta.ID}_1.trf"), path("${meta.ID}_2.trf"), emit: results
 
     script:
     """
