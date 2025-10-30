@@ -1,16 +1,14 @@
-include { TRIMMOMATIC        } from "./modules/trimmomatic.nf"
-include { FASTQ2FASTA        } from "./modules/fastq2fasta.nf"
-include { TRF                } from "./modules/trf.nf"
-include { RMREPEATFROMFASTQ  } from "./modules/rmRepeatFromFq.nf"
-include { BMTAGGER           } from "./modules/bmtagger.nf"
+include { TRIMMOMATIC        } from "../modules/trimmomatic.nf"
+include { FASTQ2FASTA        } from "../modules/fastq2fasta.nf"
+include { TRF                } from "../modules/trf.nf"
+include { RMREPEATFROMFASTQ  } from "../modules/rmRepeatFromFq.nf"
+include { BMTAGGER           } from "../modules/bmtagger.nf"
 include { FILTER_HOST_READS; 
-          GET_HOST_READS     } from './modules/filter_reads.nf'
-include { GENERATE_STATS     } from './modules/generate_stats.nf'
-include { COLLATE_STATS      } from './modules/collate_stats.nf'
+          GET_HOST_READS     } from '../modules/filter_reads.nf'
+include { GENERATE_STATS     } from '../modules/generate_stats.nf'
+include { COLLATE_STATS      } from '../modules/collate_stats.nf'
 include { COMPRESS_READS; 
-          RENAME_READS       } from "./modules/helper_processes.nf"
-include { SEQTK_MERGEPE; 
-          SEQTK_SPLIT        } from "./modules/seqtk.nf"
+          RENAME_READS       } from "../modules/helper_processes.nf"
 
 workflow PREPROCESSING {
     /*
@@ -28,7 +26,7 @@ workflow PREPROCESSING {
         // run trimmomatic
         if (params.run_trimmomatic){
             TRIMMOMATIC(reads_ch)
-            trimmomatic_Out_ch = TRIMMOMATIC.out.paired_channel // tuple (meta, read_trim_1, read_trim_2)
+            trimmomatic_Out_ch = TRIMMOMATIC.out.trimmed_fastqs // tuple (meta, read_trim_1, read_trim_2)
         }
 
         // run trf
@@ -51,7 +49,7 @@ workflow PREPROCESSING {
                 | set {trf_in_ch}
             
             TRF(trf_in_ch)
-            TRF.out.paired_trf // tuple (meta, trf_out_1, trf_out_2)
+            TRF.out.fasta_trfs // tuple (meta, trf_out_1, trf_out_2)
                 | map {meta, trf_out_1, trf_out_2 -> 
                     tuple (meta.id,[trf_out_1, trf_out_2])
                  }
