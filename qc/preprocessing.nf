@@ -1,12 +1,16 @@
-include { TRIMMOMATIC        } from "/modules/trimmomatic.nf"
-include { FASTQ2FASTA        } from "/modules/fastq2fasta.nf"
-include { TRF                } from "/modules/trf.nf"
-include { RMREPEATFROMFASTQ  } from "/modules/rmRepeatFromFq.nf"
-include { SRA_HUMAN_SCRUBBER } from "/modules/scrubber.nf"
+include { TRIMMOMATIC        } from "./modules/trimmomatic.nf"
+include { FASTQ2FASTA        } from "./modules/fastq2fasta.nf"
+include { TRF                } from "./modules/trf.nf"
+include { RMREPEATFROMFASTQ  } from "./modules/rmRepeatFromFq.nf"
+include { BMTAGGER           } from "./modules/bmtagger.nf"
+include { FILTER_HOST_READS; 
+          GET_HOST_READS     } from './modules/filter_reads.nf'
+include { GENERATE_STATS     } from './modules/generate_stats.nf'
+include { COLLATE_STATS      } from './modules/collate_stats.nf'
 include { COMPRESS_READS; 
-          RENAME_READS       } from "/modules/helper_processes.nf"
+          RENAME_READS       } from "./modules/helper_processes.nf"
 include { SEQTK_MERGEPE; 
-          SEQTK_SPLIT        } from "/modules/seqtk.nf"
+          SEQTK_SPLIT        } from "./modules/seqtk.nf"
 
 workflow PREPROCESSING {
     /*
@@ -62,7 +66,7 @@ workflow PREPROCESSING {
                 | set {trf_Out_ch} // tuple (meta, trf_fq_1, trf_fq_2)
         }
 
-        // run human-sra-scrubber
+        // run bmtagger
         if (params.run_hrr){
 
             // if only scrubber is on
@@ -79,17 +83,25 @@ workflow PREPROCESSING {
             if (params.run_trf){
                 hrr_In_ch = trf_Out_ch
             }
-            // generate interleaved fq for scrubber
-            SEQTK_MERGEPE(hrr_In_ch)
 
-            // run hrr
-            SRA_HUMAN_SCRUBBER(SEQTK_MERGEPE.out)
+            hrr_In_ch.view()
+             // run hrr
+            BMTAGGER(hrr_In_ch)
+            | set {bmtagger_out_ch}
 
-            // deinterleaved fastq files
-            SEQTK_SPLIT(SRA_HUMAN_SCRUBBER.out, "clean")
+            FILTER_HOST_READS(BMTAGGER.out.data_ch, BMTAGGER.out.bmtagger_list_ch)
+            | set { filtered_reads_ch }
 
-            scrubber_Out_ch = SEQTK_SPLIT.out // tuple(meta, reads_clean_1, reads_clean_2)
+            GET_HOST_READS(BMTAGGER.out.data_ch, BMTAGGER.out.bmtagger_list_ch)
+            | set { host_reads_ch }
 
+            filtered_reads_ch.data_ch
+            | join(filtered_reads_ch.cleaned_ch)
+            | join(host_reads_ch.host_ch)
+            | join(reads_ch)
+            | GENERATE_STATS
+
+            COLLATE_STATS(GENERATE_STATS.out.stats_ch.collect())
         }
 
         // setup output channel
@@ -103,7 +115,7 @@ workflow PREPROCESSING {
         }
         // if scrubber on
         if (params.run_hrr){
-            out_ch = scrubber_Out_ch // tuple (meta, reads_clean_1, reads_clean_2)
+            out_ch = filtered_reads_ch.cleaned_ch // tuple (meta, reads_clean_1, reads_clean_2)
         }
 
         // publish compressed clean reads
