@@ -37,13 +37,13 @@ workflow PREPROCESSING {
         | set{ processed_reads }
     } else if (params.run_trimmomatic) {
         TRIMMOMATIC(reads_ch)
-        | set (processed_reads)
+        | set{ processed_reads }
     } else if (params.run_trf) {
         TR_FILTERING(reads_ch)
-        | set (processed_reads)
+        | set{ processed_reads }
     } else if (params.run_bmtagger) {
         READ_REMOVAL(reads_ch)
-        | set (processed_reads)
+        | set{ processed_reads }
     } else {
         processed_reads = reads_ch
     }
