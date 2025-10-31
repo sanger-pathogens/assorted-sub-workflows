@@ -4,7 +4,7 @@ process FASTQ2FASTA {
     label 'time_1'
     label 'cpu_1'
     tag {meta.ID}
-    container "quay.io/gsu-pipelines/rvi-vp-basecontainer"
+    container 'quay.io/sangerpathogens/python-curl:3.11'
     /*
     *             Process: fastq_to_fasta
 

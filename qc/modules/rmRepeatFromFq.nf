@@ -5,7 +5,7 @@ process RMREPEATFROMFASTQ {
     label 'time_1'
 
     publishDir enabled: params.debug_preproc_output, "${params.outdir}/${meta.ID}/preprocessing/", mode: "copy", pattern:"*.{trf,fastq}"
-    container "quay.io/gsu-pipelines/rvi-vp-basecontainer"
+    container 'quay.io/sangerpathogens/python-curl:3.11'
 
     input:
     tuple val(meta), path(fastq_1), path(fastq_2), path(trf_out_1), path(trf_out_2)
