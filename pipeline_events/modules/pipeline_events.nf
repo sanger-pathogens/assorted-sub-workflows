@@ -5,6 +5,7 @@ process PIPELINE_GET_METHOD {
     label 'cpu_1'
     label 'mem_1'
     label 'local'
+    cache false
 
     // no input as really we only need to query this once per run based on pipeline own info
 
@@ -38,6 +39,7 @@ process PIPELINE_EVENTS_OPEN_BATCH {
     label 'cpu_1'
     label 'mem_1'
     label 'time_queue_from_small'
+    cache false
 
     container "${params.pipeline_events_container}"
 
@@ -68,6 +70,7 @@ process PIPELINE_EVENTS_CLOSE_BATCH {
     label 'cpu_1'
     label 'mem_1'
     label 'time_queue_from_small'
+    cache false
 
     container "${params.pipeline_events_container}"
 
@@ -85,6 +88,7 @@ process GATHER_RESULTFILE_INFO {
     label 'cpu_1'
     label 'mem_1'
     label 'local'
+    cache false
 
     input:
     tuple val(meta), path(resultfileWorkPath)
@@ -117,6 +121,7 @@ process PIPELINE_EVENTS_CREATE_FILE {
     label 'cpu_1'
     label 'mem_1'
     label 'time_queue_from_small'
+    cache false
 
     container "${params.pipeline_events_container}"
 
