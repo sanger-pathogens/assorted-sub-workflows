@@ -19,41 +19,48 @@ workflow PREPROCESSING {
 
     main:
 
-    DECOMPRESS_READS(reads_ch)
-    | set{ decompressed_reads_ch }
+    if (params.run_trimmomatic || params.run_trf || params.run_bmtagger) {
 
-    if (params.run_trimmomatic && params.run_trf && params.run_bmtagger) {
-        TRIMMOMATIC(decompressed_reads_ch)
-        | TR_FILTERING
-        | READ_REMOVAL
-        | set{ processed_reads }
-    } else if (params.run_trimmomatic && params.run_trf) {
-        TRIMMOMATIC(decompressed_reads_ch)
-        | TR_FILTERING
-        | set{ processed_reads }
-    } else if (params.run_trimmomatic && params.run_bmtagger) {
-        TRIMMOMATIC(decompressed_reads_ch)
-        | READ_REMOVAL
-        | set{ processed_reads }
-    } else if (params.run_trf && params.run_bmtagger) {
-        TR_FILTERING(decompressed_reads_ch)
-        | READ_REMOVAL
-        | set{ processed_reads }
-    } else if (params.run_trimmomatic) {
-        TRIMMOMATIC(decompressed_reads_ch)
-        | set{ processed_reads }
-    } else if (params.run_trf) {
-        TR_FILTERING(decompressed_reads_ch)
-        | set{ processed_reads }
-    } else if (params.run_bmtagger) {
-        READ_REMOVAL(decompressed_reads_ch)
-        | set{ processed_reads }
-    } else {
-        processed_reads = decompressed_reads_ch
+        DECOMPRESS_READS(reads_ch)
+        | set{ decompressed_reads_ch }
+
+        if (params.run_trimmomatic && params.run_trf && params.run_bmtagger) {
+            TRIMMOMATIC(decompressed_reads_ch)
+            | TR_FILTERING
+            | READ_REMOVAL
+            | set{ processed_reads }
+        } else if (params.run_trimmomatic && params.run_trf) {
+            TRIMMOMATIC(decompressed_reads_ch)
+            | TR_FILTERING
+            | set{ processed_reads }
+        } else if (params.run_trimmomatic && params.run_bmtagger) {
+            TRIMMOMATIC(decompressed_reads_ch)
+            | READ_REMOVAL
+            | set{ processed_reads }
+        } else if (params.run_trf && params.run_bmtagger) {
+            TR_FILTERING(decompressed_reads_ch)
+            | READ_REMOVAL
+            | set{ processed_reads }
+        } else if (params.run_trimmomatic) {
+            TRIMMOMATIC(decompressed_reads_ch)
+            | set{ processed_reads }
+        } else if (params.run_trf) {
+            TR_FILTERING(decompressed_reads_ch)
+            | set{ processed_reads }
+        } else if (params.run_bmtagger) {
+            READ_REMOVAL(decompressed_reads_ch)
+            | set{ processed_reads }
+        } else {
+            processed_reads = decompressed_reads_ch
+        }
+
+        COMPRESS_READS(processed_reads) 
+        | set{ compressed_reads_ch }
+    } 
+    
+    else {
+        compressed_reads_ch = reads_ch
     }
-
-    COMPRESS_READS(processed_reads) 
-    | set{ compressed_reads_ch }
 
     emit:
     compressed_reads_ch
