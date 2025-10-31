@@ -2,7 +2,8 @@
 include { TRIMMOMATIC       } from './modules/trimmomatic.nf'
 include { TR_FILTERING      } from './subworkflows/tr_filtering.nf'
 include { READ_REMOVAL      } from './subworkflows/read_removal.nf'
-include { COMPRESS_READS   } from './modules/helper_processes.nf'
+include { COMPRESS_READS       
+          DECOMPRESS_READS  } from './modules/helper_processes.nf'
 
 workflow PREPROCESSING {
 
@@ -18,39 +19,41 @@ workflow PREPROCESSING {
 
     main:
 
+    DECOMPRESS_READS(reads_ch)
+    | set{ decompressed_reads_ch }
+
     if (params.run_trimmomatic && params.run_trf && params.run_bmtagger) {
-        TRIMMOMATIC(reads_ch)
+        TRIMMOMATIC(decompressed_reads_ch)
         | TR_FILTERING
         | READ_REMOVAL
         | set{ processed_reads }
     } else if (params.run_trimmomatic && params.run_trf) {
-        TRIMMOMATIC(reads_ch)
+        TRIMMOMATIC(decompressed_reads_ch)
         | TR_FILTERING
         | set{ processed_reads }
     } else if (params.run_trimmomatic && params.run_bmtagger) {
-        TRIMMOMATIC(reads_ch)
+        TRIMMOMATIC(decompressed_reads_ch)
         | READ_REMOVAL
         | set{ processed_reads }
     } else if (params.run_trf && params.run_bmtagger) {
-        TR_FILTERING(reads_ch)
+        TR_FILTERING(decompressed_reads_ch)
         | READ_REMOVAL
         | set{ processed_reads }
     } else if (params.run_trimmomatic) {
-        TRIMMOMATIC(reads_ch)
+        TRIMMOMATIC(decompressed_reads_ch)
         | set{ processed_reads }
     } else if (params.run_trf) {
-        TR_FILTERING(reads_ch)
+        TR_FILTERING(decompressed_reads_ch)
         | set{ processed_reads }
     } else if (params.run_bmtagger) {
-        READ_REMOVAL(reads_ch)
+        READ_REMOVAL(decompressed_reads_ch)
         | set{ processed_reads }
     } else {
-        processed_reads = reads_ch
+        processed_reads = decompressed_reads_ch
     }
 
-    COMPRESS_READS(processed_reads)
-
-    compressed_reads_ch = COMPRESS_READS.out
+    COMPRESS_READS(processed_reads) 
+    | set{ compressed_reads_ch }
 
     emit:
     compressed_reads_ch

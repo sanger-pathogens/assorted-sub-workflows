@@ -16,21 +16,11 @@ process BMTAGGER {
     script:
     bmtagger_list="${meta.ID}.bmtagger.list"
     """
-    if [ "${params.run_trf}" == "false" && "${params.run_trimmomatic}" == "false" ]; then
-        gunzip -c ${first_read} > ${meta.ID}_1.fastq
-        gunzip -c ${second_read} > ${meta.ID}_2.fastq
-        fq1=${meta.ID}_1.fastq
-        fq2=${meta.ID}_2.fastq
-    else
-        fq1=${first_read}
-        fq2=${second_read}
-    fi
-
     # make tmp folder for bmtagger
     mkdir bmtagger_tmp
     # run bmtagger
     bmtagger.sh -b ${params.bmtagger_db}/${params.bmtagger_host}.bitmask -x ${params.bmtagger_db}/${params.bmtagger_host}.srprism -T bmtagger_tmp -q1 \\
-	 -1 "\${fq1}" -2 "\${fq2}" \\
+	 -1 ${first_read} -2 ${second_read} \\
 	 -o ${meta.ID}.bmtagger.list
     """
 }
