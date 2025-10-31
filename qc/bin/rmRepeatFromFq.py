@@ -1,17 +1,36 @@
 #!/usr/bin/env python3
 
 ## this script is essentially a modified version of the kneaddata functions, check:
-# https://github.com/biobakery/kneaddata/blob/fdc9a6bddd8e97446ed6e4d809e680a78bdfc45c/kneaddata/utilities.py#L933 
+# https://github.com/biobakery/kneaddata/blob/fdc9a6bddd8e97446ed6e4d809e680a78bdfc45c/kneaddata/utilities.py#L933
 # https://github.com/biobakery/kneaddata/blob/fdc9a6bddd8e97446ed6e4d809e680a78bdfc45c/kneaddata/run.py#L447
 ##
 
-import logging
 import argparse
+import gzip
+import logging
 import sys
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger(__name__)
+
+
+def test_gzipped(file_path):
+    """
+    Tests if a file is gzipped by checking its magic bytes.
+
+    Args:
+        file_path (str): Path to the file to test.
+
+    Returns:
+        bool: True if the file is gzipped, False otherwise.
+    """
+    with open(file_path, "rb") as f:
+        byte_number = f.read(2)
+        return byte_number == b"\x1f\x8b"
+
 
 def read_file_n_lines(file, n):
     """
@@ -20,7 +39,7 @@ def read_file_n_lines(file, n):
     Args:
         file (str): Path to the input file.
         n (int): Number of lines to read at a time. Must be a positive integer.
-    
+
     Yields:
         list[str]: A list of up to `n` lines from the file.
 
@@ -33,7 +52,15 @@ def read_file_n_lines(file, n):
         raise ValueError("`n` must be a positive integer.")
 
     try:
-        with open(file, "r") as file_handle:
+
+        if test_gzipped(file):
+            open_func = gzip.open
+            mode = "rt"
+        else:
+            open_func = open
+            mode = "r"
+
+        with open(file, mode) as file_handle:
             line_batch = []
             for line in file_handle:
                 line_batch.append(line)
@@ -69,7 +96,7 @@ def remove_repeats_from_fastq(input_fastq, trf_output, output_fastq):
             for line in file_handle:
                 if line.startswith("@"):  # Sequence IDs in TRF output start with "@"
                     sequences_with_repeats.add(line.strip())
-                    c+=1
+                    c += 1
         logger.info(f" {c} total sequences with repeats from {trf_output}.")
     except FileNotFoundError:
         raise FileNotFoundError(f"Error: TRF output file not found: {trf_output}")
@@ -94,7 +121,9 @@ def remove_repeats_from_fastq(input_fastq, trf_output, output_fastq):
         raise RuntimeError(f"Error processing FASTQ file: {e}")
 
     # Log the result
-    logger.info(f"Filtered {removed_sequences} sequences with repeats from {input_fastq} and saved to {output_fastq}.")
+    logger.info(
+        f"Filtered {removed_sequences} sequences with repeats from {input_fastq} and saved to {output_fastq}."
+    )
     return removed_sequences
 
 
@@ -108,26 +137,28 @@ def main():
 
     # Define arguments
     parser.add_argument(
-        "-i", "--input_fastq",
-        required=True,
-        help="Path to the input FASTQ file."
+        "-i", "--input_fastq", required=True, help="Path to the input FASTQ file."
     )
     parser.add_argument(
-        "-t", "--trf_output",
+        "-t",
+        "--trf_output",
         required=True,
-        help="Path to the TRF output file containing sequence IDs with repeats."
+        help="Path to the TRF output file containing sequence IDs with repeats.",
     )
     parser.add_argument(
-        "-o", "--output_fastq",
+        "-o",
+        "--output_fastq",
         required=True,
-        help="Path to the output FASTQ file with filtered sequences."
+        help="Path to the output FASTQ file with filtered sequences.",
     )
 
     args = parser.parse_args()
 
     # Validate arguments and execute the function
     try:
-        removed_count = remove_repeats_from_fastq(args.input_fastq, args.trf_output, args.output_fastq)
+        removed_count = remove_repeats_from_fastq(
+            args.input_fastq, args.trf_output, args.output_fastq
+        )
         logger.info(f"Successfully removed {removed_count} sequences with repeats.")
     except Exception as e:
         logger.error(f"Error: {e}")

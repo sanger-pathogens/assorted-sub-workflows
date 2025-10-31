@@ -47,18 +47,7 @@ process FASTQ2FASTA {
 
     script:
     """
-    if [ "${params.run_trimmomatic}" != "true" ]; then
-        gunzip -c ${fastq_1} > ${meta.ID}_1.fastq
-        gunzip -c ${fastq_2} > ${meta.ID}_2.fastq
-        fq1=${meta.ID}_1.fastq
-        fq2=${meta.ID}_2.fastq
-    else
-        fq1=${fastq_1}
-        fq2=${fastq_2}
-    fi
-
-    echo "Converting FASTQ to FASTA..."
-    ${params.script_src_path}fastq2fasta.py "\${fq1}" -o ${meta.ID}_1.fasta
-    ${params.script_src_path}fastq2fasta.py "\${fq2}" -o ${meta.ID}_2.fasta
+    ${params.script_src_path}fastq2fasta.py ${fastq_1} -o ${meta.ID}_1.fasta
+    ${params.script_src_path}fastq2fasta.py ${fastq_2} -o ${meta.ID}_2.fasta
     """
 }
