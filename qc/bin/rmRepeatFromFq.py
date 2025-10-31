@@ -60,7 +60,7 @@ def read_file_n_lines(file, n):
             open_func = open
             mode = "r"
 
-        with open(file, mode) as file_handle:
+        with open_func(file, mode) as file_handle:
             line_batch = []
             for line in file_handle:
                 line_batch.append(line)

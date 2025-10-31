@@ -18,8 +18,6 @@ workflow PREPROCESSING {
 
     main:
 
-    reads_ch.view()
-
     if (params.run_trimmomatic && params.run_trf && params.run_bmtagger) {
         TRIMMOMATIC(reads_ch)
         | TR_FILTERING
