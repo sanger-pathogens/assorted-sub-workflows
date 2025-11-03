@@ -2,7 +2,7 @@ include { CHECKM2                   } from './modules/checkm2.nf'
 include { GTDBTK                    } from './modules/gtdbtk.nf'
 include { GUNC                      } from './modules/gunc.nf'
 include { QUAST;                         
-          QUAST_SUMMARY                    } from './modules/quast.nf'
+          QUAST_SUMMARY             } from './modules/quast.nf'
 include { REPORT                    } from './modules/reporting.nf'
 
 workflow QC_ISOLATES {
