@@ -12,7 +12,7 @@ It runs the following steps on the assembly (`fasta` files):
 
 1. **gtdbtk classify_wf and QUAST**: Assemblies are classified using steps detailed in the [gtdbtk docs](https://ecogenomics.github.io/GTDBTk/commands/classify_wf.html). The `ani_screen` step is skipped. [QUAST](https://github.com/ablab/quast) evaluates genome/metagenome assemblies by computing various metrics.
 2. **checkm2 and GUNC**: [CheckM2](https://github.com/chklovski/CheckM2) is used to predict the completeness and contamination of genomic bins (independent of their taxonomic classification). [GUNC](https://github.com/grp-bork/gunc) is also run to check for chimerism and contamination. [SeqKit](https://github.com/shenwei356/seqkit) can be used to remove small contigs.
-3. **Reporting** A summary CSV report is created that combines the summary files of checkm2, gtdbtk and GUNC runs.
+3. **Reporting** A summary CSV report is created that combines the summary files of gtdbtk, QUAST, checkm2 and GUNC runs.
 
 ### Parameters
 
