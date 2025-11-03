@@ -17,9 +17,13 @@ process FASTQC {
 
     script:
     """
+    mv ${read_1} ./${meta.ID}_1.fastq.gz
+    mv ${read_2} ./${meta.ID}_2.fastq.gz 
+
     fastqc \
         -f fastq \
         --threads ${task.cpus} \
-        ${read_1} ${read_2}
+        ${meta.ID}_1.fastq.gz ${meta.ID}_2.fastq.gz 
     """
 }
+
