@@ -42,6 +42,14 @@
       "skip_raw_reports": {
         "default": "false",
         "help_text": "Skip publishing raw reports from various QC tools, keeping only final summary reports."
+      },
+      "temp_file_storage": {
+        "default": "/tmp",
+        "help_text": "Specify a directory where GTDBTk can store temporary files during processing (see README for more information). Options are '/tmp', '/dev/shm' or 'null' (write to memory)."
+      },
+      "temp_space": {
+        "default": "30GB",
+        "help_text": "Request a specific amount of temporary working space to reserve for GTDB-Tk."
       }
     }
   }

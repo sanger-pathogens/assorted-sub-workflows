@@ -32,7 +32,7 @@ Other parameters:
 - `--autoqc_config` (default: null) Optional parameter to filter MAGs that pass QC thresholds specified in the config. When applying this option you must either provide the path to a config or with the string "default" use the provided config at `./assorted-sub-workflows/qc_mags/assets/autoqc_config.json`. See [AutoQC configuration](#autoqc-configuration) for more details.
 - `--min-contig` (default: 1000 (Note that QUAST will ignore contigs below the set threshold but does not take into account the effects of MDMCleaner))  
 - `--skip_raw_reports` (default: false) Skip publishing raw reports from various QC tools, keeping only final summary reports.  
-- `--temp_file_storage` (default: `null`): Specify a directory where GTDB-Tk can store temporary files during processing. Options are '/dev/shm', '/tmp'. See [GTDB-Tk runtime](#gdtbk-runtime) for more details.
+- `--temp_file_storage` (default: `/tmp`): Specify a directory where GTDB-Tk can store temporary files during processing. Options are '/tmp', '/dev/shm' or 'null' (write to memory). See [GTDB-Tk runtime](#gdtbk-runtime) for more details.
 - `--temp_space` (default: `30GB`): Request a specific amount of temporary working space to reserve for GTDB-Tk. See [GTDB-Tk runtime](#gdtbk-runtime) for more details.
 
 ## Configuration

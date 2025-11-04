@@ -27,7 +27,7 @@ Other parameters:
 - `--fasta_ext` (default: `fa`): Set the expected extension of fasta files in the input directories.
 - `--report_config` (default: [`./assets/report_config.json`](./assets/report_config.json)). See [configuration](#configuration) for more details.
 - `--min-contig` (default: 1000)  
-- `--temp_file_storage` (default: `null`): Specify a directory where GTDB-Tk can store temporary files during processing. Options are '/dev/shm', '/tmp'. See [GTDB-Tk runtime](#gdtbk-runtime) for more details.
+- `--temp_file_storage` (default: `/tmp`): Specify a directory where GTDB-Tk can store temporary files during processing. Options are '/tmp', '/dev/shm' or 'null' (write to memory). See [GTDB-Tk runtime](#gdtbk-runtime) for more details.
 - `--temp_space` (default: `30GB`): Request a specific amount of temporary working space to reserve for GTDB-Tk. See [GTDB-Tk runtime](#gdtbk-runtime) for more details.
 
 ## Report configuration
