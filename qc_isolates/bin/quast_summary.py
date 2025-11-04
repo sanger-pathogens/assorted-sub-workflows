@@ -32,14 +32,14 @@ def read_quast_tsv(file_path: Path):
 
 def calculate_small_contigs(df):
     try:
-        small_contig_df = df[['Assembly', 'N50', 'Total length', '# contigs (>= 0 bp)', '# contigs (>= 1000 bp)']]
+        small_contig_df = df[['Assembly', 'N50', 'Total length', '# contigs', '# contigs (>= 1000 bp)']]
     except Exception as e:
         logging.error(f'Unable to parse headers -> {e}')
         sys.exit(1)
     
     try:
-        small_contig_df['small contigs'] = (small_contig_df['# contigs (>= 0 bp)'] - small_contig_df['# contigs (>= 1000 bp)'])
-        small_contig_df['Proportion Contigs <= 1kbp'] = (small_contig_df['small contigs'] / small_contig_df['# contigs (>= 0 bp)'])
+        small_contig_df['small contigs'] = (small_contig_df['# contigs'] - small_contig_df['# contigs (>= 1000 bp)'])
+        small_contig_df['Proportion Contigs <= 1kbp'] = (small_contig_df['small contigs'] / small_contig_df['# contigs'])
         logging.info('Computed proportion of small contigs')
     except Exception as e:
         logging.error(f'Unable to compute small contigs -> {e}')
