@@ -4,7 +4,7 @@ process DOWNLOAD_METADATA {
     label 'time_1'
     label 'no_retry'
 
-    container 'quay.io/sangerpathogens/enadownloader:v2.3.3-903be379'
+    container 'quay.io/sangerpathogens/enadownloader:v2.3.5-4ac05c8f'
 
     publishDir "${params.outdir}/metadata", mode: 'copy', overwrite: true, enabled: params.publish_metadata, saveAs: {filename -> "${timestampout}"}
 
