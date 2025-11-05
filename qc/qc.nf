@@ -78,7 +78,12 @@ workflow QC {
     
     REPORT(pass_fail_channel)
 
+    fastqc_results
+    | join(TAXO_PROFILE.out.ch_kraken2_style_bracken_reports)
+    | set { binbadger_pass_fail }
+
     emit:
+    binbadger_pass_fail
     multiqc_input
     kraken2_style_bracken_reports = TAXO_PROFILE.out.ch_kraken2_style_bracken_reports
     bracken_mpa_reports = TAXO_PROFILE.out.ch_mpa_abundance_reports
