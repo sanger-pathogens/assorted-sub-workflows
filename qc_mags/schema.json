@@ -36,12 +36,20 @@
         "help_text": "Optional parameter to filter MAGs that pass QC thresholds specified in the config. When applying this option you must either provide the path to a config or with the string 'default' use the provided config."
       },
       "min_contig": {
-        "default": 0 ,
+        "default": 0,
         "help_text": "Configure the lower threshold for a contig level (in bp). Shorter contigs won't be taken into account, unless required in specific metrics."
       },
       "skip_raw_reports": {
         "default": "false",
         "help_text": "Skip publishing raw reports from various QC tools, keeping only final summary reports."
+      },
+      "temp_file_storage": {
+        "default": "/tmp",
+        "help_text": "Specify a directory where GTDBTk can store temporary files during processing (see README for more information). Options are '/tmp', '/dev/shm' or 'null' (write to memory)."
+      },
+      "temp_space": {
+        "default": "30GB",
+        "help_text": "Request a specific amount of temporary working space to reserve for GTDB-Tk."
       }
     }
   }
