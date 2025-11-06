@@ -37,7 +37,7 @@ process COLLATE_STATS_TRIMMOMATIC {
     script:
     trimming_stats_file="trimmomatic_statistics.csv"
     """
-    echo "Sample_id,Sample,Input_read_pairs,Both_surviving_reads,Both_surviving_read_percent,Forward_only_surviving_reads,Forward_only_surviving_read_percent,Reverse_only_surviving_reads,Reverse_only_surviving_read_percent,Dropped_reads,Dropped_read_percent" > "${trimming_stats_file}"
+    echo "Sample_id,Input_read_pairs,Both_surviving_reads,Both_surviving_read_percent,Forward_only_surviving_reads,Forward_only_surviving_read_percent,Reverse_only_surviving_reads,Reverse_only_surviving_read_percent,Dropped_reads,Dropped_read_percent" > "${trimming_stats_file}"
 
     for file in *_trimmomatic_summary.csv; do
 
