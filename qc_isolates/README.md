@@ -27,8 +27,8 @@ Other parameters:
 - `--fasta_ext` (default: `fa`): Set the expected extension of fasta files in the input directories.
 - `--report_config` (default: [`./assets/report_config.json`](./assets/report_config.json)). See [configuration](#configuration) for more details.
 - `--min_contig` (default: 0) Contigs below this value (length) are removed and also are not included in QUAST-generated stats
-- `--temp_file_storage` (default: `/tmp`): Specify a directory where GTDB-Tk can store temporary files during processing. Options are '/tmp', '/dev/shm' or 'null' (write to memory). See [GTDB-Tk runtime](#gdtbk-runtime) for more details.
-- `--temp_space` (default: `30GB`): Request a specific amount of temporary working space to reserve for GTDB-Tk. See [GTDB-Tk runtime](#gdtbk-runtime) for more details.
+- `--temp_file_storage` (default: `/tmp`): Specify a directory where GTDB-Tk can store temporary files during processing. Options are '/tmp', '/dev/shm' or 'null' (write to memory). See [GTDB-Tk runtime](#gtdbtk-runtime) for more details.
+- `--temp_space` (default: `30GB`): Request a specific amount of temporary working space to reserve for GTDB-Tk. See [GTDB-Tk runtime](#gtdbtk-runtime) for more details.
 
 ## Report configuration
 
@@ -67,7 +67,7 @@ NOTE: In addition to columns derived from the tool reports, the script includes 
 ### GTDB-Tk runtime
 
 - Runtime and memory can be reduced for GTDB-Tk classficiation by specifying the `--temp_file_storage` option with either `/tmp` or `/dev/shm`. Writing these files to disk instead of keeping everything in memory reduces peak RAM usage by up to 89% and can improve runtime by up to 10%. This often allows the job to run with a smaller memory request, meaning it can start faster on cluster schedulers. 
-- If you know the size of your samples you can request a specific temp memory using `--tmp_space <XX>GB`. This lets you reserve a specific amount of temporary memory/disk space. Typically you should request < 100 GB, and no more then 1000 GB, as larger requests may cause jobs to remain pending. Note that due to a know bug reported in the farm documentation, request half the memory you require as LSF double-accounts /tmp use see [here](https://ssg-confluence.internal.sanger.ac.uk/spaces/FARM/pages/101361225/Useful+LSF+resources#UsefulLSFresources-Resources).
+- If you know the size of your samples you can request a specific temp memory using `--temp_space <XX>GB`. This lets you reserve a specific amount of temporary memory/disk space. Typically you should request < 100 GB, and no more then 1000 GB, as larger requests may cause jobs to remain pending. Note that due to a know bug reported in the farm documentation, request half the memory you require as LSF double-accounts /tmp use see [here](https://ssg-confluence.internal.sanger.ac.uk/spaces/FARM/pages/101361225/Useful+LSF+resources#UsefulLSFresources-Resources).
 
 ### Dependencies
 
