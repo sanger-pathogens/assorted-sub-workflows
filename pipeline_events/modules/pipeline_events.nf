@@ -22,7 +22,7 @@ process PIPELINE_GET_METHOD {
     pipelineurl = workflow.manifest.homePage
     methodshort = (pipelineurl as Path).getSimpleName()
     methodurl = workflow.manifest.version == "{{${methodshort}_version}}" ? "${pipelineurl}" : "${pipelineurl}/-/tree/${workflow.manifest.version}"
-    methodname = workflow.manifest.name
+    methodname = workflow.manifest.name + '-' + workflow.manifest.version
     // Collect pipeline metadata into a map
     pipeline_manifest = workflow.manifest.toMap()
     pipeline_mani_params = [:] // https://www.nextflow.io/docs/latest/reference/syntax.html#variable-declaration "Variables declared in the process script, exec, and stub sections exist only in their respective section, with one exception – variables declared without the def keyword also exist in the output section"
