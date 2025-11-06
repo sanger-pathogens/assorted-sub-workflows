@@ -25,12 +25,8 @@
         "help_text": "Configuration file (JSON) to customise summary report"
       },
       "min_contig": {
-        "default": 1000,
-        "help_text": "Configure the lower threshold for a contig level (in bp). Shorter contigs won't be taken into account, unless required in specific metrics."
-      },
-      "keep_small_contigs": {
-         "default": false,
-         "help_text": "Sets min_contig to 0"
+        "default": 0,
+        "help_text": "Contigs below this value (length in bp) are removed and are not included in some calculations performed by QUAST. See QUAST documentation for details of which calculations are effected."
       },
       "temp_file_storage": {
         "default": "/tmp",
