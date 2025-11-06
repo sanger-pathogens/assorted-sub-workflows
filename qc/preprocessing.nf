@@ -1,5 +1,5 @@
 #!/usr/bin/env nextflow
-include { TRIMMOMATIC       } from './modules/trimmomatic.nf'
+include { TRIMMING       } from './subworkflows/trimming.nf'
 include { TR_FILTERING      } from './subworkflows/tr_filtering.nf'
 include { READ_REMOVAL      } from './subworkflows/read_removal.nf'
 include { COMPRESS_READS       
@@ -25,16 +25,16 @@ workflow PREPROCESSING {
         | set{ decompressed_reads_ch }
 
         if (params.run_trimmomatic && params.run_trf && params.run_bmtagger) {
-            TRIMMOMATIC(decompressed_reads_ch)
+            TRIMMING(decompressed_reads_ch)
             | TR_FILTERING
             | READ_REMOVAL
             | set{ processed_reads }
         } else if (params.run_trimmomatic && params.run_trf) {
-            TRIMMOMATIC(decompressed_reads_ch)
+            TRIMMING(decompressed_reads_ch)
             | TR_FILTERING
             | set{ processed_reads }
         } else if (params.run_trimmomatic && params.run_bmtagger) {
-            TRIMMOMATIC(decompressed_reads_ch)
+            TRIMMING(decompressed_reads_ch)
             | READ_REMOVAL
             | set{ processed_reads }
         } else if (params.run_trf && params.run_bmtagger) {
@@ -42,7 +42,7 @@ workflow PREPROCESSING {
             | READ_REMOVAL
             | set{ processed_reads }
         } else if (params.run_trimmomatic) {
-            TRIMMOMATIC(decompressed_reads_ch)
+            TRIMMING(decompressed_reads_ch)
             | set{ processed_reads }
         } else if (params.run_trf) {
             TR_FILTERING(decompressed_reads_ch)

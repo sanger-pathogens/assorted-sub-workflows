@@ -55,7 +55,7 @@
         },
         "Tandem Repeat Finder (TRF) Options": {
             "run_trf": {
-                "default": "true",
+                "default": "false",
                 "help_text": "Run TRF for tandem repeat finding"
             },
             "trf_cli_options": {

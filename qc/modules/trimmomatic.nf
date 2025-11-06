@@ -16,16 +16,19 @@ process TRIMMOMATIC {
 
     output:
     tuple val(meta), path(output_1), path(output_2), emit: trimmed_fastqs
+    path(summary_file), emit: trimmomatic_stats
 
     script:
     output_1="${meta.ID}_trimmed_1.fastq"
     output_2="${meta.ID}_trimmed_2.fastq"
     output_1_unpaired="${meta.ID}_trimmed_unpaired_1.fastq"
     output_2_unpaired="${meta.ID}_trimmed_unpaired_2.fastq"
+    summary_file="${meta.ID}_trimmomatic_summary.csv"
     """
     trimmomatic PE -phred33 -threads ${task.cpus} ${extracted_R1} ${extracted_R2} \
     ${output_1} ${output_1_unpaired} \
     ${output_2} ${output_2_unpaired} \
-    ${params.trimmomatic_options}
+    ${params.trimmomatic_options} \
+    -summary ${summary_file}
     """
 }

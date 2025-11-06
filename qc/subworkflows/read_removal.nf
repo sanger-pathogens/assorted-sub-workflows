@@ -1,8 +1,8 @@
-include { BMTAGGER           } from "../modules/bmtagger.nf"
+include { BMTAGGER                    } from "../modules/bmtagger.nf"
 include { FILTER_HOST_READS; 
-          GET_HOST_READS     } from '../modules/filter_reads.nf'
-include { GENERATE_STATS     } from '../modules/generate_stats.nf'
-include { COLLATE_STATS      } from '../modules/collate_stats.nf'
+          GET_HOST_READS              } from '../modules/filter_reads.nf'
+include { GENERATE_STATS              } from '../modules/generate_stats.nf'
+include { COLLATE_STATS_BMTAGGER      } from '../modules/collate_stats.nf'
 
 
 
@@ -36,7 +36,7 @@ workflow READ_REMOVAL {
     | join(reads_ch)
     | GENERATE_STATS
 
-    COLLATE_STATS(GENERATE_STATS.out.stats_ch.collect())
+    COLLATE_STATS_BMTAGGER(GENERATE_STATS.out.stats_ch.collect())
 
     read_removal_Out_ch = filtered_reads_ch.cleaned_ch // tuple (meta, reads_clean_1.gz, reads_clean_2.gz)   
     
