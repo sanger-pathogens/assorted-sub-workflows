@@ -41,7 +41,7 @@ process COLLATE_STATS_TRIMMOMATIC {
 
     for file in *_trimmomatic_summary.csv; do
 
-        sample_id=\$(ls "\$file" | cut -d'_' -f1)
+        sample_id=\$(basename "\$file" | sed 's/_trimmomatic_summary.*//')
         input_read_pairs=\$(grep "Input Read Pairs" "\$file" | awk '{print \$4}' | xargs)
         both_surviving_reads=\$(grep "Both Surviving Reads" "\$file" | awk '{print \$4}' | xargs)
         both_surviving_read_percent=\$(grep "Both Surviving Read Percent" "\$file" | awk '{print \$5}' | xargs)
