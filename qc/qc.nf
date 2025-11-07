@@ -27,7 +27,7 @@ workflow QC {
         | collect
         | set { multiqc_input }
 
-    pass_fail_channel = fastqc_results.map { sample_pass_fail -> [sample_pass_fail[0].ID, sample_pass_fail[1]] } // Sample ID, Pass/Fail status e.g [ERR14241855, pass] 
+    pass_fail_fastqc_ch = fastqc_results.map { sample_pass_fail -> [sample_pass_fail[0].ID, sample_pass_fail[1]] } // Sample ID, Pass/Fail status e.g [ERR14241855, pass] 
 
     if (params.bracken_profile) {
 
@@ -35,8 +35,7 @@ workflow QC {
         | PASS_OR_FAIL_K2B
         | set { k2b_results }
 
-        pass_fail_channel = pass_fail_channel.join(k2b_results.map { sample_pass_fail -> [sample_pass_fail[0].ID, sample_pass_fail[1]] })
-    
+        pass_fail_k2b_ch = k2b_results.map { sample_pass_fail -> [sample_pass_fail[0].ID, sample_pass_fail[1]] }
     }
 
     if (params.sylph_profile) {
@@ -45,8 +44,27 @@ workflow QC {
             | PASS_OR_FAIL_SYLPH
             | set { sylph_results }
 
-        pass_fail_channel = pass_fail_channel.join(sylph_results.map { sample_pass_fail -> [sample_pass_fail[0].ID, sample_pass_fail[1]] })
+        pass_fail_sylph_ch = sylph_results.map { sample_pass_fail -> [sample_pass_fail[0].ID, sample_pass_fail[1]] }
 
+    }
+
+    if (params.bracken_profile && params.sylph_profile) {
+        pass_fail_channel = pass_fail_fastqc_ch.join(pass_fail_k2b_ch)
+                            .map { flat -> flat.flatten() }
+                            .join(pass_fail_sylph_ch)
+                            .map { flat -> flat.flatten() }
+    
+    } 
+    else if (params.bracken_profile) {
+        pass_fail_channel = pass_fail_fastqc_ch.join(pass_fail_k2b_ch)
+                            .map { flat -> flat.flatten() }
+    } 
+    else if (params.sylph_profile) {
+        pass_fail_channel = pass_fail_fastqc_ch.join(pass_fail_sylph_ch)
+                            .map { flat -> flat.flatten() }
+    } 
+    else {
+        pass_fail_channel = pass_fail_fastqc_ch
     }
 
     // map dynamic number of columns into a list of sample lists for reporting
