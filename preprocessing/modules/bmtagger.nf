@@ -10,8 +10,7 @@ process BMTAGGER {
     tuple val(meta), path(first_read), path(second_read)
 
     output:
-    tuple val(meta), path(first_read), path(second_read), emit: data_ch
-    path(bmtagger_list), emit: bmtagger_list_ch
+    tuple val(meta), path(first_read), path(second_read),  path(bmtagger_list), emit: data_ch
 
     script:
     bmtagger_list="${meta.ID}.bmtagger.list"

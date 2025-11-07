@@ -6,7 +6,7 @@ include { COLLATE_STATS_BMTAGGER      } from '../modules/collate_stats.nf'
 
 
 
-workflow READ_REMOVAL {
+workflow HOST_READ_REMOVAL {
     /*
     -----------------------------------------------------------------
     Remove reads mapping to unwanted references
@@ -24,10 +24,10 @@ workflow READ_REMOVAL {
     BMTAGGER(reads_ch)
     | set {bmtagger_out_ch}
 
-    FILTER_HOST_READS(BMTAGGER.out.data_ch, BMTAGGER.out.bmtagger_list_ch)
+    FILTER_HOST_READS(bmtagger_out_ch)
     | set { filtered_reads_ch }
 
-    GET_HOST_READS(BMTAGGER.out.data_ch, BMTAGGER.out.bmtagger_list_ch)
+    GET_HOST_READS(bmtagger_out_ch)
     | set { host_reads_ch }
 
     filtered_reads_ch.data_ch
@@ -38,8 +38,8 @@ workflow READ_REMOVAL {
 
     COLLATE_STATS_BMTAGGER(GENERATE_STATS.out.stats_ch.collect())
 
-    read_removal_Out_ch = filtered_reads_ch.cleaned_ch // tuple (meta, reads_clean_1.gz, reads_clean_2.gz)   
+    host_read_removal_out_ch = filtered_reads_ch.cleaned_ch // tuple (meta, reads_clean_1.fastq, reads_clean_2.fastq)
     
     emit: 
-    read_removal_Out_ch
+    host_read_removal_out_ch
 }

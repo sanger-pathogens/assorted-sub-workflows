@@ -4,7 +4,7 @@ process RMREPEATFROMFASTQ {
     label 'mem_1'
     label 'time_1'
 
-    publishDir enabled: params.debug_preproc_output, "${params.outdir}/${meta.ID}/preprocessing/", mode: "copy", pattern:"*.{trf,fastq}"
+    publishDir enabled: params.publish_intermediate_reads, "${params.outdir}/${meta.ID}/preprocessing/", mode: "copy", pattern:"*.{trf,fastq}"
     container 'quay.io/sangerpathogens/python-curl:3.11'
 
     input:

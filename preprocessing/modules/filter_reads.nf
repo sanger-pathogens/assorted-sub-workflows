@@ -7,8 +7,7 @@ process FILTER_HOST_READS {
     container 'quay.io/sangerpathogens/metawrap_qc_python:1.0'
 
     input:
-    tuple val(meta), path(first_read), path(second_read)
-    path(bmtagger_list)
+    tuple val(meta), path(first_read), path(second_read), path(bmtagger_list)
 
     output:
     tuple val(meta), path(first_read), path(second_read), emit: data_ch
@@ -34,8 +33,7 @@ process GET_HOST_READS {
     container 'quay.io/sangerpathogens/metawrap_qc_python:1.0'
 
     input:
-    tuple val(meta), path(first_read), path(second_read)
-    path(bmtagger_list)
+    tuple val(meta), path(first_read), path(second_read), path(bmtagger_list)
 
     output:
     tuple val(meta), path(first_read), path(second_read), emit: data_ch

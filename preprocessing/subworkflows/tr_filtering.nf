@@ -20,7 +20,7 @@ workflow TR_FILTERING {
 
     // preapare fastq channel to be join by id
     reads_ch.map{meta, fq_1, fq_2 -> 
-        tuple (meta.ID, meta, [fq_1, fq_2])
+        tuple (meta.ID, meta, fq_1, fq_2)
         }
         .set {fqs_ch}
                     
@@ -32,19 +32,18 @@ workflow TR_FILTERING {
     TRF(trf_in_ch)
     TRF.out.fasta_trfs // tuple (meta, trf_out_1, trf_out_2)
         | map {meta, trf_out_1, trf_out_2 -> 
-            tuple (meta.ID,[trf_out_1, trf_out_2])
+            tuple (meta.ID, trf_out_1, trf_out_2)
             }
-        | set {trf_ch} // tuple (meta.id, [trfs_out])
+        | set {trf_ch} // tuple (meta.id, trf_out_1, trf_out_2)
 
-    fqs_ch // tuple (meta.id, meta, [fqs])
-        | join(trf_ch) // tuple (meta.id, meta, [fqs], [trfs_out])
-        | map {id, meta, fqs, trfs -> tuple(meta, fqs[0], fqs[1], trfs[0], trfs[1])}
-        | set {rmTRFfromFq_In_ch}
-    RMREPEATFROMFASTQ(rmTRFfromFq_In_ch)
+    fqs_ch // tuple (meta.id, meta, fasta_1, fasta_2)
+        | join(trf_ch) // tuple (meta.id, meta, fasta_1, fasta_2, trf_out_1, trf_out_2)
+        | set {rm_trf_from_fq_in_ch}
+    RMREPEATFROMFASTQ(rm_trf_from_fq_in_ch)
     RMREPEATFROMFASTQ.out.fastqs
-        | set {trf_Out_ch} // tuple (meta, trf_fq_gz_1, trf_fq_gz_2)
+        | set {trf_out_ch} // tuple (meta, trf_fq_1, trf_fq_2)
 
     emit:
-        trf_Out_ch
+        trf_out_ch
 
 }
