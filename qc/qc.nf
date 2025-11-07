@@ -1,4 +1,5 @@
 #!/usr/bin/env nextflow
+include { PREPROCESSING  } from '../preprocessing/preprocessing.nf'
 include { FASTQC              } from './modules/fastqc.nf'
 include { PASS_OR_FAIL_FASTQC
           PASS_OR_FAIL_K2B
@@ -11,8 +12,16 @@ workflow QC {
     reads_ch // meta, read_1, read_2
 
     main:
+
+    if (!params.skip_preprocessing) {
+        PREPROCESSING(reads_ch)
+        | FASTQC 
+    }
+    else {
+        FASTQC(reads_ch)
+    }
     
-    FASTQC(reads_ch) 
+    
 
     fastqc_pass_criteria = file(params.fastqc_pass_criteria, checkIfExists: true)
     fastqc_no_fail_criteria = file(params.fastqc_no_fail_criteria, checkIfExists: true)
@@ -77,4 +86,8 @@ workflow QC {
 
     emit:
     multiqc_input
+    kraken2_style_bracken_reports = TAXO_PROFILE.out.ch_kraken2_style_bracken_reports
+    bracken_mpa_reports = TAXO_PROFILE.out.ch_mpa_abundance_reports
+    sylphtax_mpa_report = TAXO_PROFILE.out.sylphtax_mpa_report
+    qc_summary = REPORT.out.qc_summary
 }
