@@ -116,6 +116,9 @@ This file contains two workflows:
 - **Outputs**:  
   - `created_file_info` ([value, value, value]): Tuple containing the output/run ID, the full published file path, and the file type.
 
+## Parameters
+
+For a description of available parameters and their uses, see [schema.json](./schema.json) and [pipeline_events.config](./pipeline_events.config).
 
 ## Pipelines/Workflows using this subworkflow
 - [irods_extractor](https://gitlab.internal.sanger.ac.uk/sanger-pathogens/pipelines/irods_extractor)
