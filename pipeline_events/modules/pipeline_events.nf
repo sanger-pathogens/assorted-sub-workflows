@@ -53,16 +53,16 @@ process PIPELINE_EVENTS_OPEN_BATCH {
 
     output:
     tuple val(batch_mani_params), path(batch_mani_params_out), emit: batch_manifest_params
-    val(batchuuid),  emit: batch_uuid
+    val(batch_id),  emit: batch_id
 
     script:
-    batchuuid = UUID.randomUUID().toString()
-    batch_mani_params["batchuuid"] = batchuuid
+    batch_id = UUID.randomUUID().toString()
+    batch_mani_params["batch_id"] = batch_id
     batch_mani_params_json = new JsonBuilder(batch_mani_params).toPrettyString()
-    batch_mani_params_out = "pipeline_manifest_run_params_batch_${batchuuid}.json"
+    batch_mani_params_out = "pipeline_manifest_run_params_batch_${batch_id}.json"
     """
     echo '${batch_mani_params_json}' > ${batch_mani_params_out}
-    send_pipeline_event open --batch_id ${batchuuid} --pipeline_name ${methodname} --pipeline_url ${method_url}
+    send_pipeline_event open --batch_id ${batch_id} --pipeline_name ${methodname} --pipeline_url ${method_url}
     """
 }
 
@@ -75,12 +75,12 @@ process PIPELINE_EVENTS_CLOSE_BATCH {
     container "${params.pipeline_events_container}"
 
     input:
-    val(batchuuid)
+    val(batch_id)
     val(filecreatedcount)
 
     script:
     """
-    send_pipeline_event close --batch_id ${batchuuid} --status completed --files_created ${filecreatedcount}
+    send_pipeline_event close --batch_id ${batch_id} --status completed --files_created ${filecreatedcount}
     """
 }
 
@@ -94,10 +94,10 @@ process GATHER_RESULTFILE_INFO {
     tuple val(meta), path(resultfileWorkPath)
     val(outputfoldertag)
     val(file_type)
-    val(batchuuid)
+    val(batch_id)
 
     output:
-    tuple val(meta), path(resultfileWorkPath), val(resultfilePublishedDirAbsPath), val(file_type), val(batchuuid), emit: file_info
+    tuple val(meta), path(resultfileWorkPath), val(resultfilePublishedDirAbsPath), val(file_type), val(batch_id), emit: file_info
 
     // could be exec block here maybe, given shell script is there purely to avoid returning last declared variable
     script:
@@ -126,21 +126,21 @@ process PIPELINE_EVENTS_CREATE_FILE {
     container "${params.pipeline_events_container}"
 
     input:
-    tuple val(meta), path(resultfileWorkPath), val(resultfilePublishedDir), val(file_type), val(batchuuid) // val(resultfilePublishedDir), not path() so not to stage folder
+    tuple val(meta), path(resultfileWorkPath), val(resultfilePublishedDir), val(file_type), val(batch_id) // val(resultfilePublishedDir), not path() so not to stage folder
 
     output:
     tuple val(outid), val(resultfilePublishedFullPath), val(file_type),  emit: created_file_info // val(resultfilePublishedFullPath), not path() so not to stage the file that's outside the work folder
 
     script:
     runid = meta.ID
-    outid = (runid == null) ? batchuuid : runid
+    outid = (runid == null) ? batch_id : runid
     resultfileName = resultfileWorkPath.name.toString()
     resultfilePublishedFullPath = "${resultfilePublishedDir}/${resultfileName}"
     // runassociationOptString = (file_type == "batch_manifest") ? "" : "--association RUN --association_id ${runid}"
     runassociationOptString = "--association RUN --association_id ${runid}" // in waiting for the API to allow not using these options for batch_manifest type
     """
     filemd5=\$(md5sum ${resultfileWorkPath} | cut -d' ' -f1)
-    send_pipeline_event file --batch_id ${batchuuid} --path ${resultfilePublishedFullPath} --file_type ${file_type} \\
+    send_pipeline_event file --batch_id ${batch_id} --path ${resultfilePublishedFullPath} --file_type ${file_type} \\
                                 --md5sum \${filemd5} ${runassociationOptString} \\
                                 --username \$(id -un) --group \$(id -gn)
     """

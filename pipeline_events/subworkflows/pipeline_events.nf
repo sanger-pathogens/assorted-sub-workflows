@@ -10,9 +10,9 @@ workflow PIPELINE_EVENTS_INIT {
     PIPELINE_GET_METHOD()
     | PIPELINE_EVENTS_OPEN_BATCH
 
-    batch_uuid = PIPELINE_EVENTS_OPEN_BATCH.out.batch_uuid
+    batch_id = PIPELINE_EVENTS_OPEN_BATCH.out.batch_id
 
-    GATHER_RESULTFILE_INFO(PIPELINE_EVENTS_OPEN_BATCH.out.batch_manifest_params, "pipeline_info", "batch_manifest", batch_uuid)
+    GATHER_RESULTFILE_INFO(PIPELINE_EVENTS_OPEN_BATCH.out.batch_manifest_params, "pipeline_info", "batch_manifest", batch_id)
 
     if (params.associate_batch_metadata) {
         GATHER_RESULTFILE_INFO.out.file_info
@@ -24,13 +24,13 @@ workflow PIPELINE_EVENTS_INIT {
     }
 
     emit:
-    batch_uuid
+    batch_id
     batch_manifest_info
 }
 
 workflow PIPELINE_EVENTS_END {
     take:
-    batch_uuid
+    batch_id
     batch_manifest_info
     created_file_infos
 
@@ -63,7 +63,7 @@ workflow PIPELINE_EVENTS_END {
     created_file_count_per_type
     .subscribe { file_count_per_type -> log.info("Count of file tracked in Pipeline Events Database per file type: ${file_count_per_type}") }
 
-    PIPELINE_EVENTS_CLOSE_BATCH(batch_uuid, created_file_count)
+    PIPELINE_EVENTS_CLOSE_BATCH(batch_id, created_file_count)
 
     emit:
     all_created_file_paths
