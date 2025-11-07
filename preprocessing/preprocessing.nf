@@ -78,8 +78,4 @@ def check_preprocessing_params(){
             log.error("The adapter_fasta provided (${params.adapter_fasta}) does not exist.")
         }
     }
-
-    else {
-        log.error("Testing runs")
-    }
 }
