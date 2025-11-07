@@ -1,5 +1,5 @@
 { 
-    "pipeline": "Combined input (sub-workflow)",
+    "pipeline": "Mixed Input (sub-workflow)",
     "params": {
         "Sequencing reads input parameters": {
             "header_combined_input_1": {
