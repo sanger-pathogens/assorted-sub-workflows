@@ -49,8 +49,8 @@
         },
         "Bmtagger Options": {
             "run_bmtagger": {
-                "default": "true",
-                "help_text": "Run bmtagger for read removal"
+                "default": "false",
+                "help_text": "Run bmtagger for host read removal"
             },
             "publish_host_data": {
                 "default": "false",
