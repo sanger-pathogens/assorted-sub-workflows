@@ -23,5 +23,5 @@ workflow TRIMMING {
     
     emit: 
 
-        TRIMMOMATIC.out.trimmed_fastqs // tuple (meta, reads_trimmed_1.gz, reads_trimmed_2.gz)
+        TRIMMOMATIC.out.trimmed_fastqs // tuple (meta, reads_trimmed_1.fq, reads_trimmed_2.fq)
 }
