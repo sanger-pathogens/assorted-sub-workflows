@@ -6,9 +6,13 @@
                 "default": "true",
                 "help_text": "should the pre-processed reads be saved (gzip-compressed) in the preprocessing/ output folder."
             },
-            "publish_intermediate_reads": {
+            "publish_trimmomatic_reads": {
                 "default": "false",
-                "help_text": "Enable publishing of intermediate reads from trimmomatic, and trf processes during pre-processing. Most read sets will be uncompressed fastq files."
+                "help_text": "Enable publishing of intermediate reads from trimmomatic process during pre-processing. Read sets will be uncompressed fastq files."
+            },
+            "publish_trf_reads": {
+                "default": "false",
+                "help_text": "Enable publishing of intermediate reads from trf process during pre-processing. Read sets will be uncompressed fastq files."
             }
         },
         "Trimmomatic Options": {

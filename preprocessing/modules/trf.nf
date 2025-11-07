@@ -6,7 +6,7 @@ process TRF {
 
     container "quay.io/biocontainers/trf:4.09.1--h031d066_6"
 
-    publishDir enabled: params.publish_intermediate_reads, mode: 'copy', pattern: "*.trf", path: "${params.outdir}/${meta.ID}/preprocessing/intermediates/trf"
+    publishDir enabled: params.publish_intermediate_trf, mode: 'copy', pattern: "*.trf", path: "${params.outdir}/${meta.ID}/preprocessing/intermediates/trf"
 
     input:
     tuple val(meta), path(fasta_R1), path(fasta_R2)

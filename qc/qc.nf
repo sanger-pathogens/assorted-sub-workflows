@@ -21,7 +21,6 @@ workflow QC {
         FASTQC(reads_ch)
     }
     
-    
 
     fastqc_pass_criteria = file(params.fastqc_pass_criteria, checkIfExists: true)
     fastqc_no_fail_criteria = file(params.fastqc_no_fail_criteria, checkIfExists: true)
