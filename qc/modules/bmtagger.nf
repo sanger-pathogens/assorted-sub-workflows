@@ -21,6 +21,6 @@ process BMTAGGER {
     # run bmtagger
     bmtagger.sh -b ${params.bmtagger_db}/${params.bmtagger_host}.bitmask -x ${params.bmtagger_db}/${params.bmtagger_host}.srprism -T bmtagger_tmp -q1 \\
 	 -1 ${first_read} -2 ${second_read} \\
-	 -o ${meta.ID}.bmtagger.list
+	 -o ${bmtagger_list}
     """
 }
