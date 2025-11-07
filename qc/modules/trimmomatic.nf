@@ -3,7 +3,6 @@ process TRIMMOMATIC {
     label 'mem_1'
     label 'time_1'
     label 'cpu_4'
-    // cpus params.trimmomatic_threads
 
     container "quay.io/biocontainers/trimmomatic:0.39--1"
 
