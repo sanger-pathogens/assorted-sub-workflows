@@ -1,6 +1,6 @@
 # Preprocessing workflow
 
-This workflow takes a pair of FASTQ files and performs a series of preprocessing steps to clean and prepare reads for any downstream analysis. Steps can include trimming, tandem repeat filtering (TRF), and host read removal, depending on the parameters yopu specify. By default trimming is turned on and TRF and host read removal is off. 
+This workflow takes a pair of FASTQ files and performs a series of preprocessing steps to clean and prepare reads for any downstream analysis. Steps can include trimming, tandem repeat filtering (TRF), and host read removal, depending on the parameters you specify. By default trimming is turned on and TRF and host read removal is off. 
 
 ### Trimming
 
@@ -8,7 +8,7 @@ Trimming is turned on my default and conducted using Trimmomatic for adapter rem
 
 ### Tandem repeat filtering (TRF)
 
-If enabled by specifying `--run_trf true` Tandem Repeat Finder (TRF) is run to identify and remove reads with excessive tandem repeats (two or more adjacent, approximate copies of a pattern of nucleotides). This helps reduce artifacts caused by repetitive sequences that may interfere with mapping or assembly.
+If enabled by specifying `--run_trf true`, Tandem Repeat Finder (TRF) is run to identify and remove reads with excessive tandem repeats (two or more adjacent, approximate copies of a pattern of nucleotides). This helps reduce artifacts caused by repetitive sequences that may interfere with mapping or assembly.
 
 ### Host read removal
 
