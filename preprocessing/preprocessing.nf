@@ -1,7 +1,7 @@
 #!/usr/bin/env nextflow
-include { TRIMMING       } from './subworkflows/trimming.nf'
+include { TRIMMING          } from './subworkflows/trimming.nf'
 include { TR_FILTERING      } from './subworkflows/tr_filtering.nf'
-include { HOST_READ_REMOVAL      } from './subworkflows/host_read_removal.nf'
+include { HOST_READ_REMOVAL } from './subworkflows/host_read_removal.nf'
 include { COMPRESS_READS       
           DECOMPRESS_READS  } from './modules/helper_processes.nf'
 
@@ -22,37 +22,25 @@ workflow PREPROCESSING {
     DECOMPRESS_READS(reads_ch)
     | set{ decompressed_reads_ch }
 
-    if (params.run_trimmomatic && params.run_trf && params.run_bmtagger) {
+    if (params.run_trimmomatic):
         TRIMMING(decompressed_reads_ch)
-        | TR_FILTERING
-        | HOST_READ_REMOVAL
-        | set{ processed_reads }
-    } else if (params.run_trimmomatic && params.run_trf) {
-        TRIMMING(decompressed_reads_ch)
-        | TR_FILTERING
-        | set{ processed_reads }
-    } else if (params.run_trimmomatic && params.run_bmtagger) {
-        TRIMMING(decompressed_reads_ch)
-        | HOST_READ_REMOVAL
-        | set{ processed_reads }
-    } else if (params.run_trf && params.run_bmtagger) {
-        TR_FILTERING(decompressed_reads_ch)
-        | HOST_READ_REMOVAL
-        | set{ processed_reads }
-    } else if (params.run_trimmomatic) {
-        TRIMMING(decompressed_reads_ch)
-        | set{ processed_reads }
-    } else if (params.run_trf) {
-        TR_FILTERING(decompressed_reads_ch)
-        | set{ processed_reads }
-    } else if (params.run_bmtagger) {
-        HOST_READ_REMOVAL(decompressed_reads_ch)
-        | set{ processed_reads }
-    } else {
-        processed_reads = decompressed_reads_ch
-    }
+        | set{ preprocessed_ch_1 }
+    else:
+        preprocessed_ch_1 = decompressed_reads_ch
+    if (params.run_trf):
+        TR_FILTERING(preprocessed_ch_1)
+        | set{ preprocessed_ch_2 }
+    else:
+        preprocessed_ch_2 = preprocessed_ch_1
+    if (params.run_bmtagger):
+        HOST_READ_REMOVAL(preprocessed_ch_2)
+        | set{ preprocessed_ch_3 }
+    else:
+        preprocessed_ch_3 = preprocessed_ch_2
+    if (!params.run_bmtagger && !params.run_trf && !params.run_trimmomatic):
+        preprocessed_ch_3 = decompressed_reads_ch
 
-    COMPRESS_READS(processed_reads) 
+    COMPRESS_READS(preprocessed_ch_3) 
     | set{ compressed_reads_ch }
     
 
