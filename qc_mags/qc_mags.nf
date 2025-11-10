@@ -3,7 +3,8 @@ include { CHECKM2 as PRE_CHECKM2;
 include { GTDBTK                           } from './modules/gtdbtk.nf'
 include { GUNC as PRE_GUNC;
           GUNC                             } from './modules/gunc.nf'
-include { QUAST;                         
+include { getQuastThresholds;
+          QUAST;                         
           QUAST_SUMMARY                    } from './modules/quast.nf'
 include { MDMCLEANER                       } from './modules/mdmcleaner.nf'
 include { SEQKIT                           } from './modules/seqkit.nf'
@@ -22,6 +23,7 @@ def ensureList(Object maybeListLike) {
     }
 }
 
+
 // Workflows
 
 workflow QC_MAGS {
@@ -34,7 +36,7 @@ workflow QC_MAGS {
     PRE_CHECKM2(fastas, pre_qc)
     PRE_GUNC(fastas, pre_qc)
     GTDBTK(fastas, pre_qc)
-    QUAST(fastas, pre_qc)
+    QUAST(fastas, pre_qc, getQuastThresholds())
 
     QUAST_SUMMARY(QUAST.out.results, pre_qc)
 
