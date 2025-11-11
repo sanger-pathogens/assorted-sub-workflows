@@ -22,28 +22,35 @@ workflow PREPROCESSING {
     DECOMPRESS_READS(reads_ch)
     | set{ decompressed_reads_ch }
 
-    if (params.run_trimmomatic):
+    if (params.run_trimmomatic){
         TRIMMING(decompressed_reads_ch)
         | set{ preprocessed_ch_1 }
-    else:
+    }
+    else{
         preprocessed_ch_1 = decompressed_reads_ch
-    if (params.run_trf):
+    }
+    if (params.run_trf){
         TR_FILTERING(preprocessed_ch_1)
         | set{ preprocessed_ch_2 }
-    else:
+    }
+    else{
         preprocessed_ch_2 = preprocessed_ch_1
-    if (params.run_bmtagger):
+    }
+    if (params.run_bmtagger){
         HOST_READ_REMOVAL(preprocessed_ch_2)
         | set{ preprocessed_ch_3 }
-    else:
+    }
+    else{
         preprocessed_ch_3 = preprocessed_ch_2
-    if (!params.run_bmtagger && !params.run_trf && !params.run_trimmomatic):
+    }
+    if (!params.run_bmtagger && !params.run_trf && !params.run_trimmomatic){
         preprocessed_ch_3 = decompressed_reads_ch
-
+    }
     COMPRESS_READS(preprocessed_ch_3) 
     | set{ compressed_reads_ch }
     
 
     emit:
     compressed_reads_ch
+
 }
