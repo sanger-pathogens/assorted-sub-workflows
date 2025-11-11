@@ -4,6 +4,7 @@ include { GTDBTK                           } from './modules/gtdbtk.nf'
 include { GUNC as PRE_GUNC;
           GUNC                             } from './modules/gunc.nf'
 include { getQuastThresholds;
+          QUAST as PRE_QUAST;
           QUAST;                         
           QUAST_SUMMARY                    } from './modules/quast.nf'
 include { MDMCLEANER                       } from './modules/mdmcleaner.nf'
@@ -57,15 +58,17 @@ workflow QC_MAGS {
 
     post_qc = Channel.value("post_qc")
 
+    QUAST(postqc_fastas, post_qc)
     CHECKM2(postqc_fastas, post_qc)
     GUNC(postqc_fastas, post_qc)
 
-    PRE_CHECKM2.out.results
+PRE_QUAST.out.results
+    | join(PRE_CHECKM2.out.results)
     | join(PRE_GUNC.out.results)
+    | join(QUAST.out.results)
     | join(CHECKM2.out.results)
     | join(GUNC.out.results)
     | join(GTDBTK.out.results)
-    | join(QUAST_SUMMARY.out.results)
     | combine(Channel.fromPath(params.report_config))
     | REPORT
 
