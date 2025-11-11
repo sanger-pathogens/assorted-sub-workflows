@@ -4,7 +4,7 @@ This workflow takes a pair of FASTQ files and performs a series of preprocessing
 
 ### Trimming
 
-Trimming is turned on my default and conducted using Trimmomatic for adapter removal and quality trimming. Trimming ensures that only high-quality, informative sequences are used for downstream analysis. Note that adapter trimming is currently not carried out automatically in IROD by NPG. 
+Trimming is turned on by default and conducted using Trimmomatic for adapter removal and quality trimming. Trimming ensures that only high-quality, informative sequences are used for downstream analysis. Note that adapter trimming is currently not carried out automatically in IROD by NPG. 
 
 ### Tandem repeat filtering (TRF)
 
