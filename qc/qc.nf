@@ -57,18 +57,18 @@ workflow QC {
     }
 
     if (params.bracken_profile && params.sylph_profile) {
-        pass_fail_channel = pass_fail_fastqc_ch.join(pass_fail_k2b_ch)
+        pass_fail_channel = pass_fail_fastqc_ch.join(pass_fail_k2b_ch, remainder: true)
                             .map { flat -> flat.flatten() }
-                            .join(pass_fail_sylph_ch)
+                            .join(pass_fail_sylph_ch, remainder: true)
                             .map { flat -> flat.flatten() }
     
     } 
     else if (params.bracken_profile) {
-        pass_fail_channel = pass_fail_fastqc_ch.join(pass_fail_k2b_ch)
+        pass_fail_channel = pass_fail_fastqc_ch.join(pass_fail_k2b_ch, remainder: true)
                             .map { flat -> flat.flatten() }
     } 
     else if (params.sylph_profile) {
-        pass_fail_channel = pass_fail_fastqc_ch.join(pass_fail_sylph_ch)
+        pass_fail_channel = pass_fail_fastqc_ch.join(pass_fail_sylph_ch, remainder: true)
                             .map { flat -> flat.flatten() }
     } 
     else {
