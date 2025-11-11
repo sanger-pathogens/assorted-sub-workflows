@@ -11,8 +11,8 @@
     "id_column": "user_genome",
     "keep_columns": ["classification", "closest_genome_reference"]
   },
-  "QUAST_SUMMARY": {
+  "QUAST": {
     "id_column": "Assembly",
-    "keep_columns": ["N50", "Total length", "Proportion Contigs <= 1kbp"]
+    "keep_columns": ["N50", "# Contigs"]
   }
 }

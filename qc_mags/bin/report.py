@@ -141,10 +141,16 @@ def parse_args():
         description="Merge GUNC, CheckM2 and post-QC metadata."
     )
     parser.add_argument(
+        "--pre_qc_quast", type=Path, required=True, help="Path to pre-QC QUAST report TSV"
+    )
+    parser.add_argument(
         "--pre_qc_checkm2", type=Path, required=True, help="Path to pre-QC CheckM2 TSV"
     )
     parser.add_argument(
         "--pre_qc_gunc", type=Path, required=True, help="Path to pre-QC GUNC TSV"
+    )
+    parser.add_argument(
+        "--post_qc_quast", type=Path, required=True, help="Path to post-QC QUAST report TSV"
     )
     parser.add_argument(
         "--post_qc_checkm2", type=Path, required=True, help="Path to post-QC CheckM2 TSV",
@@ -154,9 +160,6 @@ def parse_args():
     )
     parser.add_argument(
         "--gtdbtk", type=Path, required=True, help="Path to GTDBTK TSV"
-    )
-    parser.add_argument(
-        "--quast_summary", type=Path, required=True, help="Path to QUAST_SUMMARY TSV"
     )
     parser.add_argument(
         "--config", type=Path, required=True, help="Path to report configuration file"
@@ -174,10 +177,11 @@ def main():
     config = read_config(args.config)
 
     args_qc_stage = {
+        "pre_qc_quast": ["preqc","quast"],
         "pre_qc_checkm2": ["preqc", "checkm2"],
         "pre_qc_gunc": ["preqc", "gunc"],
         "gtdbtk": [None, "gtdbtk"],
-        "quast_summary": [None, "quast_summary"],
+        "post_qc_quast": ["postqc", "quast"],
         "post_qc_checkm2": ["postqc", "checkm2"],
         "post_qc_gunc": ["postqc", "gunc"]
     }
