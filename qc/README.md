@@ -26,8 +26,9 @@ Example criteria file:
 
 If provided to `--fastqc_pass_criteria`, these criteria would need a `'PASS'` for the sample to pass. If provided to `--fastqc_no_fail_criteria`, the criteria would need a `'PASS'` or a `'WARN'` for the sample to pass. Other criteria would be allowed to have a `'FAIL'` (or `'WARN'`).
 
-### [kraken2bracken](../kraken2bracken/README.md)
-If the abundance of the top (likely correct) genus or species in the Kraken style Bracken report is less than its specified threshold, the sample is considered contaminated/poor quality and a `'fail'` will be output. If the abundances meet the thresholds, a `'pass'` will be output.
+### Taxonomy Profiling
+
+If the most abundant genus or species in the Kraken or Sylph report is below a set threshold, the sample is marked as ‘fail’, meaning it may be contaminated or low quality. If the abundance meets or exceeds the threshold, the sample is marked as ‘pass’. You can adjust these thresholds using the `genus_abundance_threshold` and `species_abundance_threshold` parameters.
 
 ### Parameters
 ```
@@ -42,7 +43,7 @@ If the abundance of the top (likely correct) genus or species in the Kraken styl
             default: assorted-sub-workflows/qc/assets/fastqc_no_fail_criteria.json
             JSON file containing definition of an array specifying which items in the FastQC summary.txt are required to NOT have the value FAIL for the sample to be considered a pass (i.e. they could have WARN)
 -----------------------------------------------------------------
- kraken2bracken QC
+ Taxonomy Profiling QC
       --genus_abundance_threshold
             default: 90
             Fail the sample if the top genus abundance is lower than this

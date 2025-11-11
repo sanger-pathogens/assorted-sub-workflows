@@ -1,0 +1,35 @@
+process TRF {
+    tag "${meta.ID}"
+    label 'mem_1'
+    label 'cpu_1'
+    label 'time_1'
+
+    container "quay.io/biocontainers/trf:4.09.1--h031d066_6"
+
+    publishDir enabled: params.publish_intermediate_trf, mode: 'copy', pattern: "*.trf", path: "${params.outdir}/${meta.ID}/preprocessing/intermediates/trf"
+
+    input:
+    tuple val(meta), path(fasta_R1), path(fasta_R2)
+
+    output:
+    tuple val(meta), path("${meta.ID}_1.trf"), path("${meta.ID}_2.trf"), emit: fasta_trfs
+
+    script:
+    """
+    # Handle R1 file
+    if [ -f "$fasta_R1" ] && [ ! -s "$fasta_R1" ]; then
+        echo "R1 file exists but is empty, writing empty output..."
+        touch "${meta.ID}_1.trf"
+    else
+        trf ${fasta_R1} ${params.trf_cli_options} > ${meta.ID}_1.trf
+    fi
+
+    # Handle R2 file
+    if [ -f "$fasta_R2" ] && [ ! -s "$fasta_R2" ]; then
+        echo "R2 file exists but is empty, writing empty output..."
+        touch "${meta.ID}_2.trf"
+    else
+        trf ${fasta_R2} ${params.trf_cli_options} > ${meta.ID}_2.trf
+    fi
+    """
+}

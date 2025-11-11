@@ -1,6 +1,12 @@
 { 
     "pipeline": "QC (sub-workflow)",
     "params": {
+        "Preprocessing options": {
+            "skip_preprocessing": {
+                "default": "false",
+                "help_text": "Skip the preprocessing step and use the input reads directly for QC"
+            }
+        },
         "FastQC": {
             "save_fastqc": {
                 "default": false,

@@ -13,15 +13,17 @@ process FASTQC {
 
     output:
     tuple val(meta), path("*.html"), emit: html
-    tuple val(meta), path(read_1_fastqc), path(read_2_fastqc), emit: zip
+    tuple val(meta), path("*_1_fastqc.zip"), path("*_2_fastqc.zip"), emit: zip
 
     script:
-    read_1_fastqc = "${meta.ID}_1_fastqc.zip"
-    read_2_fastqc = "${meta.ID}_2_fastqc.zip"
     """
+    mv ${read_1} ./${meta.ID}_1.fastq.gz
+    mv ${read_2} ./${meta.ID}_2.fastq.gz 
+
     fastqc \
         -f fastq \
         --threads ${task.cpus} \
-        ${read_1} ${read_2}
+        ${meta.ID}_1.fastq.gz ${meta.ID}_2.fastq.gz 
     """
 }
+

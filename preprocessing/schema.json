@@ -1,0 +1,73 @@
+{ 
+    "pipeline": "Preprocessing (sub-workflow)",
+    "params": {
+        "General pre-processing options":{
+            "publish_clean_reads": {
+                "default": "true",
+                "help_text": "Save the pre-processed reads (gzip-compressed) in the preprocessing/ output folder."
+            },
+            "publish_trimmomatic_reads": {
+                "default": "false",
+                "help_text": "Enable publishing of intermediate reads from trimmomatic process during pre-processing. Read sets will be uncompressed fastq files."
+            },
+            "publish_trf_reads": {
+                "default": "false",
+                "help_text": "Enable publishing of intermediate reads from trf process during pre-processing. Read sets will be uncompressed fastq files."
+            }
+        },
+        "Trimmomatic Options": {
+            "run_trimmomatic": {
+                "default": "true",
+                "help_text": "Run Trimmomatic for adapter removal and trimming for quality"
+            },
+            "adapter_fasta": {
+                "default": "/data/pam/software/trimmomatic/adapter_fastas/solexa-with-nextseqPR-adapters.fasta",
+                "help_text": "Path to fasta file containing adapter sequences"
+            },
+            "trim_window_size": {
+                "default": 4,
+                "help_text": "Sliding window size for read trimming"
+            },
+            "trim_baseq": {
+                "default": 20,
+                "help_text": "Average base quality cutoff for the sliding window for trimmomatic"
+            },  
+            "trim_min_length": {
+                "default": 70,
+                "help_text": "Minimum read length retained following trimming"
+            },
+            "trimmomatic_options": {
+                "default": "ILLUMINACLIP:${params.adapter_fasta}:2:10:7:1 CROP:151 SLIDINGWINDOW:${params.trim_window_size}:${params.trim_baseq} MINLEN:${params.trim_min_length}",
+                "help_text": "Trimmomatic command line options"
+            }
+        },
+        "Tandem Repeat Finder (TRF) Options": {
+            "run_trf": {
+                "default": "false",
+                "help_text": "Run TRF for finding and removing tandem repeat from short reads"
+            },
+            "trf_cli_options": {
+                "default": "2 7 7 80 10 50 500 -h -ngs",
+                "help_text": "TRF command line options"
+            }
+        },
+        "Bmtagger Options": {
+            "run_bmtagger": {
+                "default": "false",
+                "help_text": "Run bmtagger for host read removal"
+            },
+            "publish_host_data": {
+                "default": "false",
+                "help_text": "Publish the reads determined to originate from the host organism."
+            },
+            "bmtagger_db": {
+                "default": "/data/pam/software/bmtagger",
+                "help_text": "Path to directory containing BMTagger database."
+            },
+            "bmtagger_host":{
+                "default": "T2T-CHM13v2.0",
+                "help_text": "Reference genome version used for host read filtering."
+            }
+        }
+    }
+}
