@@ -55,20 +55,20 @@ workflow QC_MAGS {
 
     post_qc = Channel.value("post_qc")
 
-    QUAST(postqc_fastas, post_qc)
+    QUAST(postqc_fastas, post_qc, getQuastThresholds())
     CHECKM2(postqc_fastas, post_qc)
     GUNC(postqc_fastas, post_qc)
 
-PRE_QUAST.out.results
-    | join(PRE_CHECKM2.out.results)
-    | join(PRE_GUNC.out.results)
-    | join(QUAST.out.results)
-    | join(CHECKM2.out.results)
-    | join(GUNC.out.results)
-    | join(GTDBTK.out.results)
-    | combine(Channel.fromPath(params.report_config))
-    | REPORT
-    | SUMMARISE_CONTIG_FILTERING
+    PRE_QUAST.out.results
+        | join(PRE_CHECKM2.out.results)
+        | join(PRE_GUNC.out.results)
+        | join(QUAST.out.results)
+        | join(CHECKM2.out.results)
+        | join(GUNC.out.results)
+        | join(GTDBTK.out.results)
+        | combine(Channel.fromPath(params.report_config))
+        | REPORT
+        | SUMMARISE_CONTIG_FILTERING
 
     if (params.autoqc_config) {
         // Check if user-supplied config or opted for default config
