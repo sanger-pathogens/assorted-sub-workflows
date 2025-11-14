@@ -8,7 +8,8 @@ include { getQuastThresholds;
           QUAST                            } from './modules/quast.nf'
 include { MDMCLEANER                       } from './modules/mdmcleaner.nf'
 include { SEQKIT                           } from './modules/seqkit.nf'
-include { REPORT                           } from './modules/reporting.nf'
+include { REPORT;                           
+          SUMMARISE_CONTIG_FILTERING       } from './modules/reporting.nf'
 include { FILTER_METADATA as FILTER_REPORT } from '../mixed_input/modules/filter_metadata.nf'
 include { FILTER_FASTAS;
           PUBLISH_RESULTS                  } from './modules/filtering.nf'
@@ -67,6 +68,7 @@ PRE_QUAST.out.results
     | join(GTDBTK.out.results)
     | combine(Channel.fromPath(params.report_config))
     | REPORT
+    | SUMMARISE_CONTIG_FILTERING
 
     if (params.autoqc_config) {
         // Check if user-supplied config or opted for default config
