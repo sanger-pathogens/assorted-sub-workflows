@@ -35,8 +35,8 @@ workflow QC_MAGS {
     
     PRE_CHECKM2(fastas, pre_qc)
     PRE_GUNC(fastas, pre_qc)
+    PRE_QUAST(fastas, pre_qc, getQuastThresholds())
     GTDBTK(fastas, pre_qc)
-    QUAST(fastas, pre_qc, getQuastThresholds())
 
     fastas
     | MDMCLEANER
