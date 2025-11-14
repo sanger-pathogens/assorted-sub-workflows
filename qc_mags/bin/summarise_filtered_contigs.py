@@ -1,10 +1,5 @@
 #!/usr/bin/env python3
 
-# Take pre and post qc quast reports and min_contig through args - was going to do it based on report but that depends on user configuring these columns
-# pd dataframe of only ID columns + quast_preqc_#_contigs_<_min_contig, quast_preqc_#_contigs, quast_postqc_#_contigs
-# Col headers: #_contigs_removed, proportion_contigs_removed, #_contigs retained, proportion_contigs_retained
-# Rows are bins
-
 """
 Generate a quick summary of number and proportion of contigs filtered out by filtering stages.
 Will need to be adapted if further contig filtering steps are included: only works for length 
@@ -37,8 +32,7 @@ def main():
         min_contig = args.min_contig
         )
 
-    enriched_data = generate_output_columns(data)
-    
+    enriched_data = generate_output_columns(min_contig=args.min_contig, merged_df=data)    
     write_tsv(enriched_data, args.output)
 
 def parse_args():
@@ -111,10 +105,10 @@ def check_length_filter(length_pass_col:str, postqc_df:pd.DataFrame):
         logging.warning(f"Contigs below the supplied minimum contig length are found by QUAST in postqc bins. \
                         Check seqkit is functioning correctly.")
 
-def prep_postqc_join_column(preqc_df: pd.Dataframe, postqc_df: pd.DataFrame):
+def prep_postqc_join_column(preqc_df: pd.DataFrame, postqc_df: pd.DataFrame):
     # 'Assembly' name for pre and postqc need to be identical to join on this col downstream
 
-    postqc_df = postqc_df.rename(columns={'Assembly': 'postqc_Assembly'})    # Retain this col for debugging
+    postqc_df = postqc_df.rename(columns={'Assembly':'postqc_Assembly'})    # Retain this col for debugging
 
     # New Assembly column with values from matched preqc names
     for i, row in postqc_df.iterrows():
@@ -132,7 +126,7 @@ def prep_postqc_join_column(preqc_df: pd.Dataframe, postqc_df: pd.DataFrame):
                             Expected preqc name to be a substring of postqc name.")
 
     # Log matched assembly names pre and post qc for debugging:
-    for _, row in postqc_df.dropna(subset=['original_Assembly']).iterrows():
+    for _, row in postqc_df.dropna(subset=['Assembly']).iterrows():
         logging.debug(f"Matched preqc Assembly: {row['Assembly']}  -->  postqc Assembly: {row['postqc_Assembly']}")
     
     return postqc_df
@@ -140,8 +134,8 @@ def prep_postqc_join_column(preqc_df: pd.Dataframe, postqc_df: pd.DataFrame):
 def join_quast(preqc_df:pd.DataFrame, postqc_df:pd.DataFrame, min_contig:int) -> pd.DataFrame:
     # Add columns for small contigs]
     length_pass_col = f"# contigs (>= {min_contig} bp)"
-    preqc_enriched_df = calc_small_contigs(preqc_df)
-    postqc_enriched_df = calc_small_contigs(postqc_df)
+    preqc_enriched_df = calc_small_contigs(length_pass_col, min_contig preqc_df)
+    postqc_enriched_df = calc_small_contigs(length_pass_col, min_contig, postqc_df)
 
     # Double check that filtering has taken place, warning if not
     check_length_filter(length_pass_col, postqc_df)
@@ -160,9 +154,10 @@ def join_quast(preqc_df:pd.DataFrame, postqc_df:pd.DataFrame, min_contig:int) ->
 
     return merged_df
 
-def calc_small_contigs(num_contigs_col:str, length_pass_col:str, df:pd.DataFrame) -> pd.DataFrame:
+def calc_small_contigs(length_pass_col:str, min_contig:int, df:pd.DataFrame) -> pd.DataFrame:
     # Add column for number of small contigs
-    length_fail_col = length_pass_col.replace('<', '>=')
+    length_fail_col = f"# contigs (< {min_contig} bp)"
+
     enriched_df = df.copy()
     enriched_df[length_fail_col] = df['# contigs'] - df[length_pass_col]
     return enriched_df
