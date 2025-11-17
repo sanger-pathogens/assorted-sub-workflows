@@ -13,6 +13,6 @@
   },
   "QUAST": {
     "id_column": "Assembly",
-    "keep_columns": ["N50", "# Contigs"]
+    "keep_columns": ["N50", "# contigs"]
   }
 }
