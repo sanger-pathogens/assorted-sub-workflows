@@ -53,7 +53,7 @@ class InvalidConfig(ValueError):
 
 
 def validate_config(config: dict) -> None:
-    valid_tools = {"GUNC", "CHECKM2", "GTDBTK", "QUAST_SUMMARY"}
+    valid_tools = {"GUNC", "CHECKM2", "GTDBTK", "QUAST"}
     expected_tools = valid_tools & config.keys()
     unexpected_tools = set(config.keys()) - valid_tools
     if expected_tools == set():
