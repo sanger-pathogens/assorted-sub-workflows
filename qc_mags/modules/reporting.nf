@@ -9,15 +9,16 @@ process REPORT {
     container 'quay.io/sangerpathogens/pandas:2.2.1'
 
     input:
+    // Note: It is crucial the tuple order here is identical to the order the joins take place in the qc_mags.nf workflow
     tuple(
         val(meta),
         path("pre_quast_report.tsv"),
         path("pre_checkm2_report.tsv"),
         path("pre_gunc_report.tsv"),
-        path("gtdbtk_report.tsv"),
         path("post_quast_report.tsv"),
         path("post_checkm2_report.tsv"),
-        path("post_gunc_report.tsv"),
+        path("post_gunc_report.tsv"),\
+        path("gtdbtk_report.tsv"),
         path(report_config)
     )
 
