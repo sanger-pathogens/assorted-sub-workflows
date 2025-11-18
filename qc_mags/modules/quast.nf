@@ -33,7 +33,7 @@ process QUAST {
     tuple val(meta), path(quast_report), emit: results
 
     script:
-    quast_report = "${meta.ID}_quast_report.tsv"
+    quast_report = "${meta.ID}_${qc_stage}_quast_report.tsv"
     """
     quast.py fastas/*.${params.fasta_ext} -o quast --no-html --no-plots --contig-thresholds ${thresholds_str} --threads ${task.cpus}
 
