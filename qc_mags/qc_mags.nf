@@ -69,7 +69,9 @@ workflow QC_MAGS {
         | combine(Channel.fromPath(params.report_config))
         | REPORT
         
-        SUMMARISE_CONTIG_FILTERING(PRE_QUAST.out.results, QUAST.out.results)
+    PRE_QUAST.out.results
+        | join(QUAST.out.results)
+        | SUMMARISE_CONTIG_FILTERING
 
     if (params.autoqc_config) {
         // Check if user-supplied config or opted for default config
