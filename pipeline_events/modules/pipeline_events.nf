@@ -1,7 +1,7 @@
 import groovy.json.JsonBuilder;
 
 process PIPELINE_GET_METHOD {
-    // prepare Shelf tracking of output files - to apply once for the whole pipeline run
+    // prepare Pipeline Events db tracking of output files - to apply once for the whole pipeline run
     label 'cpu_1'
     label 'mem_1'
     label 'local'
