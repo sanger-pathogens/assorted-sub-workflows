@@ -1,7 +1,7 @@
 import groovy.json.JsonBuilder;
 
 process PIPELINE_GET_METHOD {
-    // prpepare Shelf tracking of output files - to apply once for the whole pipeline run
+    // prepare Pipeline Events db tracking of output files - to apply once for the whole pipeline run
     label 'cpu_1'
     label 'mem_1'
     label 'local'
@@ -16,9 +16,9 @@ process PIPELINE_GET_METHOD {
     val(pipeline_mani_params), emit: pipeline_manifest_params
 
     script:
-    // relying on manifest scope from main config file 
+    // relying on manifest scope from main config file
     // but version field is only populated with real value when running code deployed on farm
-    // when running piepline code straight from repo, version field still has template value so taking hard coded value instead
+    // when running pipeline code straight from repo, version field still has template value so taking hard coded value instead
     pipelineurl = workflow.manifest.homePage
     methodshort = (pipelineurl as Path).getSimpleName()
     methodurl = workflow.manifest.version == "{{${methodshort}_version}}" ? "${pipelineurl}" : "${pipelineurl}/-/tree/${workflow.manifest.version}"

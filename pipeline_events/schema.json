@@ -1,0 +1,24 @@
+{
+    "pipeline": "pipeline_events (sub-workflow)",
+    "params": {
+        "Pipeline events options": {
+            "pipeline_events_track": {
+                "default": "false",
+                "help_text": "Enable tracking of files created by the pipeline. Data will be stored in the pipeline events database."
+            },
+            "pipeline_events_follow_links": {
+                "default": "false",
+                "help_text": "Resolve the absolute path to any linked files created by the pipeline."
+            },
+            "associate_batch_metadata":{
+                "default": "false",
+                "help_text": "Track the metadata JSON for the pipeline run."
+            },
+            "pipeline_events_container":{
+                "default": "gitlab-registry.internal.sanger.ac.uk/sanger-pathogens/pipeline-event-api/pipeline-event-api:v1.0.3",
+                "help_text": "Container to use to provide an API to allow pipeline event tracking."
+            }
+        }
+    }
+}
+
