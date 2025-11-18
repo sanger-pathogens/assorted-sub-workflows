@@ -68,7 +68,8 @@ workflow QC_MAGS {
         | join(GTDBTK.out.results)
         | combine(Channel.fromPath(params.report_config))
         | REPORT
-        | SUMMARISE_CONTIG_FILTERING
+        
+        SUMMARISE_CONTIG_FILTERING(PRE_QUAST.out.results, QUAST.out.results)
 
     if (params.autoqc_config) {
         // Check if user-supplied config or opted for default config

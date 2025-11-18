@@ -53,7 +53,7 @@ process SUMMARISE_CONTIG_FILTERING {
     container 'quay.io/sangerpathogens/pandas:2.2.1'
 
     input:
-    tuple val(meta), path(final_report)
+    tuple (val(meta), path(pre_qc_quast), path(post_qc_quast))
 
     output:
     tuple val(meta), path(filter_summary), emit: summary
@@ -64,7 +64,8 @@ process SUMMARISE_CONTIG_FILTERING {
 
     """
     ${command} \\
-        --report ${final_report} \\
+        --pre_qc_quast ${pre_qc_quast} \\
+        --post_qc_quast ${post_qc_quast} \\
         --min_contig ${params.min_contig} \\
         --output ${filter_summary}
     """
