@@ -35,7 +35,8 @@ def main():
 
     enriched_data = generate_output_columns(min_contig=args.min_contig, merged_df=data)
     
-    write_tsv(enriched_data, args.output, "filtering_summary")
+    #write_tsv(enriched_data, args.output, "filtering_summary")
+    write_tsv(enriched_data, args.output)
 
 def parse_args():
     parser = argparse.ArgumentParser(
@@ -180,9 +181,6 @@ def generate_output_columns(merged_df:pd.DataFrame, min_contig:int) -> pd.DataFr
     merged_df['num_mdmcleaner_failed'] = merged_df['total_contigs_filtered'] - merged_df['num_small_contigs']
     merged_df['%_mdmcleaner_failed'] = (merged_df['num_mdmcleaner_failed'] * 100 / merged_df['# contigs_preqc']).round(2)
 
-    # Uncomment below if intermediate tsv needed for debugging
-    # write_tsv(merged_df, Path("."), "debugging_df")
-
     final_df = merged_df[
         [
             'Assembly', 
@@ -201,10 +199,14 @@ def generate_output_columns(merged_df:pd.DataFrame, min_contig:int) -> pd.DataFr
 
     return final_df
 
-def write_tsv(final_df: pd.DataFrame, output_path:Path, filename:str):
-    output_file = output_path / f"{filename}.tsv"
-    final_df.to_csv(output_file, sep="\t", index=False)
-    logging.info(f"Contig {filename}.tsv written to: {output_path}")
+# def write_tsv(final_df: pd.DataFrame, output_path:Path, filename:str):
+#     output_file = output_path / f"{filename}.tsv"
+#     final_df.to_csv(output_file, sep="\t", index=False)
+#     logging.info(f"Contig {filename}.tsv written to: {output_path}")
+
+def write_tsv(df: pd.DataFrame, output_path:Path):
+    df.to_csv(output_path, sep="\t", index=False)
+    logging.info(f"Contig filtering summary written to: {output_path}")
 
 if __name__ == "__main__":
     main()
