@@ -17,7 +17,7 @@ This file contains two workflows:
 - **Inputs**: None
 
 - **Outputs**:
-    - `batch_uuid` (value): UUID of the newly opened batch
+    - `batch_id` (value): ID of the newly opened batch (here an automatically generated unique id (UUID)
     - `batch_manifest_info` (path|empty): Path if a it is intended that the batch metadata info JSON file is to be associated with the batch (currently disabled, enable with param `associate_batch_metadata`). Empty channel otherwise.
 
 #### `PIPELINE_EVENTS_END`
@@ -25,7 +25,7 @@ This file contains two workflows:
 - **Purpose**: Close the given batch and log the number of files that should now be tracked by the database.
 
 - **Inputs**:
-    - `batch_uuid` (value): UUID of the opened batch to be closed
+    - `batch_id` (value): ID of the opened batch to be closed
     - `batch_manifest_info` (path|empty): Path of the batch metadata info JSON file, or empty channel if not being tracked.
     - `created_file_infos` ([value, path, value]): Tuple of runid, path of the published file, and a filetype string that have been in the pipeline events database.
 
@@ -69,7 +69,7 @@ This file contains two workflows:
 
 - **Outputs**:  
   - `batch_manifest_params` ([value, path]): Tuple containing the updated manifest map and the path to the generated batch JSON file.  
-  - `batch_uuid` (value): UUID assigned to the newly opened batch.
+  - `batch_id` (value): ID assigned to the newly opened batch.
 
 ---
 
@@ -79,7 +79,7 @@ This file contains two workflows:
   Close a batch that was previously opened and record the number of files created within it. Sends a “close” event to the tracking system.
 
 - **Inputs**:  
-  - `batch_uuid` (value): UUID of the batch to close.  
+  - `batch_id` (value): ID of the batch to close.  
   - `filecreatedcount` (value): Total number of files created/tracked for this batch.
 
 - **Outputs**:  
@@ -96,7 +96,7 @@ This file contains two workflows:
   - `[meta, resultfileWorkPath]` ([value, path]): Metadata map and the working path of the result file.  
   - `outputfoldertag` (value): Name of the output subdirectory where files are stored.  
   - `file_type` (value): File type string used for tracking purposes.  
-  - `batch_uuid` (value): UUID of the active batch associated with these result files.
+  - `batch_id` (value): ID of the active batch associated with these result files.
 
 - **Outputs**:  
   - `file_info` ([value, path, value, value, value]): Tuple containing metadata map, result file path, published directory absolute path, file type, and batch UUID.
@@ -110,8 +110,8 @@ This file contains two workflows:
   Generates a `file` pipeline event containing metadata such as MD5 checksum, file type, and user/group ownership.
 
 - **Inputs**:  
-  - `[meta, resultfileWorkPath, resultfilePublishedDir, file_type, batch_uuid]` ([value, path, value, value, value]):  
-    Tuple including metadata, working file path, published directory path (as a value), file type, and associated batch UUID.
+  - `[meta, resultfileWorkPath, resultfilePublishedDir, file_type, batch_id]` ([value, path, value, value, value]):  
+    Tuple including metadata, working file path, published directory path (as a value), file type, and associated batch ID.
 
 - **Outputs**:  
   - `created_file_info` ([value, value, value]): Tuple containing the output/run ID, the full published file path, and the file type.
