@@ -51,6 +51,10 @@ process PIPELINE_EVENTS_OPEN_BATCH {
     val(methodname)
     val(methodshort)
     val(batch_mani_params)
+    val(files_created)
+
+    when:
+    files_created == true
 
     output:
     tuple val(batch_mani_params), path(batch_mani_params_out), emit: batch_manifest_params

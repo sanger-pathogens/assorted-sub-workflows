@@ -6,9 +6,25 @@ include { PIPELINE_GET_METHOD ;
 
 
 workflow PIPELINE_EVENTS_INIT {
+    take:
+    files_to_track
+
     main:
     PIPELINE_GET_METHOD()
-    | PIPELINE_EVENTS_OPEN_BATCH
+
+    files_to_track
+    | first()
+    | map { metamap, filepath -> true }
+    | ifEmpty(false)
+    | set { files_created }
+
+    PIPELINE_EVENTS_OPEN_BATCH(
+        PIPELINE_GET_METHOD.out.method_url,
+        PIPELINE_GET_METHOD.out.method_name,
+        PIPELINE_GET_METHOD.out.method_short,
+        PIPELINE_GET_METHOD.out.pipeline_manifest_params,
+        files_created
+    )
 
     batch_id = PIPELINE_EVENTS_OPEN_BATCH.out.batch_id
 
