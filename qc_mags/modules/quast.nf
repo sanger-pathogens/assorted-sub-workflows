@@ -34,8 +34,10 @@ process QUAST {
 
     script:
     quast_report = "${meta.ID}_${qc_stage}_quast_report.tsv"
+    // Setting min-contig to 0 to override QUAST default of 500, so that ALL contigs are included in metric calculations
+    // Do not set to params.min_contig
     """
-    quast.py fastas/*.${params.fasta_ext} -o quast --no-html --no-plots --contig-thresholds ${thresholds_str} --threads ${task.cpus}
+    quast.py fastas/*.${params.fasta_ext} -o quast --no-html --no-plots --min-contig 0 --contig-thresholds ${thresholds_str} --threads ${task.cpus}
 
     mv quast/transposed_report.tsv ${quast_report}
     """
