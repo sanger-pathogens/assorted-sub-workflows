@@ -13,6 +13,6 @@
   },
   "QUAST": {
     "id_column": "Assembly",
-    "keep_columns": ["N50", "# contigs"]
+    "keep_columns": ["# contigs", "Largest contig", "Total length", "GC (%)", "N50", "N90", "auN", "L50", "L90", "# N's per 100 kbp"]
   }
 }

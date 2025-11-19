@@ -74,22 +74,52 @@ The default AutoQC config's pass criteria are:
 - Passes GUNC contamination checks
 
 If writing a custom AutoQC config the filterable columns with the default report config are:
+
+_General_
 - preqc_genome_name
 - postqc_genome_name
 - sample_or_strain_name
 - genome_status
+
+_CheckM2_
 - checkm2_postqc_Completeness
 - checkm2_postqc_Contamination
 - checkm2_postqc_Genome_Size
 - checkm2_preqc_Completeness
 - checkm2_preqc_Contamination
 - checkm2_preqc_Genome_Size
+
+_GTDBTk_
 - gtdbtk_classification
 - gtdbtk_closest_genome_reference
+
+_GUNC_
 - gunc_postqc_n_contigs
 - gunc_postqc_pass.GUNC
 - gunc_preqc_n_contigs
 - gunc_preqc_pass.GUNC
+
+_QUAST_
+- quast_preqc_\# contigs
+- quast_preqc_Largest contig
+- quast_preqc_Total length
+- quast_preqc_GC (%)
+- quast_preqc_N50
+- quast_preqc_N90
+- quast_preqc_auN
+- quast_preqc_L50
+- quast_preqc_L90
+- quast_preqc_\# N's per 100 kbp
+- quast_postqc_\# contigs
+- quast_postqc_Largest contig
+- quast_postqc_Total length
+- quast_postqc_GC (%)
+- quast_postqc_N50
+- quast_postqc_N90
+- quast_postqc_auN
+- quast_postqc_L50
+- quast_postqc_L90
+- quast_postqc_\# N's per 100 kbp
 
 If using a custom report config you can customise your AutoQC config: for the column using the tool name (lowercase) and keep_column from the report config seperated by an underscore. i.e.  `<tool>_<keep_column>`. Note that for adding filters based on CheckM2 or GUNC you must specify whether to use preqc or postqc reports i.e. `<tool>_<qc_stage>_<keep_column>`, as shown in the filterable column list above.
 
