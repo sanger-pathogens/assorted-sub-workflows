@@ -6,6 +6,10 @@
                 "default": null,
                 "help_text": "Path to the Kraken2 database"
             },
+            "memory_mapping": {
+                "default": false,
+                "help_text": "Uses the kraken2 memory mapping option. This option avoid loading the whole database into memory."
+            },
             "kraken2_threads": {
                 "default": 4,
                 "help_text": "Number of threads for Kraken2"
