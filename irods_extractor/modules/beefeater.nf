@@ -45,7 +45,7 @@ process BEEFEATER {
     path("*output.json"), emit: csv_ch
 
     script:
-    def search_option = params.search ? "${params.search}" : "--get"
+    def search_option = params.search ? "" : "--get"
 
     """
     beefeater search ${query(meta)} ${search_option} --format json
