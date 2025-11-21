@@ -36,7 +36,7 @@ process BEEFEATER {
     label 'mem_10'
     label 'time_30m'
 
-    container 'quay.io/sangerpathogens/beefeater:0.0.1'
+    container 'quay.io/sangerpathogens/beefeater:0.0.1-c1'
 
     input:
     val(meta)
@@ -48,6 +48,6 @@ process BEEFEATER {
     def search_option = params.search ? "" : "--get"
 
     """
-    beefeater search ${query(meta)} ${search_option} --format json
+    beefeater search ${query(meta)} ${search_option} --file_format json
     """
 }
