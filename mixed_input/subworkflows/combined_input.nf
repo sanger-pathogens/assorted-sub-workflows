@@ -5,17 +5,15 @@ include { IRODS_MANIFEST_PARSE } from './irods_manifest_parse.nf'
 //
 workflow IRODS_CLI {
     main:
-    param_input = Channel.of(["${params.studyid}", "${params.runid}", "${params.laneid}", "${params.plexid}", "${params.target}", "${params.type}"])
+    param_input = Channel.of(["${params.studyid}", "${params.runid}", "${params.laneid}", "${params.plexid}"])
     
-    param_input.map{ studyid, runid, laneid, plexid, target, type ->
+    param_input.map{ studyid, runid, laneid, plexid ->
         if (studyid > 0 || runid > 0) {
             meta = [:]
             if (studyid > 0) {meta.studyid = studyid}
             if (runid > 0) {meta.runid = runid}
             if (laneid > 0 ) {meta.laneid = laneid}
             if (plexid > 0 ) {meta.plexid = plexid}
-            meta.target = target
-            meta.type = type
             return meta
         } else {
             if ((laneid > 0) || (plexid > 0)) {
