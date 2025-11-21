@@ -53,20 +53,11 @@ def createChannel(LinkedHashMap row) {
     }
     
     // Collect additional metadata fields
-    def extraFields = row.keySet() - ['studyid', 'runid', 'laneid', 'plexid', 'target', 'type']
+    def extraFields = row.keySet() - ['studyid', 'runid', 'laneid', 'plexid']
     extraFields.each { key ->
         if (row[key]?.toString()?.trim()) {
             metadata[key] = row[key].toString()
         }
-    }
-
-    // Set target and type if necessary
-    if (metadata.studyid != -1 || metadata.runid != -1 || extraFields.any { row[it]?.toString()?.trim() }) {
-        metadata.target = setMissingValue("target", row, params)
-        metadata.type = setMissingValue("type", row, params)
-    } else if (row.target?.toString()?.trim() || row.type?.toString()?.trim()) {
-        log.warn ("Cannot submit an iRODS query solely based on target or type metadata tags, as this query would catch too many file objects.\nThe row ${row} in the input manifest is ignored")
-        return "none"
     }
     
     return metadata
