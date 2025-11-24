@@ -10,14 +10,14 @@ process COMPRESS_READS {
     tuple val(meta), path(read_1), path(read_2)
 
     output:
-    tuple val(meta), path("${meta.ID}_pre_processed_1.fq.gz"), path("${meta.ID}_pre_processed_2.fq.gz")
+    tuple val(meta), path("${meta.ID}_preprocessed_1.fastq.gz"), path("${meta.ID}_preprocessed_2.fastq.gz")
 
     script:
     """
     gzip -c ${read_1} > ${read_1}.tmp.gz
     gzip -c ${read_2} > ${read_2}.tmp.gz
-    mv ${read_1}.tmp.gz ${meta.ID}_pre_processed_1.fq.gz
-    mv ${read_2}.tmp.gz ${meta.ID}_pre_processed_2.fq.gz
+    mv ${read_1}.tmp.gz ${meta.ID}_preprocessed_1.fastq.gz
+    mv ${read_2}.tmp.gz ${meta.ID}_preprocessed_2.fastq.gz
     """
 }
 
@@ -31,11 +31,11 @@ process DECOMPRESS_READS {
     tuple val(meta), path(read_1), path(read_2)
 
     output:
-    tuple val(meta), path("${meta.ID}_1.fq"), path("${meta.ID}_2.fq")
+    tuple val(meta), path("${meta.ID}_1.fastq"), path("${meta.ID}_2.fastq")
 
     script:
     """
-    gunzip -c ${read_1} > ${meta.ID}_1.fq
-    gunzip -c ${read_2} > ${meta.ID}_2.fq
+    gunzip -c ${read_1} > ${meta.ID}_1.fastq
+    gunzip -c ${read_2} > ${meta.ID}_2.fastq
     """
 }
