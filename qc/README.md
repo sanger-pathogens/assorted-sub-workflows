@@ -51,3 +51,5 @@ If the most abundant genus or species in the Kraken or Sylph report is below a s
             default: 85
             Fail the sample if the top species abundance is lower than this
 ```
+
+NB: this subworkflow is designed to be used on Illumina short reads; it might work on long/other reads but this remains to be tested and fastQC analysis might not be adequate and reported fail/pass status be misleading.

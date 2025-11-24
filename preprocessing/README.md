@@ -69,3 +69,5 @@ When enabled by specifying `--run_bmtagger true`, BMTagger filters out reads tha
             default: T2T-CHM13v2.0
             Reference genome version used for host read filtering
 ```
+
+NB: this subworkflow is designed to be used on Illumina short reads; it might work on long/other reads but options need to be changed (notably the value of `trimmomatic_options`) and this remains to be tested.
