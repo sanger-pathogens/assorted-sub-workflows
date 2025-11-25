@@ -9,10 +9,10 @@ process REPORT {
     val(pass_fail_channel)
 
     output:
-    path("sample_pass_fail_qc_summary.tsv"), emit: qc_summary
+    tuple val(fakemeta), path("sample_pass_fail_qc_summary.tsv"), emit: qc_summary
 
     script:
-
+    fakemeta = [:]  // dummy meta to allow tuple output compatibility with PIPELINE_EVENTS:GATHER_RESULTFILE_INFO's input
     def header = ['Sample_ID', 'FastQC_Status']
         if (params.bracken_profile) header << 'Kraken_Braken_Profile_Status'
         if (params.sylph_profile) header << 'Sylph_Profile_Status'
