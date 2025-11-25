@@ -31,7 +31,7 @@ process DECOMPRESS_READS {
     tuple val(meta), path(read_1), path(read_2)
 
     output:
-    tuple val(meta), path("${meta.ID}_1.fastq"), path("${meta.ID}_2.fastq")
+    tuple val(meta), path("${meta.ID}_1.fastq"), path("${meta.ID}_2.fastq"), emit: decompressed_reads_ch
 
     script:
     """

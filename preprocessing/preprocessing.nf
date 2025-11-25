@@ -45,15 +45,12 @@ workflow PREPROCESSING {
     else{
         preprocessed_ch_3 = preprocessed_ch_2
     }
-    if (!params.run_bmtagger && !params.run_trf && !params.run_trimmomatic){
-        preprocessed_ch_3 = decompressed_reads_ch
-    }
-    COMPRESS_READS(preprocessed_ch_3) 
-    | set{ compressed_reads_ch }
+
+    COMPRESS_READS(preprocessed_ch_3)
     
 
     emit:
-    preprocessed_reads_ch = compressed_reads_ch
+    preprocessed_reads_ch = COMPRESS_READS.out.compressed_reads_ch
     collated_host_reads_stats_ch = HOST_READ_REMOVAL.collated_host_reads_stats_ch
     collated_trimming_stats_ch = TRIMMING.collated_trimming_stats_ch
 
