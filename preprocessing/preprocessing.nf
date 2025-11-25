@@ -24,6 +24,8 @@ workflow PREPROCESSING {
 
     if (params.run_trimmomatic){
         TRIMMING(decompressed_reads_ch)
+
+        TRIMMING.out.trimmed_fastqs
         | set{ preprocessed_ch_1 }
     }
     else{
