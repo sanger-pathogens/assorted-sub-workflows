@@ -38,6 +38,8 @@ workflow PREPROCESSING {
     }
     if (params.run_bmtagger){
         HOST_READ_REMOVAL(preprocessed_ch_2)
+
+        HOST_READ_REMOVAL.out.host_read_removal_out_ch
         | set{ preprocessed_ch_3 }
     }
     else{
@@ -52,5 +54,8 @@ workflow PREPROCESSING {
 
     emit:
     compressed_reads_ch
+    collated_host_reads_stats_ch = HOST_READ_REMOVAL.collated_host_reads_stats_ch
+    collated_trimming_stats_ch = TRIMMING.collated_trimming_stats_ch
+
 
 }
