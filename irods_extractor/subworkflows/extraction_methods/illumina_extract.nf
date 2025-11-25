@@ -94,10 +94,10 @@ workflow CRAM_EXTRACT {
     main:
 
     if ("${params.save_method}" == "nested"){
-        Channel.fromPath("${params.outdir}/*/${params.preexisting_fastq_tag}/*${split_sep_for_ID_from_fastq}.gz")
+        Channel.fromPath("${params.outdir}/*/${params.preexisting_fastq_tag}/*${params.split_sep_for_ID_from_fastq}.gz")
         .set{ preexisting_fastq_path_ch }
     }else{
-        Channel.fromPath("${params.outdir}/${params.preexisting_fastq_tag}/*${split_sep_for_ID_from_fastq}.gz")
+        Channel.fromPath("${params.outdir}/${params.preexisting_fastq_tag}/*${params.split_sep_for_ID_from_fastq}.gz")
         .set{ preexisting_fastq_path_ch }
     }
     preexisting_fastq_path_ch.toList().map{ preexisting_fastq_path_list -> 
