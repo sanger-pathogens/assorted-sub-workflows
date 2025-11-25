@@ -53,7 +53,7 @@ workflow PREPROCESSING {
     
 
     emit:
-    compressed_reads_ch
+    preprocessed_reads_ch = compressed_reads_ch
     collated_host_reads_stats_ch = HOST_READ_REMOVAL.collated_host_reads_stats_ch
     collated_trimming_stats_ch = TRIMMING.collated_trimming_stats_ch
 
