@@ -28,7 +28,7 @@ workflow PREPROCESSING {
         TRIMMING.out.trimmed_fastqs
         | set{ preprocessed_ch_1 }
 
-        TRIMMING.collated_trimming_stats_ch
+        TRIMMING.out.collated_trimming_stats_ch
         | set { collated_trimming_stats_ch }
     }
     else{
@@ -48,7 +48,7 @@ workflow PREPROCESSING {
         HOST_READ_REMOVAL.out.host_read_removal_out_ch
         | set{ preprocessed_ch_3 }
         
-        HOST_READ_REMOVAL.collated_host_reads_stats_ch
+        HOST_READ_REMOVAL.out.collated_host_reads_stats_ch
         | set { collated_host_reads_stats_ch }
     }
     else{
