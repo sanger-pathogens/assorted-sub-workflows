@@ -6,12 +6,11 @@ process COMPRESS_READS {
 
     publishDir path: { if ("${params.save_method}" == "nested") "${params.outdir}/${meta.ID}/preprocessing/" else "${params.outdir}/preprocessing/" }, mode: "copy", enabled: params.publish_clean_reads
 
-
     input:
     tuple val(meta), path(read_1), path(read_2)
 
     output:
-    tuple val(meta), path("${meta.ID}_preprocessed_1.fastq.gz"), path("${meta.ID}_preprocessed_2.fastq.gz")
+    tuple val(meta), path("${meta.ID}_preprocessed_1.fastq.gz"), path("${meta.ID}_preprocessed_2.fastq.gz"), emit: compressed_reads_ch
 
     script:
     """
