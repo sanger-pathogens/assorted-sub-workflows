@@ -17,6 +17,10 @@
             "pipeline_events_container":{
                 "default": "gitlab-registry.internal.sanger.ac.uk/sanger-pathogens/pipeline-event-api/pipeline-event-api:v1.0.3",
                 "help_text": "Container to use to provide an API to allow pipeline event tracking."
+            },
+            "track_batch_metadata": {
+                "default": "false",
+                "help_text": "Track batch-level metadata files for the pipeline run (pipeline run manifest, reads QC summary, trimming and host read removal stats summaries)."
             }
         }
     }

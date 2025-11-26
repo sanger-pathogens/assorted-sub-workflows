@@ -51,7 +51,7 @@ workflow PIPELINE_EVENTS_END {
     created_file_infos
 
     main:
-    if (params.associate_batch_metadata) {
+    if (params.track_batch_metadata) {
         created_file_infos
         .mix(batch_manifest_info)
         .set { all_created_file_infos }

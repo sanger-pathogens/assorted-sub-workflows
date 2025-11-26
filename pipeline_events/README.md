@@ -1,6 +1,6 @@
 # Pipeline Events Subworkflow
 
-This workflow interacts with the Pipeline Events Database API to record the opening and closing of "batches", entities intended to embody pipeline runs, or similar units of analysis. Each batch has a number of parameters/metadata associated with it, which are logged in the form of a JSON file and can be tracked. Additionally, files created/published in the run can be associated with the batch and tracked.
+This workflow interacts with the Pipeline Events Database (PEdb) API to record the opening and closing of "batches", entities intended to embody pipeline runs, or similar units of analysis. Each batch has a number of parameters/metadata associated with it, which are logged in the form of a JSON file and can be tracked. Additionally, files created/published in the run can be associated with the batch and tracked.
 
 [[_TOC_]]
 
@@ -119,6 +119,8 @@ This file contains two workflows:
 ## Parameters
 
 For a description of available parameters and their uses, see [schema.json](./schema.json) and [pipeline_events.config](./pipeline_events.config).
+
+Note that `track_batch_metadata` dictates whether to track files relating to batch-level metadata i.e. no single relation to a sample/run in the PEdb. This option is defaulting to `false` for the moment as the PEdb API does not yet support this functionality.
 
 ## Pipelines/Workflows using this subworkflow
 - [irods_extractor](https://gitlab.internal.sanger.ac.uk/sanger-pathogens/pipelines/irods_extractor)
