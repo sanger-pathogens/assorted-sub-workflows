@@ -107,7 +107,7 @@ def check_length_filter(length_fail_col:str, postqc_df:pd.DataFrame):
     failing_mask = postqc_df[length_fail_col] > 0    # negative value equal number small contigs that also fail mdmcleaner
     if failing_mask.any():
         failing_assemblies = postqc_df.loc[failing_mask, 'Assembly'].tolist()
-        logging.warning(f"Contigs below the supplied minimum contig length are found by QUAST in postqc bins: "
+        logging.error(f"Contigs below the supplied minimum contig length are found by QUAST in postqc bins: "
                         f"{failing_assemblies}. Check seqkit is functioning correctly.")
 
 def prep_postqc_join_column(preqc_df: pd.DataFrame, postqc_df: pd.DataFrame):
