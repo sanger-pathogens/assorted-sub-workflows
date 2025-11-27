@@ -199,10 +199,6 @@ def generate_output_columns(merged_df:pd.DataFrame, min_contig:int) -> pd.DataFr
 
     return final_df
 
-# def write_tsv(final_df: pd.DataFrame, output_path:Path, filename:str):
-#     output_file = output_path / f"{filename}.tsv"
-#     final_df.to_csv(output_file, sep="\t", index=False)
-#     logging.info(f"Contig {filename}.tsv written to: {output_path}")
 
 def write_tsv(df: pd.DataFrame, output_path:Path):
     df.to_csv(output_path, sep="\t", index=False)
