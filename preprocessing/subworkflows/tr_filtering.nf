@@ -38,6 +38,9 @@ workflow TR_FILTERING {
 
     fqs_ch // tuple (meta.id, meta, fasta_1, fasta_2)
         | join(trf_ch) // tuple (meta.id, meta, fasta_1, fasta_2, trf_out_1, trf_out_2)
+        | map {id, meta, fq_1, fq_2, trf_out_1, trf_out_2 -> 
+            tuple (meta, fq_1, fq_2, trf_out_1, trf_out_2)
+            }
         | set {rm_trf_from_fq_in_ch}
     RMREPEATFROMFASTQ(rm_trf_from_fq_in_ch)
     RMREPEATFROMFASTQ.out.fastqs
