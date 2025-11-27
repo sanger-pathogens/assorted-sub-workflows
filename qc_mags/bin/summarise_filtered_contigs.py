@@ -7,10 +7,10 @@ filter (currently implemented by seqkit), and contamination filter (mdmcleaner).
 
 Usage:
     summarise_filtered_contigs.py
-        --preqc_quast <quast_report1.tsv> \
-        --postqc_quast <quast_report2.tsv> \
+        --pre_qc_quast <quast_report1.tsv> \
+        --post_qc_quast <quast_report2.tsv> \
         --min_contig <int> \
-        --output <output/path>
+        --output <output/path/file.tsv>
 """
 
 import argparse
