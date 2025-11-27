@@ -37,8 +37,9 @@ process SYLPH_PROFILE {
     tuple val(meta), path("${meta.ID}_sylph_profile.tsv"), emit: sylph_report
 
     script:
+    def estimate_unknown = params.sylph_estimate_unknown ? "-u --read-seq-id ${params.sylph_read_seq_id}" : ""
     """
-    sylph profile -t ${task.cpus} -o ${meta.ID}_sylph_profile.tsv -k ${params.sketch_size} ${sketch} ${params.sylph_db}
+    sylph profile -t ${task.cpus} -o ${meta.ID}_sylph_profile.tsv -k ${params.sketch_size} ${sketch} ${params.sylph_db} ${estimate_unknown}
     """
 }
 

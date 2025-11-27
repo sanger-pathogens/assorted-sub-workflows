@@ -21,6 +21,14 @@
                 "default": "/data/pam/software/sylph-tax/v1/gtdb_r226_metadata.tsv",
                 "help_text": "Path to taxonomy metadata for sylph (list of sylph-tax identifiers)"
             },
+            "sylph_estimate_unknown": {
+                "default": "true",
+                "help_text": "Estimate proportion of sample reads that originate from species not represented in the reference database."
+            },
+            "sylph_read_seq_id" : {
+                "default": "99.5",
+                "help_text": "Estimated percentage identity of your sequences (i.e. 100 - error percent). 99.5 is recommended for Illumina reads."
+            },
             "bracken_profile":{
                 "default": "false",
                 "help_text": "Run Kraken2Bracken taxonomic classification."
