@@ -128,7 +128,9 @@ The default AutoQC config's pass criteria are:
 - Under 5% Contamination
 - Passes GUNC contamination checks
 
-It is possible to add filtering rules to the autoqc config for any columns within the report config. If using a custom report config you can customise your AutoQC config: for the column using the tool name (lowercase) and keep_column from the report config seperated by an underscore. i.e.  `<tool>_<keep_column>`. Note that for adding filters based on CheckM2 or GUNC you must specify whether to use preqc or postqc reports i.e. `<tool>_<qc_stage>_<keep_column>`, as shown in the filterable column list above.
+It is possible to add filtering rules to the autoqc config for columns\* within the report config. If using a custom report config you can customise your AutoQC config: for the column using the tool name (lowercase) and keep_column from the report config seperated by an underscore. i.e.  `<tool>_<keep_column>`. Note that for adding filters based on CheckM2 or GUNC you must specify whether to use preqc or postqc reports i.e. `<tool>_<qc_stage>_<keep_column>`, as shown in the filterable column list above.
+
+\*NOTE: Unfortunately QUAST report columns are not currently columns you can AutoQC on. This is an area for future development and should be possible in future versions.
 
 Please note - if you add the parameter `--autoqc_config` but do not supply either a valid config file path or "default" the pipeline will error on not being able to find a config file to use.
 
