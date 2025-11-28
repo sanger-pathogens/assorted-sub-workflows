@@ -3,11 +3,13 @@ include { CHECKM2 as PRE_CHECKM2;
 include { GTDBTK                           } from './modules/gtdbtk.nf'
 include { GUNC as PRE_GUNC;
           GUNC                             } from './modules/gunc.nf'
-include { QUAST;                         
-          QUAST_SUMMARY                    } from './modules/quast.nf'
+include { getQuastThresholds;
+          QUAST as PRE_QUAST;
+          QUAST                            } from './modules/quast.nf'
 include { MDMCLEANER                       } from './modules/mdmcleaner.nf'
 include { SEQKIT                           } from './modules/seqkit.nf'
-include { REPORT                           } from './modules/reporting.nf'
+include { REPORT;                           
+          SUMMARISE_CONTIG_FILTERING       } from './modules/reporting.nf'
 include { FILTER_METADATA as FILTER_REPORT } from '../mixed_input/modules/filter_metadata.nf'
 include { FILTER_FASTAS;
           PUBLISH_RESULTS                  } from './modules/filtering.nf'
@@ -33,10 +35,8 @@ workflow QC_MAGS {
     
     PRE_CHECKM2(fastas, pre_qc)
     PRE_GUNC(fastas, pre_qc)
+    PRE_QUAST(fastas, pre_qc, getQuastThresholds())
     GTDBTK(fastas, pre_qc)
-    QUAST(fastas, pre_qc)
-
-    QUAST_SUMMARY(QUAST.out.results, pre_qc)
 
     fastas
     | MDMCLEANER
@@ -55,17 +55,23 @@ workflow QC_MAGS {
 
     post_qc = Channel.value("post_qc")
 
+    QUAST(postqc_fastas, post_qc, getQuastThresholds())
     CHECKM2(postqc_fastas, post_qc)
     GUNC(postqc_fastas, post_qc)
 
-    PRE_CHECKM2.out.results
-    | join(PRE_GUNC.out.results)
-    | join(CHECKM2.out.results)
-    | join(GUNC.out.results)
-    | join(GTDBTK.out.results)
-    | join(QUAST_SUMMARY.out.results)
-    | combine(Channel.fromPath(params.report_config))
-    | REPORT
+    PRE_QUAST.out.results
+        | join(PRE_CHECKM2.out.results)
+        | join(PRE_GUNC.out.results)
+        | join(QUAST.out.results)
+        | join(CHECKM2.out.results)
+        | join(GUNC.out.results)
+        | join(GTDBTK.out.results)
+        | combine(Channel.fromPath(params.report_config))
+        | REPORT
+        
+    PRE_QUAST.out.results
+        | join(QUAST.out.results)
+        | SUMMARISE_CONTIG_FILTERING
 
     if (params.autoqc_config) {
         // Check if user-supplied config or opted for default config
