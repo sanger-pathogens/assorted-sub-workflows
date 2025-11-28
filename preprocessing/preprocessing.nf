@@ -24,10 +24,16 @@ workflow PREPROCESSING {
 
     if (params.run_trimmomatic){
         TRIMMING(decompressed_reads_ch)
+
+        TRIMMING.out.trimmed_fastqs
         | set{ preprocessed_ch_1 }
+
+        TRIMMING.out.collated_trimming_stats_ch
+        | set { collated_trimming_stats_ch }
     }
     else{
         preprocessed_ch_1 = decompressed_reads_ch
+        collated_trimming_stats_ch = Channel.empty()
     }
     if (params.run_trf){
         TR_FILTERING(preprocessed_ch_1)
@@ -38,19 +44,25 @@ workflow PREPROCESSING {
     }
     if (params.run_bmtagger){
         HOST_READ_REMOVAL(preprocessed_ch_2)
+
+        HOST_READ_REMOVAL.out.host_read_removal_out_ch
         | set{ preprocessed_ch_3 }
+        
+        HOST_READ_REMOVAL.out.collated_host_reads_stats_ch
+        | set { collated_host_reads_stats_ch }
     }
     else{
         preprocessed_ch_3 = preprocessed_ch_2
+        collated_host_reads_stats_ch = Channel.empty()
     }
-    if (!params.run_bmtagger && !params.run_trf && !params.run_trimmomatic){
-        preprocessed_ch_3 = decompressed_reads_ch
-    }
-    COMPRESS_READS(preprocessed_ch_3) 
-    | set{ compressed_reads_ch }
-    
+
+    COMPRESS_READS(preprocessed_ch_3)
+    | set{ preprocessed_reads_ch }
 
     emit:
-    compressed_reads_ch
+    preprocessed_reads_ch
+    collated_trimming_stats_ch
+    collated_host_reads_stats_ch
+
 
 }

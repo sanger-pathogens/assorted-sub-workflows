@@ -3,7 +3,7 @@ process GENERATE_STATS {
     label 'cpu_1'
     label 'mem_1'
     label 'time_1'
-    
+
     container 'quay.io/sangerpathogens/metawrap_qc_python:1.0'
 
     input:

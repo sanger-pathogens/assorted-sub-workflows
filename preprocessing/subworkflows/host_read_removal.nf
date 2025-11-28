@@ -42,4 +42,5 @@ workflow HOST_READ_REMOVAL {
     
     emit: 
     host_read_removal_out_ch
+    collated_host_reads_stats_ch = COLLATE_STATS_BMTAGGER.out.host_reads_stats_ch
 }

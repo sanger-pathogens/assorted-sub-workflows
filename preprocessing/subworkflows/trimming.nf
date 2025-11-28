@@ -21,7 +21,7 @@ workflow TRIMMING {
 
         COLLATE_STATS_TRIMMOMATIC(TRIMMOMATIC.out.trimmomatic_stats.collect())
     
-    emit: 
-
-        TRIMMOMATIC.out.trimmed_fastqs // tuple (meta, reads_trimmed_1.fq, reads_trimmed_2.fq)
+    emit:
+        collated_trimming_stats_ch = COLLATE_STATS_TRIMMOMATIC.out.trimming_stats_ch
+        trimmed_fastqs = TRIMMOMATIC.out.trimmed_fastqs // tuple (meta, reads_trimmed_1.fq, reads_trimmed_2.fq)
 }

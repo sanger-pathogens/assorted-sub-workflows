@@ -30,7 +30,7 @@ workflow PIPELINE_EVENTS_INIT {
 
     GATHER_RESULTFILE_INFO(PIPELINE_EVENTS_OPEN_BATCH.out.batch_manifest_params, "pipeline_info", "batch_manifest", batch_id)
 
-    if (params.associate_batch_metadata) {
+    if (params.track_batch_metadata) {
         GATHER_RESULTFILE_INFO.out.file_info
         | PIPELINE_EVENTS_CREATE_FILE
         | set { batch_manifest_info }
@@ -51,7 +51,7 @@ workflow PIPELINE_EVENTS_END {
     created_file_infos
 
     main:
-    if (params.associate_batch_metadata) {
+    if (params.track_batch_metadata) {
         created_file_infos
         .mix(batch_manifest_info)
         .set { all_created_file_infos }

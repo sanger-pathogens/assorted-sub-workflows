@@ -4,20 +4,20 @@ process COMPRESS_READS {
     label 'cpu_1'
     label 'time_queue_from_small_slow2'
 
-    publishDir "${params.outdir}/${meta.ID}/preprocessing/", mode: "copy", enabled: params.publish_clean_reads
+    publishDir path: { if ("${params.save_method}" == "nested") "${params.outdir}/${meta.ID}/preprocessing/" else "${params.outdir}/preprocessing/" }, mode: "copy", enabled: params.publish_clean_reads
 
     input:
     tuple val(meta), path(read_1), path(read_2)
 
     output:
-    tuple val(meta), path("${meta.ID}_pre_processed_1.fq.gz"), path("${meta.ID}_pre_processed_2.fq.gz")
+    tuple val(meta), path("${meta.ID}_preprocessed_1.fastq.gz"), path("${meta.ID}_preprocessed_2.fastq.gz"), emit: compressed_reads_ch
 
     script:
     """
     gzip -c ${read_1} > ${read_1}.tmp.gz
     gzip -c ${read_2} > ${read_2}.tmp.gz
-    mv ${read_1}.tmp.gz ${meta.ID}_pre_processed_1.fq.gz
-    mv ${read_2}.tmp.gz ${meta.ID}_pre_processed_2.fq.gz
+    mv ${read_1}.tmp.gz ${meta.ID}_preprocessed_1.fastq.gz
+    mv ${read_2}.tmp.gz ${meta.ID}_preprocessed_2.fastq.gz
     """
 }
 
@@ -31,11 +31,11 @@ process DECOMPRESS_READS {
     tuple val(meta), path(read_1), path(read_2)
 
     output:
-    tuple val(meta), path("${meta.ID}_1.fq"), path("${meta.ID}_2.fq")
+    tuple val(meta), path("${meta.ID}_1.fastq"), path("${meta.ID}_2.fastq"), emit: decompressed_reads_ch
 
     script:
     """
-    gunzip -c ${read_1} > ${meta.ID}_1.fq
-    gunzip -c ${read_2} > ${meta.ID}_2.fq
+    gunzip -c ${read_1} > ${meta.ID}_1.fastq
+    gunzip -c ${read_2} > ${meta.ID}_2.fastq
     """
 }

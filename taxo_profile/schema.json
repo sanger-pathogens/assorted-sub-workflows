@@ -21,6 +21,15 @@
                 "default": "/data/pam/software/sylph-tax/v1/gtdb_r226_metadata.tsv",
                 "help_text": "Path to taxonomy metadata for sylph (list of sylph-tax identifiers)"
             },
+
+            "sylph_estimate_unknown": {
+                "default": "true",
+                "help_text": "Estimate proportion of classified sequences where the sum of Sequence_abundance column is the percentage of classified reads."
+            },
+            "sylph_read_seq_id" : {
+                "default": "99.5",
+                "help_text": "Estimated percentage identity of your sequences (i.e. 100 - error percent). 99.5 is recommended for Illumina reads. Without this option when the `sylph_estimate_unknown` option is used, Sylph provides its own estimate for percentage identity. See Sylph documentation for additional information."
+            },
             "bracken_profile":{
                 "default": "false",
                 "help_text": "Run Kraken2Bracken taxonomic classification."

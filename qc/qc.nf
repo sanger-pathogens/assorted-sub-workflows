@@ -1,5 +1,4 @@
 #!/usr/bin/env nextflow
-include { PREPROCESSING  } from '../preprocessing/preprocessing.nf'
 include { FASTQC              } from './modules/fastqc.nf'
 include { PASS_OR_FAIL_FASTQC
           PASS_OR_FAIL_K2B
@@ -13,22 +12,14 @@ workflow QC {
 
     main:
 
-    if (!params.skip_preprocessing) {
-        PREPROCESSING(reads_ch)
-        | FASTQC 
-    }
-    else {
-        FASTQC(reads_ch)
-    }
-    
+    reads_ch
+    | (FASTQC & TAXO_PROFILE)
 
     fastqc_pass_criteria = file(params.fastqc_pass_criteria, checkIfExists: true)
     fastqc_no_fail_criteria = file(params.fastqc_no_fail_criteria, checkIfExists: true)
 
     PASS_OR_FAIL_FASTQC(FASTQC.out.zip, fastqc_pass_criteria, fastqc_no_fail_criteria)
     | set { fastqc_results }
-
-    TAXO_PROFILE(reads_ch)
 
     FASTQC.out.zip.collect{it[1,2]}
         | mix(TAXO_PROFILE.out.ch_kraken2_style_bracken_reports.collect{it[1]})
