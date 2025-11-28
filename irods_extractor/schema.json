@@ -4,31 +4,31 @@
         "Irods extractor processing options": {
             "cleanup_intermediate_files_irods_extractor": {
                 "default": "false",
-                "help_text": "Delete intermediate CRAM files downloaded from IRODS in work/ folder"
+                "help_text": "delete intermediate CRAM files downloaded from IRODS in work/ folder"
             },
             "preexisting_fastq_tag": {
                 "default": "raw_fastq",
-                "help_text": "If the expected output fastq files exist in the folder named like this under the result folder for the sample e.g. in results/12345_1#67/raw_fastq/12345_1#67_1.fastq.gz,\n            then skip download and any further processing for this sample."
+                "help_text": "if the expected ouput fastq files exist in the folder named like this under the result folder for the sample e.g. in results/12345_1#67/raw_fastq/12345_1#67_1.fastq.gz,\n            then skip download and any further processing for this sample."
             },
             "split_sep_for_ID_from_fastq":{
                 "default": "_1.fastq",
-                "help_text": "Separator to recognise sample ID from preexisting file."
+                "help_text": "separator to recognise sample ID from preexisting file."
             },
             "lane_plex_sep":{
                 "default": "#",
-                "help_text": "Separator to build sample ID from runid, laneid and plexid. Defaults to '#', which is the iRODS-native syntax."
+                "help_text": "separator to build sample ID from runid, laneid and plexid. Defaults to '#', which is the iRODS-native syntax."
             },
             "save_method":{
                 "default": "nested",
-                "help_text": "Save output files in per sample folders (nested) or in one folder (flat)"
+                "help_text": "save output files in per sample folders (nested) or in one folder (flat)"
             },
             "irods_subset_to_skip": {
                 "default": "phix",
-                "help_text": "Skip data items for which metadata field 'subset' is set to this value"
+                "help_text": "skip data items for which metadata field 'subset' is set to this value"
             },
             "combine_same_id_crams": {
                 "default": "false",
-                "help_text": "If retrieving read files representing subsets of the same source (files will share the same run, lane and plex IDs), should these files be combined into a 'total' subset i.e. reforming the source read file before subsetting by NPG processing."
+                "help_text": "if retrieving read files representing subsets of the same source (files will share the same run, lane and plex IDs), should these files be combined into a 'total' subset i.e. reforming the source read file before subsetting by NPG processing."
             },
             "large_data": {
                 "default": "false",

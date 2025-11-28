@@ -1,9 +1,9 @@
 { 
-    "pipeline": "Mixed Input (sub-workflow)",
+    "pipeline": "Combined input (sub-workflow)",
     "params": {
         "Sequencing reads input parameters": {
             "header_combined_input_1": {
-                "subtext": "\nThere are two ways of providing input reads, which can be combined\n      1) through direct input of compressed fastq sequence reads files. This kind of input is passed by specifying the paths to the\n      read files via a manifest listing the pair of read files pertaining to a sample, one per row."
+                "subtext": "\nThere are two ways of providing input reads, which can be combined\n      1) through direct input of compressed fastq sequence reads files. This kind of input is passed by specifying the paths to the\n      read files via a manifest listing the pair of read files pertaing to a sample, one per row."
             },
             "manifest_of_reads": {
                 "default": "false",
