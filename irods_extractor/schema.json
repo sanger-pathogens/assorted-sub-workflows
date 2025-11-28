@@ -52,7 +52,7 @@
         "Irods extractor processing options": {
             "cleanup_intermediate_files_irods_extractor": {
                 "default": "false",
-                "help_text": "Delete intermediate CRAM files downloaded from IRODS in work/ folder"
+                "help_text": "delete intermediate CRAM files downloaded from IRODS in work/ folder"
             },
             "raw_reads_suffix": {
                 "default": "_raw",
@@ -64,7 +64,7 @@
             },
             "save_method":{
                 "default": "nested",
-                "help_text": "Save output files in per sample folders (nested) or in one folder (flat)"
+                "help_text": "save output files in per sample folders (nested) or in one folder (flat)"
             },
             "large_data": {
                 "default": "false",

@@ -11,7 +11,7 @@ process COLLATE_FASTQ {
 
 
     input:
-    tuple val(meta), path(cram)
+    val(meta)
 
     output:
     tuple val(meta), path(forward_fastq), path(reverse_fastq), emit: fastq_channel
@@ -23,7 +23,7 @@ process COLLATE_FASTQ {
 
     """
     samtools collate -O \
-    -f ${cram} \
+    -f ${meta.local_path} \
     -@ ${task.cpus} \
     |
     samtools fastq -N \
