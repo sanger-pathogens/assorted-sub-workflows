@@ -1,4 +1,4 @@
-# Combined Input subworkflow
+# Mixed Input subworkflow
 
 ## Mixed_inputs.nf
 
