@@ -24,7 +24,7 @@
 
             "sylph_estimate_unknown": {
                 "default": "true",
-                "help_text": "Estimate proportion of sample reads that originate from species not represented in the reference database."
+                "help_text": "Estimate proportion of classified sequences where the sum of Sequence_abundance column is the percentage of classified reads."
             },
             "sylph_read_seq_id" : {
                 "default": "99.5",
