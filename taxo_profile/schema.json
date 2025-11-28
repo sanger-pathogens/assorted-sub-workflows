@@ -28,7 +28,7 @@
             },
             "sylph_read_seq_id" : {
                 "default": "99.5",
-                "help_text": "Estimated percentage identity of your sequences (i.e. 100 - error percent). 99.5 is recommended for Illumina reads."
+                "help_text": "Estimated percentage identity of your sequences (i.e. 100 - error percent). 99.5 is recommended for Illumina reads. Without this option when the -u option is used, sylph provides its own estimate for percentage identity. See Sylph documentation for additional information."
             },
             "bracken_profile":{
                 "default": "false",
