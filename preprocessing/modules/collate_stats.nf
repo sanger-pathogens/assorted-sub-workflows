@@ -10,7 +10,7 @@ process COLLATE_STATS_BMTAGGER {
     path(stats_files)
 
     output:
-    tuple val(fakemeta), path(read_removal_stats_file), emit: host_reads_stats_ch
+    tuple val(fakemeta), path(host_read_removal_stats_file), emit: host_reads_stats_ch
 
     script:
     fakemeta = [:]  // dummy meta to allow tuple output compatibility with PIPELINE_EVENTS:GATHER_RESULTFILE_INFO's input
