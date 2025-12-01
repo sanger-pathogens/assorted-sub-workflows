@@ -36,7 +36,7 @@ process BEEFEATER {
     label 'mem_10'
     label 'time_30m'
 
-    container 'quay.io/sangerpathogens/beefeater:0.0.1'
+    container 'quay.io/sangerpathogens/beefeater:v0.0.1-f50111b3'
 
     input:
     val(meta)
