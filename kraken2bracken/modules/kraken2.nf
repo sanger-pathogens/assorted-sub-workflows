@@ -17,6 +17,7 @@ process KRAKEN2 {
 
     script:
     kraken2_id = "${meta.ID}".replaceAll('#','_')
+    memory_mapping = (params.memory_mapping == true ? "--memory-mapping" : "")
     """
     kraken2 --db "${kraken2_db}" \
             --threads ${task.cpus} \
@@ -25,7 +26,8 @@ process KRAKEN2 {
             --report "${meta.ID}_kraken_sample_report.tsv" \
             --report-zero-counts \
             --report-minimizer-data \
-            --paired "${read_1}" "${read_2}"
+            --paired "${read_1}" "${read_2}" \
+            ${memory_mapping}
     """
 }
 
@@ -51,6 +53,7 @@ process KRAKEN2_GET_CLASSIFIED {
 
     script:
     kraken2_id = "${meta.ID}".replaceAll('#','_')
+    memory_mapping = (params.memory_mapping == true ? "--memory-mapping" : "")
     """
     kraken2 --db "${kraken2_db}" \
             --threads ${task.cpus} \
@@ -60,7 +63,8 @@ process KRAKEN2_GET_CLASSIFIED {
             --report "${meta.ID}_kraken_sample_report.tsv" \
             --report-zero-counts \
             --report-minimizer-data \
-            --paired "${read_1}" "${read_2}"
+            --paired "${read_1}" "${read_2}" \
+            ${memory_mapping}            
     """
 }
 
