@@ -79,6 +79,8 @@ Options:
     --kraken2_db                       Path to Kraken2 database (mandatory)
     --read_len                         Ideal length of reads in sample (mandatory)
     --kmer_len                         Length of kmers [Default: 35] (optional)
+    --memory_mapping                   Uses the kraken2 memory mapping option. This option avoid loading the whole database into memory.
+                                       This is recommended to shorten turnaround time when submitting large batch runs.
     --bracken_classification_level     Taxonomic rank to analyze for bracken2. Available options are 'D','P','C','O','F','G','S' [Default: 'S'] (optional)
     --threshold                        Minimum number of reads required for a classification at the specified classification_level [Default: 10] (optional)
     --get_classified_reads             Generate .fastq.gz files containing classified and unclassified reads for each sample [Default: False] (optional)
@@ -88,6 +90,10 @@ Options:
     --enable_building                  allow for the building of new kmer indexes should the requested not exist. default: false
     --help                             Print this help message (optional)
 ```
+
+### Memory mapping option
+
+When submitting large batch runs, it is recommended to uses the Kraken2 memory mapping option with `memory_mapping = true`. This option avoid loading the whole database into memory, drastically reducing the RAM needed to run the Kraken2 processes, at the expense of a longer runtime. In a large batch run, the cumulative effect of many large-memory job submissions on the HPC fair share system will lead to Kraken2 jobs pending for long times - longer than the time gained running kraken normal/fast way with loading the database in memory - and use of this option is therefore likely to reduce overall turnaround time.
 
 ## Credits
 
