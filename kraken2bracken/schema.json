@@ -8,7 +8,7 @@
             },
             "memory_mapping": {
                 "default": false,
-                "help_text": "Uses the kraken2 memory mapping option. This option avoid loading the whole database into memory."
+                "help_text": "Uses the kraken2 memory mapping option. This option avoid loading the whole database into memory, drastically reducing the RAM needed to run the Kraken2 processes, at the expense of a longer runtime.\nThis option is recommended to shorten turnaround time when submitting large batch runs, where the cumulative effect of many large-memory job submissions will lead to job pending for long times (longer than the time gained running kraken normal/fast way with loading the database in memory."
             },
             "kraken2_threads": {
                 "default": 4,
