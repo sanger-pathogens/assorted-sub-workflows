@@ -25,7 +25,7 @@
     "Other options": {
       "fasta_ext": {
         "default": "fa",
-        "help_text": "Rename fasta output files using the given extension"
+        "help_text": "Set the expected extension of fasta files in the input directories."
       },
       "report_config": {
         "default": "./assorted-sub-workflows/qc_mags/assets/report_config.json",
@@ -37,7 +37,7 @@
       },
       "min_contig": {
         "default": 0,
-        "help_text": "Configure the lower threshold for a contig level (in bp). Shorter contigs won't be taken into account, unless required in specific metrics."
+        "help_text": "Contigs below this length will be filtered out by seqkit."
       },
       "skip_raw_reports": {
         "default": "false",
