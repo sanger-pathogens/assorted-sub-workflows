@@ -8,20 +8,15 @@ workflow FILTER_EXISTING_OUTPUTS {
 
     main:
         // Build the glob once
-        def fastq_glob = (params.save_method == "nested")
-            ? "${params.outdir}/*/${params.preexisting_fastq_tag}/*${params.split_sep_for_ID_from_fastq}.gz"
-            : "${params.outdir}/${params.preexisting_fastq_tag}/*${params.split_sep_for_ID_from_fastq}.gz"
-            
-        //log.debug "FILTER_EXISTING_OUTPUTS: save_method=${params.save_method}; glob=${fastq_glob}"
+        def fastq_glob
 
-        // Use normal Groovy variable assignment (avoids scope collisions)
+        if (params.save_method == 'nested') {
+            fastq_glob = "${params.outdir}/*/${params.preexisting_fastq_tag}/*${params.split_sep_for_ID_from_fastq}.gz"
+        } else {
+            fastq_glob = "${params.outdir}/${params.preexisting_fastq_tag}/*${params.split_sep_for_ID_from_fastq}.gz"
+        }
+
         def preexisting_fastq_path_ch = Channel.fromPath(fastq_glob)
-
-        /*
-        preexisting_fastq_path_ch
-            .take(5)
-            .view { p -> "DEBUG preexisting_fastq_path_ch item: ${p} (class=${p?.getClass()?.name})" }
-        */
 
         // Count how many FASTQ files already exist at the start
         def preexisting_fastq_count_ch = preexisting_fastq_path_ch
@@ -37,8 +32,17 @@ workflow FILTER_EXISTING_OUTPUTS {
         */
         
         // Extract IDs from filenames (define once, then branch)
-        def extracted_id_ch = preexisting_fastq_path_ch
-            .map { p -> p.getName().split("${params.split_sep_for_ID_from_fastq}")[0] }
+        def existing_id_ch = preexisting_fastq_path_ch
+            .map { p -> p.getName().tokenize(params.split_sep_for_ID_from_fastq)[0] }
+            .collect()
+            .map { ids ->
+                ids = (ids ?: []).unique()
+                if (ids.isEmpty()) {
+                    log.info "FILTER_EXISTING_OUTPUTS: No existing FASTQs found — nothing will be skipped"
+                }
+                ids
+            }
+
 
         /* debug branch (safe)
         extracted_id_ch
@@ -46,13 +50,6 @@ workflow FILTER_EXISTING_OUTPUTS {
             .view { id -> "DEBUG extracted_id (pre-collect): ${id} (class=${id?.getClass()?.name})" }
         */
         
-        // real branch
-        def existing_id_ch = extracted_id_ch
-            .collect()
-            .map { (it ?: []).unique() }
-            
-
-        // Extra debug + warning around ID inference quality
         def existing_id_checked_ch = existing_id_ch
             .combine(preexisting_fastq_count_ch)
             .map { ids, n_fastqs ->
@@ -73,23 +70,14 @@ workflow FILTER_EXISTING_OUTPUTS {
 
         // Filter inputs against existing IDs
         def do_not_exist = meta_cram_ch
+            .tap { meta_cram -> log.debug "FILTER_EXISTING_OUTPUTS: incoming meta ID = ${meta_cram[0]?.ID}" }
             .combine(existing_id_checked_ch)
             .filter { meta_cram, existing_ids ->
-                def metadata = meta_cram[0]
-                def id = metadata?.ID?.toString()
-
-                if ( !id ) {
-                    log.warn "FILTER_EXISTING_OUTPUTS: metadata.ID missing for item; NOT skipping. metadata=${metadata}"
-                    return true
-                }
-                
-                return !(id in existing_ids)
+                    def (meta, cram_path) = meta_cram
+                    !existing_ids.contains(meta.ID)
             }
             .map { meta_cram, _ -> meta_cram }
 
-
-        log.warn "FILTER_EXISTING_OUTPUTS LOADED: emitting do_not_exist"
-
     emit:
-        do_not_exist
+        do_not_exist 
 }

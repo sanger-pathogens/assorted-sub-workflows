@@ -135,5 +135,5 @@ workflow CRAM_EXTRACT {
                 .map { it.delete() }
     }
 
-    emit: reads_ch // tuple val(meta), path(forward_fastq), path(reverse_fastq
+    emit: reads_ch  // tuple val(meta), path(forward_fastq), path(reverse_fastq
 }
