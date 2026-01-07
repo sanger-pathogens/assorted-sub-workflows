@@ -5,6 +5,7 @@
 include { RETRIEVE_CRAM                 } from './../../modules/retrieve.nf'
 include { COLLATE_FASTQ; COMBINE_FASTQ  } from './../../modules/samtools.nf'
 include { METADATA as METADATA_COMBINED } from './../../modules/metadata_save.nf'
+include { FILTER_EXISTING_OUTPUTS       } from './../skip_downloaded.nf'
 
 def IRODS_ERROR_MSG = """
     Error: IRODS search returned no data!
@@ -93,37 +94,12 @@ workflow CRAM_EXTRACT {
 
     main:
 
-    if ("${params.save_method}" == "nested"){
-        Channel.fromPath("${params.outdir}/*/${params.preexisting_fastq_tag}/*${params.split_sep_for_ID_from_fastq}.gz")
-        .set{ preexisting_fastq_path_ch }
-    }else{
-        Channel.fromPath("${params.outdir}/${params.preexisting_fastq_tag}/*${params.split_sep_for_ID_from_fastq}.gz")
-        .set{ preexisting_fastq_path_ch }
-    }
-    preexisting_fastq_path_ch.toList().map{ preexisting_fastq_path_list -> 
-       no_download = preexisting_fastq_path_list.size()
-       log.info "irods_extractor: ${no_download} data items already exist and won't be downloaded."
-    }
+    def skip = FILTER_EXISTING_OUTPUTS(meta_cram_ch)
 
-    preexisting_fastq_path_ch.map{ preexisting_fastq_path ->
-        preexisting_fastq_path.Name.split("${params.split_sep_for_ID_from_fastq}")[0]
-    }
-    .collect().map{ [it] }
-    .ifEmpty("fresh_run")
-    .set{ existing_id }
-
-    meta_cram_ch.combine( existing_id )
-    .filter { metadata, cram_path, existing -> !(metadata.ID.toString() in existing) }
-    .map { it[0,1] }
-    .set{ do_not_exist }
-
-    do_not_exist.toList().map{ do_not_exist_list -> 
-       new_downloads = do_not_exist_list.size()
-       log.info "irods_extractor: ${new_downloads} data items will be downloaded."
-    }
-
-    RETRIEVE_CRAM(do_not_exist)
+    RETRIEVE_CRAM(skip.out.do_not_exist)
     | COLLATE_FASTQ
+
+
 
     if (params.combine_same_id_crams) {
         COLLATE_FASTQ.out.fastq_channel.map{ metaMap, read_1, read_2 ->

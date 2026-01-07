@@ -6,6 +6,7 @@ include { CRAM_EXTRACT                  } from './extraction_methods/illumina_ex
 
 include { ILLUMINA_PARSE                } from './extraction_methods/illumina_extract.nf'
 include { ONT_PARSE                     } from './extraction_methods/ONT_extract.nf'
+include { FILTER_EXISTING_OUTPUTS       } from './skip_downloaded.nf'
 
 workflow IRODS_QUERY {
         take:
