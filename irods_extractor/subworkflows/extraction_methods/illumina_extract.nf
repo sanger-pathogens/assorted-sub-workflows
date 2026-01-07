@@ -94,11 +94,10 @@ workflow CRAM_EXTRACT {
 
     main:
 
-    def skip = FILTER_EXISTING_OUTPUTS(meta_cram_ch)
+    FILTER_EXISTING_OUTPUTS(meta_cram_ch)
 
-    RETRIEVE_CRAM(skip.out.do_not_exist)
+    RETRIEVE_CRAM(FILTER_EXISTING_OUTPUTS.out.do_not_exist_ch)
     | COLLATE_FASTQ
-
 
 
     if (params.combine_same_id_crams) {
