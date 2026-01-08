@@ -1,0 +1,35 @@
+{
+  "pipeline": "Chaining pipelines TBD (sub-workflow)",
+  "params": {
+    "Filter existing outputs options": {
+      "save_method": {
+        "default": "flat",
+        "help_text": "How outputs are laid out under outdir. Use 'flat' for <outdir>/<preexisting_output_tag>/..., or 'nested' for <outdir>/*/<preexisting_output_tag>/... (e.g. per-sample folders)."
+      },
+      "raw_reads_prefix": {
+        "default": "raw_",
+        "help_text": "Prefix used when constructing the preexisting output folder name. With the default, preexisting_output_tag becomes 'raw_fastqs'."
+      },
+      "preexisting_output_tag": {
+        "default": "raw_fastqs",
+        "help_text": "Folder name under outdir that contains existing outputs to check for. Default is built from raw_reads_prefix + 'fastqs' (e.g. 'raw_fastqs')."      
+      },
+        "existing_output_extension": {
+        "default": "*.gz",
+        "help_text": "Glob pattern used to discover existing output files in the preexisting_output_tag folder (e.g. '*.gz', '*.fastq.gz', '*.cram')."
+      },
+      "existing_output_id_suffix": {
+        "default": "_1.fastq",
+        "help_text": "Suffix used to derive an ID from an existing output filename. The filename is split on this string and the first part is treated as the ID (e.g. 'SAMPLE_1.fastq.gz' -> 'SAMPLE' when suffix is '_1.fastq')."
+      },
+      "outdir": {
+        "default": null,
+        "help_text": "Base output directory to scan for existing outputs. Typically set by the calling pipeline."
+      },
+      "manifest_of_lanes": {
+        "default": null,
+        "help_text": "Optional manifest describing lanes / input data units. Leave null if not used by the calling pipeline."
+      }
+    }
+  }
+}
