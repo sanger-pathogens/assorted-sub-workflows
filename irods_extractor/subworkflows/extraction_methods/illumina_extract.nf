@@ -5,7 +5,7 @@
 include { RETRIEVE_CRAM                 } from './../../modules/retrieve.nf'
 include { COLLATE_FASTQ; COMBINE_FASTQ  } from './../../modules/samtools.nf'
 include { METADATA as METADATA_COMBINED } from './../../modules/metadata_save.nf'
-include { FILTER_EXISTING_OUTPUTS       } from './../skip_downloaded.nf'
+include { FILTER_EXISTING_OUTPUTS       } from './../../../chaining_pipelines_tbd/subworkflows/skip_downloaded.nf'
 
 def IRODS_ERROR_MSG = """
     Error: IRODS search returned no data!
@@ -95,16 +95,10 @@ workflow CRAM_EXTRACT {
     main:
 
     FILTER_EXISTING_OUTPUTS(meta_dataobj_ch)
-
-    FILTER_EXISTING_OUTPUTS.out.do_not_exist_ch
-    .view { "TO DOWNLOAD => ${it[0]?.ID} ${it[1]}" }
-    .set { to_download_ch }
-
-    RETRIEVE_CRAM(to_download_ch)
-
-    COLLATE_FASTQ(RETRIEVE_CRAM.out.path_channel)
-    COLLATE_FASTQ.out.fastq_channel.set { reads_ch }
-
+    FILTER_EXISTING_OUTPUTS.out.do_not_exist.set { do_not_exist }
+    
+    RETRIEVE_CRAM(do_not_exist)
+    | COLLATE_FASTQ
 
     if (params.combine_same_id_crams) {
         COLLATE_FASTQ.out.fastq_channel.map{ metaMap, read_1, read_2 ->
