@@ -81,23 +81,29 @@ workflow ILLUMINA_PARSE {
         [metamap, cram_path]  }
     | ifEmpty { error(IRODS_ERROR_MSG) }
     | filter{ it[0]["subset"] != "${params.irods_subset_to_skip}" }
-    | set{ meta_cram_ch }
+    | set{ meta_dataobj_ch }
 
     emit:
-    meta_cram_ch
+    meta_dataobj_ch
 }
 
 workflow CRAM_EXTRACT {
 
     take:
-    meta_cram_ch //tuple meta, cram_path
+    meta_dataobj_ch //tuple meta, cram_path
 
     main:
 
-    FILTER_EXISTING_OUTPUTS(meta_cram_ch)
+    FILTER_EXISTING_OUTPUTS(meta_dataobj_ch)
 
-    RETRIEVE_CRAM(FILTER_EXISTING_OUTPUTS.out.do_not_exist_ch)
-    | COLLATE_FASTQ
+    FILTER_EXISTING_OUTPUTS.out.do_not_exist_ch
+    .view { "TO DOWNLOAD => ${it[0]?.ID} ${it[1]}" }
+    .set { to_download_ch }
+
+    RETRIEVE_CRAM(to_download_ch)
+
+    COLLATE_FASTQ(RETRIEVE_CRAM.out.path_channel)
+    COLLATE_FASTQ.out.fastq_channel.set { reads_ch }
 
 
     if (params.combine_same_id_crams) {
