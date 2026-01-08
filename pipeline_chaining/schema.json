@@ -1,6 +1,6 @@
 {
-  "pipeline": "Chaining pipelines TBD (sub-workflow)",
-  "params": {
+  "pipeline": "Pipeline_chaining (sub-workflow)",
+"params": {
     "Filter existing outputs options": {
       "save_method": {
         "default": "flat",
@@ -8,15 +8,15 @@
       },
       "raw_reads_prefix": {
         "default": "raw_",
-        "help_text": "Prefix used when constructing the preexisting output folder name. With the default, preexisting_output_tag becomes 'raw_fastqs'."
+        "help_text": "Prefix used when constructing the preexisting output folder name."
       },
       "preexisting_output_tag": {
-        "default": "raw_fastqs",
-        "help_text": "Folder name under outdir that contains existing outputs to check for. Default is built from raw_reads_prefix + 'fastqs' (e.g. 'raw_fastqs')."      
+        "default": "${params.raw_reads_prefix}fastqs",
+        "help_text": "Folder name under outdir that contains existing outputs to check for. Computed from raw_reads_prefix + 'fastqs' (e.g. 'raw_fastqs')."
       },
-        "existing_output_extension": {
-        "default": "*.gz",
-        "help_text": "Glob pattern used to discover existing output files in the preexisting_output_tag folder (e.g. '*.gz', '*.fastq.gz', '*.cram')."
+      "existing_output_extension": {
+        "default": ".gz",
+        "help_text": "File extension used to discover existing output files in the preexisting_output_tag folder (e.g. '.gz', '.fastq.gz', '.cram')."
       },
       "existing_output_id_suffix": {
         "default": "_1.fastq",

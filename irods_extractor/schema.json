@@ -37,6 +37,14 @@
             "read_type": {
                 "default": "Illumina",
                 "help_text": "Platform the data you wish to receive was sequenced on Illumina|ont"
+            },
+            "save_metadata": {
+                "default": true,
+                "help_text": "If true, save all lane/sample metadata into one file called 'lane_metadata.txt'. This does not change how FASTQ files are created."
+            },
+            "short_metacsv_name": {
+                "default": false,
+                "help_text": "Use a short date instead of a full timestamp in metadata filenames."
             }
         }
     }
