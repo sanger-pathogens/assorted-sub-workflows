@@ -93,11 +93,16 @@ workflow CRAM_EXTRACT {
     meta_dataobj_ch //tuple meta, cram_path
 
     main:
-
-    FILTER_EXISTING_OUTPUTS(meta_dataobj_ch)
-    FILTER_EXISTING_OUTPUTS.out.do_not_exist.set { do_not_exist }
     
-    RETRIEVE_CRAM(do_not_exist)
+    if (params.only_new_input){
+        FILTER_EXISTING_OUTPUTS(meta_dataobj_ch)
+        FILTER_EXISTING_OUTPUTS.out.do_not_exist
+        .set { meta_dataobj_to_process }
+    } else{
+        meta_dataobj_to_process = meta_dataobj_ch
+    }
+
+    RETRIEVE_CRAM(meta_dataobj_to_process)
     | COLLATE_FASTQ
 
     if (params.combine_same_id_crams) {
