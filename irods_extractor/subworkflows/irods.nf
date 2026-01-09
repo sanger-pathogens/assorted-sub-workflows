@@ -19,7 +19,6 @@ workflow IRODS_QUERY {
         switch (params.read_type.toLowerCase()) {
             case "illumina":
                 ILLUMINA_PARSE(JSON_PARSE.out.json_file)
-                .view { "ILLUMINA_PARSE EMIT => ID=${it[0]?.ID} path=${it[1]}" } // deleting after testing
                 | set{ meta_file_ch }
 
                 break
