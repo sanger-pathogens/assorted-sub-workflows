@@ -1,6 +1,16 @@
 { 
     "pipeline": "Preprocessing (sub-workflow)",
     "params": {
+        "Filter existing outputs options": {
+            "save_method": {
+                "default": "flat",
+                "help_text": "How outputs are laid out under outdir. Use 'flat' for <outdir>/<preexisting_output_tag>/..., or 'nested' for <outdir>/*/<preexisting_output_tag>/... (e.g. per-sample folders)."
+            },
+            "raw_reads_prefix": {
+                "default": "raw_",
+                "help_text": "Prefix used when constructing the preexisting output folder name."
+            }
+        },
         "General pre-processing options":{
             "publish_clean_reads": {
                 "default": "true",
