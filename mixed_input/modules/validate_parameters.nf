@@ -55,6 +55,7 @@ def validate_parameters() {
     def manifest_of_lanes_exists = params.manifest_of_lanes != null
     def manifest_of_reads_exists = params.manifest_of_reads != null
     def manifest_exists = params.manifest != null
+    def manifest_from_dir_exists = params.manifest_from_dir != null
     
     //and CLI
     def has_studyid = params.studyid != -1
@@ -67,6 +68,7 @@ def validate_parameters() {
                           manifest_of_lanes_exists ||
                           manifest_of_reads_exists ||
                           manifest_exists ||
+                          manifest_from_dir_exists ||
                           has_studyid ||
                           has_runid ||
                           has_laneid ||
@@ -79,6 +81,7 @@ def validate_parameters() {
                     - --manifest_ena
                     - --manifest_of_lanes
                     - --manifest_of_reads or --manifest
+                    - --manifest_from_dir
 
                     CLI Arguments:
                     - --studyid
@@ -120,6 +123,11 @@ def validate_parameters() {
     if (manifest_of_reads_exists) {
         errors += validate_path_param("--manifest_of_reads", params.manifest_of_reads)
         workflows_to_run << 'READS_MANIFEST'
+    }
+
+    if (manifest_from_dir_exists) {
+        errors += validate_path_param("--manifest_from_dir", params.manifest_from_dir)
+        workflows_to_run << 'MANIFEST_FROM_DIR'
     }
 
     // Validate CLI-based inputs

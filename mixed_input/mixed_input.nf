@@ -52,6 +52,27 @@ workflow MIXED_INPUT {
         | set { reads_from_local_ch }
     }
 
+    if ('MANIFEST_FROM_DIR' in active_workflows) {
+        Channel.fromPath(params.manifest_from_dir)
+        | MANIFEST_GENERATOR
+
+        ch_manifest = MANIFEST_GENERATOR.out.ch_manifest_from_dir
+
+        ch_reads = ch_manifest
+            .splitCsv(header: true)
+            .map { row ->
+                tuple(
+                    row.ID,
+                    file(row.R1),
+                    file(row.R2)
+                )
+            }
+            | set { reads_from_local_ch }
+    } else {
+        Channel.of("none")
+        | set { reads_from_local_ch }
+    }
+
     reads_from_irods_ch
     | mix(reads_from_local_ch)
     | mix(reads_from_ena_ch)
