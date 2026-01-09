@@ -2,12 +2,8 @@
   "pipeline": "Pipeline_chaining (sub-workflow)",
 "params": {
     "Filter existing outputs options": {
-      "save_method":{
-        "default": "flat",
-        "help_text": "Save output files in per sample folders (nested) or in one folder (flat)"
-      },
       "preexisting_output_tag": {
-        "default": "${params.raw_reads_prefix}fastqs",
+        "default": "",
         "help_text": "Folder name under outdir that contains existing outputs to check for. Computed from raw_reads_prefix + 'fastqs' (e.g. 'raw_fastqs')."
       },
       "existing_output_extension": {
@@ -15,16 +11,8 @@
         "help_text": "File extension used to discover existing output files in the preexisting_output_tag folder (e.g. 'fa.gz', '.fastq.gz', '.cram')."
       },
       "existing_output_id_suffix": {
-        "default": null,
+        "default": "",
         "help_text": "Suffix used to derive an ID from an existing output filename. The filename is split on this string and the first part is treated as the ID (e.g. 'SAMPLE_1.fastq.gz' -> 'SAMPLE' when suffix is '_1.fastq')."
-      },
-      "outdir": {
-        "default": null,
-        "help_text": "Base output directory to scan for existing outputs. Typically set by the calling pipeline."
-      },
-      "manifest_of_lanes": {
-        "default": null,
-        "help_text": "Optional manifest describing lanes / input data units. Leave null if not used by the calling pipeline."
       }
     }
   }
