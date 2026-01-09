@@ -126,7 +126,7 @@ def validate_parameters() {
     }
 
     if (manifest_from_dir_exists) {
-        errors += validate_path_param("--manifest_from_dir", params.manifest_from_dir)
+        errors += validate_path_param("--manifest_from_dir", params.manifest_from_dir, type="directory")
         workflows_to_run << 'MANIFEST_FROM_DIR'
     }
 

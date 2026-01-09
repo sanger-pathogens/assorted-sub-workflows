@@ -12,12 +12,9 @@ process MANIFEST_GENERATOR {
     path "manifest/manifest.csv", emit: 'ch_manifest_from_dir'
 
     script:
+    manifest_script = "${projectDir}/assorted-sub-workflows/mixed_input/bin/generate_manifest.py"
     """
     mkdir -p manifest
-    ${projectDir}/scripts/generate_manifest.py \
-        -i ${input_dir} \
-        -o manifest \
-        -v ${params.fastq_validation} \
-        -d ${params.depth}
+    ${manifest_script} -i ${input_dir} -o manifest -v ${params.fastq_validation} -d ${params.depth}
     """
 }

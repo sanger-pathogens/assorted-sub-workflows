@@ -58,8 +58,7 @@ workflow MIXED_INPUT {
 
         ch_manifest = MANIFEST_GENERATOR.out.ch_manifest_from_dir
 
-        ch_reads = ch_manifest
-            .splitCsv(header: true)
+        ch_manifest.splitCsv(header: true)
             .map { row ->
                 tuple(
                     row.ID,
