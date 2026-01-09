@@ -53,7 +53,7 @@ workflow MIXED_INPUT {
     }
 
     if ('MANIFEST_FROM_DIR' in active_workflows) {
-        Channel.fromPath(params.manifest_from_dir)
+        Channel.of(params.manifest_from_dir)
         | MANIFEST_GENERATOR
 
         ch_manifest = MANIFEST_GENERATOR.out.ch_manifest_from_dir

@@ -105,6 +105,7 @@ def main():
     args.output.parent.mkdir(parents=True, exist_ok=True)
 
     setup_logging(log_file=args.output.parent / "fastq_manifest.log")
+    logging.info(f'Manifest generator input: {args.input}')
     logging.info(f'Manifest generator in {args.fastq_validation} mode')
     logging.info(f'Max depth set to {args.max_depth}')
 

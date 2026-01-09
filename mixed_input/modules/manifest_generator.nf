@@ -6,7 +6,7 @@ process MANIFEST_GENERATOR {
     publishDir "${params.outdir}", mode: 'copy'
 
     input:
-    path input_dir
+    val input_dir
 
     output:
     path "manifest/manifest.csv", emit: 'ch_manifest_from_dir'
