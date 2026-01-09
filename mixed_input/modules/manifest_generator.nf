@@ -13,6 +13,7 @@ process MANIFEST_GENERATOR {
 
     script:
     """
+    mkdir -p manifest
     ${projectDir}/scripts/generate_manifest.py \
         -i ${input_dir} \
         -o manifest \
