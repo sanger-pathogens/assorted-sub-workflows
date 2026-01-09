@@ -45,7 +45,12 @@
             "short_metacsv_name": {
                 "default": false,
                 "help_text": "Use a short date instead of a full timestamp in metadata filenames."
+            },
+            "only_new_input": {
+                "default": true,
+                "help_text": "Only download data that has not been already downloaded to the output folder; see options \`preexisting_output_tag\` (for output subfolder in which to look for already existing output files), \`existing_output_id_suffix\` and \`existing_output_extension\` that affect this behaviou."
             }
+
         }
     }
 }
