@@ -1,19 +1,31 @@
 {
   "pipeline": "Pipeline_chaining (sub-workflow)",
-"params": {
-    "Filter existing outputs options": {
-      "preexisting_output_tag": {
-        "default": "",
-        "help_text": "Folder name under outdir that contains existing outputs to check for. Computed from raw_reads_prefix + 'fastqs' (e.g. 'raw_fastqs')."
-      },
-      "existing_output_extension": {
-        "default": "",
-        "help_text": "File extension used to discover existing output files in the preexisting_output_tag folder (e.g. 'fa.gz', '.fastq.gz', '.cram')."
-      },
-      "existing_output_id_suffix": {
-        "default": "",
-        "help_text": "Suffix used to derive an ID from an existing output filename. The filename is split on this string and the first part is treated as the ID (e.g. 'SAMPLE_1.fastq.gz' -> 'SAMPLE' when suffix is '_1.fastq')."
-      }
+  "params": {
+    "only_new_input": {
+      "type": "boolean",
+      "default": false,
+      "help_text": "If true, skip downloading inputs that already have corresponding outputs in the output directory. Requires output naming parameters to be set."
+    },
+
+    "preexisting_output_tag": {
+      "type": "string",
+      "default": "",
+      "group": "Filter existing outputs options",
+      "help_text": "Folder name under outdir that contains existing outputs to check for (e.g. 'raw_fastqs'). Required when only_new_input is true."
+    },
+
+    "existing_output_extension": {
+      "type": "string",
+      "default": "",
+      "group": "Filter existing outputs options",
+      "help_text": "File extension used to discover existing output files (e.g. '.fastq.gz', '.fa.gz', '.cram'). Required when only_new_input is true."
+    },
+
+    "existing_output_id_suffix": {
+      "type": "string",
+      "default": "",
+      "group": "Filter existing outputs options",
+      "help_text": "Suffix used to derive an ID from an existing output filename. The filename is split on this string and the first part is treated as the ID (e.g. '_1.fastq.gz'). Required when only_new_input is true."
     }
   }
 }

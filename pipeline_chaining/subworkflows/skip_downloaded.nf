@@ -11,6 +11,13 @@ workflow FILTER_EXISTING_OUTPUTS {
     meta_dataobj_ch  // tuple(meta, dataobj); meta is a Map with ID fields, dataobj is the input file/path to be processed 
 
     main:
+    if (params.only_new_input) {
+        ['preexisting_output_tag','existing_output_id_suffix','existing_output_extension'].each { p ->
+            if (!params[p]?.toString()?.trim()) {
+                error "only_new_input=true requires params.${p} to be set (non-empty)."
+            }
+        }
+    }
     if ("${params.save_method}" == "nested"){
         Channel.fromPath("${params.outdir}/*/${params.preexisting_output_tag}/*${params.existing_output_id_suffix}${params.existing_output_extension}")
         .set{ preexisting_output_path_ch }
