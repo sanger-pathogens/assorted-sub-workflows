@@ -5,7 +5,7 @@
 include { RETRIEVE_CRAM                 } from './../../modules/retrieve.nf'
 include { COLLATE_FASTQ; COMBINE_FASTQ  } from './../../modules/samtools.nf'
 include { METADATA as METADATA_COMBINED } from './../../modules/metadata_save.nf'
-include { FILTER_EXISTING_OUTPUTS       } from './../../../chaining_pipelines_tbd/subworkflows/skip_downloaded.nf'
+include { FILTER_EXISTING_OUTPUTS       } from './../../../pipeline_chaining/subworkflows/skip_downloaded.nf'
 
 def IRODS_ERROR_MSG = """
     Error: IRODS search returned no data!
