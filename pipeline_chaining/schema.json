@@ -20,6 +20,10 @@
       "manifest_of_lanes": {
         "default": null,
         "help_text": "Optional manifest describing lanes / input data units. Leave null if not used by the calling pipeline."
+      },
+      "save_method":{
+        "default": "nested",
+        "help_text": "Save output files in per sample folders (nested) or in one folder (flat)"
       }
     }
   }
