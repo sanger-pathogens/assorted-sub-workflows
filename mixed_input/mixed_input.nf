@@ -4,6 +4,7 @@ include { IRODS_CLI; COMBINE_IRODS } from './subworkflows/combined_input.nf'
 include { ENA_DOWNLOAD             } from './subworkflows/ena_input.nf'
 include { IRODS_EXTRACTOR          } from '../irods_extractor/subworkflows/irods.nf'
 
+include { MANIFEST_GENERATOR       } from './modules/manifest_generator.nf'
 include { validate_parameters      } from './modules/validate_parameters'
 
 workflow MIXED_INPUT {
