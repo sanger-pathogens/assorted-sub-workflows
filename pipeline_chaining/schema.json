@@ -3,7 +3,7 @@
   "params": {
     "only_new_input": {
       "type": "boolean",
-      "default": false,
+      "default": true,
       "help_text": "If true, skip downloading inputs that already have corresponding outputs in the output directory. Requires output naming parameters to be set."
     },
 
