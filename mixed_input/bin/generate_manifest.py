@@ -98,6 +98,16 @@ def is_fastq(path: Path) -> bool:
         return line1.startswith(b"@") and line3.startswith(b"+")
     except OSError:
         return False
+    
+
+def validate_reads(read, mode):
+    if mode == 'strict':
+        fastq = is_fastq(read)
+        if not fastq:
+            return False
+    elif mode == 'relaxed':
+        if not read.endswith(['.fq', '.fq.gz', '.fastq', '.fastq.gz']):
+            return False
 
 
 def main():
@@ -154,22 +164,12 @@ def main():
                     continue
 
                 # validate reads
-                if args.fastq_validation == 'strict':
-                    r1 = is_fastq(R1)
-                    r2 = is_fastq(R2)
-                    if not r1:
-                        logging.warning(f"{R1} failed FASTQ validation")
-                        continue
-                    if not r2:
-                        logging.warning(f"{R2} failed FASTQ validation")
-                        continue
-                elif args.fastq_validation == 'relaxed':
-                    if not R1.endswith(['.fq', '.fq.gz', '.fastq', '.fastq.gz']):
-                        logging.warning(f"{R1} failed FASTQ validation")
-                        continue
-                    if not R2.endswith(['.fq', '.fq.gz', '.fastq', '.fastq.gz']):
-                        logging.warning(f"{R2} failed FASTQ validation")
-                        continue
+                if validate_reads(R1, args.fastq_validation) is False:
+                    logging.warning(f"{R1} failed FASTQ validation")
+                    continue
+                if validate_reads(R2, args.fastq_validation) is False:
+                    logging.warning(f"{R2} failed FASTQ validation")
+                    continue
 
                 writer.writerow([ID, str(R1), str(R2)])
                 counter += 1

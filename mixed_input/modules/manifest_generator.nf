@@ -15,6 +15,6 @@ process MANIFEST_GENERATOR {
     manifest_script = "${projectDir}/assorted-sub-workflows/mixed_input/bin/generate_manifest.py"
     """
     mkdir -p manifest
-    ${manifest_script} -i ${input_dir} -o manifest -v ${params.fastq_validation} -d ${params.depth}
+    ${manifest_script} -i ${input_dir} -o manifest -v ${params.fastq_validation} -d ${params.max_depth}
     """
 }
