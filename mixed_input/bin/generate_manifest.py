@@ -44,7 +44,7 @@ def parse_args():
         '-d', '--max_depth',
         type=int,
         default=0,
-        help='Max depth to scan for FASTQ files'
+        help='Max depth to scan for FASTQ files. Default = 0'
     )
     return parser.parse_args()
 
