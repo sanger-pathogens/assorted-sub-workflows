@@ -1,7 +1,7 @@
 process MANIFEST_GENERATOR {
     label "cpu_1"
     label "mem_1"
-    label "time_10m"
+    label "time_30m"
 
     publishDir "${params.outdir}", mode: 'copy'
 
