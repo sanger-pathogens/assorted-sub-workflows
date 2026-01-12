@@ -163,7 +163,6 @@ def main():
                     if not r2:
                         logging.warning(f"{R2} failed FASTQ validation")
                         continue
-
                 elif args.fastq_validation == 'relaxed':
                     if not R1.endswith(['.fq', '.fq.gz', '.fastq', '.fastq.gz']):
                         logging.warning(f"{R1} failed FASTQ validation")
