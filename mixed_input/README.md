@@ -12,7 +12,7 @@ There are two ways of specifying input for the pipeline:
 - --manifest_ena: ENA
 - --manifest_of_lanes: IRODS
 - --manifest_of_reads or --manifest: READS
-- --manifest_from_dir: DIRECTORY PATH
+- --manifest_from_dir: DIRECTORY PATH (--fastq_validation (strict/normal), --depth (0 = top directory only, N = recursively search subdirectories to depth N))
 
 CLI arguments:
 - --studyid: IRODS
