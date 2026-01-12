@@ -5,6 +5,7 @@
 include { RETRIEVE_CRAM                 } from './../../modules/retrieve.nf'
 include { COLLATE_FASTQ; COMBINE_FASTQ  } from './../../modules/samtools.nf'
 include { METADATA as METADATA_COMBINED } from './../../modules/metadata_save.nf'
+include { FILTER_EXISTING_OUTPUTS       } from './../../../pipeline_chaining/subworkflows/skip_downloaded.nf'
 
 def IRODS_ERROR_MSG = """
     Error: IRODS search returned no data!
@@ -80,49 +81,28 @@ workflow ILLUMINA_PARSE {
         [metamap, cram_path]  }
     | ifEmpty { error(IRODS_ERROR_MSG) }
     | filter{ it[0]["subset"] != "${params.irods_subset_to_skip}" }
-    | set{ meta_cram_ch }
+    | set{ meta_dataobj_ch }
 
     emit:
-    meta_cram_ch
+    meta_dataobj_ch
 }
 
 workflow CRAM_EXTRACT {
 
     take:
-    meta_cram_ch //tuple meta, cram_path
+    meta_dataobj_ch //tuple meta, cram_path
 
     main:
-
-    if ("${params.save_method}" == "nested"){
-        Channel.fromPath("${params.outdir}/*/${params.preexisting_fastq_tag}/*${params.split_sep_for_ID_from_fastq}.gz")
-        .set{ preexisting_fastq_path_ch }
-    }else{
-        Channel.fromPath("${params.outdir}/${params.preexisting_fastq_tag}/*${params.split_sep_for_ID_from_fastq}.gz")
-        .set{ preexisting_fastq_path_ch }
-    }
-    preexisting_fastq_path_ch.toList().map{ preexisting_fastq_path_list -> 
-       no_download = preexisting_fastq_path_list.size()
-       log.info "irods_extractor: ${no_download} data items already exist and won't be downloaded."
+    
+    if (params.only_new_input){
+        FILTER_EXISTING_OUTPUTS(meta_dataobj_ch)
+        FILTER_EXISTING_OUTPUTS.out.do_not_exist
+        .set { meta_dataobj_to_process }
+    } else{
+        meta_dataobj_to_process = meta_dataobj_ch
     }
 
-    preexisting_fastq_path_ch.map{ preexisting_fastq_path ->
-        preexisting_fastq_path.Name.split("${params.split_sep_for_ID_from_fastq}")[0]
-    }
-    .collect().map{ [it] }
-    .ifEmpty("fresh_run")
-    .set{ existing_id }
-
-    meta_cram_ch.combine( existing_id )
-    .filter { metadata, cram_path, existing -> !(metadata.ID.toString() in existing) }
-    .map { it[0,1] }
-    .set{ do_not_exist }
-
-    do_not_exist.toList().map{ do_not_exist_list -> 
-       new_downloads = do_not_exist_list.size()
-       log.info "irods_extractor: ${new_downloads} data items will be downloaded."
-    }
-
-    RETRIEVE_CRAM(do_not_exist)
+    RETRIEVE_CRAM(meta_dataobj_to_process)
     | COLLATE_FASTQ
 
     if (params.combine_same_id_crams) {
@@ -159,5 +139,5 @@ workflow CRAM_EXTRACT {
                 .map { it.delete() }
     }
 
-    emit: reads_ch // tuple val(meta), path(forward_fastq), path(reverse_fastq
+    emit: reads_ch  // tuple val(meta), path(forward_fastq), path(reverse_fastq
 }

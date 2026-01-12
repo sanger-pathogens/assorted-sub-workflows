@@ -1,6 +1,12 @@
 { 
     "pipeline": "Preprocessing (sub-workflow)",
     "params": {
+        "Filter existing outputs options": {
+            "raw_reads_prefix": {
+                "default": "raw_",
+                "help_text": "Prefix used when constructing the preexisting output folder name; used only when fastq reads preprocessing is applied (skip_preprocessing = false ."
+            }
+        },
         "General pre-processing options":{
             "publish_clean_reads": {
                 "default": "true",
