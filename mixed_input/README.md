@@ -13,7 +13,7 @@ There are two ways of specifying input for the pipeline:
 - --manifest_of_lanes: IRODS
 - --manifest_of_reads or --manifest: READS
 - --manifest_from_dir: DIRECTORY PATH (options) --fastq_validation [(strict/normal, default = strict)],
-                                                --depth [Depth to recursively search subdirectories, default = 0]
+                                                --max_depth [Depth to recursively search subdirectories, default = 0]
 
 CLI arguments:
 - --studyid: IRODS
