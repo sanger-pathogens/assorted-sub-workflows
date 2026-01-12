@@ -65,15 +65,16 @@ workflow MIXED_INPUT {
                     file(row.R2)
                 )
             } 
-        | set { reads_from_local_ch }
+        | set { reads_from_local_dir_ch }
     } else {
         Channel.of("none")
-        | set { reads_from_local_ch }
+        | set { reads_from_local_dir_ch }
     }
 
     reads_from_irods_ch
     | mix(reads_from_local_ch)
     | mix(reads_from_ena_ch)
+    | mix (reads_from_local_dir_ch)
     | filter { it != "none"}
     | set { all_reads_ready_ch }
 
