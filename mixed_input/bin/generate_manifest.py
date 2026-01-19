@@ -65,9 +65,9 @@ def infer_read_pairs(input_dir: Path) -> list[tuple]:
         else:
             if len(previous) == len(name):
                 suffix = ''.join(read.suffixes)
-                if sum(c1!=c2 for c1, c2 in zip(previous, name)) == 1:
+                if sum(c1!=c2 for c1, c2 in zip(previous, name)) == 1: # read pair names should only differ by 1 character
                     for n, (d1, d2) in enumerate(zip(previous, name)):
-                        if d1 in {'1', '2'} and d2 in {'1', '2'} and d1!=d2: #validate differing characters are either '1' or '2'
+                        if d1 in {'1', '2'} and d2 in {'1', '2'} and d1!=d2: # validate differing characters are either '1' or '2'
                             base = name[:n] + '@' # placeholder character
                             remain = ''
                             if len(name[n+1:]) > len(suffix): # handle case where sample has further characters after placeholder before prefix
