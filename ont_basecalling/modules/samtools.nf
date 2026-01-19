@@ -34,7 +34,7 @@ process PUBLISH_BAMS {
     tuple val(meta), path(reads_bam)
 
     output:
-    tuple val(meta), path(reads_bam),  emit: reads_bam
+    tuple val(meta), path(bam_output),  emit: reads_bam
 
     script:
     bam_output = "${meta.ID ?: "${meta.barcode_kit}_B${meta.barcode}"}.bam"
