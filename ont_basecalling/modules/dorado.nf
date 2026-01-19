@@ -15,8 +15,6 @@ process BASECALL {
     path("calls.bam"), emit: called_channel
 
     script:
-    def min_qscore = "${params.min_qscore == "" ? "" : "--min-qscore ${params.min_qscore}"}"
-
     def barcodeArgs = ""
     if (params.barcode_arrangement) {
         barcodeArgs = "--kit-name ${params.barcode_kit_name} " +
@@ -26,13 +24,14 @@ process BASECALL {
         barcodeArgs = "--kit-name ${params.barcode_kit_name} "
     }
 
-    if (params.modified_bases_models) {
-        barcodeArgs = "--modified-bases-models  ${params.modified_bases_models} "
-    }
+    def min_qscore_args = params.min_qscore == "" ? "" : "--min-qscore ${params.min_qscore}"
+
+    def methylation_models_args = params.modified_bases_models ? "--modified-bases-models  ${params.modified_bases_models}" : ""
+    
 
     def basecallCommand =
         "dorado basecaller ${params.model} --trim ${params.trim_adapters} " +
-        "${min_qscore} ${barcodeArgs} ${pod5} > calls.bam"
+        "${min_qscore_args} ${barcodeArgs} ${methylation_models_args} ${pod5} > calls.bam"
     
     """
     ${basecallCommand}
