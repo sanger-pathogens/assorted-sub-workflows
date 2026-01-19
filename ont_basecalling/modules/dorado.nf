@@ -18,8 +18,8 @@ process BASECALL {
     def barcodeArgs = ""
     if (params.barcode_arrangement) {
         barcodeArgs = "--kit-name ${params.barcode_kit_name} " +
-                    "--barcode-arrangement ${params.barcode_arrangement} " +
-                    "--barcode-sequences ${params.barcode_sequences} "
+                      "--barcode-arrangement ${params.barcode_arrangement} " +
+                      "--barcode-sequences ${params.barcode_sequences} "
     } else if (params.barcode_kit_name) {
         barcodeArgs = "--kit-name ${params.barcode_kit_name} "
     }
