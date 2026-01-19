@@ -102,7 +102,7 @@ workflow ONT_BASECALLING{
             def meta = [:]
             def input_directory_name = file(params.raw_read_dir).simpleName
             meta.barcode_kit = "not-reclassified"
-            meta.barcode = "${input_directory_name.contains("barcode") ? input_directory_name.split("barcode")[-1] : input_directory_name }"
+            meta.barcode = input_directory_name.contains("barcode") ? input_directory_name.split("barcode")[-1] : input_directory_name
             [meta, called_bam]
         }
         | set { bam_ch }
