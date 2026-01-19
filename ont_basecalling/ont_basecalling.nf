@@ -30,7 +30,6 @@ workflow ONT_BASECALLING{
     raw_read_signal_files
 
     main:
-    validateBarcodeParams()
 
     raw_read_signal_files.map{ raw_read_signal_file ->
         tuple(raw_read_signal_file.extension, raw_read_signal_file)
@@ -61,15 +60,24 @@ workflow ONT_BASECALLING{
     MERGE_POD5(raw_files.pod5)
     | mix(CONVERT_FAST5_TO_POD5.out.pod5_ch) //mix in files if there are only fast5's
     | BASECALL
-    | DEMUX
-    | flatten
-    | map{ long_read_bam -> 
-        def meta = [:]
-        meta.barcode_kit = params.barcode_kit_name
-        meta.barcode = "${ long_read_bam.simpleName.contains("barcode") ? long_read_bam.simpleName.split("barcode")[-1] : long_read_bam.simpleName.split("_")[-1] }" //i.e. when simpleName = unclassified
-        tuple(meta, long_read_bam)
+
+    if (params.barcode_kit_name) {
+        validateBarcodeParams()
+
+        BASECALL.out.called_channel
+        | DEMUX
+        | flatten
+        | map{ long_read_bam -> 
+            def meta = [:]
+            meta.barcode_kit = params.barcode_kit_name
+            meta.barcode = "${ long_read_bam.simpleName.contains("barcode") ? long_read_bam.simpleName.split("barcode")[-1] : long_read_bam.simpleName.split("_")[-1] }" //i.e. when simpleName = unclassified
+            tuple(meta, long_read_bam)
+        }
+        | set{ bam_ch }
+    } else {
+        BASECALL.out.called_channel
+        | set{ bam_ch }
     }
-    | set{ bam_ch }
 
     DORADO_SUMMARY(BASECALL.out.called_channel)
     | PYCOQC
@@ -84,12 +92,19 @@ workflow ONT_BASECALLING{
         | splitCsv(header:true, sep:',')
         | map { meta -> ["${params.barcode_kit_name}_${meta.barcode}", meta] }
         | join(bam_by_barcode_ch)
-        | map { barcodekit_barcode, meta1, meta2, reads -> [meta1 + meta2, reads] }
+        | map { _barcodekit_barcode, meta1, meta2, reads -> [meta1 + meta2, reads] }
         | set { bam_ch }
 
     } else {
-
         bam_ch
+        | map { called_bam -> 
+            //as we are not performing any meta additon we just generate a name from the input directory
+            def meta = [:]
+            def input_directory_name = file(params.raw_read_dir).simpleName
+            meta.barcode_kit = "not-reclassified"
+            meta.barcode = "${input_directory_name.contains("barcode") ? input_directory_name.split("barcode")[-1] : input_directory_name }"
+            [meta, called_bam]
+        }
         | set { bam_ch }
     }
     

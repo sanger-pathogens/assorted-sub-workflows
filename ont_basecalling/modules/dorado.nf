@@ -6,7 +6,7 @@ process BASECALL {
 
     tag "${params.barcode_kit_name}"
 
-    container 'quay.io/sangerpathogens/cuda_dorado:0.9.1'
+    container 'quay.io/sangerpathogens/cuda_dorado:1.3.1'
     
     input:
     path(pod5)
@@ -17,16 +17,23 @@ process BASECALL {
     script:
     def min_qscore = "${params.min_qscore == "" ? "" : "--min-qscore ${params.min_qscore}"}"
 
-    def basecallCommand = "dorado basecaller ${params.basecall_model} --trim ${params.trim_adapters} ${min_qscore}"
-
+    def barcodeArgs = ""
     if (params.barcode_arrangement) {
-        basecallCommand += " --kit-name ${params.barcode_kit_name} --barcode-arrangement ${params.barcode_arrangement} --barcode-sequences ${params.barcode_sequences} "
-    } else {
-        basecallCommand += " --kit-name ${params.barcode_kit_name} "
+        barcodeArgs = "--kit-name ${params.barcode_kit_name} " +
+                    "--barcode-arrangement ${params.barcode_arrangement} " +
+                    "--barcode-sequences ${params.barcode_sequences} "
+    } else if (params.barcode_kit_name) {
+        barcodeArgs = "--kit-name ${params.barcode_kit_name} "
     }
 
-    basecallCommand += "${pod5} > calls.bam"
+    if (params.modified_bases_models) {
+        barcodeArgs = "--modified-bases-models  ${params.modified_bases_models} "
+    }
 
+    def basecallCommand =
+        "dorado basecaller ${params.model} --trim ${params.trim_adapters} " +
+        "${min_qscore} ${barcodeArgs} ${pod5} > calls.bam"
+    
     """
     ${basecallCommand}
     """
@@ -39,7 +46,7 @@ process DEMUX {
 
     tag "${params.barcode_kit_name}"
 
-    container 'quay.io/sangerpathogens/cuda_dorado:0.9.1'
+    container 'quay.io/sangerpathogens/cuda_dorado:1.3.1'
 
     input:
     path(called_bam)
@@ -62,7 +69,7 @@ process DORADO_SUMMARY {
 
     publishDir path: "${params.outdir}/sequencing_summary/", mode: 'copy', overwrite: true, pattern: "summary.tsv"
 
-    container 'quay.io/sangerpathogens/cuda_dorado:0.9.1'
+    container 'quay.io/sangerpathogens/cuda_dorado:1.3.1'
     
     input:
     path(called_bam)
