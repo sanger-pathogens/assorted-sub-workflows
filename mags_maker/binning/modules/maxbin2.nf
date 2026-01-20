@@ -44,25 +44,12 @@ process MAXBIN2 {
 	    -out maxbin2/${meta.ID} \\
 	    -abund_list ${depth_dir}/mb2_abund_list.txt
 
-    #move stuff out of the bin that isn't to use
-    #commented line is not added until later version
-
+    #move stuff out of the bin that isn't a fasta file
+    shopt -s extglob
     mkdir maxbin_misc
-
-    expected_files=(
-        "${meta.ID}.marker"
-        "${meta.ID}.noclass"
-        "${meta.ID}.tooshort"
-        "${meta.ID}.log"
-        "${meta.ID}.summary"
-        "${meta.ID}.seed"
-        #"${meta.ID}.marker_of_each_bin.tar.gz"
-    )
-
-    for file in "\${expected_files[@]}"; do
-        if [ -f "maxbin2/\${file}" ]; then
-            mv "maxbin2/\${file}" maxbin_misc
-        fi
-    done
+    unexpected_files=(maxbin2/*.!(fasta))
+    if [ "\${#unexpected_files[@]}" -gt 0 ]; then
+        mv "\${unexpected_files[@]}" maxbin_misc
+    fi
     """
 }
