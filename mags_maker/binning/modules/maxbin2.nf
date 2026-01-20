@@ -41,10 +41,10 @@ process MAXBIN2 {
         -markerset ${params.maxbin_markers} \\
         -thread ${task.cpus} \\
         -min_contig_length ${params.maxbin2_min_contig} \\
-	    -out maxbin2/${meta.ID} \\
-	    -abund_list ${depth_dir}/mb2_abund_list.txt
+        -out maxbin2/${meta.ID} \\
+        -abund_list ${depth_dir}/mb2_abund_list.txt
 
-    #move stuff out of the bin that isn't a fasta file
+    # Move anything that isn't a fasta from maxbin2 into maxbin_misc
     shopt -s extglob
     mkdir maxbin_misc
     unexpected_files=(maxbin2/*.!(fasta))
