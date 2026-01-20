@@ -35,18 +35,18 @@ metaspades.py ${params.fastspades ? "--only-assembler" : ""} \\
         -1 ${first_read} \\
         -2 ${second_read} \\
         \${phred_flag}
+spades_status=\${?}
 
 mv ${scaffolds} ${meta.ID}_scaffolds.fasta
 
 # Remap exit codes
-status=\${?}
 if [ \${status} -eq 12 ] ; then
     # spades sometimes fails with exit code 12 "mimalloc: error: unable to allocate OS memory"
     # fixed when sufficient memory is requested, so exit 130 to enable retry strategy
     grep 'Cannot allocate memory. Error code: 12' spades.log 
     exit 130
 else
-    exit \$status
+    exit \${spades_status}
 fi
 
 """
