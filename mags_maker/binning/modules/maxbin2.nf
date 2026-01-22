@@ -47,7 +47,7 @@ process MAXBIN2 {
     # Move anything that isn't a fasta from maxbin2 into maxbin_misc
     shopt -s extglob
     mkdir maxbin_misc
-    unexpected_files=(maxbin2/*.!(fasta))
+    unexpected_files=(maxbin2/!(*.fasta))
     if [ "\${#unexpected_files[@]}" -gt 0 ]; then
         mv "\${unexpected_files[@]}" maxbin_misc
     fi
