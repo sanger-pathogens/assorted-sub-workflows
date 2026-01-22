@@ -39,17 +39,19 @@ spades_status=\${?}
 
 if [ \${spades_status} -eq 0 ]; then
     mv ${scaffolds} ${meta.ID}_scaffolds.fasta
-fi
-
-# Remap exit codes
-if [ \${spades_status} -eq 12 ] ; then
-    # spades sometimes fails with exit code 12 "mimalloc: error: unable to allocate OS memory"
-    # fixed when sufficient memory is requested, so exit 130 to enable retry strategy
-    grep 'Cannot allocate memory. Error code: 12' spades.log 
-    exit 130
 else
-    exit \${spades_status}
-fi
+    echo "SPAdes failed with exit code \${spades_status}" >&2
+    echo "Checking to see if this is a known issue. Any known errors that are found will appear below..." >&2
 
+    if \$(grep 'mimalloc: error: unable to allocate OS memory' spades.log) ; then
+        # spades sometimes fails with "mimalloc: error: unable to allocate OS memory"
+        # although this appears to be exit code 12 in the logs, spades exits with code 250
+        # fixed when sufficient memory is requested, so exit 130 to enable retry strategy
+        echo "SPAdes failed due to insufficient memory. Process will be retried with more memory." >&2
+        exit 130
+    else
+        exit \${spades_status}
+    fi
+fi
 """
 }
