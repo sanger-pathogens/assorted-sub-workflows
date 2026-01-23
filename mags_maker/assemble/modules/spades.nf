@@ -63,7 +63,7 @@ else
     ## "mimalloc: error: unable to allocate OS memory"
     # appears to be exit code 12 in the logs, but spades exits with code 250
     # fixed when sufficient memory is requested, so exit 130 to enable retry strategy
-    grep 'mimalloc: error: unable to allocate OS memory' ${spades_log} \\
+    grep 'mimalloc: error: unable to allocate OS memory' ${spades_log} >&2 \\
         && echo "SPAdes failed due to insufficient memory. Process will be retried with more memory." >&2 \\
         && exit 130
 
