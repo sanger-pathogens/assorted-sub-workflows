@@ -40,8 +40,8 @@ metaspades.py ${params.fastspades ? "--only-assembler" : ""} \\
 spades_status=\${?}
 
 if [ \${spades_status} -eq 0 ]; then
-    echo "SPAdes completed successfully (exit code \${spades_status}") >&2
-    echo "Try and catch known warnings from spades.log, as there may be issues with the assembly. Known warnings will appear below..." >&2
+    echo "SPAdes completed successfully (exit code \${spades_status})" >&2
+    echo "Catching known warnings from spades.log, as there may be issues with the assembly. Known warnings will appear below..." >&2
 
     ## empty output contigs.fasta file and no scaffold file, often meaning low read input - exit 7
     grep '======= SPAdes pipeline finished WITH WARNINGS!' ${spades_log} 1>&2 \\
@@ -63,7 +63,7 @@ else
     ## "mimalloc: error: unable to allocate OS memory"
     # appears to be exit code 12 in the logs, but spades exits with code 250
     # fixed when sufficient memory is requested, so exit 130 to enable retry strategy
-    grep 'mimalloc: error: unable to allocate OS memory' ${spades_log}) \\
+    grep 'mimalloc: error: unable to allocate OS memory' ${spades_log} \\
         && echo "SPAdes failed due to insufficient memory. Process will be retried with more memory." >&2 \\
         && exit 130
 
