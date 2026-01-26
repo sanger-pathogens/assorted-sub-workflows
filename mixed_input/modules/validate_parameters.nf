@@ -68,6 +68,7 @@ def validate_parameters() {
                           manifest_of_lanes_exists ||
                           manifest_of_reads_exists ||
                           manifest_exists ||
+                          manifest_from_dir_exists ||
                           has_studyid ||
                           has_runid ||
                           has_laneid ||
