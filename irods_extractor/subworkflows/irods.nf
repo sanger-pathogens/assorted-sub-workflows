@@ -48,10 +48,10 @@ workflow IRODS_EXTRACTOR {
 workflow CRAM_EXTRACT {
 
     take:
-    meta_cram_ch //tuple meta
+    meta_cram_ch
 
     main:
-    COLLATE_FASTQ(meta_cram_ch )
+    COLLATE_FASTQ(meta_cram_ch)
     | set { reads_ch }
 
     if (params.cleanup_intermediate_files_irods_extractor) {
