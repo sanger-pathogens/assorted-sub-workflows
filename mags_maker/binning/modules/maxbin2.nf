@@ -41,32 +41,15 @@ process MAXBIN2 {
         -markerset ${params.maxbin_markers} \\
         -thread ${task.cpus} \\
         -min_contig_length ${params.maxbin2_min_contig} \\
-	    -out maxbin2/${meta.ID} \\
-	    -abund_list ${depth_dir}/mb2_abund_list.txt
+        -out maxbin2/${meta.ID} \\
+        -abund_list ${depth_dir}/mb2_abund_list.txt
 
-    #move stuff out of the bin that isn't to use
-    #commented line is not added until later version
-    #touch files first to avoid crash if file not generated
-
+    # Move anything that isn't a fasta from maxbin2 into maxbin_misc
+    shopt -s extglob
     mkdir maxbin_misc
-
-    touch maxbin2/${meta.ID}.marker .
-    mv maxbin2/${meta.ID}.marker maxbin_misc
-
-    touch maxbin2/${meta.ID}.noclass .
-    mv maxbin2/${meta.ID}.noclass maxbin_misc
-
-    touch maxbin2/${meta.ID}.tooshort .
-    mv maxbin2/${meta.ID}.tooshort maxbin_misc
-
-    touch maxbin2/${meta.ID}.log .    
-    mv maxbin2/${meta.ID}.log maxbin_misc   
-
-    #mv maxbin2/${meta.ID}.marker_of_each_bin.tar.gz maxbin_misc
-
-    touch maxbin2/${meta.ID}.summary .
-    mv maxbin2/${meta.ID}.summary maxbin_misc
-
-    #maxbin is already fasta
+    unexpected_files=(maxbin2/!(*.fasta))
+    if [ "\${#unexpected_files[@]}" -gt 0 ]; then
+        mv "\${unexpected_files[@]}" maxbin_misc
+    fi
     """
 }
