@@ -74,7 +74,6 @@ workflow MIXED_INPUT {
     reads_from_irods_ch
     | mix(reads_from_local_ch)
     | mix(reads_from_ena_ch)
-    | mix (reads_from_local_dir_ch)
     | filter { it != "none"}
     | set { all_reads_ready_ch }
 
