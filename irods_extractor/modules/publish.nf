@@ -13,7 +13,6 @@ process PUBLISH_FASTQ {
     tuple val(meta), path(final_name), emit: path_channel
 
     script:
-    //fix for pod5?
     final_name="${meta.ID}.fastq.gz"
     """
     cat ${meta.local_path}/*fastq.gz > ${final_name}
