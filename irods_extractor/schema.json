@@ -36,7 +36,7 @@
             },
             "read_type": {
                 "default": "Illumina",
-                "help_text": "Platform the data you wish to recieve was sequenced on Illumina|ont"
+                "help_text": "Platform the data you wish to receive was sequenced on Illumina|ont"
             },
             "save_metadata": {
                 "default": true,
