@@ -4,11 +4,8 @@ include { METADATA as METADATA_QUERIED  } from '../modules/metadata_save.nf'
 include { PUBLISH_FASTQ                 } from '../modules/publish.nf'
 
 workflow IRODS_QUERY {
-        take:
-        input_irods_ch // map
-
         main:
-        BEEFEATER(input_irods_ch)
+        BEEFEATER()
         | splitJson() //split that sample row into metadata
         | set { meta_file_ch }
 
@@ -31,7 +28,7 @@ workflow IRODS_EXTRACTOR {
 
     main:
     
-    meta_file_ch.branch{ meta_map ->
+    input_irods_ch.branch{ meta_map ->
             illumina_to_unpack: meta_map.method == "ILLUMINA"
 
             ONT: meta_map.method == "ONT"
@@ -54,38 +51,6 @@ workflow CRAM_EXTRACT {
     meta_cram_ch //tuple meta
 
     main:
-
-    /*
-    if ("${params.save_method}" == "nested"){
-        Channel.fromPath("${params.outdir}/*-/${params.preexisting_fastq_tag}/*_1.fastq.gz")
-        .set{ preexisting_fastq_path_ch }
-    }else{
-        Channel.fromPath("${params.outdir}/${params.preexisting_fastq_tag}/*_1.fastq.gz")
-        .set{ preexisting_fastq_path_ch }
-    }
-    preexisting_fastq_path_ch.toList().map{ preexisting_fastq_path_list -> 
-       no_download = preexisting_fastq_path_list.size()
-       log.info "irods_extractor: ${no_download} data items already exist and won't be downloaded."
-    }
-
-    preexisting_fastq_path_ch.map{ preexisting_fastq_path ->
-        preexisting_fastq_path.Name.split("${params.split_sep_for_ID_from_fastq}")[0]
-    }
-    .collect().map{ [it] }
-    .ifEmpty("fresh_run")
-    .set{ existing_id }
-
-    meta_cram_ch.combine( existing_id )
-    .filter { metadata, cram_path, existing -> !(metadata.ID.toString() in existing) }
-    .map { it[0,1] }
-    .set{ do_not_exist }
-
-    do_not_exist.toList().map{ do_not_exist_list -> 
-       new_downloads = do_not_exist_list.size()
-       log.info "irods_extractor: ${new_downloads} data items will be downloaded."
-    }
-    */
-
     COLLATE_FASTQ(meta_cram_ch )
     | set { reads_ch }
 
@@ -95,5 +60,5 @@ workflow CRAM_EXTRACT {
                 .map { it.delete() }
     }
 
-    emit: reads_ch = COLLATE_FASTQ.out.fastq_channel // tuple val(meta), path(forward_fastq), path(reverse_fastq
+    emit: reads_ch // tuple val(meta), path(forward_fastq), path(reverse_fastq
 }

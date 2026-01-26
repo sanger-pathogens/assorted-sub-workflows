@@ -36,15 +36,7 @@
             },
             "read_type": {
                 "default": "Illumina",
-                "help_text": "Platform the data you wish to receive was sequenced on Illumina|ont"
-            },
-            "save_metadata": {
-                "default": true,
-                "help_text": "If true, save all lane/sample metadata into a CSV file named 'metadata_irods_queried_<datetime>.csv'. If `combine_same_id_crams` is also true, an additional CSV file named 'metadata_combined_readsets_<datetime>.csv' will be created. This does not change how FASTQ files are created."
-            },
-            "short_metacsv_name": {
-                "default": false,
-                "help_text": "Use a short date instead of a full timestamp in metadata filenames."
+                "help_text": "Platform the data you wish to recieve was sequenced on Illumina|ont"
             }
         }
     }

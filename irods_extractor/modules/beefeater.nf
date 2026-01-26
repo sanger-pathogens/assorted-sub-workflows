@@ -18,16 +18,18 @@ def translateKey(in_key) {
     }
 }
 
-def query(meta_query) {
-    query_list = []
-    meta_query.each { key, value ->
-        if (value.class.simpleName == 'String' || value >= 0){
+def generate_query(params) {
+
+    def keys = ['studyid', 'runid', 'laneid', 'plexid']
+
+    def query_list = keys
+        .findAll { params[it] != null }
+        .collect { key ->
             def irods_key = translateKey(key)
-            def query_part = "-q ${irods_key}=${value}"
-            query_list.add(query_part)
-         }
-    }
-    return query_list.join(' ') 
+            "-q ${irods_key}=${params[key]} "
+        }
+
+    return query_list.join('')
 }
 
 
@@ -36,18 +38,20 @@ process BEEFEATER {
     label 'mem_10'
     label 'time_30m'
 
-    container 'quay.io/sangerpathogens/beefeater:v0.0.1-f50111b3'
-
-    input:
-    val(meta)
+    container 'quay.io/sangerpathogens/beefeater:v1.0.1-6b5c227e'
 
     output:
-    path("*output.json"), emit: csv_ch
+    path("*output.csv"), emit: csv_ch //this is a json but the output file name is messed up to fix
 
     script:
-    def search_option = params.search ? "${params.search}" : "--get"
-
+    def query    = generate_query(params)
+    def manifest = params.manifest_of_lanes ? "--manifest ${params.manifest_of_lanes}" : ""
+    def search   = params.search ? "" : "--get"
     """
-    beefeater search ${query(meta)} ${search_option} --format json
+    beefeater search \\
+        ${query} \\
+        ${manifest} \\
+        ${search} \\
+        --file_format json
     """
 }
