@@ -2,6 +2,7 @@ include { IRODS_MANIFEST_PARSE     } from './subworkflows/irods_manifest_parse.n
 include { INPUT_CHECK              } from './subworkflows/input_check.nf'
 include { ENA_DOWNLOAD             } from './subworkflows/ena_input.nf'
 include { IRODS_EXTRACTOR          } from '../irods_extractor/subworkflows/irods.nf'
+include { MANIFEST_GENERATOR       } from './modules/manifest_generator.nf'
 
 include { validate_parameters      } from './modules/validate_parameters'
 
@@ -49,9 +50,29 @@ workflow MIXED_INPUT {
         | set { reads_from_local_ch }
     }
 
+    if ('MANIFEST_FROM_DIR' in active_workflows) {
+        Channel.of(params.manifest_from_dir)
+        | MANIFEST_GENERATOR
+
+        ch_manifest = MANIFEST_GENERATOR.out.ch_manifest_from_dir
+
+        ch_reads = ch_manifest.splitCsv(header: true)
+            .map { row -> tuple(
+                    [ ID : row.ID ],
+                    file(row.R1),
+                    file(row.R2)
+                )
+            } 
+        | set { reads_from_local_dir_ch }
+    } else {
+        Channel.of("none")
+        | set { reads_from_local_dir_ch }
+    }
+
     reads_from_irods_ch
     | mix(reads_from_local_ch)
     | mix(reads_from_ena_ch)
+    | mix (reads_from_local_dir_ch)
     | filter { it != "none"}
     | set { all_reads_ready_ch }
 
