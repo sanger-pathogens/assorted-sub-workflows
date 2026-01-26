@@ -29,9 +29,9 @@ workflow IRODS_EXTRACTOR {
     main:
     
     input_irods_ch.branch{ meta_map ->
-            illumina_to_unpack: meta_map.method == "ILLUMINA"
+            illumina_to_unpack: meta_map.Platform == "ILLUMINA"
 
-            ONT: meta_map.method == "ONT"
+            ONT: meta_map.Platform == "ONT"
 
             other: true
         }
