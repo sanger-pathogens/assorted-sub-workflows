@@ -31,7 +31,6 @@ process SPADES_REASSEMBLE {
             --tmp-dir tmp \\
             -t ${task.cpus} \\
             -m ${task.memory.toGiga()} \\
-            --careful \\
             --untrusted-contigs ${bin} \\
             -o reassembled \\
             -1 ${first_read} \\
@@ -40,14 +39,41 @@ process SPADES_REASSEMBLE {
 
     mv ${scaffolds} ${final_name}
 
-    status=\${?}
-    if [ \${status} -gt 0 ] ; then
-        # remap exit 12 memory error to 130 to enable retry strategy
-        grep 'Cannot allocate memory. Error code: 12' spades.log 
-        exit 130
+    if [ \${spades_status} -eq 0 ]; then
+        echo "SPAdes completed successfully (exit code \${spades_status})" >&2
+        echo "Catching known warnings from spades.log, as there may be issues with the assembly. Known warnings will appear below..." >&2
+
+        ## empty output contigs.fasta file and no scaffold file, often meaning low read input - exit 7
+        grep '======= SPAdes pipeline finished WITH WARNINGS!' ${spades_log} 1>&2 \\
+            && grep ' * Assembled contigs are in .\\+contigs.fasta' ${spades_log} 1>&2 \\
+            && [ ! -s contigs.fasta ] \\
+            && exit 7
+
+        # NB: in case scaffolds.fasta file is missing not due to the above, nextflow will error out as expecting it as output file
+        mv ${scaffolds} ${meta.ID}_scaffolds.fasta
+
     else
-        exit \$status
+        echo "SPAdes failed with exit code \${spades_status}" >&2
+        echo "Checking to see if this is a known issue. Any known errors that are found will appear below..." >&2
+
+        ## empty input read file - exit 7
+        grep '== Error ==  file is empty' ${spades_log} \\
+            && exit 7
+
+        ## "mimalloc: error: unable to allocate OS memory"
+        # appears to be exit code 12 in the logs, but spades exits with code 250
+        # fixed when sufficient memory is requested, so exit 130 to enable retry strategy
+        grep 'mimalloc: error: unable to allocate OS memory' ${spades_log} >&2 \\
+            && echo "SPAdes failed due to insufficient memory. Process will be retried with more memory." >&2 \\
+            && exit 130
+
+        ## segmentation fault, possibly due to farm environment and spades not being compiled against the machine/in the singularity container - exit 3
+        # This error may not be informative
+        grep '== Error ==  system call for:.\\+/usr/local/bin/spades-hammer.\\+finished abnormally' ${spades_log} 1>&2 \\
+            && exit 3
     fi
 
+    # if not caught known exception, process should not have exited yet - do it now with stored metaspades exit status
+    exit \${spades_status}
     """
 }
