@@ -8,6 +8,8 @@ process KRAKEN2 {
 
     container 'quay.io/biocontainers/kraken2:2.1.3--pl5321hdcf5f25_0'
 
+    scratch (params.memory_mapping == true ? true : false)
+
     input:
     tuple val(meta), path(read_1), path(read_2), path(kraken2_db)
 
@@ -41,6 +43,8 @@ process KRAKEN2_GET_CLASSIFIED {
     publishDir "${params.outdir}/${meta.ID}/kraken2", mode: 'copy', overwrite: true, pattern: "classified.fastq"
 
     container 'quay.io/biocontainers/kraken2:2.1.3--pl5321hdcf5f25_0'
+
+    scratch (params.memory_mapping == true ? true : false)
 
     input:
     tuple val(meta), path(read_1), path(read_2), path(kraken2_db)
