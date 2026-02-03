@@ -7,11 +7,11 @@ include { CONTIG_DEPTHS;
           CONTIG_DEPTHS_NO_INTRA  } from './modules/metabat2.nf'
 include { SPLIT_DEPTHS; 
           MAXBIN2                 } from './modules/maxbin2.nf'
-include {CUT_UP_FASTA ;
-         ESTIMATE_ABUNDANCE;
-         CONCOCT;
-         CUTUP_CLUSTERING;
-         SPLIT_BINS               } from './modules/concoct.nf'
+include { CUT_UP_FASTA;
+          ESTIMATE_ABUNDANCE;
+          CONCOCT;
+          CUTUP_CLUSTERING;
+          SPLIT_BINS               } from './modules/concoct.nf'
 
 /*
 ##############################################################################################################################################################
