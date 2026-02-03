@@ -1,7 +1,6 @@
 include { BWA_INDEX;
           BWA                     } from '../assemble/modules/bwa.nf'
-include { SORT_BAM; 
-          INDEX                   } from './modules/samtools.nf'
+include { INDEX                   } from './modules/samtools.nf'
 include { CONTIG_DEPTHS;
           METABAT1; 
           METABAT2;
@@ -70,7 +69,6 @@ workflow METAWRAP_BINNING {
 
     reads.join(indexed_contigs)
     | BWA
-    | SORT_BAM
     | set { bam } 
     
     METABAT_WF(bam, contigs)
