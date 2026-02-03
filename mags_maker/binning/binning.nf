@@ -77,13 +77,13 @@ workflow METAWRAP_BINNING {
     | set { metabat_bins }
 
     MAXBIN_WF(bam, contigs)
-    | set { maxbins_bins }
+    | set { maxbin_bins }
 
     CONCOCT_WF(bam, contigs)
     | set { concoct_bins }
 
     metabat_bins
-    | join(maxbins_bins)
+    | join(maxbin_bins)
     | join(concoct_bins)
     | set { final_bins }
 
