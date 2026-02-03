@@ -1,5 +1,5 @@
 include { COMBINE_BINS; SPLIT_READS } from "./modules/helper_scripts.nf"
-include { BWA_INDEX; BWA            } from './modules/bwa.nf'
+include { BWA_INDEX; BWA            } from '../assemble/modules/bwa.nf'
 include { SPADES_REASSEMBLE         } from './modules/spades.nf'
 include { REMOVE_SMALL_CONTIGS; 
 		  COLLECT_BINS;
