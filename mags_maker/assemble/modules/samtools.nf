@@ -1,4 +1,4 @@
-process SAM_TO_FASTQ {
+process MAPPED_READS_TO_FASTQ {
     tag "${meta.ID}"
     label 'cpu_2'
     label 'mem_100M'
