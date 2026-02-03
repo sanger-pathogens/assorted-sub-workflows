@@ -67,6 +67,11 @@ else
         && echo "SPAdes failed due to insufficient memory. Process will be retried with more memory." >&2 \\
         && exit 130
 
+    # sometimes spades catches a memory issues (or at least does not throw the mimalloc error above)
+    grep 'mmap(2) failed. Reason: Cannot allocate memory' ${spades_log} >&2 \\
+        && echo "SPAdes failed due to insufficient memory. Process will be retried with more memory." >&2 \\
+        && exit 130
+
     ## segmentation fault, possibly due to farm environment and spades not being compiled against the machine/in the singularity container - exit 3
     # This error may not be informative
     grep '== Error ==  system call for:.\\+/usr/local/bin/spades-hammer.\\+finished abnormally' ${spades_log} 1>&2 \\
