@@ -25,10 +25,10 @@ process SPLIT_READS {
     label 'mem_1'
     label 'time_12'
 
-    container 'quay.io/sangerpathogens/python-curl:3.11'
+    container 'quay.io/biocontainers/pysam:0.23.3--py39hdd5828d_1'
 
     input:
-    tuple val(meta), path(untrusted_contigs), path(sam)
+    tuple val(meta), path(untrusted_contigs), path(mapped_reads)
 
     output:
     tuple val(meta), path("bin.*.{permissive,strict}_{1,2}.fastq.gz"),  emit: split_reads
@@ -36,7 +36,7 @@ process SPLIT_READS {
     script:
     command = "${projectDir}/assorted-sub-workflows/mags_maker/reassemble/modules/bin/filter_reads_for_bin_reassembly.py"
     """
-    ${command} ${untrusted_contigs} . ${params.strict_max} ${params.permissive_max} --sam ${sam}
+    ${command} ${untrusted_contigs} . ${params.strict_max} ${params.permissive_max} --mapped_reads ${mapped_reads}
     """
 }
 
