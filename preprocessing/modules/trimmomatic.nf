@@ -34,10 +34,17 @@ process TRIMMOMATIC {
     ${params.trimmomatic_options} \
     -summary ${summary_file}
 
-    gzip -c ${output_1} > ${output_1}.tmp.gz
-    gzip -c ${output_2} > ${output_2}.tmp.gz
-    mv ${output_1}.tmp.gz ${output_1_gz}
-    mv ${output_2}.tmp.gz ${output_2_gz}
+    
+
+    if [ ${params.publish_trimmomatic_reads} == true ]; then
+        gzip -c ${output_1} > ${output_1}.tmp.gz
+        gzip -c ${output_2} > ${output_2}.tmp.gz
+        mv ${output_1}.tmp.gz ${output_1_gz}
+        mv ${output_2}.tmp.gz ${output_2_gz}
+    else
+        touch ${output_1_gz}
+        touch ${output_2_gz}
+    fi
 
     """
 }
