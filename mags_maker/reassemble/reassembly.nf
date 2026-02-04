@@ -44,10 +44,10 @@ workflow METAWRAP_REASSEMBLY {
     reads_ch
     | join(index)
     | BWA
-    | set { sam }
+    | set { mapped_reads }
 
     to_reassemble_bins
-    | join(sam)
+    | join(mapped_reads)
     | SPLIT_READS
 	| transpose
 	| map { meta, path -> 
