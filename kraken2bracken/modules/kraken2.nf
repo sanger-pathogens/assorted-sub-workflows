@@ -8,7 +8,7 @@ process KRAKEN2 {
 
     container 'quay.io/biocontainers/kraken2:2.1.3--pl5321hdcf5f25_0'
 
-    scratch (params.memory_mapping == true ? true : false)
+    scratch (params.memory_mapping ? true : false)
 
     input:
     tuple val(meta), path(read_1), path(read_2), path(kraken2_db)
@@ -19,7 +19,7 @@ process KRAKEN2 {
 
     script:
     kraken2_id = "${meta.ID}".replaceAll('#','_')
-    memory_mapping = (params.memory_mapping == true ? "--memory-mapping" : "")
+    memory_mapping = (params.memory_mapping ? "--memory-mapping" : "")
     """
     kraken2 --db "${kraken2_db}" \
             --threads ${task.cpus} \
@@ -44,7 +44,7 @@ process KRAKEN2_GET_CLASSIFIED {
 
     container 'quay.io/biocontainers/kraken2:2.1.3--pl5321hdcf5f25_0'
 
-    scratch (params.memory_mapping == true ? true : false)
+    scratch (params.memory_mapping ? true : false)
 
     input:
     tuple val(meta), path(read_1), path(read_2), path(kraken2_db)
@@ -57,7 +57,7 @@ process KRAKEN2_GET_CLASSIFIED {
 
     script:
     kraken2_id = "${meta.ID}".replaceAll('#','_')
-    memory_mapping = (params.memory_mapping == true ? "--memory-mapping" : "")
+    memory_mapping = (params.memory_mapping ? "--memory-mapping" : "")
     """
     kraken2 --db "${kraken2_db}" \
             --threads ${task.cpus} \
