@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 
-import sys
 import os
 import argparse
 import gzip
+
+from pysam import AlignmentFile
 
 complement = {
     'A': 'T', 'C': 'G', 'G': 'C', 'T': 'A',
@@ -19,15 +20,15 @@ def rev_comp(seq):
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Filter SAM reads for bin reassembly based on mismatch thresholds."
+        description="Filter mapped reads for bin reassembly based on mismatch thresholds."
     )
     parser.add_argument("original_bin_folder", help="Folder containing original bin fasta files")
     parser.add_argument("output_dir", help="Directory to store output FASTQ files")
     parser.add_argument("strict_snp_cutoff", type=int, help="Strict mismatch threshold")
     parser.add_argument("permissive_snp_cutoff", type=int, help="Permissive mismatch threshold")
     parser.add_argument(
-        "--sam", type=str, default=None,
-        help="SAM file input instead of stdin. If omitted, reads are expected from stdin."
+        "--mapped_reads", type=str, default=None,
+        help="Mapped reads (sam/bam) input instead of stdin. If omitted, reads are expected from stdin."
     )
     args = parser.parse_args()
 
@@ -51,11 +52,19 @@ def main():
     files = {}
     opened_bins = {}
 
-    input_stream = open(args.sam, 'r') if args.sam else sys.stdin
+    if args.mapped_reads.endswith(".bam"):
+        input_stream = AlignmentFile(args.mapped_reads, "rb")
+    elif args.mapped_reads.endswith(".sam"):
+        input_stream = AlignmentFile(args.mapped_reads, "r")
+    else:
+        input_stream = AlignmentFile("-", "r")
+    
+    # Includes unmapped reads (probably don't want this)
+    # 
+    sam_iter = input_stream.fetch(until_eof=True)
 
-    for line in input_stream:
-        if line[0] == "@":
-            continue
+    for read in sam_iter:
+        line = read.to_string()
         cut = line.strip().split("\t")
         binary_flag = bin(int(cut[1]))
 
