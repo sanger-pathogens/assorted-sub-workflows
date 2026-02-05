@@ -5,7 +5,7 @@ process BWA {
     label 'time_12'
     label 'avx512'
 
-    container 'quay.io/sangerpathogens/bwa-mem2:2.2.1'
+    container 'quay.io/sangerpathogens/bwa:0.7.19'
 
     input:
     tuple val(meta), path(reads_1), path(reads_2), path(reference), path(bwa_index_files)
@@ -17,7 +17,7 @@ process BWA {
     mapped_reads = "${meta.ID}_mapped.bam"
     // -v 1 for only errors, -M for picard compatibility
     """
-    bwa-mem2 mem -v 1 -M -t ${task.cpus} ${reference} ${reads_1} ${reads_2} \
+    bwa mem -t ${task.cpus} ${reference} ${reads_1} ${reads_2} \
       | samtools view -@ ${task.cpus} -b - \
       | samtools sort -@ ${task.cpus} -o "${mapped_reads}"
     """
@@ -31,7 +31,7 @@ process BWA_INDEX {
     label 'time_30m'
     label 'avx512'
 
-    container 'quay.io/sangerpathogens/bwa-mem2:2.2.1'
+    container 'quay.io/sangerpathogens/bwa:0.7.19'
 
     input:
     tuple val(meta), path(reference)
@@ -41,6 +41,6 @@ process BWA_INDEX {
 
     script:
     """
-    bwa-mem2 index ${reference}
+    bwa index ${reference}
     """
 }
