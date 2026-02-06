@@ -5,7 +5,7 @@
                 "default": "1234",
                 "help_text": "Set a fixed seed for metaBAT1/2 and CONCOCT."
             },
-            "concot_min_contig": {
+            "concoct_min_contig": {
                 "default": "1000",
                 "help_text": "Minimum threshold for contig size (bp). The lowest accepted value is 500."
             },
