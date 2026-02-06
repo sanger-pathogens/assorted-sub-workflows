@@ -55,6 +55,9 @@ process KRAKEN2_GET_CLASSIFIED {
     kraken2_id = "${meta.ID}".replaceAll('#','_')
     memory_mapping = (params.memory_mapping ? "--memory-mapping" : "")
     """
+    if [ "${params.memory_mapping}" = true ]; then
+        echo "du -sh \$PWD"
+    fi
     kraken2 --db "${kraken2_db}" \
             --threads ${task.cpus} \
             --classified-out "${kraken2_id}#_classified.fastq" --unclassified-out "${kraken2_id}#_unclassified.fastq" \
@@ -64,7 +67,10 @@ process KRAKEN2_GET_CLASSIFIED {
             --report-zero-counts \
             --report-minimizer-data \
             --paired "${read_1}" "${read_2}" \
-            ${memory_mapping}            
+            ${memory_mapping}        
+    if [ "${params.memory_mapping}" = true ]; then
+        echo "du -sh \$PWD"
+    fi    
     """
 }
 
