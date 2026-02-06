@@ -22,7 +22,7 @@
                 "help_text": "Marker set to choose from 107 marker genes present in >95% of bacteria, or 40 marker gene sets that are universal among bacteria and archaea."
             },
             "metabat1":{
-                "default": "null",
+                "default": "false",
                 "help_text": "Run metaBAT1 binning instead of default metaBAT2."
             },
             "keep_unbinned":{
