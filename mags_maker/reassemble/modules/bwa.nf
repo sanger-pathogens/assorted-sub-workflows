@@ -17,7 +17,7 @@ process BWA {
     // -v 1 for only errors, -M for picard compatibility
     """
     bwa mem -t ${task.cpus} ${reference} ${reads_1} ${reads_2} \
-      | samtools view -@ ${task.cpus} -b -
+      | samtools view -@ ${task.cpus} -b -o "${mapped_reads}"
     """
 }
 
