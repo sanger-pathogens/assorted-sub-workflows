@@ -10,12 +10,14 @@ process METASPADES {
     tuple val(meta), path(first_read), path(second_read)
 
     output:
-    tuple val(meta), path("${meta.ID}_scaffolds.fasta"), emit: scaffolds
+    tuple val(meta), path(assembly), emit: scaffolds
 
     script:
     output_folder = "metaspades"
     spades_log="${output_folder}/spades.log"
     scaffolds = "${output_folder}/scaffolds.fasta"
+    contigs = "${output_folder}/contigs.fasta"
+    assembly = "${meta.ID}_scaffolds.fasta"
     """
     # This is done because if the sra-lite format there is no quality information so --phred-offset needs to be set
     # Determine phred flag
@@ -42,14 +44,14 @@ process METASPADES {
         echo "SPAdes completed successfully (exit code \${spades_status})" >&2
         echo "Catching known warnings from spades.log, as there may be issues with the assembly. Known warnings will appear below..." >&2
 
-        ## empty output contigs.fasta file and no scaffold file, often meaning low read input - exit 7
+        ## empty output contigs.fasta file, often meaning low read input - exit 7
         grep '======= SPAdes pipeline finished WITH WARNINGS!' ${spades_log} 1>&2 \\
             && grep ' * Assembled contigs are in .\\+contigs.fasta' ${spades_log} 1>&2 \\
-            && [ ! -s contigs.fasta ] \\
+            && [ ! -s "${contigs}" ] \\
             && exit 7
-
-        # NB: in case scaffolds.fasta file is missing not due to the above, nextflow will error out as expecting it as output file
-        mv ${scaffolds} ${meta.ID}_scaffolds.fasta
+        
+        # Move scaffolds to output assembly location - if scaffolds.fasta is missing, nextflow will error out as expecting it as output file
+        mv ${scaffolds} ${assembly}
 
     else
         echo "SPAdes failed with exit code \${spades_status}" >&2
