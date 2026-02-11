@@ -19,8 +19,6 @@ process KRAKEN2 {
     kraken2_id = "${meta.ID}".replaceAll('#','_')
     memory_mapping = (params.memory_mapping ? "--memory-mapping" : "")
     """
-    echo "du -sh \$PWD"
-    du -sh \$PWD
     kraken2 --db "${kraken2_db}" \
             --threads ${task.cpus} \
             --output "${meta.ID}_kraken_report.tsv" \
@@ -30,8 +28,6 @@ process KRAKEN2 {
             --report-minimizer-data \
             --paired "${read_1}" "${read_2}" \
             ${memory_mapping}
-    echo "du -sh \$PWD"
-    du -sh \$PWD
     """
 }
 
