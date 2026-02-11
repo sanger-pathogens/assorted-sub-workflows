@@ -14,7 +14,7 @@ process CHECKM2 {
     tuple val(meta), path(fastas), path(report_txt), emit: results_with_bin
 
     script:
-    report_txt = "${meta.ID}_${bin_name}_checkm2_report.tsv"
+    report_txt = "${meta.ID}_checkm2_report.tsv"
     """
     checkm2 predict -x .fasta --threads ${task.cpus} --input ${fastas} --output-directory checkm2 --database_path ${params.checkm2_db}
 
