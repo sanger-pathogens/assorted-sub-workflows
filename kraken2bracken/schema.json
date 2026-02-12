@@ -41,6 +41,10 @@
             "enable_building": {
                 "default": false,
                 "help_text": "Include this flag to enable automatic building of kraken2 db if not found on disc"
+            },
+            "publish_full_kraken_report": {
+                "default": false, 
+                "help_text": "publish the full Kraken2 report including the taxa with zero reads assigned (tsv.gz) in addition to the sample report with present taxa only (tsv)"
             }
         }
     }
