@@ -116,7 +116,12 @@ workflow METAWRAP_REASSEMBLY {
         | SUMMARISE_CHECKM
         | set { checkm }
     } else {
-        CHECKM2(reassembled_bins)
+		channel.fromPath(params.checkm2_db, checkIfExists: true)
+		| set { checkm2_db }
+
+        CHECKM2(
+			reassembled_bins.combine(checkm2_db)
+		)
 
 		CHECKM2.out.results_with_bin
         | set { checkm }
