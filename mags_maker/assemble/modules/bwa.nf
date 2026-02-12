@@ -3,7 +3,6 @@ process BWA {
     label 'cpu_1'
     label 'mem_1'
     label 'time_12'
-    label 'avx512'
 
     container 'quay.io/sangerpathogens/bwa:0.7.19'
 
@@ -29,7 +28,6 @@ process BWA_INDEX {
     label 'cpu_1'
     label 'mem_250M'
     label 'time_30m'
-    label 'avx512'
 
     container 'quay.io/sangerpathogens/bwa:0.7.19'
 
