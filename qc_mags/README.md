@@ -55,21 +55,21 @@ A configuration file can be supplied to the `--report_config` option to customis
 
 Please refer to the default [`report_config.json`](./assets/report_config.json) for expected JSON structure.
 
-NOTE: In addition to columns derived from the tool reports, the script includes 4 columns `preqc_genome_name`, `postqc_genome_name`, `sample_or_strain_name` and `genome_status`. These are currently all derived from filenames (at some point).
+NOTE: In addition to columns derived from the tool reports, the script includes 4 columns `preqc_genome_name`, `postqc_genome_name`, `sample_or_strain_name` and `name_inferred_genome_type`. These are currently all derived from filenames (at some point).
 
-| column                | description                                                                              |
-| --------------------- | ---------------------------------------------------------------------------------------- |
-| preqc_genome_name     | Name of the input fasta file minus extension                                             |
-| postqc_genome_name    | Name of the fasta file output after processing with `seqkit` minus extension             |
-| sample_or_strain_name | Name of the fasta file up to the last `_` character                                      |
-| genome_status         | `mag` if the fasta file contains the string `mag` (lower/uppercase), `isolate` otherwise |
+| column                            | description                                                                              |
+| --------------------------------- | ---------------------------------------------------------------------------------------- |
+| preqc_genome_name                 | Name of the input fasta file minus extension                                             |
+| postqc_genome_name                | Name of the fasta file output after processing with `seqkit` minus extension             |
+| sample_or_strain_name             | Name of the fasta file up to the last `_` character                                      |
+| name_inferred_genome_type         | `mag` if the fasta file contains the string `mag` or `bin` (lower/uppercase), `isolate` otherwise |
 
 The default columns included in the final report are as follows:
 _General_
 - preqc_genome_name
 - postqc_genome_name
 - sample_or_strain_name
-- genome_status
+- name_inferred_genome_type
 
 _CheckM2_
 - checkm2_postqc_Completeness
