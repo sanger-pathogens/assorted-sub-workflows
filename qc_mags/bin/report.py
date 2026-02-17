@@ -106,8 +106,11 @@ def enrich_fields(df: pd.DataFrame) -> pd.DataFrame:
     df["sample_or_strain_name"] = (
         df[JOIN_COLUMN].str.rsplit("_", expand=True, n=1).loc[:, 0]
     )
-    df["genome_status"] = df[JOIN_COLUMN].apply(
-        lambda x: "mag" if "MAG" in x.upper() else "isolate"
+
+    mask = df[JOIN_COLUMN].str.upper().str.contains("MAG|BIN", regex=True)
+
+    df["name_inferred_genome_type"] = mask.map(
+        {True: "mag", False: "isolate"}
     )
     return df
 
@@ -129,7 +132,7 @@ def reorder_columns(df: pd.DataFrame) -> pd.DataFrame:
         JOIN_COLUMN,
         f"postqc_{JOIN_COLUMN_STEM}",
         "sample_or_strain_name",
-        "genome_status",
+        "name_inferred_genome_type",
     ]
     other_cols = sorted([col for col in df.columns if col not in priority_cols])
     new_order = priority_cols + other_cols
