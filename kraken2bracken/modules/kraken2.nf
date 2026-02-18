@@ -5,6 +5,9 @@ process KRAKEN2 {
     label 'time_12'
 
     publishDir "${params.outdir}/${meta.ID}/kraken2", mode: 'copy', overwrite: true, pattern: "*.tsv"
+    publishDir "${params.outdir}/${meta.ID}/kraken2", mode: 'copy', overwrite: true, pattern: "*.tsv.gz", enabled: params.publish_full_kraken_report
+
+    scratch (params.memory_mapping ? true : false)
 
     container 'quay.io/biocontainers/kraken2:2.1.3--pl5321hdcf5f25_0'
 
@@ -12,12 +15,12 @@ process KRAKEN2 {
     tuple val(meta), path(read_1), path(read_2), path(kraken2_db)
 
     output:
-    tuple val(meta), path("*kraken_report.tsv"),  emit: kraken2_report
+    tuple val(meta), path("*kraken_report.tsv.gz"),  emit: kraken2_report
     tuple val(meta), path("*kraken_sample_report.tsv"),  emit: kraken2_sample_report
 
     script:
     kraken2_id = "${meta.ID}".replaceAll('#','_')
-    memory_mapping = (params.memory_mapping == true ? "--memory-mapping" : "")
+    memory_mapping = (params.memory_mapping ? "--memory-mapping" : "")
     """
     kraken2 --db "${kraken2_db}" \
             --threads ${task.cpus} \
@@ -28,6 +31,8 @@ process KRAKEN2 {
             --report-minimizer-data \
             --paired "${read_1}" "${read_2}" \
             ${memory_mapping}
+    
+    gzip ${meta.ID}_kraken_report.tsv
     """
 }
 
@@ -38,7 +43,10 @@ process KRAKEN2_GET_CLASSIFIED {
     label 'time_12'
 
     publishDir "${params.outdir}/${meta.ID}/kraken2", mode: 'copy', overwrite: true, pattern: "*.tsv"
+    publishDir "${params.outdir}/${meta.ID}/kraken2", mode: 'copy', overwrite: true, pattern: "*.tsv.gz", enabled: params.publish_full_kraken_report
     publishDir "${params.outdir}/${meta.ID}/kraken2", mode: 'copy', overwrite: true, pattern: "classified.fastq"
+
+    scratch (params.memory_mapping ? true : false)
 
     container 'quay.io/biocontainers/kraken2:2.1.3--pl5321hdcf5f25_0'
 
@@ -46,14 +54,14 @@ process KRAKEN2_GET_CLASSIFIED {
     tuple val(meta), path(read_1), path(read_2), path(kraken2_db)
 
     output:
-    tuple val(meta), path("*kraken_report.tsv"),  emit: kraken2_report
+    tuple val(meta), path("*kraken_report.tsv.gz"),  emit: kraken2_report
     tuple val(meta), path("*kraken_sample_report.tsv"),  emit: kraken2_sample_report
     tuple val(meta), path("*_classified.fastq"),  emit: classified_reads
     tuple val(meta), path("*_unclassified.fastq"),  emit: unclassified_reads
 
     script:
     kraken2_id = "${meta.ID}".replaceAll('#','_')
-    memory_mapping = (params.memory_mapping == true ? "--memory-mapping" : "")
+    memory_mapping = (params.memory_mapping ? "--memory-mapping" : "")
     """
     kraken2 --db "${kraken2_db}" \
             --threads ${task.cpus} \
@@ -64,7 +72,9 @@ process KRAKEN2_GET_CLASSIFIED {
             --report-zero-counts \
             --report-minimizer-data \
             --paired "${read_1}" "${read_2}" \
-            ${memory_mapping}            
+            ${memory_mapping}
+    
+    gzip ${meta.ID}_kraken_report.tsv
     """
 }
 
