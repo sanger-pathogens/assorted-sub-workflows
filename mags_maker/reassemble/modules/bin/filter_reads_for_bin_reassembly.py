@@ -68,10 +68,10 @@ def main():
     read_cache = {}
 
     for read in sam_iter:
-        # Ignore unpaired, secondary, and supplementary alignments
+        # Ignore unpaired or secondary
         if not read.is_paired:
             continue
-        if read.is_secondary or read.is_supplementary:
+        if read.is_secondary:
             continue
 
         qname = read.query_name
