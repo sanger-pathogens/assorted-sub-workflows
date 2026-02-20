@@ -64,7 +64,7 @@ def main():
     sam_iter = input_stream.fetch(until_eof=True)
 
     # Cache to hold reads until their mates are found (allows processing mapped reads in one pass
-    # - memory efficient way to process mapped reads in any arbitary order)
+    # - memory efficient way to process mapped reads in any arbitrary order)
     read_cache = {}
 
     for read in sam_iter:
@@ -94,7 +94,7 @@ def main():
             continue
 
         if F_cut[2] != R_cut[2]:
-            # If each segment in read pair mapped to different contigs and either contig isn't included in bins, the skip.
+            # If each segment in read pair mapped to different contigs and either contig isn't included in bins, then skip.
             if F_cut[2] not in contig_bins or R_cut[2] not in contig_bins:
                 continue
             bin1 = contig_bins[F_cut[2]]
