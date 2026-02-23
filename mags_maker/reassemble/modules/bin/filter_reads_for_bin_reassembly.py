@@ -66,33 +66,20 @@ def main():
         input_stream = AlignmentFile("-", "r")
     
     # Includes unmapped reads (probably don't want this, but also preserves read order)
+    # In this case, order is very important, as read pairs are processed with the assumption that the first read is
+    # followed by the second read in the alignment file.
     sam_iter = input_stream.fetch(until_eof=True)
 
-    # Cache to hold reads until their mates are found (allows processing mapped reads in one pass
-    # - memory efficient way to process mapped reads in any arbitrary order)
-    read_cache = {}
-
     for read in sam_iter:
-        # Ignore unpaired, secondary, and supplementary alignments
-        if not read.is_paired:
+        line = read.to_string()
+        cut = line.strip().split("\t")
+        binary_flag = bin(int(cut[1]))
+
+        if binary_flag[-7] == "1":
+            F_line = line
             continue
-        if read.is_secondary or read.is_supplementary:
-            continue
-
-        qname = read.query_name
-
-        if qname in read_cache:
-            mate = read_cache.pop(qname)
-
-            F_line = read.to_string() if read.is_read1 else mate.to_string()
-            R_line = read.to_string() if read.is_read2 else mate.to_string()
-        else:
-            read_cache[qname] = read
-            continue
-
-        with open(os.path.join(debug_filepath), "a") as debug_file:
-            debug_file.write(f"{F_line}\n")
-            debug_file.write(f"{R_line}\n")
+        elif binary_flag[-8] == "1":
+            R_line = line
 
         # Start processing read pair
         F_cut = F_line.strip().split("\t")
