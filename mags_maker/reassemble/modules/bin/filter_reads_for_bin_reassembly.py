@@ -34,6 +34,11 @@ def main():
 
     os.makedirs(args.output_dir, exist_ok=True)
 
+    # Delete debug file
+    debug_filepath = os.path.join(args.output_dir, "debug_read_pairs.txt")
+    if os.path.exists(debug_filepath):
+        os.remove(debug_filepath)
+
     strict_snp_cutoff = args.strict_snp_cutoff
     permissive_snp_cutoff = args.permissive_snp_cutoff
 
@@ -84,6 +89,10 @@ def main():
         else:
             read_cache[qname] = read
             continue
+
+        with open(os.path.join(debug_filepath), "a") as debug_file:
+            debug_file.write(f"{F_line}\n")
+            debug_file.write(f"{R_line}\n")
 
         # Start processing read pair
         F_cut = F_line.strip().split("\t")
