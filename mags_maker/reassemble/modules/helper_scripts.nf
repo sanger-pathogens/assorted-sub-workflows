@@ -122,9 +122,10 @@ process CHOOSE_BEST_BIN {
 
     script:
     command = "${projectDir}/assorted-sub-workflows/mags_maker/reassemble/modules/bin/choose_best_bin.py"
+    config_dir = "${projectDir}/assorted-sub-workflows/mags_maker/reassemble/assets"
     final_bin = "${meta.ID}_best_bins"
-    checkm2 = params.checkm1 ? "" : "--checkm2"
+    summary_config = params.checkm1 ? "${config_dir}/checkm1_columns.json" : "${config_dir}/checkm2_columns.json"
     """
-    ${command} ${summary} ${bin} ${final_bin} --min-completeness ${params.min_completeness} --max-contamination ${params.max_contamination} ${checkm2}
+    ${command} ${summary} ${bin} ${final_bin} --min-completeness ${params.min_completeness} --max-contamination ${params.max_contamination} --config ${summary_config}
     """
 }
