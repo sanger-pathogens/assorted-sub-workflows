@@ -1,0 +1,6 @@
+{
+    "bin": "bin",
+    "completeness": "completeness",
+    "contamination": "contamination",
+    "n50": "N50"
+}
