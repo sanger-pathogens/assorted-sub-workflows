@@ -69,7 +69,7 @@ process SPADES_REASSEMBLE {
             && echo "SPAdes failed due to insufficient memory. Process will be retried with more memory." >&2 \\
             && exit 130
 
-        # sometimes spades catches a memory issues (or at least does not throw the mimalloc error above)
+        # sometimes spades catches a memory issue (or at least does not throw the mimalloc error above)
         grep 'mmap(2) failed. Reason: Cannot allocate memory' ${spades_log} >&2 \\
             && echo "SPAdes failed due to insufficient memory. Process will be retried with more memory." >&2 \\
             && exit 130
