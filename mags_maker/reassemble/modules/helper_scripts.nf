@@ -100,7 +100,7 @@ process RENAME_ORIGINAL {
     tuple val(meta), path(final_name), emit: renamed_file
 
     script:
-    final_name = "long_${meta.ID}_${fasta.baseName.replaceAll('\\.', '_')}_orgin.fasta"
+    final_name = "long_${meta.ID}_${fasta.baseName.replaceAll('\\.', '_')}_origin.fasta"
     """
     cp ${fasta} ${final_name}
     """
