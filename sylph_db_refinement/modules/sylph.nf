@@ -1,30 +1,28 @@
-process SYLPH_SKETCH_DB {
+process SYLPH_SKETCH {
     label 'cpu_2'
     label 'mem_16'
     label 'time_from_queue_normal'
 
-    publishDir "${params.outdir}/sylph/", pattern: "*.syldb", mode: 'copy', overwrite: true, enabled: params.save_sylph_sketches
+    publishDir "${params.outdir}/sylph/", pattern: "*.sylsp", mode: 'copy', overwrite: true, enabled: params.save_sylph_sketches
 
     container 'gitlab-registry.internal.sanger.ac.uk/sanger-pathogens/docker-images/sylph:0.8.1--ha6fb395_0'
 
     input:
-    path(assemblies)
+    tuple val(meta), path(read1), path(read2)
 
     output:
-    path("*.syldb"), emit: db_sketch
+    tuple val(meta), path("${meta.ID}.sylsp"), emit: sylsp
 
     script:
     """
-    sylph sketch -t ${task.cpus} --gl ${assemblies} -k ${params.sketch_size} -d ./
+    sylph sketch -t ${task.cpus} -1 ${read1} -2 ${read2} -S ${meta.ID} -d ./ -k ${params.sketch_size}
     """
 }
 
+// Sylph Version >=0.6 you can do direct profiling of paired-end reads without sketching.
+// query: uses ANI and k-mers to determine which species are in the sample.
 
-// Sylph Version >=0.6 you can do direct profiling of paired-end reads without sketching 
-// profile: uses the ANI and k-mers to determine which species are in the sample and their abundances
-// profile basically runs a large-scale version of query automatically across the database.
-
-process SYLPH_PROFILE {
+process SYLPH_QUERY {
     label 'cpu_2'
     label 'mem_20'
     label 'time_from_queue_small'
@@ -34,21 +32,16 @@ process SYLPH_PROFILE {
     container 'gitlab-registry.internal.sanger.ac.uk/sanger-pathogens/docker-images/sylph:0.8.1--ha6fb395_0'
 
     input:
-    tuple val(meta), path(read1), path(read2)
+    tuple val(meta), path(sample_sketch)
     path(sylph_db)
 
     output:
     tuple val(meta), path("${meta.ID}_sylph_profile.tsv"), emit: sylph_report
 
     script:
-    // if -u is present then it detects how many reads don’t match the reference database well enough and 
-    // Adjusts abundance estimates of known genomes to account for that missing fraction.
-    // unknown reads remain unknown
-    // i dont think it should be a params, or it should always be set to on
-
-    // Profile paired-end reads against a single chosen .syldb (custom or default).
+    // Query a sample sketch against a single chosen .syldb (custom or default).
     """
-    sylph profile -t ${task.cpus} -u -1 ${read1} -2 ${read2} -k ${params.sketch_size} ${sylph_db} -o ${meta.ID}_sylph_profile.tsv
+    sylph query ${sample_sketch} ${sylph_db} -t ${task.cpus} -o ${meta.ID}_sylph_profile.tsv
     """
 }
 
