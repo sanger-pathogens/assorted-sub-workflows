@@ -11,7 +11,8 @@
 //
 include { SYLPH_SKETCH;
           SYLPH_QUERY;
-          SYLPH_SUMMARIZE } from './modules/sylph.nf'
+          SYLPH_SUMMARIZE;
+          SYLPHTAX_TAXPROF } from '../taxo_profile/modules/sylph.nf'
 
 /*
 ========================================================================================
@@ -27,8 +28,13 @@ workflow SYLPH_DB_REFINEMENT {
     def sylph_db_ch = channel.fromPath(params.sylph_db).first()
 
     SYLPH_SKETCH(reads_ch)
-    SYLPH_QUERY(SYLPH_SKETCH.out.sylsp, sylph_db_ch)
+    SYLPH_QUERY(SYLPH_SKETCH.out.sketch)
+
+    // Taxonomic annotations from Sylph query output.
+    SYLPHTAX_TAXPROF(SYLPH_QUERY.out.sylph_report)
+
     // Summarize across all sample reports (thresholds).
+    SYLPH_QUERY.out.sylph_report
     | map { meta, report -> report }
     | collect()
     | SYLPH_SUMMARIZE
@@ -37,6 +43,7 @@ workflow SYLPH_DB_REFINEMENT {
     references = SYLPH_SUMMARIZE.out.references
     sylph_summary = SYLPH_SUMMARIZE.out.sylph_summary
     sylph_db = sylph_db_ch
+    sylphtax_mpa_report = SYLPHTAX_TAXPROF.out.sylphtax_mpa_report
 }
 
 /*
