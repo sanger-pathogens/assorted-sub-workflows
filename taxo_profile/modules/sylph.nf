@@ -121,7 +121,7 @@ with input_path.open(newline="") as src, output_path.open("w", newline="") as ds
     for row in reader:
         writer.writerow({col: row.get(col, "") for col in columns})
 PYTHON
-    sylph-tax taxprof "${normalized_report}" -t "\${metadata_file}"
+    sylph-tax taxprof "\${normalized_report}" -t "\${metadata_file}"
     mv ${meta.ID}.sylphmpa ${meta.ID}_sylphtax_profile.sylphmpa
     """
 }
