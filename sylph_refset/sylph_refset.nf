@@ -10,7 +10,7 @@
 // MODULES
 //
 include { SYLPH_SKETCH;
-          SYLPH_PROFILE;
+          SYLPH_QUERY;
           SYLPH_SUMMARIZE;
           SYLPHTAX_TAXPROF } from '../taxo_profile/modules/sylph.nf'
 
@@ -29,17 +29,17 @@ workflow SYLPH_REFSET {
     def sylph_tax_metadata_ch = channel.fromPath(params.sylph_tax_metadata).first()
 
     SYLPH_SKETCH(reads_ch)
-    SYLPH_PROFILE(SYLPH_SKETCH.out.sketch)
+    SYLPH_QUERY(SYLPH_SKETCH.out.sketch)
 
-    // Taxonomic annotations from Sylph profile output.
-    SYLPHTAX_TAXPROF(SYLPH_PROFILE.out.sylph_report, sylph_tax_metadata_ch)
+    // Taxonomic annotations from Sylph query output.
+    SYLPHTAX_TAXPROF(SYLPH_QUERY.out.sylph_report, sylph_tax_metadata_ch)
     def taxprof_done = SYLPHTAX_TAXPROF.out.sylphtax_mpa_report
         .map { meta, report -> true }
         .collect()
         .first()
 
     // Summarize across all sample reports (thresholds).
-    SYLPH_PROFILE.out.sylph_report
+    SYLPH_QUERY.out.sylph_report
         .map { meta, report -> report }
         .collect()
         .combine(taxprof_done)
