@@ -17,9 +17,9 @@
                 "default": "0.01",
                 "help_text": "Coverage threshold for Sylph filtering."
             },
-            "sylphtax_db_tag": {
+            "sylph_tax_metadata": {
                 "default": "/data/pam/software/sylph-tax/v1/gtdb_r226_metadata.tsv",
-                "help_text": "Path to taxonomy metadata for sylph-tax (GTDB_r226 identifiers)."
+                "help_text": "Path to the sylph-tax metadata TSV to use for taxprof."
             },
             "save_sylph_sketches": {
                 "default": "true",

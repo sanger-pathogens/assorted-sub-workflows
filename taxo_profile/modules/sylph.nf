@@ -7,6 +7,7 @@ process SYLPH_SKETCH {
     publishDir "${params.outdir}/${meta.ID}/sylph/", pattern: "*.sylsp", mode: 'copy', overwrite: true, enabled: params.save_sylph_sketches
 
     container 'gitlab-registry.internal.sanger.ac.uk/sanger-pathogens/docker-images/sylph:0.8.1--ha6fb395_0'
+    errorStrategy 'terminate'
 
     input:
     tuple val(meta), path(read_1), path(read_2)
@@ -29,6 +30,7 @@ process SYLPH_PROFILE {
     publishDir "${params.outdir}/${meta.ID}/sylph/", pattern: "*.tsv", mode: 'copy', overwrite: true
 
     container 'gitlab-registry.internal.sanger.ac.uk/sanger-pathogens/docker-images/sylph:0.8.1--ha6fb395_0'
+    errorStrategy 'terminate'
 
     input:
     tuple val(meta), path(sketch)
@@ -52,6 +54,7 @@ process SYLPH_QUERY {
     publishDir "${params.outdir}/${meta.ID}/sylph/", pattern: "*.tsv", mode: 'copy', overwrite: true
 
     container 'gitlab-registry.internal.sanger.ac.uk/sanger-pathogens/docker-images/sylph:0.8.1--ha6fb395_0'
+    errorStrategy 'terminate'
 
     input:
     tuple val(meta), path(sketch)
@@ -73,17 +76,20 @@ process SYLPHTAX_TAXPROF {
 
     publishDir "${params.outdir}/${meta.ID}/sylph/", pattern: "*.sylphmpa", mode: 'copy', overwrite: true
 
-    container 'gitlab-registry.internal.sanger.ac.uk/sanger-pathogens/docker-images/sylph-tax:1.2.0'
+    container 'quay.io/biocontainers/sylph-tax:1.7.0--pyhdfd78af_0'
+    errorStrategy 'terminate'
 
     input:
     tuple val(meta), path(sylph_report)
+    path sylph_tax_metadata
 
     output:
     tuple val(meta), path("${meta.ID}_sylphtax_profile.sylphmpa") , emit: sylphtax_mpa_report
 
     script:
     """
-    sylph-tax taxprof ${sylph_report} -t ${params.sylphtax_db_tag}
+    metadata_file=\$(basename "${sylph_tax_metadata}")
+    sylph-tax taxprof ${sylph_report} -t "\${metadata_file}"
     mv ${meta.ID}.sylphmpa ${meta.ID}_sylphtax_profile.sylphmpa
     """
 }
@@ -94,6 +100,7 @@ process SYLPH_SUMMARIZE {
     label 'time_queue_from_small'
 
     container 'quay.io/sangerpathogens/pandas:2.2.1'
+    errorStrategy 'terminate'
 
     publishDir "${params.outdir}/sylph/", mode: 'copy', overwrite: true
 
@@ -107,11 +114,11 @@ process SYLPH_SUMMARIZE {
     script:
     // Filter once with thresholds.
     """
-    ${workflow.projectDir}/assorted-sub-workflows/sylph_db_refinement/bin/sylph_summarize.py \
+    ${workflow.projectDir}/assorted-sub-workflows/sylph_refset/bin/sylph_summarize.py \
         --reports ${sylph_reports} \
         --ani ${params.sylph_ani} \
         --cov ${params.sylph_cov} \
-        --ani-column Adjusted_ANI \
+        --ani-column Naive_ANI \
         --cov-column Eff_cov \
         --out-references references.txt \
         --out-summary sylph_summary.tsv

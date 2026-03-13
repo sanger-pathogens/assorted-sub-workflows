@@ -17,9 +17,9 @@
                 "default": "31",
                 "help_text": "Value of k. Only k = 21, 31 are currently supported."
             },
-            "sylphtax_db_tag": {
+            "sylph_tax_metadata": {
                 "default": "/data/pam/software/sylph-tax/v1/gtdb_r226_metadata.tsv",
-                "help_text": "Path to taxonomy metadata for sylph (list of sylph-tax identifiers)"
+                "help_text": "Path to the sylph-tax metadata TSV to use for taxprof."
             },
 
             "sylph_estimate_unknown": {
@@ -52,5 +52,4 @@
             }  
     }
 }
-
 

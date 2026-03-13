@@ -30,15 +30,15 @@ workflow TAXO_PROFILE {
     read_ch // meta, read_1, read_2
 
     main:
+    def sylph_tax_metadata_ch = channel.fromPath(params.sylph_tax_metadata).first()
     
     if (params.sylph_profile){
         SYLPH_SKETCH(read_ch)
         | SYLPH_PROFILE
         | set { sylph_report }
 
-        SYLPH_PROFILE.out.sylph_report
-        | SYLPHTAX_TAXPROF
-        | set { sylphtax_mpa_report }
+        SYLPHTAX_TAXPROF(SYLPH_PROFILE.out.sylph_report, sylph_tax_metadata_ch)
+        SYLPHTAX_TAXPROF.out.sylphtax_mpa_report | set { sylphtax_mpa_report }
     } else {
         sylph_report = channel.empty()
         sylphtax_mpa_report = channel.empty()
