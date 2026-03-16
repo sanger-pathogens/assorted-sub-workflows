@@ -30,9 +30,17 @@ workflow SYLPH_REF_SELECTION {
 
     SYLPH_SKETCH(reads_ch)
     | SYLPH_QUERY
-    | SYLPH_TAXPROF
+    
+    SYLPH_QUERY.out.sylph_report
+        .combine(sylph_tax_metadata_ch)
+        | SYLPHTAX_TAXPROF
 
-    // Summarize across all sample reports (thresholds).
+    SYLPHTAX_TAXPROF.out.sylphtax_mpa_report
+        .map { true }
+        .collect()
+        .first()
+        | set { taxprof_done }
+
     SYLPH_QUERY.out.sylph_report
         .map { meta, report -> report }
         .collect()
