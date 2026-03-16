@@ -20,23 +20,17 @@ include { SYLPH_SKETCH;
 ========================================================================================
 */
 
-workflow SYLPH_REFSET {
+workflow SYLPH_REF_SELECTION {
     take:
     reads_ch // meta, read_1, read_2
 
     main:
-    def sylph_db_ch = channel.fromPath(params.sylph_db).first()
-    def sylph_tax_metadata_ch = channel.fromPath(params.sylph_tax_metadata).first()
+    sylph_db_ch = channel.fromPath(params.sylph_db).first()
+    sylph_tax_metadata_ch = channel.fromPath(params.sylph_tax_metadata).first()
 
     SYLPH_SKETCH(reads_ch)
-    SYLPH_QUERY(SYLPH_SKETCH.out.sketch)
-
-    // Taxonomic annotations from Sylph query output.
-    SYLPHTAX_TAXPROF(SYLPH_QUERY.out.sylph_report, sylph_tax_metadata_ch)
-    def taxprof_done = SYLPHTAX_TAXPROF.out.sylphtax_mpa_report
-        .map { meta, report -> true }
-        .collect()
-        .first()
+    | SYLPH_QUERY
+    | SYLPH_TAXPROF
 
     // Summarize across all sample reports (thresholds).
     SYLPH_QUERY.out.sylph_report
