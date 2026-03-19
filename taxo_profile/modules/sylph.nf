@@ -146,8 +146,9 @@ process SYLPH_SUMMARIZE {
     script:
     // Filter once with thresholds.
     """
-    ${workflow.projectDir}/assorted-sub-workflows/sylph_refset/bin/sylph_summarize.py \
+    ${workflow.projectDir}/assorted-sub-workflows/taxo_profile/bin/sylph_summarize.py \
         --reports ${sylph_reports} \
+        --genome_path_prefix ${params.genome_path_prefix} \
         --ani ${params.sylph_ani} \
         --cov ${params.sylph_cov} \
         --ani-column Naive_ANI \

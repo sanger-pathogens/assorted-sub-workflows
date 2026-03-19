@@ -20,6 +20,7 @@ def main():
     p.add_argument("--cov", type=float, required=True)
     p.add_argument("--ani-column", default="Adjusted_ANI")
     p.add_argument("--cov-column", default="Eff_cov")
+    p.add_argument("--genome_path_prefix", default=None)
     p.add_argument("--out-references", default="references.txt")
     p.add_argument("--out-summary", default="sylph_summary.tsv")
     args = p.parse_args()
@@ -38,7 +39,10 @@ def main():
     pass_mask = (df[ani_col] >= args.ani) & (df[cov_col] >= args.cov)
     pass_hits = df.loc[pass_mask].copy()
 
-    references = sorted(pass_hits["Genome_file"].dropna().unique())
+    references = pass_hits["Genome_file"].dropna().unique()
+    if args.genome_path_prefix:
+        references = f"{Path(args.genome_path_prefix)}/" + references
+    references = sorted(references)
 
     Path(args.out_references).write_text("\n".join(references) + ("\n" if references else ""))
 
