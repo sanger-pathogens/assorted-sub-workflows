@@ -21,7 +21,10 @@
                 "default": "/data/pam/software/sylph-tax/v1/gtdb_r226_metadata.tsv",
                 "help_text": "Path to the sylph-tax metadata TSV to use for taxprof."
             },
-
+            "genome_path_prefix": {
+                "default": "",
+                "help_text": "Path to prefix sylph references in sylph database paths to make them resolvable."
+            },
             "sylph_estimate_unknown": {
                 "default": "true",
                 "help_text": "Estimate proportion of classified sequences where the sum of Sequence_abundance column is the percentage of classified reads."
