@@ -44,7 +44,8 @@ def main():
         references = f"{Path(args.genome_path_prefix)}/" + references
     references = sorted(references)
 
-    Path(args.out_references).write_text("\n".join(references) + ("\n" if references else ""))
+    if references:
+        Path(args.out_references).write_text("\n".join(references) + "\n")
 
     # Summarize per reference genome across all samples.
     summaries = []

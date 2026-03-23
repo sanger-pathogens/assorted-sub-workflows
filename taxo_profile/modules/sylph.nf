@@ -140,7 +140,7 @@ process SYLPH_SUMMARIZE {
     path(sylph_reports)
 
     output:
-    path("references.txt"), emit: references
+    path("references.txt"), optional: true, emit: references
     path("sylph_summary.tsv"), emit: sylph_summary
 
     script:
