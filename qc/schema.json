@@ -4,7 +4,7 @@
         "Preprocessing options": {
             "preprocessing": {
                 "default": "true",
-                "help_text": "Run the preprocesing subworkflow, use false to skip preprocessing stages"
+                "help_text": "Run the preprocessing subworkflow, use false to skip preprocessing stages"
             }
         },
         "FastQC": {
