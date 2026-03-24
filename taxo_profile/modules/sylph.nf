@@ -7,7 +7,6 @@ process SYLPH_SKETCH {
     publishDir "${params.outdir}/${meta.ID}/sylph/", pattern: "*.sylsp", mode: 'copy', overwrite: true, enabled: params.save_sylph_sketches
 
     container 'gitlab-registry.internal.sanger.ac.uk/sanger-pathogens/docker-images/sylph:0.8.1--ha6fb395_0'
-    errorStrategy 'terminate'
 
     input:
     tuple val(meta), path(read_1), path(read_2)
@@ -54,7 +53,6 @@ process SYLPH_QUERY {
     publishDir "${params.outdir}/${meta.ID}/sylph/", pattern: "*.tsv", mode: 'copy', overwrite: true
 
     container 'gitlab-registry.internal.sanger.ac.uk/sanger-pathogens/docker-images/sylph:0.8.1--ha6fb395_0'
-    errorStrategy 'terminate'
 
     input:
     tuple val(meta), path(sketch)
