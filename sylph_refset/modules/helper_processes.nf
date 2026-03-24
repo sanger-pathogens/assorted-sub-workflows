@@ -3,10 +3,6 @@ process GROUP_SYLPH_REFS_BY_TAXON {
     label 'cpu_1'
     label 'mem_1'
     label 'time_from_queue_small'
-    //TODO Caching sometimes not working as expected
-    // cache false
-
-    // publishDir "${params.outdir}/${meta.ID}/sylph/", pattern: "*.sylphmpa", mode: 'copy', overwrite: true
 
     container 'quay.io/sangerpathogens/pandas:2.2.1'
 
@@ -38,7 +34,6 @@ process COMBINE_REFS_ACROSS_SAMPLES {
     container 'ubuntu:22.04'
 
     input:
-    // tuple val(taxon_group), path(taxon_group_ref_reports, stageAs: "${taxon_group}/*")
     tuple val(taxon_group), path(taxon_group_ref_reports, stageAs: "ref_reports/*")
 
     output:
