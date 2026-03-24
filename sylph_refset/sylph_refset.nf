@@ -58,7 +58,9 @@ workflow SYLPH_REF_SELECTION {
 
     COMBINE_REFS_ACROSS_SAMPLES.out.taxon_group_ref_report
     | map { taxon_group, report ->
-        report
+        def meta = [:]
+        meta.ID = taxon_group
+        [meta, report]
     }
     | SYLPH_SUMMARIZE
 
