@@ -47,52 +47,33 @@ workflow SYLPH_REF_SELECTION {
         error "Unsupported --sylph_method '${params.sylph_method}'. Use 'query' or 'profile'."
     }
 
-
-    sylph_report_ch
-    | map { meta, report -> report }
-    | collect()
-    | map { reports -> [[ID: 'all_samples'], reports] }
-    | COMBINE_SYLPH_REPORTS
-
-    if (sylph_method == 'query') {
-        NORMALIZE_QUERY_REPORT_FOR_SYLPHTAX(COMBINE_SYLPH_REPORTS.out.sylph_report)
-        sylphtax_input_ch = NORMALIZE_QUERY_REPORT_FOR_SYLPHTAX.out.sylph_report
-    } else {
-        sylphtax_input_ch = COMBINE_SYLPH_REPORTS.out.sylph_report
-    }
-
     // Combine sylph reports
-    SYLPH_QUERY.out.sylph_report
+    sylph_report_ch
     | map { meta, report -> report }
     | collectFile( name: "combined_sylph_report.tsv", keepHeader: true )
     // | map { reports -> [ "combined_sylph_report", (reports instanceof List) ? reports : [reports] ] }
     | map { report -> [ [ID: "combined_sylph_report"], report ] }
     | set { combined_sylph_report }
-    
-    // COMBINE_SYLPH_REPORTS(
-    //     combined_sylph_report,
-    //     "${params.outdir}/sylph/"
-    // )
-    
+
     // Filter based on ANI and coverage threshold
-    // COMBINE_SYLPH_REPORTS.out.group_report
-    // | map { group, report ->
-    //     def meta = [:]
-    //     meta.ID = group
-    //     [ meta, report ]
-    // }
     combined_sylph_report
     | SYLPH_SUMMARIZE
 
+    // Normalize report
+    if (sylph_method == 'query') {
+        NORMALIZE_QUERY_REPORT_FOR_SYLPHTAX(SYLPH_SUMMARIZE.out.report)
+        sylphtax_input_ch = NORMALIZE_QUERY_REPORT_FOR_SYLPHTAX.out.sylph_report
+    } else {
+        sylphtax_input_ch = SYLPH_SUMMARIZE.out.report
+    }
+
     // Get taxonomic profile in metaphlan (mpa) report format
-    // COMBINE_SYLPH_REPORTS.out.group_report
-    SYLPH_SUMMARIZE.out.report
-    | NORMALIZE_SYLPH_QUERY_REPORT
+    sylphtax_input_ch
     | combine(sylph_tax_metadata_ch)
     | SYLPHTAX_TAXPROF
 
     // Join sylph report (incl. reference filepaths) with taxonomy
-    SYLPH_SUMMARIZE.out.report
+    sylphtax_input_ch
     | join(SYLPHTAX_TAXPROF.out.sylphtax_mpa_report)
     | GROUP_SYLPH_REFS_BY_TAXON
 
@@ -109,37 +90,10 @@ workflow SYLPH_REF_SELECTION {
 
     // Extract reference lists from reports?
 
-    // COMBINE_REFS_ACROSS_SAMPLES(
-    //     grouped_sample_reports,
-    //     null // publish_dir (don't publish)
-    // )
-    // | map { taxon_group, report ->
-    //     def meta = [:]
-    //     meta.ID = taxon_group
-    //     [meta, report]
-    // }
-    // | SYLPH_SUMMARIZE
-
-    // SYLPH_SUMMARIZE.out.sylph_summary
-    // | map { meta, summary -> summary }
-    // | collect
-    // | map { summaries ->
-    //     [ "summaries", summaries ]
-    // }
-    // | set { sylph_summaries }
-
-    // COMBINE_SYLPH_SUMMARIES(
-    //     sylph_summaries,
-    //     "${params.outdir}/sylph/summaries"  // publishDir
-    // )
-    // COMBINE_SYLPH_REFERENCES(
-    //     ,
-    // )
-
     emit:
     references = SYLPH_SUMMARIZE.out.references
     sylph_summary = SYLPH_SUMMARIZE.out.sylph_summary
-    combined_sylph_report = COMBINE_SYLPH_REPORTS.out.sylph_report
+    combined_sylph_report = NORMALIZE_QUERY_REPORT_FOR_SYLPHTAX.out.sylph_report
     //TODO Do we need to output the following?
     // sylph_db = sylph_db_ch
     // sylphtax_mpa_report = SYLPHTAX_TAXPROF.out.sylphtax_mpa_report

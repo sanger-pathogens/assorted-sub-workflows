@@ -79,12 +79,11 @@ process SYLPHTAX_TAXPROF {
     input: tuple val(meta), path(sylph_report), path(sylph_tax_metadata)
 
     output:
-    tuple val(meta), path("${meta.ID}_sylphtax_profile.sylphmpa") , emit: sylphtax_mpa_report
+    tuple val(meta), path("*.sylphmpa") , emit: sylphtax_mpa_report
 
     script:
     """
     sylph-tax taxprof "${sylph_report}" -t "${sylph_tax_metadata}"
-    mv ${meta.ID}.sylphmpa ${meta.ID}_sylphtax_profile.sylphmpa
     """
 }
 
