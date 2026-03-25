@@ -7,7 +7,6 @@ process SYLPH_SKETCH {
     publishDir "${params.outdir}/${meta.ID}/sylph/", pattern: "*.sylsp", mode: 'copy', overwrite: true, enabled: params.save_sylph_sketches
 
     container 'gitlab-registry.internal.sanger.ac.uk/sanger-pathogens/docker-images/sylph:0.8.1--ha6fb395_0'
-    errorStrategy 'terminate'
 
     input:
     tuple val(meta), path(read_1), path(read_2)
@@ -54,7 +53,6 @@ process SYLPH_QUERY {
     publishDir "${params.outdir}/${meta.ID}/sylph/", pattern: "*.tsv", mode: 'copy', overwrite: true
 
     container 'gitlab-registry.internal.sanger.ac.uk/sanger-pathogens/docker-images/sylph:0.8.1--ha6fb395_0'
-    errorStrategy 'terminate'
 
     input:
     tuple val(meta), path(sketch)
@@ -127,6 +125,7 @@ PYTHON
 
 
 process SYLPH_SUMMARIZE {
+    tag "${meta.ID}"
     label 'cpu_1'
     label 'mem_4'
     label 'time_queue_from_small'
@@ -134,14 +133,14 @@ process SYLPH_SUMMARIZE {
     container 'quay.io/sangerpathogens/pandas:2.2.1'
     errorStrategy 'terminate'
 
-    publishDir "${params.outdir}/sylph/", mode: 'copy', overwrite: true
+    publishDir "${params.outdir}/sylph/filtered", mode: 'copy', overwrite: true
 
     input:
-    path(sylph_reports)
+    tuple val(meta), path(sylph_reports)
 
     output:
-    path("references.txt"), emit: references
-    path("sylph_summary.tsv"), emit: sylph_summary
+    path("${meta.ID}_references.txt"), optional: true, emit: references
+    path("${meta.ID}_sylph_summary.tsv"), emit: sylph_summary
 
     script:
     // Filter once with thresholds.
@@ -153,7 +152,7 @@ process SYLPH_SUMMARIZE {
         --cov ${params.sylph_cov} \
         --ani-column Naive_ANI \
         --cov-column Eff_cov \
-        --out-references references.txt \
-        --out-summary sylph_summary.tsv
+        --out-references ${meta.ID}_references.txt \
+        --out-summary ${meta.ID}_sylph_summary.tsv
     """
 }
