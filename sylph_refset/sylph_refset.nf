@@ -9,13 +9,14 @@
 //
 // MODULES
 //
-include { SYLPH_SKETCH;
-          SYLPH_QUERY;
-          SYLPH_SUMMARIZE;
-          SYLPHTAX_TAXPROF } from '../taxo_profile/modules/sylph.nf'
-include { COMBINE_SYLPH_REPORTS;
-          GROUP_SYLPH_REFS_BY_TAXON;
-          COMBINE_REFS_ACROSS_SAMPLES } from './modules/helper_processes.nf'
+include   { SYLPH_SKETCH;
+            SYLPH_QUERY;
+            SYLPH_PROFILE;
+            SYLPH_SUMMARIZE;
+            SYLPHTAX_TAXPROF } from '../taxo_profile/modules/sylph.nf'
+include   { COMBINE_SYLPH_REPORTS;
+            GROUP_SYLPH_REFS_BY_TAXON;
+            COMBINE_REFS_ACROSS_SAMPLES } from './modules/helper_processes.nf'
 
 /*
 ========================================================================================
@@ -32,11 +33,21 @@ workflow SYLPH_REF_SELECTION {
     sylph_db_ch = channel.fromPath(params.sylph_db).first()
     sylph_tax_metadata_ch = channel.fromPath(params.sylph_tax_metadata).first()
 
-    // Profile sample using sylph
-    SYLPH_SKETCH(reads_ch)
-    | SYLPH_QUERY
+    sylph_method = (params.sylph_method ?: 'query').toString().toLowerCase()
 
-    SYLPH_QUERY.out.sylph_report
+    SYLPH_SKETCH(reads_ch)
+    if (sylph_method == 'query') {
+        SYLPH_QUERY(SYLPH_SKETCH.out.sketch)
+        sylph_report_ch = SYLPH_QUERY.out.sylph_report
+    } else if (sylph_method == 'profile') {
+        SYLPH_PROFILE(SYLPH_SKETCH.out.sketch)
+        sylph_report_ch = SYLPH_PROFILE.out.sylph_report
+    } else {
+        error "Unsupported --sylph_method '${params.sylph_method}'. Use 'query' or 'profile'."
+    }
+
+
+    sylph_report_ch
     | map { meta, report -> report }
     | collect()
     | map { reports -> [[ID: 'all_samples'], reports] }
