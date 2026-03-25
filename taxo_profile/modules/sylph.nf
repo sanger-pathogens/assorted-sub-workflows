@@ -75,18 +75,15 @@ process SYLPHTAX_TAXPROF {
     publishDir "${params.outdir}/${meta.ID}/sylph/", pattern: "*.sylphmpa", mode: 'copy', overwrite: true
 
     container 'quay.io/biocontainers/sylph-tax:1.7.0--pyhdfd78af_0'
-    errorStrategy 'terminate'
 
     input: tuple val(meta), path(sylph_report), path(sylph_tax_metadata)
-
 
     output:
     tuple val(meta), path("${meta.ID}_sylphtax_profile.sylphmpa") , emit: sylphtax_mpa_report
 
     script:
     """
-    metadata_file=\$(basename "${sylph_tax_metadata}")
-    sylph-tax taxprof "${sylph_report}" -t "\${metadata_file}"
+    sylph-tax taxprof "${sylph_report}" -t "${sylph_tax_metadata}"
     mv ${meta.ID}.sylphmpa ${meta.ID}_sylphtax_profile.sylphmpa
     """
 }
@@ -99,28 +96,27 @@ process SYLPH_SUMMARIZE {
     label 'time_queue_from_small'
 
     container 'quay.io/sangerpathogens/pandas:2.2.1'
-    errorStrategy 'terminate'
-
-    publishDir "${params.outdir}/sylph/filtered", mode: 'copy', overwrite: true
 
     input:
     tuple val(meta), path(sylph_reports)
 
     output:
-    path("${meta.ID}_references.txt"), optional: true, emit: references
-    path("${meta.ID}_sylph_summary.tsv"), emit: sylph_summary
+    tuple val(meta), path("${meta.ID}_references.txt"), optional: true, emit: references
+    tuple val(meta), path("${meta.ID}_sylph_report.txt"), optional: true, emit: report
+    tuple val(meta), path("${meta.ID}_sylph_summary.tsv"), emit: sylph_summary
 
     script:
     // Filter once with thresholds.
     """
-    ${workflow.projectDir}/assorted-sub-workflows/taxo_profile/bin/sylph_summarize.py \
-        --reports ${sylph_reports} \
-        --genome_path_prefix ${params.genome_path_prefix} \
-        --ani ${params.sylph_ani} \
-        --cov ${params.sylph_cov} \
-        --ani-column Naive_ANI \
-        --cov-column Eff_cov \
-        --out-references ${meta.ID}_references.txt \
+    ${workflow.projectDir}/assorted-sub-workflows/taxo_profile/bin/sylph_summarize.py \\
+        --reports ${sylph_reports} \\
+        --genome_path_prefix ${params.genome_path_prefix} \\
+        --ani ${params.sylph_ani} \\
+        --cov ${params.sylph_cov} \\
+        --ani-column Naive_ANI \\
+        --cov-column Eff_cov \\
+        --out-references ${meta.ID}_references.txt \\
+        --out-report ${meta.ID}_sylph_report.txt \\
         --out-summary ${meta.ID}_sylph_summary.tsv
     """
 }

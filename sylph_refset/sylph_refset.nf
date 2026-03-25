@@ -61,13 +61,38 @@ workflow SYLPH_REF_SELECTION {
         sylphtax_input_ch = COMBINE_SYLPH_REPORTS.out.sylph_report
     }
 
+    // Combine sylph reports
+    SYLPH_QUERY.out.sylph_report
+    | map { meta, report -> report }
+    | collectFile( name: "combined_sylph_report.tsv", keepHeader: true )
+    // | map { reports -> [ "combined_sylph_report", (reports instanceof List) ? reports : [reports] ] }
+    | map { report -> [ [ID: "combined_sylph_report"], report ] }
+    | set { combined_sylph_report }
+    
+    // COMBINE_SYLPH_REPORTS(
+    //     combined_sylph_report,
+    //     "${params.outdir}/sylph/"
+    // )
+    
+    // Filter based on ANI and coverage threshold
+    // COMBINE_SYLPH_REPORTS.out.group_report
+    // | map { group, report ->
+    //     def meta = [:]
+    //     meta.ID = group
+    //     [ meta, report ]
+    // }
+    combined_sylph_report
+    | SYLPH_SUMMARIZE
+
     // Get taxonomic profile in metaphlan (mpa) report format
-    sylphtax_input_ch
+    // COMBINE_SYLPH_REPORTS.out.group_report
+    SYLPH_SUMMARIZE.out.report
+    | NORMALIZE_SYLPH_QUERY_REPORT
     | combine(sylph_tax_metadata_ch)
     | SYLPHTAX_TAXPROF
 
     // Join sylph report (incl. reference filepaths) with taxonomy
-    COMBINE_SYLPH_REPORTS.out.sylph_report
+    SYLPH_SUMMARIZE.out.report
     | join(SYLPHTAX_TAXPROF.out.sylphtax_mpa_report)
     | GROUP_SYLPH_REFS_BY_TAXON
 
@@ -79,16 +104,37 @@ workflow SYLPH_REF_SELECTION {
         taxon_group = report.baseName.replace("${meta.ID}_", "")  // Construct taxonomic group from filename
         [taxon_group, report]
     }
-    | groupTuple()
-    | COMBINE_REFS_ACROSS_SAMPLES
+    | groupTuple
+    | set { grouped_sample_reports }
 
-    COMBINE_REFS_ACROSS_SAMPLES.out.taxon_group_ref_report
-    | map { taxon_group, report ->
-        def meta = [:]
-        meta.ID = taxon_group
-        [meta, report]
-    }
-    | SYLPH_SUMMARIZE
+    // Extract reference lists from reports?
+
+    // COMBINE_REFS_ACROSS_SAMPLES(
+    //     grouped_sample_reports,
+    //     null // publish_dir (don't publish)
+    // )
+    // | map { taxon_group, report ->
+    //     def meta = [:]
+    //     meta.ID = taxon_group
+    //     [meta, report]
+    // }
+    // | SYLPH_SUMMARIZE
+
+    // SYLPH_SUMMARIZE.out.sylph_summary
+    // | map { meta, summary -> summary }
+    // | collect
+    // | map { summaries ->
+    //     [ "summaries", summaries ]
+    // }
+    // | set { sylph_summaries }
+
+    // COMBINE_SYLPH_SUMMARIES(
+    //     sylph_summaries,
+    //     "${params.outdir}/sylph/summaries"  // publishDir
+    // )
+    // COMBINE_SYLPH_REFERENCES(
+    //     ,
+    // )
 
     emit:
     references = SYLPH_SUMMARIZE.out.references

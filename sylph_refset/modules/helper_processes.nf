@@ -68,6 +68,34 @@ process GROUP_SYLPH_REFS_BY_TAXON {
     """
 }
 
+// process COMBINE_REPORTS {
+//     tag "${group}"
+//     label 'cpu_1'
+//     label 'mem_1'
+//     label 'time_from_queue_small'
+
+//     publishDir { publish_dir }, mode: 'copy', overwrite: true
+
+//     container 'ubuntu:22.04'
+
+//     input:
+//     tuple val(group), path(reports, stageAs: "reports/*")
+//     val(publish_dir)
+
+//     output:
+//     tuple val(group), path(output_file), emit: group_report
+
+//     script:
+//     reports = (reports instanceof List) ? reports : [reports]
+//     file_extension = reports[0].extension
+//     output_file = "${group}.${file_extension}"
+
+//     """
+//     head -n 1 ${reports[0]} > ${output_file}
+//     tail -n +2 reports/* >> ${output_file}
+//     """
+// }
+
 process COMBINE_REFS_ACROSS_SAMPLES {
     tag "${taxon_group}"
     label 'cpu_1'
