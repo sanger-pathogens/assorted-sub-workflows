@@ -13,7 +13,8 @@ include { SYLPH_SKETCH;
           SYLPH_QUERY;
           SYLPH_SUMMARIZE;
           SYLPHTAX_TAXPROF } from '../taxo_profile/modules/sylph.nf'
-include { GROUP_SYLPH_REFS_BY_TAXON;
+include { COMBINE_SYLPH_REPORTS;
+          GROUP_SYLPH_REFS_BY_TAXON;
           COMBINE_REFS_ACROSS_SAMPLES } from './modules/helper_processes.nf'
 
 /*
@@ -35,13 +36,19 @@ workflow SYLPH_REF_SELECTION {
     SYLPH_SKETCH(reads_ch)
     | SYLPH_QUERY
 
-    // Get taxonomic profile in metaphlan (mpa) report format
     SYLPH_QUERY.out.sylph_report
+    | map { meta, report -> report }
+    | collect()
+    | map { reports -> [[ID: 'all_samples'], reports] }
+    | COMBINE_SYLPH_REPORTS
+
+    // Get taxonomic profile in metaphlan (mpa) report format
+    COMBINE_SYLPH_REPORTS.out.sylph_report
     | combine(sylph_tax_metadata_ch)
     | SYLPHTAX_TAXPROF
 
     // Join sylph report (incl. reference filepaths) with taxonomy
-    SYLPH_QUERY.out.sylph_report
+    COMBINE_SYLPH_REPORTS.out.sylph_report
     | join(SYLPHTAX_TAXPROF.out.sylphtax_mpa_report)
     | GROUP_SYLPH_REFS_BY_TAXON
 
@@ -67,6 +74,7 @@ workflow SYLPH_REF_SELECTION {
     emit:
     references = SYLPH_SUMMARIZE.out.references
     sylph_summary = SYLPH_SUMMARIZE.out.sylph_summary
+    combined_sylph_report = COMBINE_SYLPH_REPORTS.out.sylph_report
     //TODO Do we need to output the following?
     // sylph_db = sylph_db_ch
     // sylphtax_mpa_report = SYLPHTAX_TAXPROF.out.sylphtax_mpa_report
