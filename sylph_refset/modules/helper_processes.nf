@@ -21,6 +21,28 @@ process COMBINE_SYLPH_REPORTS {
     """
 }
 
+process NORMALIZE_QUERY_REPORT_FOR_SYLPHTAX {
+    tag "${meta.ID}"
+    label 'cpu_1'
+    label 'mem_1'
+    label 'time_from_queue_small'
+
+    container 'quay.io/sangerpathogens/pandas:2.2.1'
+
+    input:
+    tuple val(meta), path(sylph_report)
+
+    output:
+    tuple val(meta), path("${meta.ID}_sylph_tax_input.tsv"), emit: sylph_report
+
+    script:
+    """
+    ${workflow.projectDir}/assorted-sub-workflows/sylph_refset/bin/normalize_query_report_for_sylphtax.py \
+        --input ${sylph_report} \
+        --output ${meta.ID}_sylph_tax_input.tsv
+    """
+}
+
 process GROUP_SYLPH_REFS_BY_TAXON {
     tag "${meta.ID}"
     label 'cpu_1'

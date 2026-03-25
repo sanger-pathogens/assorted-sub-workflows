@@ -15,6 +15,7 @@ include   { SYLPH_SKETCH;
             SYLPH_SUMMARIZE;
             SYLPHTAX_TAXPROF } from '../taxo_profile/modules/sylph.nf'
 include   { COMBINE_SYLPH_REPORTS;
+            NORMALIZE_QUERY_REPORT_FOR_SYLPHTAX;
             GROUP_SYLPH_REFS_BY_TAXON;
             COMBINE_REFS_ACROSS_SAMPLES } from './modules/helper_processes.nf'
 
@@ -53,8 +54,15 @@ workflow SYLPH_REF_SELECTION {
     | map { reports -> [[ID: 'all_samples'], reports] }
     | COMBINE_SYLPH_REPORTS
 
+    if (sylph_method == 'query') {
+        NORMALIZE_QUERY_REPORT_FOR_SYLPHTAX(COMBINE_SYLPH_REPORTS.out.sylph_report)
+        sylphtax_input_ch = NORMALIZE_QUERY_REPORT_FOR_SYLPHTAX.out.sylph_report
+    } else {
+        sylphtax_input_ch = COMBINE_SYLPH_REPORTS.out.sylph_report
+    }
+
     // Get taxonomic profile in metaphlan (mpa) report format
-    COMBINE_SYLPH_REPORTS.out.sylph_report
+    sylphtax_input_ch
     | combine(sylph_tax_metadata_ch)
     | SYLPHTAX_TAXPROF
 
