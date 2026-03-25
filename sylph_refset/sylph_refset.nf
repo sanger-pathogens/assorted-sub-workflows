@@ -12,10 +12,10 @@
 include   { SYLPH_SKETCH;
             SYLPH_QUERY;
             SYLPH_PROFILE;
-            SYLPH_SUMMARIZE;
             SYLPHTAX_TAXPROF } from '../taxo_profile/modules/sylph.nf'
 include   { COMBINE_SYLPH_REPORTS;
             NORMALIZE_QUERY_REPORT_FOR_SYLPHTAX;
+            SYLPH_SUMMARIZE;
             GROUP_SYLPH_REFS_BY_TAXON;
             COMBINE_REFS_ACROSS_SAMPLES } from './modules/helper_processes.nf'
 

@@ -87,35 +87,3 @@ process SYLPHTAX_TAXPROF {
     """
 }
 
-
-process SYLPH_SUMMARIZE {
-    tag "${meta.ID}"
-    label 'cpu_1'
-    label 'mem_4'
-    label 'time_queue_from_small'
-
-    container 'quay.io/sangerpathogens/pandas:2.2.1'
-
-    input:
-    tuple val(meta), path(sylph_reports)
-
-    output:
-    tuple val(meta), path("${meta.ID}_references.txt"), optional: true, emit: references
-    tuple val(meta), path("${meta.ID}_sylph_report.txt"), optional: true, emit: report
-    tuple val(meta), path("${meta.ID}_sylph_summary.tsv"), emit: sylph_summary
-
-    script:
-    // Filter once with thresholds.
-    """
-    ${workflow.projectDir}/assorted-sub-workflows/taxo_profile/bin/sylph_summarize.py \\
-        --reports ${sylph_reports} \\
-        --genome_path_prefix ${params.genome_path_prefix} \\
-        --ani ${params.sylph_ani} \\
-        --cov ${params.sylph_cov} \\
-        --ani-column Naive_ANI \\
-        --cov-column Eff_cov \\
-        --out-references ${meta.ID}_references.txt \\
-        --out-report ${meta.ID}_sylph_report.txt \\
-        --out-summary ${meta.ID}_sylph_summary.tsv
-    """
-}

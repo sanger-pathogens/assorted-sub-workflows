@@ -1,3 +1,4 @@
+// remove when will's done with commiting and pushing his changes.
 process COMBINE_SYLPH_REPORTS {
     tag ""
     label 'cpu_1'
@@ -68,34 +69,6 @@ process GROUP_SYLPH_REFS_BY_TAXON {
     """
 }
 
-// process COMBINE_REPORTS {
-//     tag "${group}"
-//     label 'cpu_1'
-//     label 'mem_1'
-//     label 'time_from_queue_small'
-
-//     publishDir { publish_dir }, mode: 'copy', overwrite: true
-
-//     container 'ubuntu:22.04'
-
-//     input:
-//     tuple val(group), path(reports, stageAs: "reports/*")
-//     val(publish_dir)
-
-//     output:
-//     tuple val(group), path(output_file), emit: group_report
-
-//     script:
-//     reports = (reports instanceof List) ? reports : [reports]
-//     file_extension = reports[0].extension
-//     output_file = "${group}.${file_extension}"
-
-//     """
-//     head -n 1 ${reports[0]} > ${output_file}
-//     tail -n +2 reports/* >> ${output_file}
-//     """
-// }
-
 process COMBINE_REFS_ACROSS_SAMPLES {
     tag "${taxon_group}"
     label 'cpu_1'
@@ -116,5 +89,37 @@ process COMBINE_REFS_ACROSS_SAMPLES {
     """
     ls ref_reports/*.tsv | head -n 1 | xargs head -n 1 > ${taxon_group}.tsv
     tail -n +2 ref_reports/*.tsv >> ${taxon_group}.tsv
+    """
+}
+
+process SYLPH_SUMMARIZE {
+    tag "${meta.ID}"
+    label 'cpu_1'
+    label 'mem_4'
+    label 'time_queue_from_small'
+
+    container 'quay.io/sangerpathogens/pandas:2.2.1'
+
+    input:
+    tuple val(meta), path(sylph_reports)
+
+    output:
+    tuple val(meta), path("${meta.ID}_references.txt"), optional: true, emit: references
+    tuple val(meta), path("${meta.ID}_sylph_report.txt"), optional: true, emit: report
+    tuple val(meta), path("${meta.ID}_sylph_summary.tsv"), emit: sylph_summary
+
+    script:
+    // Filter once with thresholds.
+    """
+    ${workflow.projectDir}/assorted-sub-workflows/taxo_profile/bin/sylph_summarize.py \\
+        --reports ${sylph_reports} \\
+        --genome_path_prefix ${params.genome_path_prefix} \\
+        --ani ${params.sylph_ani} \\
+        --cov ${params.sylph_cov} \\
+        --ani-column Naive_ANI \\
+        --cov-column Eff_cov \\
+        --out-references ${meta.ID}_references.txt \\
+        --out-report ${meta.ID}_sylph_report.txt \\
+        --out-summary ${meta.ID}_sylph_summary.tsv
     """
 }
