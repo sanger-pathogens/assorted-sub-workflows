@@ -1,3 +1,26 @@
+process COMBINE_SYLPH_REPORTS {
+    tag ""
+    label 'cpu_1'
+    label 'mem_1'
+    label 'time_from_queue_small'
+
+    publishDir "/sylph/", pattern: "sylph_profile.tsv", mode: 'copy', overwrite: true
+
+    container 'ubuntu:22.04'
+
+    input:
+    tuple val(meta), path(sylph_reports, stageAs: "reports/*")
+
+    output:
+    tuple val(meta), path("sylph_profile.tsv"), emit: sylph_report
+
+    script:
+    """
+    ls reports/*.tsv | sort | head -n 1 | xargs head -n 1 > sylph_profile.tsv
+    tail -q -n +2 reports/*.tsv >> sylph_profile.tsv
+    """
+}
+
 process GROUP_SYLPH_REFS_BY_TAXON {
     tag "${meta.ID}"
     label 'cpu_1'
