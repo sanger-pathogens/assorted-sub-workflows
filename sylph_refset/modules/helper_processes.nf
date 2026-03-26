@@ -99,6 +99,7 @@ process SYLPH_SUMMARIZE {
     label 'time_queue_from_small'
 
     publishDir "${params.outdir}/sylph/", pattern: "${meta.ID}_sylph_filtered_report.tsv", mode: 'copy', overwrite: true
+    publishDir "${params.outdir}/sylph/", pattern: "${meta.ID}_sylph_summary.tsv", mode: 'copy', overwrite: true
 
     container 'quay.io/sangerpathogens/pandas:2.2.1'
 
