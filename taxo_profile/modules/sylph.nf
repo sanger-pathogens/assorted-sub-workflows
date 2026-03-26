@@ -72,7 +72,7 @@ process SYLPHTAX_TAXPROF {
     label 'mem_2'
     label 'time_from_queue_small'
 
-    publishDir "${params.outdir}/${meta.ID}/sylph/", pattern: "*.sylphmpa", mode: 'copy', overwrite: true
+    publishDir params.outdir, saveAs: { filename -> "${file(filename).baseName}/sylph/${filename}" }, pattern: "*.sylphmpa", mode: 'copy', overwrite: true
 
     container 'quay.io/biocontainers/sylph-tax:1.7.0--pyhdfd78af_0'
 
