@@ -50,7 +50,7 @@ workflow SYLPH_REF_SELECTION {
     // Combine sylph reports
     sylph_report_ch
     | map { meta, report -> report }
-    | collectFile( name: "combined_sylph_report.tsv", keepHeader: true )
+    | collectFile( name: "combined_sylph_report.tsv", keepHeader: true, storeDir: "${params.outdir}/sylph" )
     // | map { reports -> [ "combined_sylph_report", (reports instanceof List) ? reports : [reports] ] }
     | map { report -> [ [ID: "combined"], report ] }
     | set { combined_sylph_report }
