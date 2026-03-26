@@ -23,7 +23,7 @@ TAXONOMIC_RANK = {
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--sylph_prof_report", help="Report file (TSV) with `sylph profile` output format.", type=Path, required=True)
-    parser.add_argument("--sylphtax_report", help="Report file (TSV) with `sylph-tax taxprof` output format.", type=Path, required=True)
+    parser.add_argument("--sylphtax_report", help="One or more report files (TSV) with sylph-tax taxprof output format.", type=Path, nargs="+", required=True)
     parser.add_argument("--outdir", type=Path, default=".")
     parser.add_argument("--taxonomic_group", help="Taxonomic rank by which to group report", type=str, choices=list(TAXONOMIC_RANK.values()), default="species")
     parser.add_argument("--prefix", help="Prefix for output report filenames", type=str)
@@ -40,6 +40,11 @@ def setup_logging():
 def load_data(report: Path) -> pd.DataFrame:
     df = pd.read_csv(report, sep="\t", comment="#")
     return df
+
+
+def load_taxonomy_data(reports) -> pd.DataFrame:
+    frames = [load_data(report) for report in reports]
+    return pd.concat(frames, ignore_index=True)
 
 def extract_genbank_id(df: pd.DataFrame, column: str) -> pd.DataFrame:
     extract_pattern = {
@@ -74,8 +79,8 @@ def main():
     args.outdir.mkdir(parents=True, exist_ok=True)
 
     sylph_prof_df = extract_genbank_id(load_data(args.sylph_prof_report), column="Genome_file")
-    sylphtax_df = extract_genbank_id(load_data(args.sylphtax_report), column="clade_name")
-    sylphtax_df.to_csv("intermediate.tsv", sep="\t", index=False)
+    sylphtax_df = extract_genbank_id(load_taxonomy_data(args.sylphtax_report), column="clade_name")
+    sylphtax_df = sylphtax_df.drop_duplicates(subset=["genome_id", "clade_name"])
 
     columns_to_drop = ["relative_abundance", "sequence_abundance", "ANI (if strain-level)", "Coverage (if strain-level)"]
     merged_df = sylph_prof_df.merge(sylphtax_df, on="genome_id", how="left").drop(columns_to_drop, axis=1)
