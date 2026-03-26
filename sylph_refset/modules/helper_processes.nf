@@ -106,7 +106,7 @@ process SYLPH_SUMMARIZE {
     tuple val(meta), path(sylph_reports)
 
     output:
-    tuple val(meta), path("${meta.ID}_sylph_filtered_report.tsv"), optional: true, emit: report
+    tuple val(meta), path("${meta.ID}_sylph_filtered_report.tsv"), emit: report
     tuple val(meta), path("${meta.ID}_sylph_summary.tsv"), emit: sylph_summary
     tuple val(meta), path("${meta.ID}_references.txt"), optional: true, emit: references
 
