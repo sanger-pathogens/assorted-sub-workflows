@@ -108,11 +108,13 @@ process SYLPH_SUMMARIZE {
     output:
     tuple val(meta), path("${meta.ID}_sylph_filtered_report.tsv"), optional: true, emit: report
     tuple val(meta), path("${meta.ID}_sylph_summary.tsv"), emit: sylph_summary
+    tuple val(meta), path("${meta.ID}_references.txt"), optional: true, emit: references
+
 
     script:
     // Filter once with thresholds.
     """
-    ${workflow.projectDir}/assorted-sub-workflows/taxo_profile/bin/sylph_summarize.py \\
+    ${workflow.projectDir}/assorted-sub-workflows/sylph_refset/bin/sylph_summarize.py \\
         --reports ${sylph_reports} \\
         --genome_path_prefix ${params.genome_path_prefix} \\
         --ani ${params.sylph_ani} \\
