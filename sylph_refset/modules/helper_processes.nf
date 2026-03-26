@@ -122,7 +122,7 @@ process SYLPH_SUMMARIZE {
         --ani-column Naive_ANI \\
         --cov-column Eff_cov \\
         --out-references ${meta.ID}_references.txt \\
-        --out-report ${meta.ID}_sylph_filtered_report.txt \\
+        --out-report ${meta.ID}_sylph_filtered_report.tsv \\
         --out-summary ${meta.ID}_sylph_summary.tsv
     """
 }
