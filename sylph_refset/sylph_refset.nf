@@ -52,7 +52,7 @@ workflow SYLPH_REF_SELECTION {
     | map { meta, report -> report }
     | collectFile( name: "combined_sylph_report.tsv", keepHeader: true )
     // | map { reports -> [ "combined_sylph_report", (reports instanceof List) ? reports : [reports] ] }
-    | map { report -> [ [ID: "combined_sylph_report"], report ] }
+    | map { report -> [ [ID: "combined"], report ] }
     | set { combined_sylph_report }
 
     // Filter based on ANI and coverage threshold
