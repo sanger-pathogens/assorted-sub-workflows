@@ -85,13 +85,28 @@ workflow SYLPH_REF_SELECTION {
         taxon_group = report.baseName.replace("${meta.ID}_", "")  // Construct taxonomic group from filename
         [taxon_group, report]
     }
-    | groupTuple
-    | set { grouped_sample_reports }
+    | set { taxon_grouped_reports }
 
-    // Extract reference lists from reports?
+    // Extract reference lists from reports
+    //TODO Better as a process?
+    taxon_grouped_reports
+    | splitCsv(header: true, sep: "\t")
+    | map { taxon_group, row -> [ taxon_group, row.Genome_file ] }
+    | unique  // Get rid of duplicate genomes
+    | groupTuple
+    | collectFile(
+        { taxon_group, items ->
+            [
+                "${taxon_group}.txt",
+                items.join('\n') + '\n'
+            ]
+        }
+        , storeDir: "${params.outdir}/sylph/taxon_refs"
+    )
+    | set { references }
 
     emit:
-    references = SYLPH_SUMMARIZE.out.references
+    references
     sylph_summary = SYLPH_SUMMARIZE.out.sylph_summary
     combined_sylph_report = NORMALIZE_QUERY_REPORT_FOR_SYLPHTAX.out.sylph_report
     //TODO Do we need to output the following?
