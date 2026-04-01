@@ -52,11 +52,14 @@ process GROUP_SYLPH_REFS_BY_TAXON {
 
     container 'quay.io/sangerpathogens/pandas:2.2.1'
 
+    publishDir "${params.outdir}/sylph/taxon_refs", pattern: "${meta.ID}/refs/*.txt", saveAs: { ref_file -> file(ref_file).name }, mode: 'copy', overwrite: true
+
     input:
     tuple val(meta), path(sylph_report), path(sylphtax_report)
 
     output:
-    tuple val(meta), path("${meta.ID}/*.tsv") , emit: taxon_group_ref_reports
+    tuple val(meta), path("${meta.ID}/reports/*.tsv") , emit: taxon_group_ref_reports
+    tuple val(meta), path("${meta.ID}/refs/*.txt") , emit: taxon_group_refs
 
     script:
     """
@@ -64,7 +67,6 @@ process GROUP_SYLPH_REFS_BY_TAXON {
         --sylph_prof_report ${sylph_report} \\
         --sylphtax_report ${sylphtax_report} \\
         --taxonomic_group ${params.taxonomic_grouping} \\
-        --prefix ${meta.ID} \\
         --outdir ${meta.ID}
     """
 }
