@@ -82,8 +82,11 @@ workflow SYLPH_REF_SELECTION {
         | EXPAND_REFS
 
         EXPAND_REFS.out.references
-        | map { meta, refs -> refs }
-        | flatMap  //TODO Ideally, we should establish a new meta that uses the taxon name so we can join/combine if necessary for downstream processes
+        | transpose
+        | map { meta, ref ->
+            def new_meta = ["ID": ref.baseName]  // Construct taxonomic group from filename
+            [ new_meta, ref ]
+        }
         | set { references }
 
     } else {
