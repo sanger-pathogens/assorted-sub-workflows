@@ -127,3 +127,34 @@ process SYLPH_SUMMARIZE {
         --out-summary ${meta.ID}_sylph_summary.tsv
     """
 }
+
+
+process EXPAND_REFS {
+    tag "${meta.ID}"
+    label 'cpu_1'
+    label 'mem_4'
+    label 'time_queue_from_small'
+
+    publishDir "${params.outdir}/sylph/taxon_refs", mode: 'copy', overwrite: true
+
+    container 'quay.io/sangerpathogens/pandas:2.2.1'
+
+    input:
+    tuple val(meta), path(sylphtax_report), path(taxonomy_data), path(genome_id_to_file)
+
+    output:
+    tuple val(meta), path("taxon_refs/*"), emit: references
+
+
+    script:
+    remove_pattern_option = params.remove_taxo_suffix ? "--remove_pattern '_[A-Z]{0,3}?\$'" : ""
+    """
+    ${workflow.projectDir}/assorted-sub-workflows/sylph_refset/bin/expand_refs.py \\
+        --sylphtax_report *.sylphmpa \\
+        --taxonomy_data ${taxonomy_data} \\
+        --genome_to_file ${genome_id_to_file} \\
+        --outdir taxon_refs \\
+        --taxonomic_group ${params.taxonomic_grouping} \\
+        ${remove_pattern_option}
+    """
+}
