@@ -73,6 +73,7 @@ workflow SYLPH_REF_SELECTION {
     | combine(sylph_tax_metadata_ch)
     | SYLPHTAX_TAXPROF
 
+    // Get all references for taxonomic groups output from sylph-tax report
     if (params.expand_refs) {
         genome_id_to_file = channel.fromPath(params.genome_id_to_file).first()
 
