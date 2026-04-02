@@ -32,6 +32,18 @@
       "taxonomic_grouping": {
         "default": "species",
         "help_text": "Taxonomic rank by which to group references. Choices: domain, kingdom, phylum, class, order, family, genus, species."
+      },
+      "expand_refs": {
+        "default": "true",
+        "help_text": "Expand reference list to all genomes available for taxonomic groups extracted from sylph-tax profiling."
+      },
+      "remove_taxo_suffix": {
+        "default": "false",
+        "help_text": "Remove the alphabetic suffix from the end of taxonomic groups when expand_refs is enabled. May be useful if you do not wish to use the clusters of GTDB (see https://gtdb.ecogenomic.org/faq#why-do-some-genus-and-species-names-end-with-an-alphabetic-suffix)."
+      },
+      "genome_id_to_file": {
+        "default": "/data/pam/collections/GTDB/release226/genomic_files_all_retrievable_2026_03_05/metadata/id_to_genome_path.tsv",
+        "help_text": "File from which to extract genome paths based on genome identifiers (required for if expand_refs is enabled)."
       }
     }
   },
