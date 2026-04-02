@@ -29,6 +29,7 @@ process SYLPH_PROFILE {
     publishDir "${params.outdir}/${meta.ID}/sylph/", pattern: "*.tsv", mode: 'copy', overwrite: true
 
     container 'gitlab-registry.internal.sanger.ac.uk/sanger-pathogens/docker-images/sylph:0.8.1--ha6fb395_0'
+    errorStrategy 'terminate'
 
     input:
     tuple val(meta), path(sketch)
@@ -43,25 +44,46 @@ process SYLPH_PROFILE {
     """
 }
 
+process SYLPH_QUERY {
+    tag "${meta.ID}"
+    label 'cpu_2'
+    label 'mem_20'
+    label 'time_from_queue_small'
+
+    publishDir "${params.outdir}/${meta.ID}/sylph/", pattern: "*.tsv", mode: 'copy', overwrite: true
+
+    container 'gitlab-registry.internal.sanger.ac.uk/sanger-pathogens/docker-images/sylph:0.8.1--ha6fb395_0'
+
+    input:
+    tuple val(meta), path(sketch)
+
+    output:
+    tuple val(meta), path("${meta.ID}_sylph_profile.tsv"), emit: sylph_report
+
+    script:
+    """
+    sylph query ${sketch} ${params.sylph_db} -t ${task.cpus} -o ${meta.ID}_sylph_profile.tsv
+    """
+}
+
 process SYLPHTAX_TAXPROF {
     tag "${meta.ID}"
     label 'cpu_1'
     label 'mem_2'
     label 'time_from_queue_small'
 
-    publishDir "${params.outdir}/${meta.ID}/sylph/", pattern: "*.sylphmpa", mode: 'copy', overwrite: true
+    publishDir params.outdir, saveAs: { filename -> "${file(filename).baseName}/sylph/${filename}" }, pattern: "*.sylphmpa", mode: 'copy', overwrite: true
 
-    container 'gitlab-registry.internal.sanger.ac.uk/sanger-pathogens/docker-images/sylph-tax:1.2.0'
+    container 'quay.io/biocontainers/sylph-tax:1.7.0--pyhdfd78af_0'
 
-    input:
-    tuple val(meta), path(sylph_report)
+    input: tuple val(meta), path(sylph_report), path(sylph_tax_metadata)
 
     output:
-    tuple val(meta), path("${meta.ID}_sylphtax_profile.sylphmpa") , emit: sylphtax_mpa_report
+    tuple val(meta), path("*.sylphmpa") , emit: sylphtax_mpa_report
 
     script:
     """
-    sylph-tax taxprof ${sylph_report} -t ${params.sylphtax_db_tag}
-    mv ${meta.ID}.sylphmpa ${meta.ID}_sylphtax_profile.sylphmpa
+    sylph-tax taxprof "${sylph_report}" -t "${sylph_tax_metadata}"
     """
 }
+

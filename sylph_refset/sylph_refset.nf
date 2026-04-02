@@ -1,0 +1,121 @@
+#!/usr/bin/env nextflow
+
+/*
+========================================================================================
+    IMPORT MODULES/SUBWORKFLOWS
+========================================================================================
+*/
+
+//
+// MODULES
+//
+include   { SYLPH_SKETCH;
+            SYLPH_QUERY;
+            SYLPH_PROFILE;
+            SYLPHTAX_TAXPROF } from '../taxo_profile/modules/sylph.nf'
+include   { COMBINE_SYLPH_REPORTS;
+            NORMALIZE_QUERY_REPORT_FOR_SYLPHTAX;
+            SYLPH_SUMMARIZE;
+            GROUP_SYLPH_REFS_BY_TAXON;
+            COMBINE_REFS_ACROSS_SAMPLES } from './modules/helper_processes.nf'
+
+/*
+========================================================================================
+    RUN MAIN WORKFLOW
+========================================================================================
+*/
+
+workflow SYLPH_REF_SELECTION {
+    take:
+    reads_ch // meta, read_1, read_2
+
+    main:
+    // Workflow only works with GTDB-like sylph database
+    sylph_db_ch = channel.fromPath(params.sylph_db).first()
+    sylph_tax_metadata_ch = channel.fromPath(params.sylph_tax_metadata).first()
+
+    sylph_method = (params.sylph_method ?: 'query').toString().toLowerCase()
+
+    SYLPH_SKETCH(reads_ch)
+    if (sylph_method == 'query') {
+        SYLPH_QUERY(SYLPH_SKETCH.out.sketch)
+        sylph_report_ch = SYLPH_QUERY.out.sylph_report
+    } else if (sylph_method == 'profile') {
+        SYLPH_PROFILE(SYLPH_SKETCH.out.sketch)
+        sylph_report_ch = SYLPH_PROFILE.out.sylph_report
+    } else {
+        error "Unsupported --sylph_method '${params.sylph_method}'. Use 'query' or 'profile'."
+    }
+
+    // Combine sylph reports
+    sylph_report_ch
+    | map { meta, report -> report }
+    | collectFile( name: "combined_sylph_report.tsv", keepHeader: true, storeDir: "${params.outdir}/sylph" )
+    // | map { reports -> [ "combined_sylph_report", (reports instanceof List) ? reports : [reports] ] }
+    | map { report -> [ [ID: "combined"], report ] }
+    | set { combined_sylph_report }
+
+    // Filter based on ANI and coverage threshold
+    combined_sylph_report
+    | SYLPH_SUMMARIZE
+
+    // Normalize report
+    if (sylph_method == 'query') {
+        NORMALIZE_QUERY_REPORT_FOR_SYLPHTAX(SYLPH_SUMMARIZE.out.report)
+        sylphtax_input_ch = NORMALIZE_QUERY_REPORT_FOR_SYLPHTAX.out.sylph_report
+    } else {
+        sylphtax_input_ch = SYLPH_SUMMARIZE.out.report
+    }
+
+    // Get taxonomic profile in metaphlan (mpa) report format
+    sylphtax_input_ch
+    | combine(sylph_tax_metadata_ch)
+    | SYLPHTAX_TAXPROF
+
+    // Join sylph report (incl. reference filepaths) with taxonomy
+    sylphtax_input_ch
+    | join(SYLPHTAX_TAXPROF.out.sylphtax_mpa_report)
+    | GROUP_SYLPH_REFS_BY_TAXON
+
+    // Group reports by taxonomic group, then combine them across samples
+    // Output can then be passed to SYLPH_SUMMARIZE for filtering
+    GROUP_SYLPH_REFS_BY_TAXON.out.taxon_group_ref_reports
+    | transpose
+    | map { meta, report ->
+        taxon_group = report.baseName.replace("${meta.ID}_", "")  // Construct taxonomic group from filename
+        [taxon_group, report]
+    }
+    | set { taxon_grouped_reports }
+
+    // Extract reference lists from reports
+    //TODO Better as a process?
+    taxon_grouped_reports
+    | splitCsv(header: true, sep: "\t")
+    | map { taxon_group, row -> [ taxon_group, row.Genome_file ] }
+    | unique  // Get rid of duplicate genomes
+    | groupTuple
+    | collectFile(
+        { taxon_group, items ->
+            [
+                "${taxon_group}.txt",
+                items.join('\n') + '\n'
+            ]
+        }
+        , storeDir: "${params.outdir}/sylph/taxon_refs"
+    )
+    | set { references }
+
+    emit:
+    references
+    sylph_summary = SYLPH_SUMMARIZE.out.sylph_summary
+    combined_sylph_report = NORMALIZE_QUERY_REPORT_FOR_SYLPHTAX.out.sylph_report
+    //TODO Do we need to output the following?
+    // sylph_db = sylph_db_ch
+    // sylphtax_mpa_report = SYLPHTAX_TAXPROF.out.sylphtax_mpa_report
+}
+
+/*
+========================================================================================
+    THE END
+========================================================================================
+*/
