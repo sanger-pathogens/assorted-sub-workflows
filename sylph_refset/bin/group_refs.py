@@ -96,7 +96,9 @@ def main():
         if args.prefix:
             report_prefix = f"{args.prefix}_{report_prefix}"
         df.to_csv(args.outdir / "reports" / f"{report_prefix}.tsv", sep="\t", index=False)
-        df.to_csv(args.outdir / "refs" / f"{report_prefix}.txt", sep="\t", index=False, columns=["Genome_file"])
+        # Ensure we have a unique list of genomes as output
+        refs = pd.Series(df["Genome_file"].unique())
+        refs.to_csv(args.outdir / "refs" / f"{report_prefix}.txt", sep="\t", index=False, header=False)
 
 if __name__ == "__main__":
     main()
