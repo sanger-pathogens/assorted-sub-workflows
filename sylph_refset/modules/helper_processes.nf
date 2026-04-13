@@ -137,7 +137,7 @@ process EXPAND_REFS {
     label 'mem_4'
     label 'time_queue_from_small'
 
-    publishDir "${params.outdir}/sylph/taxon_refs", mode: 'copy', overwrite: true
+    publishDir "${params.outdir}/sylph", mode: 'copy', overwrite: true
 
     container 'quay.io/sangerpathogens/pandas:2.2.1'
 
