@@ -76,7 +76,9 @@ def main():
     args = parse_args()
     setup_logging()
 
-    args.outdir.mkdir(parents=True, exist_ok=True)
+    outdirs = [args.outdir / "reports", args.outdir / "refs"]
+    for outdir in outdirs:
+        outdir.mkdir(parents=True, exist_ok=True)
 
     sylph_prof_df = extract_genbank_id(load_data(args.sylph_prof_report), column="Genome_file")
     sylphtax_df = extract_genbank_id(load_taxonomy_data(args.sylphtax_report), column="clade_name")
@@ -93,13 +95,10 @@ def main():
         report_prefix = normalize_taxon_name(taxon_name)
         if args.prefix:
             report_prefix = f"{args.prefix}_{report_prefix}"
-        df.to_csv(args.outdir / f"{report_prefix}.tsv", sep="\t", index=False)
-
-
-
-
-
-
+        df.to_csv(args.outdir / "reports" / f"{report_prefix}.tsv", sep="\t", index=False)
+        # Ensure we have a unique list of genomes as output
+        refs = pd.Series(df["Genome_file"].unique())
+        refs.to_csv(args.outdir / "refs" / f"{report_prefix}.txt", sep="\t", index=False, header=False)
 
 if __name__ == "__main__":
     main()

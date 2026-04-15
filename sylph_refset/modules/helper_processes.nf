@@ -52,11 +52,14 @@ process GROUP_SYLPH_REFS_BY_TAXON {
 
     container 'quay.io/sangerpathogens/pandas:2.2.1'
 
+    publishDir "${params.outdir}/sylph/taxon_refs", pattern: "${meta.ID}/refs/*.txt", saveAs: { ref_file -> file(ref_file).name }, mode: 'copy', overwrite: true
+
     input:
     tuple val(meta), path(sylph_report), path(sylphtax_report)
 
     output:
-    tuple val(meta), path("${meta.ID}/*.tsv") , emit: taxon_group_ref_reports
+    tuple val(meta), path("${meta.ID}/reports/*.tsv") , emit: taxon_group_ref_reports
+    tuple val(meta), path("${meta.ID}/refs/*.txt") , emit: taxon_group_refs
 
     script:
     """
@@ -64,7 +67,6 @@ process GROUP_SYLPH_REFS_BY_TAXON {
         --sylph_prof_report ${sylph_report} \\
         --sylphtax_report ${sylphtax_report} \\
         --taxonomic_group ${params.taxonomic_grouping} \\
-        --prefix ${meta.ID} \\
         --outdir ${meta.ID}
     """
 }
@@ -125,5 +127,36 @@ process SYLPH_SUMMARIZE {
         --out-references ${meta.ID}_references.txt \\
         --out-report ${meta.ID}_sylph_filtered_report.tsv \\
         --out-summary ${meta.ID}_sylph_summary.tsv
+    """
+}
+
+
+process EXPAND_REFS {
+    tag "${meta.ID}"
+    label 'cpu_1'
+    label 'mem_4'
+    label 'time_queue_from_small'
+
+    publishDir "${params.outdir}/sylph", mode: 'copy', overwrite: true
+
+    container 'quay.io/sangerpathogens/pandas:2.2.1'
+
+    input:
+    tuple val(meta), path(sylphtax_report), path(taxonomy_data), path(genome_id_to_file)
+
+    output:
+    tuple val(meta), path("taxon_refs/*"), emit: references
+
+
+    script:
+    remove_pattern_option = params.remove_taxo_suffix ? "--remove_pattern '_[A-Z]{0,3}?\$'" : ""
+    """
+    ${workflow.projectDir}/assorted-sub-workflows/sylph_refset/bin/expand_refs.py \\
+        --sylphtax_report *.sylphmpa \\
+        --taxonomy_data ${taxonomy_data} \\
+        --genome_to_file ${genome_id_to_file} \\
+        --outdir taxon_refs \\
+        --taxonomic_group ${params.taxonomic_grouping} \\
+        ${remove_pattern_option}
     """
 }

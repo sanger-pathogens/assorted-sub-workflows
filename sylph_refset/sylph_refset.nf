@@ -17,7 +17,8 @@ include   { COMBINE_SYLPH_REPORTS;
             NORMALIZE_QUERY_REPORT_FOR_SYLPHTAX;
             SYLPH_SUMMARIZE;
             GROUP_SYLPH_REFS_BY_TAXON;
-            COMBINE_REFS_ACROSS_SAMPLES } from './modules/helper_processes.nf'
+            COMBINE_REFS_ACROSS_SAMPLES
+            EXPAND_REFS } from './modules/helper_processes.nf'
 
 /*
 ========================================================================================
@@ -51,7 +52,6 @@ workflow SYLPH_REF_SELECTION {
     sylph_report_ch
     | map { meta, report -> report }
     | collectFile( name: "combined_sylph_report.tsv", keepHeader: true, storeDir: "${params.outdir}/sylph" )
-    // | map { reports -> [ "combined_sylph_report", (reports instanceof List) ? reports : [reports] ] }
     | map { report -> [ [ID: "combined"], report ] }
     | set { combined_sylph_report }
 
@@ -72,38 +72,39 @@ workflow SYLPH_REF_SELECTION {
     | combine(sylph_tax_metadata_ch)
     | SYLPHTAX_TAXPROF
 
-    // Join sylph report (incl. reference filepaths) with taxonomy
-    sylphtax_input_ch
-    | join(SYLPHTAX_TAXPROF.out.sylphtax_mpa_report)
-    | GROUP_SYLPH_REFS_BY_TAXON
+    // Get all references for taxonomic groups output from sylph-tax report
+    if (params.expand_refs) {
+        genome_id_to_file = channel.fromPath(params.genome_id_to_file).first()
 
-    // Group reports by taxonomic group, then combine them across samples
-    // Output can then be passed to SYLPH_SUMMARIZE for filtering
-    GROUP_SYLPH_REFS_BY_TAXON.out.taxon_group_ref_reports
-    | transpose
-    | map { meta, report ->
-        taxon_group = report.baseName.replace("${meta.ID}_", "")  // Construct taxonomic group from filename
-        [taxon_group, report]
-    }
-    | set { taxon_grouped_reports }
+        SYLPHTAX_TAXPROF.out.sylphtax_mpa_report
+        | combine(sylph_tax_metadata_ch)
+        | combine(genome_id_to_file)
+        | EXPAND_REFS
 
-    // Extract reference lists from reports
-    //TODO Better as a process?
-    taxon_grouped_reports
-    | splitCsv(header: true, sep: "\t")
-    | map { taxon_group, row -> [ taxon_group, row.Genome_file ] }
-    | unique  // Get rid of duplicate genomes
-    | groupTuple
-    | collectFile(
-        { taxon_group, items ->
-            [
-                "${taxon_group}.txt",
-                items.join('\n') + '\n'
-            ]
+        EXPAND_REFS.out.references
+        | transpose
+        | map { meta, ref ->
+            def new_meta = ["ID": ref.baseName]  // Construct taxonomic group from filename
+            [ new_meta, ref ]
         }
-        , storeDir: "${params.outdir}/sylph/taxon_refs"
-    )
-    | set { references }
+        | set { references }
+
+    } else {
+        // Join sylph report (incl. reference filepaths) with taxonomy
+        sylphtax_input_ch
+        | join(SYLPHTAX_TAXPROF.out.sylphtax_mpa_report)
+        | GROUP_SYLPH_REFS_BY_TAXON
+
+        // Group reports by taxonomic group and output taxon-specific references
+        GROUP_SYLPH_REFS_BY_TAXON.out.taxon_group_refs
+        | transpose
+        | map { meta, ref ->
+            def new_meta = ["ID": ref.baseName]  // Construct taxonomic group from filename
+            [new_meta, ref]
+        }
+        | set { references }
+
+    }
 
     emit:
     references
