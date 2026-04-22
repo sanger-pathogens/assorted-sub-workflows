@@ -152,3 +152,26 @@ process PIPELINE_EVENTS_CREATE_FILE {
 
     
 }
+
+process PIPELINE_EVENTS_INGEST_FILES {
+    label 'cpu_1'
+    label 'mem_1'
+    label 'time_queue_from_small'
+    cache false
+
+    container "${params.pipeline_events_container}"
+
+    input:
+    val(batch_id)
+    val(file_to_ingest)
+    val(filetype)
+
+    script:
+    ingestmanifest=pipevdb_ingest_manifest.tsv
+    """
+    echo "type,path" > ${ingestmanifest}
+    echo "${filetype},${file_to_ingest}" >> ${ingestmanifest}
+    send_pipeline_event ingest --batch_id ${batch_id} --path ${ingestmanifest} \\
+      --username \$(id -un) --group \$(id -gn)
+    """
+}
