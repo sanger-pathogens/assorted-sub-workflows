@@ -57,7 +57,7 @@ process PIPELINE_EVENTS_OPEN_BATCH {
     files_created == true
 
     output:
-    tuple val(batch_mani_params), path(batch_mani_params_out), emit: batch_manifest_params
+    path(batch_mani_params_out), emit: batch_manifest_params
     val(batch_id),  emit: batch_id
 
     script:
@@ -122,6 +122,27 @@ process GATHER_RESULTFILE_INFO {
     """
 }
 
+process GATHER_SUMMARYFILE_INFO {
+    label 'cpu_1'
+    label 'mem_1'
+    label 'local'
+    cache false
+
+    input:
+    path(resultfileWorkPath)
+    val(file_type)
+    val(batch_id)
+
+    output:
+    tuple path(resultfileWorkPath), val(file_type), val(batch_id), emit: file_info
+
+    // could be exec block here maybe, given shell script is there purely to avoid returning last declared variable
+    script:
+    """
+    echo "file path to track: ${resultfilePublishedDirAbsPath}"
+    """
+}
+
 process PIPELINE_EVENTS_CREATE_FILE {
     label 'cpu_1'
     label 'mem_1'
@@ -134,7 +155,7 @@ process PIPELINE_EVENTS_CREATE_FILE {
     tuple val(meta), path(resultfileWorkPath), val(resultfilePublishedDir), val(file_type), val(batch_id) // val(resultfilePublishedDir), not path() so not to stage folder
 
     output:
-    tuple val(outid), val(resultfilePublishedFullPath), val(file_type),  emit: created_file_info // val(resultfilePublishedFullPath), not path() so not to stage the file that's outside the work folder
+    tuple val(runid), val(resultfilePublishedFullPath), val(file_type),  emit: created_file_info // val(resultfilePublishedFullPath), not path() so not to stage the file that's outside the work folder
 
     script:
     runid = meta.ID
@@ -160,9 +181,12 @@ process PIPELINE_EVENTS_INGEST_FILES {
     container "${params.pipeline_events_container}"
 
     input:
-    val(batch_id)
-    val(file_to_ingest)
+    path(file_to_ingest)
     val(filetype)
+    val(batch_id)
+
+    output:
+    path(ingestmanifest)
 
     script:
     ingestmanifest=pipevdb_ingest_manifest.tsv

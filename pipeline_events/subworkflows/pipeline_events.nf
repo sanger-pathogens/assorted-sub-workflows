@@ -1,8 +1,8 @@
 include { PIPELINE_GET_METHOD ;
           PIPELINE_EVENTS_OPEN_BATCH ;
           PIPELINE_EVENTS_CLOSE_BATCH ;
-          GATHER_RESULTFILE_INFO ;
-          PIPELINE_EVENTS_CREATE_FILE } from '../modules/pipeline_events.nf'
+          GATHER_SUMMARYFILE_INFO ;
+          PIPELINE_EVENTS_INGEST_FILES } from '../modules/pipeline_events.nf'
 
 
 workflow PIPELINE_EVENTS_INIT {
@@ -28,17 +28,11 @@ workflow PIPELINE_EVENTS_INIT {
 
     batch_id = PIPELINE_EVENTS_OPEN_BATCH.out.batch_id
 
-    GATHER_RESULTFILE_INFO(PIPELINE_EVENTS_OPEN_BATCH.out.batch_manifest_params, "pipeline_info", "batch_manifest", batch_id)
+    GATHER_SUMMARYFILE_INFO(PIPELINE_EVENTS_OPEN_BATCH.out.batch_manifest_params, "batch_manifest", batch_id)
 
-    if (params.track_batch_metadata) {
-        GATHER_RESULTFILE_INFO.out.file_info
-        | PIPELINE_EVENTS_CREATE_FILE
-        | set { batch_manifest_info }
-    } else {
-        Channel.empty()
-        | set { batch_manifest_info }  // default empty channel if not associating metadata
-    }
-
+    GATHER_SUMMARYFILE_INFO.out.file_info
+    | set { batch_manifest_info }
+ 
     emit:
     batch_id
     batch_manifest_info
@@ -47,13 +41,11 @@ workflow PIPELINE_EVENTS_INIT {
 workflow PIPELINE_EVENTS_END {
     take:
     batch_id
-    batch_manifest_info
     created_file_infos
 
     main:
     if (params.track_batch_metadata) {
         created_file_infos
-        .mix(batch_manifest_info)
         .set { all_created_file_infos }
     } else {
         created_file_infos
