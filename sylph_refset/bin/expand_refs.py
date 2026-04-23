@@ -89,7 +89,8 @@ def main():
 
         if args.prefix:
             report_prefix = f"{args.prefix}_{report_prefix}"
-        genome_files.to_csv(args.outdir / f"{report_prefix}.txt", sep="\t", index=False, header=False)
+        if not genome_files.empty:
+            genome_files.to_csv(args.outdir / f"{report_prefix}.txt", sep="\t", index=False, header=False)
 
 
 if __name__ == "__main__":
