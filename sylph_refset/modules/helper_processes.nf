@@ -145,7 +145,7 @@ process EXPAND_REFS {
     tuple val(meta), path(sylphtax_report), path(taxonomy_data), path(genome_id_to_file)
 
     output:
-    tuple val(meta), path("taxon_refs/*"), emit: references
+    tuple val(meta), path("taxon_refs/*"), optional: true, emit: references
 
 
     script:
