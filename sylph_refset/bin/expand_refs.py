@@ -91,6 +91,8 @@ def main():
             report_prefix = f"{args.prefix}_{report_prefix}"
         if not genome_files.empty:
             genome_files.to_csv(args.outdir / f"{report_prefix}.txt", sep="\t", index=False, header=False)
+        else:
+            logging.warning(f"Found no representatives for '{taxon_name}' in {args.genome_to_file}. Skipping output...")
 
 
 if __name__ == "__main__":
