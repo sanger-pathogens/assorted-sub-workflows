@@ -3,6 +3,7 @@
 import argparse
 import logging
 import re
+import sys
 from pathlib import Path
 
 import pandas as pd
@@ -74,6 +75,10 @@ def main():
     taxonomy_df = load_data(args.taxonomy_data)
     taxonomy_df = split_taxonomy(taxonomy_df, taxonomy_column=1)
     taxonomy_df_subset = taxonomy_df.loc[taxonomy_df[args.taxonomic_rank].isin(taxa)]
+    if len(taxonomy_df_subset) == 0:
+        logging.error(f"No representatives were found for any of the taxa at the taxonomic rank '{args.taxonomic_rank}' reported by sylph-tax: {taxa}")
+        logging.info(f"Check that the taxonomy data provided '{args.taxonomy_data}' is the same as that used for the sylph/sylph-tax report.")
+        sys.exit(1)
     if args.remove_pattern:
         remove_pattern = re.compile(args.remove_pattern)
         taxonomy_df_subset[args.taxonomic_rank] = taxonomy_df_subset[args.taxonomic_rank].str.replace(remove_pattern, "", regex=True)
@@ -82,6 +87,7 @@ def main():
 
     genome_id_to_file = load_data(args.genome_to_file)
     
+    references_found = False
     for taxon_name, df in taxonomy_specific_dfs.items():
         report_prefix = normalize_taxon_name(taxon_name)
         genome_ids = df[0]
@@ -90,9 +96,14 @@ def main():
         if args.prefix:
             report_prefix = f"{args.prefix}_{report_prefix}"
         if not genome_files.empty:
+            references_found = True
             genome_files.to_csv(args.outdir / f"{report_prefix}.txt", sep="\t", index=False, header=False)
         else:
             logging.warning(f"Found no representatives for '{taxon_name}' in {args.genome_to_file}. Skipping output...")
+    if not references_found:
+        logging.error(f"No references were found for genome identifiers gathered from the taxonomy data '{args.taxonomy_data}'.")
+        logging.info(f"Please ensure that at least some references of the expected taxa are present in the genome-to-file map '{args.genome_to_file}'.")
+        sys.exit(1)
 
 
 if __name__ == "__main__":
