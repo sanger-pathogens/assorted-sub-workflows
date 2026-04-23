@@ -94,39 +94,35 @@ process COMBINE_REFS_ACROSS_SAMPLES {
     """
 }
 
-process SYLPH_SUMMARIZE {
+process SYLPH_FILTER {
     tag "${meta.ID}"
     label 'cpu_1'
     label 'mem_4'
     label 'time_queue_from_small'
 
     publishDir "${params.outdir}/sylph/", pattern: "${meta.ID}_sylph_filtered_report.tsv", mode: 'copy', overwrite: true
-    publishDir "${params.outdir}/sylph/", pattern: "${meta.ID}_sylph_summary.tsv", mode: 'copy', overwrite: true
 
     container 'quay.io/sangerpathogens/pandas:2.2.1'
 
     input:
-    tuple val(meta), path(sylph_reports)
+    tuple val(meta), path(sylph_reports), val(sylph_method), path(taxonomy_data)
 
     output:
     tuple val(meta), path("${meta.ID}_sylph_filtered_report.tsv"), emit: report
-    tuple val(meta), path("${meta.ID}_sylph_summary.tsv"), emit: sylph_summary
-    tuple val(meta), path("${meta.ID}_references.txt"), optional: true, emit: references
+    tuple val(meta), path("${meta.ID}_removed_references_by_species.tsv"), emit: removed_reference_summary
 
 
     script:
     // Filter once with thresholds.
     """
-    ${workflow.projectDir}/assorted-sub-workflows/sylph_refset/bin/sylph_summarize.py \\
-        --reports ${sylph_reports} \\
-        --genome_path_prefix ${params.genome_path_prefix} \\
+    python3 ${workflow.projectDir}/assorted-sub-workflows/sylph_refset/bin/filter_refs.py \\
+        --input ${sylph_reports} \\
+        --taxonomy-data ${taxonomy_data} \\
+        --sylph-method ${sylph_method} \\
         --ani ${params.sylph_ani} \\
         --cov ${params.sylph_cov} \\
-        --ani-column Naive_ANI \\
-        --cov-column Eff_cov \\
-        --out-references ${meta.ID}_references.txt \\
         --out-report ${meta.ID}_sylph_filtered_report.tsv \\
-        --out-summary ${meta.ID}_sylph_summary.tsv
+        --out-summary ${meta.ID}_removed_references_by_species.tsv
     """
 }
 
