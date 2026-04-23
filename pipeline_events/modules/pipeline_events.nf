@@ -138,11 +138,9 @@ process PIPELINE_EVENTS_CREATE_FILE {
 
     script:
     runid = meta.ID
-    outid = (runid == null) ? batch_id : runid
     resultfileName = resultfileWorkPath.name.toString()
     resultfilePublishedFullPath = "${resultfilePublishedDir}/${resultfileName}"
-    // runassociationOptString = (file_type == "batch_manifest") ? "" : "--association RUN --association_id ${runid}"
-    runassociationOptString = "--association RUN --association_id ${runid}" // in waiting for the API to allow not using these options for batch_manifest type
+    runassociationOptString = "--association RUN --association_id ${runid}"
     """
     filemd5=\$(md5sum ${resultfileWorkPath} | cut -d' ' -f1)
     send_pipeline_event file --batch_id ${batch_id} --path ${resultfilePublishedFullPath} --file_type ${file_type} \\
