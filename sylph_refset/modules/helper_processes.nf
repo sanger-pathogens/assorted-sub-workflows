@@ -105,7 +105,7 @@ process SYLPH_FILTER {
     container 'quay.io/sangerpathogens/pandas:2.2.1'
 
     input:
-    tuple val(meta), path(sylph_reports), val(sylph_method), path(taxonomy_data)
+    tuple val(meta), path(sylph_reports), path(taxonomy_data)
 
     output:
     tuple val(meta), path("${meta.ID}_sylph_filtered_report.tsv"), emit: report
@@ -118,9 +118,10 @@ process SYLPH_FILTER {
     python3 ${workflow.projectDir}/assorted-sub-workflows/sylph_refset/bin/filter_refs.py \\
         --input ${sylph_reports} \\
         --taxonomy-data ${taxonomy_data} \\
-        --sylph-method ${sylph_method} \\
         --ani ${params.sylph_ani} \\
         --cov ${params.sylph_cov} \\
+        --ani-column Naive_ANI \\
+        --cov-column Eff_cov \\
         --out-report ${meta.ID}_sylph_filtered_report.tsv \\
         --out-summary ${meta.ID}_removed_references_by_species.tsv
     """
