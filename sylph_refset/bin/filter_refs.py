@@ -87,13 +87,26 @@ def main():
         removed_genome_ids = sorted(set(df["__genome_id"].dropna()) - set(pass_hits["__genome_id"].dropna()))
 
         if removed_genome_ids:
+            valid_removed_genome_ids = []
+            for genome_id in removed_genome_ids:
+                if genome_id:
+                    valid_removed_genome_ids.append(genome_id)
+
+            # Start a DataFrame with one row per removed genome ID.
+            removed_genomes_df = pd.DataFrame({"genome_id": valid_removed_genome_ids})
+
+            # Add the species name for each genome ID
+            removed_genomes_df["species_name"] = removed_genomes_df["genome_id"].map(species_by_genome_id)
+            removed_genomes_df["species_name"] = removed_genomes_df["species_name"].fillna("unknown_species")
+
+            # Collapse removed genome IDs into a comma-separated list for each species.
             summary_df = (
-                pd.DataFrame({"genome_id": [genome_id for genome_id in removed_genome_ids if genome_id]})
-                .assign(species_name=lambda sdf: sdf["genome_id"].map(species_by_genome_id).fillna("unknown_species"))
-                .groupby("species_name", sort=True)["genome_id"]
-                .agg(lambda ids: ",".join(sorted(set(ids))))
+                removed_genomes_df.groupby("species_name", sort=True)["genome_id"]
+                .agg(lambda genome_ids: ",".join(sorted(set(genome_ids))))
                 .reset_index(name="removed_genome_ids")
             )
+
+            # Count how many unique removed references were recorded for each species.
             summary_df["removed_reference_count"] = summary_df["removed_genome_ids"].str.split(",").map(len)
             summary_df = summary_df[SUMMARY_COLUMNS]
         else:
