@@ -11,22 +11,15 @@ SUMMARY_COLUMNS = ["species_name", "removed_reference_count", "removed_genome_id
 def parse_args():
     p = argparse.ArgumentParser(description="Filter a combined sylph TSV report using ANI and effective coverage thresholds.")
     p.add_argument("--input", type=Path, required=True, help="Combined sylph report TSV.")
-    p.add_argument(
-        "--taxonomy-data",
-        type=Path,
-        help="Two-column taxonomy TSV mapping genome IDs to GTDB taxonomy strings.",
-    )
+    p.add_argument("--taxonomy-data", type=Path, help="Two-column taxonomy TSV mapping genome IDs to GTDB taxonomy strings.")
     p.add_argument("--ani", type=float, required=True, help="Minimum ANI threshold.")
     p.add_argument("--cov", type=float, required=True, help="Minimum Eff_cov threshold.")
     p.add_argument("--ani-column", default="Adjusted_ANI")
     p.add_argument("--cov-column", default="Eff_cov")
     p.add_argument("--out-report", type=Path, required=True, help="Filtered TSV output path.")
     p.add_argument("--out-summary", type=Path, help="Optional summary TSV output path.")
-    p.add_argument(
-        "--out-references",
-        type=Path,
-        help="Optional file containing unique Genome_file entries from the filtered report.",
-    )
+    p.add_argument("--out-references", type=Path, help="Optional file containing unique Genome_file entries from the filtered report.")
+    p.add_argument("--genome-path-prefix", default="", help="Optional prefix to prepend to relative Genome_file paths when writing --out-references.")
     return p.parse_args()
 
 
@@ -55,6 +48,13 @@ def load_species_by_genome_id(path):
     return dict(zip(taxonomy_df["genome_id"], taxonomy_df["species_name"]))
 
 
+def resolve_reference_path(genome_file, genome_path_prefix):
+    genome_path = Path(genome_file)
+    if not genome_path.is_absolute() and genome_path_prefix:
+        genome_path = Path(genome_path_prefix) / genome_path
+    return str(genome_path.resolve(strict=False))
+
+
 def main():
     args = parse_args()
     df = pd.read_csv(args.input, sep="\t")
@@ -79,6 +79,7 @@ def main():
 
     if args.out_references:
         references = sorted(pass_hits["Genome_file"].dropna().unique())
+        references = [resolve_reference_path(reference, args.genome_path_prefix) for reference in references]
         args.out_references.parent.mkdir(parents=True, exist_ok=True)
         args.out_references.write_text("".join(f"{reference}\n" for reference in references))
 
