@@ -21,10 +21,6 @@
         "default": "/data/pam/software/sylph-tax/v1/gtdb_r226_metadata.tsv",
         "help_text": "Path to the sylph-tax metadata TSV to use for taxprof."
       },
-      "sylph_method": {
-        "default": "query",
-        "help_text": "Sylph command to use for reference selection. Choices: query, profile."
-      },
       "save_sylph_sketches": {
         "default": "true",
         "help_text": "Keep Sylph sketches."

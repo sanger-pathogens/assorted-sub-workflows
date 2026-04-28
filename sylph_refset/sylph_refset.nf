@@ -11,11 +11,10 @@
 //
 include   { SYLPH_SKETCH;
             SYLPH_QUERY;
-            SYLPH_PROFILE;
             SYLPHTAX_TAXPROF } from '../taxo_profile/modules/sylph.nf'
 include   { COMBINE_SYLPH_REPORTS;
             NORMALIZE_QUERY_REPORT_FOR_SYLPHTAX;
-            SYLPH_SUMMARIZE;
+            SYLPH_FILTER;
             GROUP_SYLPH_REFS_BY_TAXON;
             COMBINE_REFS_ACROSS_SAMPLES
             EXPAND_REFS } from './modules/helper_processes.nf'
@@ -35,18 +34,9 @@ workflow SYLPH_REF_SELECTION {
     sylph_db_ch = channel.fromPath(params.sylph_db).first()
     sylph_tax_metadata_ch = channel.fromPath(params.sylph_tax_metadata).first()
 
-    sylph_method = (params.sylph_method ?: 'query').toString().toLowerCase()
-
     SYLPH_SKETCH(reads_ch)
-    if (sylph_method == 'query') {
-        SYLPH_QUERY(SYLPH_SKETCH.out.sketch)
-        sylph_report_ch = SYLPH_QUERY.out.sylph_report
-    } else if (sylph_method == 'profile') {
-        SYLPH_PROFILE(SYLPH_SKETCH.out.sketch)
-        sylph_report_ch = SYLPH_PROFILE.out.sylph_report
-    } else {
-        error "Unsupported --sylph_method '${params.sylph_method}'. Use 'query' or 'profile'."
-    }
+    SYLPH_QUERY(SYLPH_SKETCH.out.sketch)
+    sylph_report_ch = SYLPH_QUERY.out.sylph_report
 
     // Combine sylph reports
     sylph_report_ch
@@ -57,15 +47,13 @@ workflow SYLPH_REF_SELECTION {
 
     // Filter based on ANI and coverage threshold
     combined_sylph_report
-    | SYLPH_SUMMARIZE
+    | combine(sylph_tax_metadata_ch)
+    | map { meta, report, taxonomy_data -> [ meta, report, taxonomy_data ] }
+    | SYLPH_FILTER
 
-    // Normalize report
-    if (sylph_method == 'query') {
-        NORMALIZE_QUERY_REPORT_FOR_SYLPHTAX(SYLPH_SUMMARIZE.out.report)
-        sylphtax_input_ch = NORMALIZE_QUERY_REPORT_FOR_SYLPHTAX.out.sylph_report
-    } else {
-        sylphtax_input_ch = SYLPH_SUMMARIZE.out.report
-    }
+    // Normalize query output to make it compatible for input to sylph-tax.
+    NORMALIZE_QUERY_REPORT_FOR_SYLPHTAX(SYLPH_FILTER.out.report)
+    sylphtax_input_ch = NORMALIZE_QUERY_REPORT_FOR_SYLPHTAX.out.sylph_report
 
     // Get taxonomic profile in metaphlan (mpa) report format
     sylphtax_input_ch
@@ -108,8 +96,7 @@ workflow SYLPH_REF_SELECTION {
 
     emit:
     references
-    sylph_summary = SYLPH_SUMMARIZE.out.sylph_summary
-    combined_sylph_report = NORMALIZE_QUERY_REPORT_FOR_SYLPHTAX.out.sylph_report
+    combined_sylph_report = SYLPH_FILTER.out.report
     //TODO Do we need to output the following?
     // sylph_db = sylph_db_ch
     // sylphtax_mpa_report = SYLPHTAX_TAXPROF.out.sylphtax_mpa_report
