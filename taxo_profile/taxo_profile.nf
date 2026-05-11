@@ -35,10 +35,13 @@ workflow TAXO_PROFILE {
     if (params.sylph_profile){
         SYLPH_SKETCH(read_ch)
         | SYLPH_PROFILE
-        | set { sylph_report }
 
-        SYLPHTAX_TAXPROF(SYLPH_PROFILE.out.sylph_report, sylph_tax_metadata_ch)
-        SYLPHTAX_TAXPROF.out.sylphtax_mpa_report | set { sylphtax_mpa_report }
+        SYLPH_PROFILE.out.sylph_report
+        .combine(sylph_tax_metadata_ch)
+        | SYLPHTAX_TAXPROF
+
+        SYLPHTAX_TAXPROF.out.sylphtax_mpa_report 
+        | set { sylphtax_mpa_report }
     } else {
         sylph_report = channel.empty()
         sylphtax_mpa_report = channel.empty()
