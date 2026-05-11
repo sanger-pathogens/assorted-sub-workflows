@@ -35,6 +35,7 @@ workflow TAXO_PROFILE {
     if (params.sylph_profile){
         SYLPH_SKETCH(read_ch)
         | SYLPH_PROFILE
+        | set { sylph_report }
 
         SYLPH_PROFILE.out.sylph_report
         .combine(sylph_tax_metadata_ch)
