@@ -70,29 +70,3 @@ workflow MIXED_INPUT {
     emit:
     all_reads_ready_ch //channel of [meta, R1, R2] taken from a mixture of IRODS + Given manifest or either
 }
-                )
-            } 
-        | set { reads_from_local_dir_ch }
-
-        if (params.only_new_input){
-            FILTER_EXISTING_OUTPUTS(reads_from_local_dir_ch)
-            FILTER_EXISTING_OUTPUTS.out.do_not_exist
-            .set { reads_from_local_dir_to_process }
-        } else{
-            reads_from_local_dir_to_process = reads_from_local_dir_ch
-        }
-    } else {
-        Channel.of("none")
-        | set { reads_from_local_dir_ch }
-    }
-
-    reads_from_irods_ch
-    | mix(reads_from_local_ch)
-    | mix(reads_from_ena_ch)
-    | mix (reads_from_local_dir_ch)
-    | filter { it != "none"}
-    | set { all_reads_ready_ch }
-
-    emit:
-    all_reads_ready_ch //channel of [meta, R1, R2] taken from a mixture of IRODS + Given manifest or either
-}
