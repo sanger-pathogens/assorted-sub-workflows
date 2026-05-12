@@ -1,6 +1,7 @@
 //
 // Check input samplesheet and get read channels
 //
+include { FILTER_EXISTING_OUTPUTS       } from './../../../pipeline_chaining/subworkflows/skip_downloaded.nf'
 
 workflow INPUT_CHECK {
     take:
@@ -14,9 +15,17 @@ workflow INPUT_CHECK {
         .map { create_fastq_channels(it) }
         .filter{ meta, reads_1, reads_2 -> reads_1 != null && reads_2 != null }  // Single end not supported
         .set { shortreads }
+    
+        if (params.only_new_input){
+            FILTER_EXISTING_OUTPUTS(shortreads)
+            FILTER_EXISTING_OUTPUTS.out.do_not_exist
+            .set { shortreads_to_process }
+        } else{
+            shortreads_to_process = shortreads
+        }
 
     emit:
-    shortreads // channel: [ val(meta), file(reads_1), file(reads_2) ]
+    shortreads_to_process // channel: [ val(meta), file(reads_1), file(reads_2) ]
 }
 
 // Function to get list of [ meta, fastq_1, fastq_2 ]

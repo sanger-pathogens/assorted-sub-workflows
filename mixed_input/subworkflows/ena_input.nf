@@ -1,4 +1,5 @@
 include { DOWNLOAD_METADATA; DOWNLOAD_FASTQS } from '../modules/ena_downloader'
+include { FILTER_EXISTING_OUTPUTS       } from './../../../pipeline_chaining/subworkflows/skip_downloaded.nf'
 
 workflow ENA_DOWNLOAD {
     take:
@@ -23,7 +24,17 @@ workflow ENA_DOWNLOAD {
         def read2_ftp_url = "ftp://${read2_ftp}"
         [ merged_meta, read1_ftp_url, read2_ftp_url ]
     }
-    | DOWNLOAD_FASTQS
+    .set{ meta_readsftpurls_ch }
+    
+    if (params.only_new_input){
+        FILTER_EXISTING_OUTPUTS(meta_readsftpurls_ch)
+        FILTER_EXISTING_OUTPUTS.out.do_not_exist
+        .set { meta_readsftpurls_to_process }
+    } else{
+        meta_readsftpurls_to_process = meta_readsftpurls_ch
+    }
+
+    DOWNLOAD_FASTQS(meta_readsftpurls_to_process)
     | ifEmpty { error("Error: All Downloads failed") }
     | set { reads_from_ena_ch }
 
