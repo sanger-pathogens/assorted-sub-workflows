@@ -29,3 +29,7 @@ workflow MANIFEST_FROM_DIR {
         } else{
             reads_from_local_dir_to_process = reads_from_local_dir_ch
         }
+
+    emit:
+    reads_from_local_dir_to_process // channel: [ val(meta), file(reads_1), file(reads_2) ]
+}
