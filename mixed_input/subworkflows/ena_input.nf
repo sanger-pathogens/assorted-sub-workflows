@@ -1,5 +1,5 @@
 include { DOWNLOAD_METADATA; DOWNLOAD_FASTQS } from '../modules/ena_downloader'
-include { FILTER_EXISTING_OUTPUTS       } from './../../../pipeline_chaining/subworkflows/skip_downloaded.nf'
+include { FILTER_EXISTING_OUTPUTS       } from '../../pipeline_chaining/subworkflows/skip_downloaded.nf'
 
 workflow ENA_DOWNLOAD {
     take:

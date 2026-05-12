@@ -1,7 +1,7 @@
 //
 // Check input samplesheet and get read channels
 //
-include { FILTER_EXISTING_OUTPUTS       } from './../../../pipeline_chaining/subworkflows/skip_downloaded.nf'
+include { FILTER_EXISTING_OUTPUTS       } from '../../pipeline_chaining/subworkflows/skip_downloaded.nf'
 
 workflow INPUT_CHECK {
     take:
