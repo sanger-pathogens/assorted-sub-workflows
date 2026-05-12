@@ -1,7 +1,7 @@
 //
 // Check local folder of reads and generate samplesheet from it and derive read channels
 //
-include { MANIFEST_GENERATOR       } from './modules/manifest_generator.nf'
+include { MANIFEST_GENERATOR       } from '../modules/manifest_generator.nf'
 include { FILTER_EXISTING_OUTPUTS       } from '../../pipeline_chaining/subworkflows/skip_downloaded.nf'
 
 workflow MANIFEST_FROM_DIR {
