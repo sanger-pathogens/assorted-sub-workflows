@@ -18,19 +18,19 @@ workflow ENA_DOWNLOAD {
         cleaned_metadata
     }
     | filter { it.fastq_ftp.contains(';') } //if its paired its seperated by a semi-colon
-    | map{ merged_meta ->
+    | map { merged_meta ->
         def (read1_ftp, read2_ftp) = merged_meta.fastq_ftp.split(';')
         def read1_ftp_url = "ftp://${read1_ftp}"
         def read2_ftp_url = "ftp://${read2_ftp}"
         [ merged_meta, read1_ftp_url, read2_ftp_url ]
     }
-    .set{ meta_readsftpurls_ch }
+    | set { meta_readsftpurls_ch }
     
     if (params.only_new_input){
         FILTER_EXISTING_OUTPUTS(meta_readsftpurls_ch)
         FILTER_EXISTING_OUTPUTS.out.do_not_exist
-        .set { meta_readsftpurls_to_process }
-    } else{
+        | set { meta_readsftpurls_to_process }
+    } else {
         meta_readsftpurls_to_process = meta_readsftpurls_ch
     }
 
