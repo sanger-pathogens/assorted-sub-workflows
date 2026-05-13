@@ -35,7 +35,6 @@ workflow ENA_DOWNLOAD {
     }
 
     DOWNLOAD_FASTQS(meta_readsftpurls_to_process)
-    | ifEmpty { error("Error: All Downloads failed") }
     | set { reads_from_ena_ch }
 
     emit:
