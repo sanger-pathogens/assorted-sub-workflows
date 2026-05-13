@@ -54,14 +54,12 @@ workflow QC_MAGS {
         | set { fastas }
     }
 
-    if (!params.skip_prechecks ) {
-        pre_qc = Channel.value("pre_qc")
-        
-        PRE_CHECKM2(fastas, pre_qc)
-        PRE_GUNC(fastas, pre_qc)
-        PRE_QUAST(fastas, pre_qc, getQuastThresholds())
-        GTDBTK(fastas, pre_qc)
-    }
+    pre_qc = Channel.value("pre_qc")
+    
+    PRE_CHECKM2(fastas, pre_qc)
+    PRE_GUNC(fastas, pre_qc)
+    PRE_QUAST(fastas, pre_qc, getQuastThresholds())
+    GTDBTK(fastas, pre_qc)
     
     fastas
     | MDMCLEANER
