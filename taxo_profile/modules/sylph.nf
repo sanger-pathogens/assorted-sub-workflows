@@ -75,7 +75,8 @@ process SYLPHTAX_TAXPROF {
 
     container 'quay.io/biocontainers/sylph-tax:1.7.0--pyhdfd78af_0'
 
-    input: tuple val(meta), path(sylph_report), path(sylph_tax_metadata)
+    input:
+    tuple val(meta), path(sylph_report), path(sylph_tax_metadata)
 
     output:
     tuple val(meta), path("*.sylphmpa") , emit: sylphtax_mpa_report
