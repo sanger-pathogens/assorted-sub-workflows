@@ -29,7 +29,6 @@ process SYLPH_PROFILE {
     publishDir "${params.outdir}/${meta.ID}/sylph/", pattern: "*.tsv", mode: 'copy', overwrite: true
 
     container 'quay.io/biocontainers/sylph:0.8.1--ha6fb395_0'
-    errorStrategy 'terminate'
 
     input:
     tuple val(meta), path(sketch)
