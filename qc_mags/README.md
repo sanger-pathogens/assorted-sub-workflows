@@ -95,7 +95,7 @@ _GUNC_
 
 _QUAST_
 
-- quast*preqc*\# contigs
+- quast_preqc_\# contigs
 - quast_preqc_Largest contig
 - quast_preqc_Total length
 - quast_preqc_GC (%)
