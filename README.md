@@ -148,8 +148,6 @@ In addition, optional analyses can be run and written alongside the above result
 - DeepTools `bamCoverage` is run to generate Bigwig coverage files, saved in the `bigwig/` folder
 - The pipeline will automatically build reference and alignment indexes if it doesn't find them in the same directory as the supplied `--reference`, written into the folders `bowtie2/` or `bwa/` depending on whether the alignment of reads is made using Bowtie2 or BWA-MEM.
 
-## Phylogenetic tree building
-
 ## Credit and Contact
 
 THis software is actively developed by the PaM Informatics team of the Parasites and Microbe Programme at the Wellcome Sanger Institute (Hinxton, UK).
