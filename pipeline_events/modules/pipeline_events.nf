@@ -181,9 +181,7 @@ process PIPELINE_EVENTS_INGEST_FILES {
     container "${params.pipeline_events_container}"
 
     input:
-    path(file_to_ingest)
-    val(filetype)
-    val(batch_id)
+    tuple path(file_to_ingest), val(filetype), val(batch_id)
 
     output:
     path(ingestmanifest)
