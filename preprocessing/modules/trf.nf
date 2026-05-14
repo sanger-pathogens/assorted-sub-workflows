@@ -9,27 +9,18 @@ process TRF {
     publishDir enabled: params.publish_intermediate_trf, mode: 'copy', pattern: "*.trf", path: "${params.outdir}/${meta.ID}/preprocessing/intermediates/trf"
 
     input:
-    tuple val(meta), path(fasta_R1), path(fasta_R2)
+    tuple val(ID), val(read_type), val(meta), path(fastq), path(fasta)
 
     output:
-    tuple val(meta), path("${meta.ID}_1.trf"), path("${meta.ID}_2.trf"), emit: fasta_trfs
+    tuple val(ID), val(read_type), val(meta), path(fastq), path(trf_marked), emit: fastq_trf_marked
 
     script:
+    trf_marked = "${meta.ID}_${read_type}.trf"
     """
-    # Handle R1 file
-    if [ -f "$fasta_R1" ] && [ ! -s "$fasta_R1" ]; then
-        echo "R1 file exists but is empty, writing empty output..."
-        touch "${meta.ID}_1.trf"
+    if [ -f "$fasta" ] && [ ! -s "$fasta" ]; then
+        touch "${trf_marked}"
     else
-        trf ${fasta_R1} ${params.trf_cli_options} > ${meta.ID}_1.trf
-    fi
-
-    # Handle R2 file
-    if [ -f "$fasta_R2" ] && [ ! -s "$fasta_R2" ]; then
-        echo "R2 file exists but is empty, writing empty output..."
-        touch "${meta.ID}_2.trf"
-    else
-        trf ${fasta_R2} ${params.trf_cli_options} > ${meta.ID}_2.trf
+        trf ${fasta} ${params.trf_cli_options} > ${trf_marked}
     fi
     """
 }

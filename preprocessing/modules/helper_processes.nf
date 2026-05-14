@@ -10,14 +10,35 @@ process COMPRESS_READS {
     tuple val(meta), path(read_1), path(read_2)
 
     output:
-    tuple val(meta), path("${meta.ID}_preprocessed_1.fastq.gz"), path("${meta.ID}_preprocessed_2.fastq.gz"), emit: compressed_reads_ch
+    tuple val(meta), path("${meta.ID}_processed_1.fastq.gz"), path("${meta.ID}_processed_2.fastq.gz"), emit: compressed_reads_ch
 
     script:
     """
     gzip -c ${read_1} > ${read_1}.tmp.gz
     gzip -c ${read_2} > ${read_2}.tmp.gz
-    mv ${read_1}.tmp.gz ${meta.ID}_preprocessed_1.fastq.gz
-    mv ${read_2}.tmp.gz ${meta.ID}_preprocessed_2.fastq.gz
+    mv ${read_1}.tmp.gz ${meta.ID}_processed_1.fastq.gz
+    mv ${read_2}.tmp.gz ${meta.ID}_processed_2.fastq.gz
+    """
+}
+
+process COMPRESS_SINGLE {
+    tag "${meta.ID}"
+    label 'mem_4'
+    label 'cpu_1'
+    label 'time_queue_from_small_slow2'
+
+    publishDir path: { if ("${params.save_method}" == "nested") "${params.outdir}/${meta.ID}/preprocessing/" else "${params.outdir}/preprocessing/" }, mode: "copy", enabled: params.publish_clean_reads
+
+    input:
+    tuple val(meta), path(fastq)
+
+    output:
+    tuple val(meta), path("${meta.ID}_processed_unpaired.fastq.gz"), emit: compressed_reads_ch
+
+    script:
+    """
+    gzip -c ${fastq} > ${fastq}.tmp.gz
+    mv ${fastq}.tmp.gz ${meta.ID}_processed_unpaired.fastq.gz
     """
 }
 

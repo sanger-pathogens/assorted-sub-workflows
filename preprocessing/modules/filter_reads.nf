@@ -23,11 +23,33 @@ process FILTER_HOST_READS {
     """
 }
 
+process FILTER_HOST_READS_SINGLE {
+    tag "${meta.ID}"
+    label 'cpu_1'
+    label 'mem_1'
+    label 'time_1'
+    
+    container 'quay.io/sangerpathogens/metawrap_qc_python:1.0'
+
+    input:
+    tuple val(meta), path(fastq), path(bmtagger_list)
+
+    output:
+    tuple val(meta), path(fastq), emit: data_ch
+    tuple val(meta), path(clean_fastq), emit: cleaned_ch
+
+    script:
+    clean_fastq = "${meta.ID}_unpaired_clean.fastq"
+    """
+    filter_reads.py -b ${bmtagger_list} -r ${fastq} --skip-human-reads > ${clean_fastq}
+    """
+}
+
 process GET_HOST_READS {
     tag "${meta.ID}"
     label 'cpu_1'
     label 'mem_4'  //TODO: Need 5GB?
-    label 'time_1'  //TODO: Allow for longer time?
+    label 'time_12'
 
     if (params.publish_host_reads) { publishDir path: "${params.outdir}/host_reads", mode: 'copy', overwrite: true, pattern: "*_host*.fastq.gz" }
     container 'quay.io/sangerpathogens/metawrap_qc_python:1.0'
@@ -36,7 +58,6 @@ process GET_HOST_READS {
     tuple val(meta), path(first_read), path(second_read), path(bmtagger_list)
 
     output:
-    tuple val(meta), path(first_read), path(second_read), emit: data_ch
     tuple val(meta), path(host_1), path(host_2), emit: host_ch
 
     script:
@@ -48,5 +69,28 @@ process GET_HOST_READS {
     filter_reads.py -b ${bmtagger_list} -r ${second_read} --get-human-reads > ${meta.ID}_host_2.fastq
     # compress
     pigz ${meta.ID}_host_1.fastq ${meta.ID}_host_2.fastq
+    """
+}
+
+process GET_HOST_READS_SINGLE {
+    tag "${meta.ID}"
+    label 'cpu_1'
+    label 'mem_4'  //TODO: Need 5GB?
+    label 'time_12' 
+
+    if (params.publish_host_reads) { publishDir path: "${params.outdir}/host_reads", mode: 'copy', overwrite: true, pattern: "*_host*.fastq.gz" }
+    container 'quay.io/sangerpathogens/metawrap_qc_python:1.0'
+
+    input:
+    tuple val(meta), path(fastq), path(bmtagger_list)
+
+    output:
+    tuple val(meta), path(host_fastq), emit: host_ch
+
+    script:
+    host_fastq = "${meta.ID}_unpaired_host.fastq.gz"
+    """
+    filter_reads.py -b ${bmtagger_list} -r ${fastq} --get-human-reads > ${meta.ID}_unpaired_host.fastq
+    pigz ${meta.ID}_unpaired_host.fastq
     """
 }
