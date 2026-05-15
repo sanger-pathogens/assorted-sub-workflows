@@ -10,7 +10,7 @@ process COLLATE_STATS_BMTAGGER {
     path(stats_files)
 
     output:
-    tuple path(host_read_removal_stats_file), emit: host_reads_stats_ch
+    path(host_read_removal_stats_file), emit: host_reads_stats_ch
 
     script:
     host_read_removal_stats_file="host_read_removal_statistics.csv"
@@ -32,7 +32,7 @@ process COLLATE_STATS_TRIMMOMATIC {
     path(stats_files)
 
     output:
-    tuple path(trimming_stats_file), emit: trimming_stats_ch
+    path(trimming_stats_file), emit: trimming_stats_ch
 
     script:
     trimming_stats_file="trimmomatic_statistics.csv"
