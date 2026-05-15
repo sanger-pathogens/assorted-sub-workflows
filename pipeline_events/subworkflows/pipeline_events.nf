@@ -1,7 +1,6 @@
 include { PIPELINE_GET_METHOD ;
           PIPELINE_EVENTS_OPEN_BATCH ;
           PIPELINE_EVENTS_CLOSE_BATCH ;
-          GATHER_SUMMARYFILE_INFO ;
           PIPELINE_EVENTS_INGEST_FILES } from '../modules/pipeline_events.nf'
 
 
@@ -28,10 +27,10 @@ workflow PIPELINE_EVENTS_INIT {
 
     batch_id = PIPELINE_EVENTS_OPEN_BATCH.out.batch_id
 
-    GATHER_SUMMARYFILE_INFO(PIPELINE_EVENTS_OPEN_BATCH.out.batch_manifest_params, "batch_manifest", batch_id)
-
-    GATHER_SUMMARYFILE_INFO.out.file_info
-    | set { batch_manifest_info }
+    PIPELINE_EVENTS_OPEN_BATCH.out.batch_manifest_params
+    .combine("batch_manifest")
+    .combine(batch_id)
+    .set { batch_manifest_info }
  
     emit:
     batch_id

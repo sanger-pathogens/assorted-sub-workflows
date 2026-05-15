@@ -122,27 +122,6 @@ process GATHER_RESULTFILE_INFO {
     """
 }
 
-process GATHER_SUMMARYFILE_INFO {
-    label 'cpu_1'
-    label 'mem_1'
-    label 'local'
-    cache false
-
-    input:
-    path(resultfileWorkPath)
-    val(file_type)
-    val(batch_id)
-
-    output:
-    tuple path(resultfileWorkPath), val(file_type), val(batch_id), emit: file_info
-
-    // could be exec block here maybe, given shell script is there purely to avoid returning last declared variable
-    script:
-    """
-    echo "file path to track: ${resultfileWorkPath}"
-    """
-}
-
 process PIPELINE_EVENTS_CREATE_FILE {
     label 'cpu_1'
     label 'mem_1'
