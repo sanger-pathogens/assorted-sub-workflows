@@ -16,7 +16,7 @@ process SYLPH_SKETCH {
 
     script:
     """
-    sylph sketch -t ${task.cpus} -1 ${read_1} -2 ${read_2} -k ${params.sketch_size} -S ${meta.ID} -d ./
+    sylph sketch -t ${task.cpus} -1 ${read_1} -2 ${read_2} -k ${params.sylph_k} -S ${meta.ID} -d ./
     """
 }
 
@@ -39,7 +39,7 @@ process SYLPH_PROFILE {
     script:
     def estimate_unknown = params.sylph_estimate_unknown ? (params.sylph_read_seq_id ? "-u --read-seq-id ${params.sylph_read_seq_id}" : "-u") : ""
     """
-    sylph profile -t ${task.cpus} -o ${meta.ID}_sylph_profile.tsv -k ${params.sketch_size} ${sketch} ${params.sylph_db} ${estimate_unknown}
+    sylph profile -t ${task.cpus} -o ${meta.ID}_sylph_profile.tsv -k ${params.sylph_k} ${sketch} ${params.sylph_db} ${estimate_unknown}
     """
 }
 
