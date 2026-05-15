@@ -61,38 +61,20 @@ workflow SYLPH_REF_SELECTION {
     | SYLPHTAX_TAXPROF
 
     // Get all references for taxonomic groups output from sylph-tax report
-    if (params.expand_refs) {
-        genome_id_to_file = channel.fromPath(params.genome_id_to_file).first()
+    genome_id_to_file = channel.fromPath(params.genome_id_to_file).first()
 
-        SYLPHTAX_TAXPROF.out.sylphtax_mpa_report
-        | combine(sylph_tax_metadata_ch)
-        | combine(genome_id_to_file)
-        | EXPAND_REFS
+    SYLPHTAX_TAXPROF.out.sylphtax_mpa_report
+    | combine(sylph_tax_metadata_ch)
+    | combine(genome_id_to_file)
+    | EXPAND_REFS
 
-        EXPAND_REFS.out.references
-        | transpose
-        | map { meta, ref ->
-            def new_meta = ["ID": ref.baseName]  // Construct taxonomic group from filename
-            [ new_meta, ref ]
-        }
-        | set { references }
-
-    } else {
-        // Join sylph report (incl. reference filepaths) with taxonomy
-        sylphtax_input_ch
-        | join(SYLPHTAX_TAXPROF.out.sylphtax_mpa_report)
-        | GROUP_SYLPH_REFS_BY_TAXON
-
-        // Group reports by taxonomic group and output taxon-specific references
-        GROUP_SYLPH_REFS_BY_TAXON.out.taxon_group_refs
-        | transpose
-        | map { meta, ref ->
-            def new_meta = ["ID": ref.baseName]  // Construct taxonomic group from filename
-            [new_meta, ref]
-        }
-        | set { references }
-
+    EXPAND_REFS.out.references
+    | transpose
+    | map { meta, ref ->
+        def new_meta = ["ID": ref.baseName]  // Construct taxonomic group from filename
+        [ new_meta, ref ]
     }
+    | set { references }
 
     emit:
     references
