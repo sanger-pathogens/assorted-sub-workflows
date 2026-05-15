@@ -139,7 +139,7 @@ process GATHER_SUMMARYFILE_INFO {
     // could be exec block here maybe, given shell script is there purely to avoid returning last declared variable
     script:
     """
-    echo "file path to track: ${resultfilePublishedDirAbsPath}"
+    echo "file path to track: ${resultfileWorkPath}"
     """
 }
 
