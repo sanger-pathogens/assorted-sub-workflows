@@ -66,7 +66,7 @@ process GROUP_SYLPH_REFS_BY_TAXON {
     ${workflow.projectDir}/assorted-sub-workflows/sylph_refset/bin/group_refs.py \\
         --sylph_prof_report ${sylph_report} \\
         --sylphtax_report ${sylphtax_report} \\
-        --taxonomic_group ${params.taxonomic_grouping} \\
+        --taxonomic_rank ${params.taxonomic_rank} \\
         --outdir ${meta.ID}
     """
 }
@@ -153,7 +153,7 @@ process EXPAND_REFS {
         --taxonomy_data ${taxonomy_data} \\
         --genome_to_file ${genome_id_to_file} \\
         --outdir taxon_refs \\
-        --taxonomic_group ${params.taxonomic_grouping} \\
+        --taxonomic_rank ${params.taxonomic_rank} \\
         ${remove_pattern_option}
     """
 }

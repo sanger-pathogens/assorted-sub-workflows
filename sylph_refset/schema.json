@@ -25,7 +25,7 @@
         "default": "true",
         "help_text": "Keep Sylph sketches."
       },
-      "taxonomic_grouping": {
+      "taxonomic_rank": {
         "default": "species",
         "help_text": "Taxonomic rank by which to group references. Choices: domain, kingdom, phylum, class, order, family, genus, species."
       },
