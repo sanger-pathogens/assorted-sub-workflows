@@ -118,8 +118,8 @@ process SYLPH_FILTER {
     python3 ${workflow.projectDir}/assorted-sub-workflows/sylph_refset/bin/filter_refs.py \\
         --input ${sylph_reports} \\
         --taxonomy-data ${taxonomy_data} \\
-        --ani ${params.sylph_ani} \\
-        --cov ${params.sylph_cov} \\
+        --ani ${params.sylph_mean_ani} \\
+        --cov ${params.sylph_mean_cov} \\
         --ani-column Naive_ANI \\
         --cov-column Eff_cov \\
         --out-report ${meta.ID}_sylph_filtered_report.tsv \\
