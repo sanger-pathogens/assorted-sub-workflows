@@ -29,9 +29,9 @@
         "default": "species",
         "help_text": "Taxonomic rank by which to group references. Choices: domain, kingdom, phylum, class, order, family, genus, species."
       },
-      "remove_taxo_suffix": {
+      "pool_latin_taxa": {
         "default": "false",
-        "help_text": "Remove the alphabetic suffix from the end of taxonomic groups. May be useful if you do not wish to use the clusters of GTDB (see https://gtdb.ecogenomic.org/faq#why-do-some-genus-and-species-names-end-with-an-alphabetic-suffix)."
+        "help_text": "Adanced option. Collapses divisions of a taxon together, ignoring alphabet suffixes. Not recommended to change unless the effects on output are understood, see docs for more info."
       },
       "genome_id_to_file": {
         "default": "/data/pam/collections/GTDB/release226/genomic_files_all_retrievable_2026_03_05/metadata/id_to_genome_path.tsv",

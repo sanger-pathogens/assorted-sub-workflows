@@ -146,7 +146,7 @@ process EXPAND_REFS {
 
 
     script:
-    remove_pattern_option = params.remove_taxo_suffix ? "--remove_pattern '_[A-Z]{0,3}?\$'" : ""
+    remove_pattern_option = params.pool_latin_taxa ? "--remove_pattern '_[A-Z]{0,3}?\$'" : ""
     """
     ${workflow.projectDir}/assorted-sub-workflows/sylph_refset/bin/expand_refs.py \\
         --sylphtax_report *.sylphmpa \\
