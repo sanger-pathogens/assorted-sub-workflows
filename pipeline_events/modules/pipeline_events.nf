@@ -191,7 +191,6 @@ process PIPELINE_EVENTS_INGEST_FILES {
     """
     echo "type,path" > ${ingestmanifest}
     echo "${filetype},${file_to_ingest}" >> ${ingestmanifest}
-    send_pipeline_event ingest --batch_id ${batch_id} --path ${ingestmanifest} \\
-      --username \$(id -un) --group \$(id -gn)
+    send_pipeline_event ingest --batch_id ${batch_id} --path ${ingestmanifest} 
     """
 }
