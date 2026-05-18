@@ -28,16 +28,39 @@ def ensureList(Object maybeListLike) {
 
 workflow QC_MAGS {
     take:
-    fastas  // [meta, [1.fasta, 2.fasta, ...]]
+    fasta_lists  // [meta, [1.fasta, 2.fasta, ...]]
 
     main:
+
+    if (params.batch_size > 0) {
+        log.info "Batch size parameter is set to ${params.batch_size}, will process in batches of this size."
+
+        def batchIndex = 0
+
+        fasta_lists
+        | map { meta, fasta_list ->
+            fasta_list
+        }
+        | flatten()
+        | buffer( size: params.batch_size, remainder: true )
+        | map { batch -> 
+            def meta = [:]
+            meta.ID = "batch_${++batchIndex}"
+            [ meta, batch ]
+        }
+        | set { fastas }
+    } else {
+        fasta_lists
+        | set { fastas }
+    }
+
     pre_qc = Channel.value("pre_qc")
     
     PRE_CHECKM2(fastas, pre_qc)
     PRE_GUNC(fastas, pre_qc)
     PRE_QUAST(fastas, pre_qc, getQuastThresholds())
     GTDBTK(fastas, pre_qc)
-
+    
     fastas
     | MDMCLEANER
     | map { meta, fastas ->
