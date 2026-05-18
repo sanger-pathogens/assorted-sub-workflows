@@ -166,7 +166,7 @@ process PIPELINE_EVENTS_INGEST_FILES {
     path(ingestmanifest)
 
     script:
-    ingestmanifest=pipevdb_ingest_manifest.tsv
+    ingestmanifest = "pipevdb_ingest_manifest.tsv"
     """
     echo "type,path" > ${ingestmanifest}
     echo "${filetype},${file_to_ingest}" >> ${ingestmanifest}
