@@ -21,6 +21,8 @@ a) generated groups are no longer compliant with GTDB taxonomic definitions, con
 
 b) the size of the produced group may be considerably larger, for example in GTDB release 232 at the genus level g__Clostridium has 1607 genomes but all 34 GTDB genuses in g__Clostridium* total at 2931 genomes.
 
+Note that not all taxa belonging to a "traditional" species might be pooled this way due to certain GTDB species being named differently; for instance in GTDB r232, a new species called `ECMA0423 sp047199055` has been created out of genomes previously classified as `Escherichia_coli`.
+
 ## Associated pipelines and subworkflows
 This subworkflow uses the following subworkflows:
 
