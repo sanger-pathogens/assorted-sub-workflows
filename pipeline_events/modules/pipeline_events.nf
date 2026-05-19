@@ -160,7 +160,7 @@ process PIPELINE_EVENTS_INGEST_FILES {
     container "${params.pipeline_events_container}"
 
     input:
-    tuple path(file_to_ingest), val(filetype), val(batch_id)
+    tuple path(rawingestmanifest), val(batch_id)
 
     output:
     path(ingestmanifest)
@@ -169,7 +169,7 @@ process PIPELINE_EVENTS_INGEST_FILES {
     ingestmanifest = "pipevdb_ingest_manifest.tsv"
     """
     echo "type,path" > ${ingestmanifest}
-    echo "${filetype},${file_to_ingest}" >> ${ingestmanifest}
+    cat ${rawingestmanifest} >> ${ingestmanifest}
     send_pipeline_event ingest --batch_id ${batch_id} --path ${ingestmanifest} 
     """
 }
