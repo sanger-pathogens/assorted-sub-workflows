@@ -31,7 +31,7 @@
       },
       "pool_latin_taxa": {
         "default": "false",
-        "help_text": "Adanced option. Collapses divisions of a taxon together, ignoring alphabet suffixes. Not recommended to change unless the effects on output are understood, see docs for more info."
+        "help_text": "Advanced option. Ignores alphabet suffixes of GTDB divisions of latin-name taxa, thus pooling those subdivisions together. Not recommended to change unless the effects on output are understood; see docs for more info."
       },
       "genome_id_to_file": {
         "default": "/data/pam/collections/GTDB/release226/genomic_files_all_retrievable_2026_03_05/metadata/id_to_genome_path.tsv",
