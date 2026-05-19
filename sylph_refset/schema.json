@@ -9,11 +9,11 @@
         "default": "31",
         "help_text": "Sketch k-mer size (21|31)."
       },
-      "sylph_mean_ani": {
+      "sylph_min_ani": {
         "default": "95",
         "help_text": "ANI threshold for Sylph filtering."
       },
-      "sylph_mean_cov": {
+      "sylph_min_cov": {
         "default": "0.01",
         "help_text": "Coverage threshold for Sylph filtering."
       },
