@@ -27,7 +27,8 @@ workflow PIPELINE_EVENTS_INIT {
 
     batch_id = PIPELINE_EVENTS_OPEN_BATCH.out.batch_id
 
-    Channnel.of("pipeline_run_parameters")
+    param_ingesttype = Channnel.of("pipeline_run_parameters")
+    param_ingesttype
     .combine(PIPELINE_EVENTS_OPEN_BATCH.out.batch_manifest_params)
     .set { batch_manifest_info }
  
