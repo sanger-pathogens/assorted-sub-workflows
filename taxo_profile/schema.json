@@ -13,7 +13,7 @@
                 "default": "false",
                 "help_text": "Keep sylph sketches."
             },
-            "sketch_size": {
+            "sylph_k": {
                 "default": "31",
                 "help_text": "Value of k. Only k = 21, 31 are currently supported."
             },

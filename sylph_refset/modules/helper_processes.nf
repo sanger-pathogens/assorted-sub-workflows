@@ -66,7 +66,7 @@ process GROUP_SYLPH_REFS_BY_TAXON {
     ${workflow.projectDir}/assorted-sub-workflows/sylph_refset/bin/group_refs.py \\
         --sylph_prof_report ${sylph_report} \\
         --sylphtax_report ${sylphtax_report} \\
-        --taxonomic_group ${params.taxonomic_grouping} \\
+        --taxonomic_rank ${params.taxonomic_rank} \\
         --outdir ${meta.ID}
     """
 }
@@ -118,8 +118,8 @@ process SYLPH_FILTER {
     python3 ${workflow.projectDir}/assorted-sub-workflows/sylph_refset/bin/filter_refs.py \\
         --input ${sylph_reports} \\
         --taxonomy-data ${taxonomy_data} \\
-        --ani ${params.sylph_ani} \\
-        --cov ${params.sylph_cov} \\
+        --ani ${params.sylph_min_ani} \\
+        --cov ${params.sylph_min_cov} \\
         --ani-column Naive_ANI \\
         --cov-column Eff_cov \\
         --out-report ${meta.ID}_sylph_filtered_report.tsv \\
@@ -146,14 +146,14 @@ process EXPAND_REFS {
 
 
     script:
-    remove_pattern_option = params.remove_taxo_suffix ? "--remove_pattern '_[A-Z]{0,3}?\$'" : ""
+    remove_pattern_option = params.pool_latin_taxa ? "--remove_pattern '_[A-Z]{0,3}?\$'" : ""
     """
     ${workflow.projectDir}/assorted-sub-workflows/sylph_refset/bin/expand_refs.py \\
         --sylphtax_report *.sylphmpa \\
         --taxonomy_data ${taxonomy_data} \\
         --genome_to_file ${genome_id_to_file} \\
         --outdir taxon_refs \\
-        --taxonomic_group ${params.taxonomic_grouping} \\
+        --taxonomic_rank ${params.taxonomic_rank} \\
         ${remove_pattern_option}
     """
 }
