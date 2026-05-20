@@ -15,7 +15,7 @@ process COLLATE_STATS_BMTAGGER {
     script:
     host_read_removal_stats_file="host_read_removal_statistics.csv"
     """
-    echo "Sample_id,Total_host_reads,Total_non_host_reads,Total_trimmed_reads,host_reads_%,non_host_reads_%,Total_original_reads,reads_trimmed_%" > "${host_read_removal_stats_file}"
+    echo "Sample_id,Total_host_reads,Total_non_host_reads,Total_trimmed_reads,host_reads_percent,non_host_reads_percent,Total_original_reads,reads_trimmed_percent" > "${host_read_removal_stats_file}"
     cat *_stats.csv >> "${host_read_removal_stats_file}"
     """
 }
