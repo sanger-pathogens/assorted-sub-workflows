@@ -144,8 +144,7 @@ process PIPELINE_EVENTS_CREATE_FILE {
     """
     filemd5=\$(md5sum ${resultfileWorkPath} | cut -d' ' -f1)
     send_pipeline_event file --batch_id ${batch_id} --path ${resultfilePublishedFullPath} --file_type ${file_type} \\
-                                --md5sum \${filemd5} ${runassociationOptString} \\
-                                --username \$(id -un) --group \$(id -gn)
+                                --md5sum \${filemd5} ${runassociationOptString}
     """
 
     
