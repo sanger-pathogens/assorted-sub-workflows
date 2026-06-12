@@ -62,13 +62,13 @@ workflow QC_MAGS {
     GTDBTK(fastas, pre_qc)
     
     fastas
-    | MDMCLEANER
     | map { meta, fastas ->
         def size = ensureList(fastas).size()
         def group_key = groupKey(meta, size)
         [group_key, meta, fastas]
     }
     | transpose
+    | MDMCLEANER
     | SEQKIT
     | groupTuple(remainder: true)
     | map { group_key, meta, fasta_list ->
