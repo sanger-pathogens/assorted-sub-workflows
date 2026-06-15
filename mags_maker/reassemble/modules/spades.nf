@@ -10,11 +10,15 @@ process SPADES_REASSEMBLE {
     tuple val(meta), val(fullBinInfo), path(bin), path(first_read), path(second_read)
 
     output:
-    tuple val(meta), path(final_name), emit: scaffolds
+    tuple val(meta), path(long_scaffolds), emit: long_scaffolds
 
     script:
     def scaffolds = "reassembled/scaffolds.fasta"
     final_name = "${meta.ID}_bin_${fullBinInfo.bin}_${fullBinInfo.level}.fasta"
+    def long_scaffolds = "long_${final_name.name}"
+
+    command = "${projectDir}/assorted-sub-workflows/mags_maker/assemble/bin/rm_short_contigs.py"
+    min_contig_length = [params.maxbin2_min_contig, params.concoct_min_contig, params.metabat_min_contig].min()
     """
     # This is done because if the sra-lite format there is no quality information so --phred-offset needs to be set
     # Determine phred flag
@@ -48,6 +52,9 @@ process SPADES_REASSEMBLE {
     else
         exit \$status
     fi
+
+    # Remove small contigs
+    ${command} ${min_contig_length} ${contigs} > ${long_scaffolds}
 
     """
 }

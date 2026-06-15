@@ -1,8 +1,7 @@
 include { COMBINE_BINS; SPLIT_READS } from "./modules/helper_scripts.nf"
 include { BWA_INDEX; BWA            } from './modules/bwa.nf'
 include { SPADES_REASSEMBLE         } from './modules/spades.nf'
-include { REMOVE_SMALL_CONTIGS; 
-		  COLLECT_BINS;
+include { COLLECT_BINS;
 		  CHOOSE_BEST_BIN			} from './modules/helper_scripts.nf'
 include { CHECKM; SUMMARISE_CHECKM	} from './modules/checkm1.nf'
 include { CHECKM2					} from './modules/checkm2.nf'
@@ -109,7 +108,6 @@ workflow METAWRAP_REASSEMBLY {
 	| combine(split_reads, by: 0)
 	| map { joinKey, metaOne, binInfoSmall, binFasta, metaTwo, fullBinInfo, read_1, read_2 -> [metaOne, fullBinInfo, binFasta, read_1, read_2] }
 	| SPADES_REASSEMBLE
-	| REMOVE_SMALL_CONTIGS
 	| mix(renamed_original_bins)
 	| groupTuple
 	| COLLECT_BINS

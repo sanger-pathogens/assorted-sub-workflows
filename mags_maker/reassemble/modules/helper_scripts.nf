@@ -40,29 +40,6 @@ process SPLIT_READS {
     """
 }
 
-process REMOVE_SMALL_CONTIGS {
-    tag "${meta.ID}"
-    label 'cpu_1'
-    label 'mem_100M'
-    label 'time_30m'
-
-    container 'quay.io/sangerpathogens/python-curl:3.11'
-
-    input:
-    tuple val(meta), path(contigs)
-
-    output:
-    tuple val(meta), path(long_scaffolds), emit: long_contigs
-
-    script:
-    command = "${projectDir}/assorted-sub-workflows/mags_maker/assemble/bin/rm_short_contigs.py"
-    long_scaffolds = "long_${contigs.name}"
-    min_contig_length = [params.maxbin2_min_contig, params.concoct_min_contig, params.metabat_min_contig].min()
-    """
-    ${command} ${min_contig_length} ${contigs} > ${long_scaffolds}
-    """
-}
-
 process COLLECT_BINS {
     tag "${meta.ID}"
     label 'cpu_1'
