@@ -3,7 +3,6 @@ include { BWA_INDEX; BWA            } from './modules/bwa.nf'
 include { SPADES_REASSEMBLE         } from './modules/spades.nf'
 include { REMOVE_SMALL_CONTIGS; 
 		  COLLECT_BINS;
-		  RENAME_ORIGINAL;
 		  CHOOSE_BEST_BIN			} from './modules/helper_scripts.nf'
 include { CHECKM; SUMMARISE_CHECKM	} from './modules/checkm1.nf'
 include { CHECKM2					} from './modules/checkm2.nf'
@@ -85,8 +84,13 @@ workflow METAWRAP_REASSEMBLY {
 	| set { original_bins }
 
 	original_bins
-	| RENAME_ORIGINAL
-	| set { renamed_original_bins }
+    | map { meta, bin_path ->
+        def base      = bin_path.getBaseName().replaceAll('\\.', '_')
+        def final_name = "long_${meta.ID}_${base}_orgin.fasta"
+        def new_meta  = meta + [original_name: final_name]
+        [new_meta, bin_path]
+    }
+    | set { renamed_original_bins }
 
 	original_bins
 	| map { meta, bin_path -> 

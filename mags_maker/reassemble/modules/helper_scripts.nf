@@ -72,37 +72,20 @@ process COLLECT_BINS {
     container 'quay.io/sangerpathogens/python-curl:3.11'
 
     input:
-    tuple val(meta), path(contigs)
+    tuple val(meta), path(contigs), val(rename_map)
 
     output:
     tuple val(meta), path(final_bin), emit: bin_ch
 
     script:
     final_bin = "${meta.ID}_reassembled_bin"
+    rename_cmds = rename_map
+        .collect { staged, final_name -> "[ -f '${staged}' ] && mv '${staged}' '${final_name}'" }
+        .join('\n')
     """
     mkdir ${final_bin}
-    cp ${contigs} ${final_bin}
-    """
-}
-
-process RENAME_ORIGINAL {
-    tag "${meta.ID}"
-    label 'cpu_1'
-    label 'mem_100M'
-    label 'time_30m'
-
-    container 'quay.io/sangerpathogens/python-curl:3.11'
-
-    input:
-    tuple val(meta), path(fasta)
-
-    output:
-    tuple val(meta), path(final_name), emit: renamed_file
-
-    script:
-    final_name = "long_${meta.ID}_${fasta.baseName.replaceAll('\\.', '_')}_orgin.fasta"
-    """
-    cp ${fasta} ${final_name}
+    ${rename_cmds}
+    cp ${contigs} ${final_bin}/
     """
 }
 
