@@ -32,7 +32,7 @@ workflow TAXO_PROFILE {
     main:
     def sylph_tax_metadata_ch = channel.fromPath(params.sylph_tax_metadata).first()
 
-    if (params.sketch_size) {
+    if (params.sketch_size & !params.sylph_k){
         log.warn "Parameter '--sketch_size' is deprecated. Use '--sylph_k' instead."
         params.sylph_k = params.sketch_size
     }
