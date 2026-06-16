@@ -6,19 +6,20 @@ process DOWNLOAD_METADATA {
 
     container 'quay.io/sangerpathogens/enadownloader:v2.3.3-903be379'
 
-    publishDir "${params.outdir}/metadata", mode: 'copy', overwrite: true, enabled: params.publish_metadata, saveAs: {filename -> "${timestampout}"}
+    publishDir "${params.outdir}/metadata", mode: 'copy', overwrite: true, enabled: params.publish_metadata
 
     input:
     tuple val(meta), path(accessions)
 
     output:
-    tuple val(meta), path("metadata.tsv"), emit: metadata_tsv
+    tuple val(meta), path("metadata_ena_*.tsv"), emit: metadata_tsv
 
     script:
-    def date = params.short_metacsv_name ? "${workflow.start}".split('T')[0] : "${workflow.start}"
-    timestampout = "metadata_ENA_${date}.csv"
     """
+    DATE=\$(date "+%Y-%m-%dT%H-%M-%S")
+
     enadownloader --input ${accessions} --type ${params.accession_type} --write-metadata
+    mv metadata.tsv metadata_ena_\${DATE}.tsv
     """
 }
 

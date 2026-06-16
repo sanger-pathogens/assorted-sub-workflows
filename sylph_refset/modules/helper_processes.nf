@@ -66,7 +66,7 @@ process GROUP_SYLPH_REFS_BY_TAXON {
     ${workflow.projectDir}/assorted-sub-workflows/sylph_refset/bin/group_refs.py \\
         --sylph_prof_report ${sylph_report} \\
         --sylphtax_report ${sylphtax_report} \\
-        --taxonomic_group ${params.taxonomic_grouping} \\
+        --taxonomic_rank ${params.taxonomic_rank} \\
         --outdir ${meta.ID}
     """
 }
@@ -94,39 +94,36 @@ process COMBINE_REFS_ACROSS_SAMPLES {
     """
 }
 
-process SYLPH_SUMMARIZE {
+process SYLPH_FILTER {
     tag "${meta.ID}"
     label 'cpu_1'
     label 'mem_4'
     label 'time_queue_from_small'
 
     publishDir "${params.outdir}/sylph/", pattern: "${meta.ID}_sylph_filtered_report.tsv", mode: 'copy', overwrite: true
-    publishDir "${params.outdir}/sylph/", pattern: "${meta.ID}_sylph_summary.tsv", mode: 'copy', overwrite: true
 
     container 'quay.io/sangerpathogens/pandas:2.2.1'
 
     input:
-    tuple val(meta), path(sylph_reports)
+    tuple val(meta), path(sylph_reports), path(taxonomy_data)
 
     output:
     tuple val(meta), path("${meta.ID}_sylph_filtered_report.tsv"), emit: report
-    tuple val(meta), path("${meta.ID}_sylph_summary.tsv"), emit: sylph_summary
-    tuple val(meta), path("${meta.ID}_references.txt"), optional: true, emit: references
+    tuple val(meta), path("${meta.ID}_removed_references_by_species.tsv"), emit: removed_reference_summary
 
 
     script:
     // Filter once with thresholds.
     """
-    ${workflow.projectDir}/assorted-sub-workflows/sylph_refset/bin/sylph_summarize.py \\
-        --reports ${sylph_reports} \\
-        --genome_path_prefix ${params.genome_path_prefix} \\
-        --ani ${params.sylph_ani} \\
-        --cov ${params.sylph_cov} \\
+    python3 ${workflow.projectDir}/assorted-sub-workflows/sylph_refset/bin/filter_refs.py \\
+        --input ${sylph_reports} \\
+        --taxonomy-data ${taxonomy_data} \\
+        --ani ${params.sylph_min_ani} \\
+        --cov ${params.sylph_min_cov} \\
         --ani-column Naive_ANI \\
         --cov-column Eff_cov \\
-        --out-references ${meta.ID}_references.txt \\
         --out-report ${meta.ID}_sylph_filtered_report.tsv \\
-        --out-summary ${meta.ID}_sylph_summary.tsv
+        --out-summary ${meta.ID}_removed_references_by_species.tsv
     """
 }
 
@@ -149,14 +146,14 @@ process EXPAND_REFS {
 
 
     script:
-    remove_pattern_option = params.remove_taxo_suffix ? "--remove_pattern '_[A-Z]{0,3}?\$'" : ""
+    remove_pattern_option = params.pool_latin_taxa ? "--remove_pattern '_[A-Z]{0,3}?\$'" : ""
     """
     ${workflow.projectDir}/assorted-sub-workflows/sylph_refset/bin/expand_refs.py \\
         --sylphtax_report *.sylphmpa \\
         --taxonomy_data ${taxonomy_data} \\
         --genome_to_file ${genome_id_to_file} \\
         --outdir taxon_refs \\
-        --taxonomic_group ${params.taxonomic_grouping} \\
+        --taxonomic_rank ${params.taxonomic_rank} \\
         ${remove_pattern_option}
     """
 }

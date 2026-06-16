@@ -50,6 +50,10 @@
       "temp_space": {
         "default": "30GB",
         "help_text": "Request a specific amount of temporary working space to reserve for GTDB-Tk jobs when submitted on a HPC (only relevant in combination with --temp_file_storage having a value other than null)"
+      },
+      "batch_size": {
+        "default": "0 (batch per id)",
+        "help_text": "Number of MAGs to process in a batch when running suitable tools. See README for more information."
       }
     }
   }

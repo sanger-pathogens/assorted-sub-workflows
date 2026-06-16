@@ -33,7 +33,7 @@ Other parameters:
 - `--report_config` (default: [`./assets/report_config.json`](./assets/report_config.json)). See [Report configuration](#report-configuration) for more details.
 - `--autoqc_config` (default: null) Optional parameter to filter MAGs that pass QC thresholds specified in the config. When applying this option you must either provide the path to a config or with the string "default" use the provided config at `./assorted-sub-workflows/qc_mags/assets/autoqc_config.json`. See [AutoQC configuration](#autoqc-configuration) for more details.
 - `--min_contig` (default: 1000) Contigs below this length will be filtered out by seqkit.
-- `--skip_raw_reports` (default: false) Skip publishing raw reports from various QC tools, keeping only final summary reports.  
+- `--skip_raw_reports` (default: false) Skip publishing raw reports from various QC tools, keeping only final summary reports.
 - `--temp_file_storage` (default: `/tmp`): Specify a directory where GTDB-Tk can store temporary files during processing. Options are '/tmp', '/dev/shm' or 'null' (write to memory). See [GTDB-Tk runtime](#gdtbk-runtime) for more details.
 - `--temp_space` (default: `30GB`): Request a specific amount of temporary working space to reserve for GTDB-Tk. See [GTDB-Tk runtime](#gdtbk-runtime) for more details.
 
@@ -66,12 +66,14 @@ NOTE: In addition to columns derived from the tool reports, the script includes 
 
 The default columns included in the final report are as follows:
 _General_
+
 - preqc_genome_name
 - postqc_genome_name
 - sample_or_strain_name
 - genome_status
 
 _CheckM2_
+
 - checkm2_postqc_Completeness
 - checkm2_postqc_Contamination
 - checkm2_postqc_Genome_Size
@@ -80,16 +82,19 @@ _CheckM2_
 - checkm2_preqc_Genome_Size
 
 _GTDBTk_
+
 - gtdbtk_classification
 - gtdbtk_closest_genome_reference
 
 _GUNC_
+
 - gunc_postqc_n_contigs
 - gunc_postqc_pass.GUNC
 - gunc_preqc_n_contigs
 - gunc_preqc_pass.GUNC
 
 _QUAST_
+
 - quast_preqc_\# contigs
 - quast_preqc_Largest contig
 - quast_preqc_Total length
@@ -99,8 +104,8 @@ _QUAST_
 - quast_preqc_auN
 - quast_preqc_L50
 - quast_preqc_L90
-- quast_preqc_\# N's per 100 kbp
-- quast_postqc_\# contigs
+- quast*preqc*\# N's per 100 kbp
+- quast*postqc*\# contigs
 - quast_postqc_Largest contig
 - quast_postqc_Total length
 - quast_postqc_GC (%)
@@ -109,7 +114,7 @@ _QUAST_
 - quast_postqc_auN
 - quast_postqc_L50
 - quast_postqc_L90
-- quast_postqc_\# N's per 100 kbp
+- quast*postqc*\# N's per 100 kbp
 
 A note on **number of contigs** metrics: QUAST "# contigs" reports all contigs (both in pre and post QC reports) whilst GUNC's "num_contigs" is defined as all contigs that contain a mapped gene.
 
@@ -124,11 +129,12 @@ It is also possible to automatically filter MAGs based on QC metrics produced in
 To apply this function, you must enable AutoQC by supplying a configuration file path to `--autoqc_config` (config as described [here](../mixed_input/README.md#filter_metadatapy)) or by supplying the string "default" so that the default [autoqc_config.tsv](./assets/autoqc_config.tsv) is used.
 
 The default AutoQC config's pass criteria are:
+
 - Over 90% Completeness
 - Under 5% Contamination
 - Passes GUNC contamination checks
 
-It is possible to add filtering rules to the autoqc config for columns\* within the report config. If using a custom report config you can customise your AutoQC config: for the column using the tool name (lowercase) and keep_column from the report config seperated by an underscore. i.e.  `<tool>_<keep_column>`. Note that for adding filters based on CheckM2 or GUNC you must specify whether to use preqc or postqc reports i.e. `<tool>_<qc_stage>_<keep_column>`, as shown in the filterable column list above.
+It is possible to add filtering rules to the autoqc config for columns\* within the report config. If using a custom report config you can customise your AutoQC config: for the column using the tool name (lowercase) and `keep_column` from the report config seperated by an underscore. i.e. `<tool>_<keep_column>`. Note that for adding filters based on CheckM2 or GUNC you must specify whether to use preqc or postqc reports i.e. `<tool>_<qc_stage>_<keep_column>`, as shown in the filterable column list above.
 
 \*NOTE: Unfortunately QUAST report columns are not currently columns you can AutoQC on. This is an area for future development and should be possible in future versions.
 
@@ -147,7 +153,7 @@ Please note - if you add the parameter `--autoqc_config` but do not supply eithe
 
 ### GTDB-Tk runtime
 
-- Runtime and memory can be reduced for GTDB-Tk classficiation by specifying the `--temp_file_storage` option with either `/tmp` or `/dev/shm`. Writing these files to disk instead of keeping everything in memory reduces peak RAM usage by up to 89% and can improve runtime by up to 10%. This often allows the job to run with a smaller memory request, meaning it can start faster on cluster schedulers. 
+- Runtime and memory can be reduced for GTDB-Tk classficiation by specifying the `--temp_file_storage` option with either `/tmp` or `/dev/shm`. Writing these files to disk instead of keeping everything in memory reduces peak RAM usage by up to 89% and can improve runtime by up to 10%. This often allows the job to run with a smaller memory request, meaning it can start faster on cluster schedulers.
 - If you know the size of your samples you can request a specific temp memory using `--temp_space <XX>GB`. This lets you reserve a specific amount of temporary memory/disk space. Typically you should request < 100 GB, and no more then 1000 GB, as larger requests may cause jobs to remain pending. Note that due to a know bug reported in the farm documentation, request half the memory you require as LSF double-accounts /tmp use see [here](https://ssg-confluence.internal.sanger.ac.uk/spaces/FARM/pages/101361225/Useful+LSF+resources#UsefulLSFresources-Resources).
 
 ### Dependencies
@@ -159,3 +165,19 @@ All software dependencies are containerised. Databases must be made available fo
 If a process in the pipeline fails with a non-zero exit code that is not recognised as a signal that memory or runtime limits were reached, the process will not be re-run and will be ignored. To understand why it has been ignored, please check the process-specific log file `.command.log` in the work directory of the affected process.
 
 On the Sanger farm (HPC), a post-run script is available to automatically show the end of these log files (where informative messages can often be found) and return affected sample identifiers. See [here](https://ssg-confluence.internal.sanger.ac.uk/spaces/PaMI/pages/181078206/General+pipeline+info#Generalpipelineinfo-Usingthepipelinetracefile) for more details.
+
+### Batching large runs
+
+Many of the tools within the pipeline benefit from processing multiple MAGs simultaneously. To enable cross-sample batching, specify a `batch_size` using the flag:
+
+```bash
+--batch_size <INT>
+```
+
+This flag aggregates MAGs across samples into batches of N, with any remainder assigned to a final batch. For example, to define batches of 2000:
+
+```bash
+--batch_size 2000
+```
+
+Batch size involves a trade-off between throughput and resource usage. Larger batches improve computational efficiency but increase run-time per job, while smaller batches can reduce latency — particularly on an uncontested cluster — but at the cost of significantly higher memory overhead. Note that batches below ~1000 MAGs may incur disproportionate database loading overhead relative to actual QC compute time. A batch size of 1000–2000 MAGs is recommended for most use cases to strike a balance.

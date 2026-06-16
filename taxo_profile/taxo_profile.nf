@@ -31,17 +31,20 @@ workflow TAXO_PROFILE {
 
     main:
     def sylph_tax_metadata_ch = channel.fromPath(params.sylph_tax_metadata).first()
+
+    if (params.sketch_size) {
+        log.warn "Parameter '--sketch_size' is deprecated. Use '--sylph_k' instead."
+        params.sylph_k = params.sketch_size
+    }
     
     if (params.sylph_profile){
         SYLPH_SKETCH(read_ch)
         | SYLPH_PROFILE
         | set { sylph_report }
 
-        SYLPH_PROFILE.out.sylph_report
-        .combine(sylph_tax_metadata_ch)
+        sylph_report
+        | combine(sylph_tax_metadata_ch)
         | SYLPHTAX_TAXPROF
-
-        SYLPHTAX_TAXPROF.out.sylphtax_mpa_report 
         | set { sylphtax_mpa_report }
     } else {
         sylph_report = channel.empty()

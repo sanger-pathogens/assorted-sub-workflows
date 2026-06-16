@@ -1,19 +1,19 @@
 {
   "params": {
-    "Sylph Reference Selection": {
+    "Sylph Reference Selection options": {
       "sylph_db": {
         "default": "/data/pam/software/sylph/gtdb-r226-c200-dbv1/gtdb-r226-c200-dbv1.syldb",
         "help_text": "Path to a pre-built Sylph database (.syldb)."
       },
-      "sketch_size": {
+      "sylph_k": {
         "default": "31",
         "help_text": "Sketch k-mer size (21|31)."
       },
-      "sylph_ani": {
+      "sylph_min_ani": {
         "default": "95",
         "help_text": "ANI threshold for Sylph filtering."
       },
-      "sylph_cov": {
+      "sylph_min_cov": {
         "default": "0.01",
         "help_text": "Coverage threshold for Sylph filtering."
       },
@@ -21,29 +21,21 @@
         "default": "/data/pam/software/sylph-tax/v1/gtdb_r226_metadata.tsv",
         "help_text": "Path to the sylph-tax metadata TSV to use for taxprof."
       },
-      "sylph_method": {
-        "default": "query",
-        "help_text": "Sylph command to use for reference selection. Choices: query, profile."
-      },
       "save_sylph_sketches": {
         "default": "true",
         "help_text": "Keep Sylph sketches."
       },
-      "taxonomic_grouping": {
+      "taxonomic_rank": {
         "default": "species",
         "help_text": "Taxonomic rank by which to group references. Choices: domain, kingdom, phylum, class, order, family, genus, species."
       },
-      "expand_refs": {
-        "default": "true",
-        "help_text": "Expand reference list to all genomes available for taxonomic groups extracted from sylph-tax profiling."
-      },
-      "remove_taxo_suffix": {
+      "pool_latin_taxa": {
         "default": "false",
-        "help_text": "Remove the alphabetic suffix from the end of taxonomic groups when expand_refs is enabled. May be useful if you do not wish to use the clusters of GTDB (see https://gtdb.ecogenomic.org/faq#why-do-some-genus-and-species-names-end-with-an-alphabetic-suffix)."
+        "help_text": "Advanced option. Ignores alphabet suffixes of GTDB divisions of latin-name taxa, thus pooling those subdivisions together. Not recommended to change unless the effects on output are understood; see docs for more info."
       },
       "genome_id_to_file": {
         "default": "/data/pam/collections/GTDB/release226/genomic_files_all_retrievable_2026_03_05/metadata/id_to_genome_path.tsv",
-        "help_text": "File from which to extract genome paths based on genome identifiers (required for if expand_refs is enabled)."
+        "help_text": "File from which to extract genome paths based on genome identifiers."
       }
     }
   },

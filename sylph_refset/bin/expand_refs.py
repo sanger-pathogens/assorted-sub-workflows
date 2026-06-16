@@ -26,7 +26,7 @@ def parse_args():
     parser.add_argument("--taxonomy_data", help="Two column (TSV) file linking genome IDs to metaphlan-format taxonomy.", type=Path, required=True)
     parser.add_argument("--genome_to_file", help="Two column (TSV) file linking genome IDs to genome fasta filepaths.", type=Path, required=True)
     parser.add_argument("--outdir", type=Path, default=".")
-    parser.add_argument("--taxonomic_group", help="Taxonomic rank by which to group report.", type=str, choices=list(TAXONOMIC_RANK.values()), default="species")
+    parser.add_argument("--taxonomic_rank", help="Taxonomic rank by which to group report.", type=str, choices=list(TAXONOMIC_RANK.values()), default="species")
     parser.add_argument("--remove_pattern", help="Pattern (regex) to remove some string from labels of the given taxonomic groups.", type=str)
     parser.add_argument("--prefix", help="Prefix for output report filenames", type=str)
     return parser.parse_args()
@@ -68,17 +68,17 @@ def main():
 
     sylphtax_df = load_taxonomy_data(args.sylphtax_report)
     sylphtax_df = split_taxonomy(sylphtax_df, taxonomy_column="clade_name")
-    taxa = sylphtax_df[args.taxonomic_group].unique()
+    taxa = sylphtax_df[args.taxonomic_rank].unique()
     # print(taxa)
     
     taxonomy_df = load_data(args.taxonomy_data)
     taxonomy_df = split_taxonomy(taxonomy_df, taxonomy_column=1)
-    taxonomy_df_subset = taxonomy_df.loc[taxonomy_df[args.taxonomic_group].isin(taxa)]
+    taxonomy_df_subset = taxonomy_df.loc[taxonomy_df[args.taxonomic_rank].isin(taxa)]
     if args.remove_pattern:
         remove_pattern = re.compile(args.remove_pattern)
-        taxonomy_df_subset[args.taxonomic_group] = taxonomy_df_subset[args.taxonomic_group].str.replace(remove_pattern, "", regex=True)
+        taxonomy_df_subset[args.taxonomic_rank] = taxonomy_df_subset[args.taxonomic_rank].str.replace(remove_pattern, "", regex=True)
     # print(taxonomy_df_subset.head)
-    taxonomy_specific_dfs = {taxon_name: df for taxon_name, df in taxonomy_df_subset.groupby(args.taxonomic_group)}
+    taxonomy_specific_dfs = {taxon_name: df for taxon_name, df in taxonomy_df_subset.groupby(args.taxonomic_rank)}
 
     genome_id_to_file = load_data(args.genome_to_file)
     

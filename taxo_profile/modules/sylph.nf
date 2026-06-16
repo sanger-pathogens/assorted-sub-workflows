@@ -2,11 +2,12 @@ process SYLPH_SKETCH {
     tag "${meta.ID}"
     label 'cpu_2'
     label 'mem_2'
-    label 'time_from_queue_small'
+    label 'time_queue_from_small'
+
 
     publishDir "${params.outdir}/${meta.ID}/sylph/", pattern: "*.sylsp", mode: 'copy', overwrite: true, enabled: params.save_sylph_sketches
 
-    container 'gitlab-registry.internal.sanger.ac.uk/sanger-pathogens/docker-images/sylph:0.8.1--ha6fb395_0'
+    container 'quay.io/biocontainers/sylph:0.8.1--ha6fb395_0'
 
     input:
     tuple val(meta), path(read_1), path(read_2)
@@ -16,7 +17,7 @@ process SYLPH_SKETCH {
 
     script:
     """
-    sylph sketch -t ${task.cpus} -1 ${read_1} -2 ${read_2} -k ${params.sketch_size} -S ${meta.ID} -d ./
+    sylph sketch -t ${task.cpus} -1 ${read_1} -2 ${read_2} -k ${params.sylph_k} -S ${meta.ID} -d ./
     """
 }
 
@@ -24,12 +25,11 @@ process SYLPH_PROFILE {
     tag "${meta.ID}"
     label 'cpu_2'
     label 'mem_20'
-    label 'time_from_queue_small'
+    label 'time_queue_from_small'
 
     publishDir "${params.outdir}/${meta.ID}/sylph/", pattern: "*.tsv", mode: 'copy', overwrite: true
 
-    container 'gitlab-registry.internal.sanger.ac.uk/sanger-pathogens/docker-images/sylph:0.8.1--ha6fb395_0'
-    errorStrategy 'terminate'
+    container 'quay.io/biocontainers/sylph:0.8.1--ha6fb395_0'
 
     input:
     tuple val(meta), path(sketch)
@@ -40,7 +40,7 @@ process SYLPH_PROFILE {
     script:
     def estimate_unknown = params.sylph_estimate_unknown ? (params.sylph_read_seq_id ? "-u --read-seq-id ${params.sylph_read_seq_id}" : "-u") : ""
     """
-    sylph profile -t ${task.cpus} -o ${meta.ID}_sylph_profile.tsv -k ${params.sketch_size} ${sketch} ${params.sylph_db} ${estimate_unknown}
+    sylph profile -t ${task.cpus} -o ${meta.ID}_sylph_profile.tsv -k ${params.sylph_k} ${sketch} ${params.sylph_db} ${estimate_unknown}
     """
 }
 
@@ -48,11 +48,11 @@ process SYLPH_QUERY {
     tag "${meta.ID}"
     label 'cpu_2'
     label 'mem_20'
-    label 'time_from_queue_small'
+    label 'time_queue_from_small'
 
     publishDir "${params.outdir}/${meta.ID}/sylph/", pattern: "*.tsv", mode: 'copy', overwrite: true
 
-    container 'gitlab-registry.internal.sanger.ac.uk/sanger-pathogens/docker-images/sylph:0.8.1--ha6fb395_0'
+    container 'quay.io/biocontainers/sylph:0.8.1--ha6fb395_0'
 
     input:
     tuple val(meta), path(sketch)
@@ -70,13 +70,14 @@ process SYLPHTAX_TAXPROF {
     tag "${meta.ID}"
     label 'cpu_1'
     label 'mem_2'
-    label 'time_from_queue_small'
+    label 'time_queue_from_small'
 
     publishDir params.outdir, saveAs: { filename -> "${file(filename).baseName}/sylph/${filename}" }, pattern: "*.sylphmpa", mode: 'copy', overwrite: true
 
     container 'quay.io/biocontainers/sylph-tax:1.7.0--pyhdfd78af_0'
 
-    input: tuple val(meta), path(sylph_report), path(sylph_tax_metadata)
+    input:
+    tuple val(meta), path(sylph_report), path(sylph_tax_metadata)
 
     output:
     tuple val(meta), path("*.sylphmpa") , emit: sylphtax_mpa_report

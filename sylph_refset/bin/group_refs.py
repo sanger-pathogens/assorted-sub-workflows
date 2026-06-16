@@ -25,7 +25,7 @@ def parse_args():
     parser.add_argument("--sylph_prof_report", help="Report file (TSV) with `sylph profile` output format.", type=Path, required=True)
     parser.add_argument("--sylphtax_report", help="One or more report files (TSV) with sylph-tax taxprof output format.", type=Path, nargs="+", required=True)
     parser.add_argument("--outdir", type=Path, default=".")
-    parser.add_argument("--taxonomic_group", help="Taxonomic rank by which to group report", type=str, choices=list(TAXONOMIC_RANK.values()), default="species")
+    parser.add_argument("--taxonomic_rank", help="Taxonomic rank by which to group report", type=str, choices=list(TAXONOMIC_RANK.values()), default="species")
     parser.add_argument("--prefix", help="Prefix for output report filenames", type=str)
     return parser.parse_args()
 
@@ -89,7 +89,7 @@ def main():
 
     merged_df = split_taxonomy(merged_df, taxonomy_column="clade_name")
 
-    dfs = {taxon_name: df for taxon_name, df in merged_df.groupby(args.taxonomic_group)}
+    dfs = {taxon_name: df for taxon_name, df in merged_df.groupby(args.taxonomic_rank)}
 
     for taxon_name, df in dfs.items():
         report_prefix = normalize_taxon_name(taxon_name)
