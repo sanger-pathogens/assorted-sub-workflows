@@ -45,8 +45,6 @@ workflow TAXO_PROFILE {
         sylph_report
         | combine(sylph_tax_metadata_ch)
         | SYLPHTAX_TAXPROF
-        
-        SYLPHTAX_TAXPROF.out.sylphtax_mpa_report
         | set { sylphtax_mpa_report }
     } else {
         sylph_report = channel.empty()

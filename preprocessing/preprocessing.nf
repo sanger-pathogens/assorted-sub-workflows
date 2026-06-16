@@ -18,47 +18,56 @@ workflow PREPROCESSING {
     reads_ch
 
     main:
+    
+    if (params.preprocessing && params.read_type.toLowerCase() == "illumina") {
+        DECOMPRESS_READS(reads_ch)
+        | set{ decompressed_reads_ch }
 
-    DECOMPRESS_READS(reads_ch)
-    | set{ decompressed_reads_ch }
+        if (params.run_trimmomatic){
+            TRIMMING(decompressed_reads_ch)
 
-    if (params.run_trimmomatic){
-        TRIMMING(decompressed_reads_ch)
+            TRIMMING.out.trimmed_fastqs
+            | set{ preprocessed_ch_1 }
 
-        TRIMMING.out.trimmed_fastqs
-        | set{ preprocessed_ch_1 }
+            TRIMMING.out.collated_trimming_stats_ch
+            | set { collated_trimming_stats_ch }
+        }
+        else{
+            preprocessed_ch_1 = decompressed_reads_ch
+            collated_trimming_stats_ch = Channel.empty()
+        }
+        if (params.run_trf){
+            TR_FILTERING(preprocessed_ch_1)
+            | set{ preprocessed_ch_2 }
+        }
+        else{
+            preprocessed_ch_2 = preprocessed_ch_1
+        }
+        if (params.run_bmtagger){
+            HOST_READ_REMOVAL(preprocessed_ch_2)
 
-        TRIMMING.out.collated_trimming_stats_ch
-        | set { collated_trimming_stats_ch }
-    }
-    else{
-        preprocessed_ch_1 = decompressed_reads_ch
+            HOST_READ_REMOVAL.out.host_read_removal_out_ch
+            | set{ preprocessed_ch_3 }
+            
+            HOST_READ_REMOVAL.out.collated_host_reads_stats_ch
+            | set { collated_host_reads_stats_ch }
+        }
+        else{
+            preprocessed_ch_3 = preprocessed_ch_2
+            collated_host_reads_stats_ch = Channel.empty()
+        }
+
+        COMPRESS_READS(preprocessed_ch_3)
+        | set{ preprocessed_reads_ch }
+
+    } else {
+        // for when turning off preprocessing or for non-illumina data, 
+        // just pass through the reads without preprocessing and empty channels for stats
+        // so to streamline downstream workflow compatibility
+        preprocessed_reads_ch = reads_ch
         collated_trimming_stats_ch = Channel.empty()
-    }
-    if (params.run_trf){
-        TR_FILTERING(preprocessed_ch_1)
-        | set{ preprocessed_ch_2 }
-    }
-    else{
-        preprocessed_ch_2 = preprocessed_ch_1
-    }
-    if (params.run_bmtagger){
-        HOST_READ_REMOVAL(preprocessed_ch_2)
-
-        HOST_READ_REMOVAL.out.host_read_removal_out_ch
-        | set{ preprocessed_ch_3 }
-        
-        HOST_READ_REMOVAL.out.collated_host_reads_stats_ch
-        | set { collated_host_reads_stats_ch }
-    }
-    else{
-        preprocessed_ch_3 = preprocessed_ch_2
         collated_host_reads_stats_ch = Channel.empty()
     }
-
-    COMPRESS_READS(preprocessed_ch_3)
-    | set{ preprocessed_reads_ch }
-
     emit:
     preprocessed_reads_ch
     collated_trimming_stats_ch

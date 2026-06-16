@@ -12,72 +12,86 @@ workflow QC {
 
     main:
 
-    reads_ch
-    | (FASTQC & TAXO_PROFILE)
+    if (params.run_qc && params.read_type.toLowerCase() == "illumina") {
 
-    fastqc_pass_criteria = file(params.fastqc_pass_criteria, checkIfExists: true)
-    fastqc_no_fail_criteria = file(params.fastqc_no_fail_criteria, checkIfExists: true)
+        reads_ch
+        | (FASTQC & TAXO_PROFILE)
 
-    PASS_OR_FAIL_FASTQC(FASTQC.out.zip, fastqc_pass_criteria, fastqc_no_fail_criteria)
-    | set { fastqc_results }
+        fastqc_pass_criteria = file(params.fastqc_pass_criteria, checkIfExists: true)
+        fastqc_no_fail_criteria = file(params.fastqc_no_fail_criteria, checkIfExists: true)
 
-    FASTQC.out.zip.collect{it[1,2]}
-        | mix(TAXO_PROFILE.out.ch_kraken2_style_bracken_reports.collect{it[1]})
-        | collect
-        | set { multiqc_input }
+        PASS_OR_FAIL_FASTQC(FASTQC.out.zip, fastqc_pass_criteria, fastqc_no_fail_criteria)
+        | set { fastqc_results }
 
-    pass_fail_fastqc_ch = fastqc_results.map { sample_pass_fail -> [sample_pass_fail[0].ID, sample_pass_fail[1]] } // Sample ID, Pass/Fail status e.g [ERR14241855, pass] 
+        FASTQC.out.zip.collect{it[1,2]}
+            | mix(TAXO_PROFILE.out.ch_kraken2_style_bracken_reports.collect{it[1]})
+            | collect
+            | set { multiqc_input }
 
-    if (params.bracken_profile) {
+        pass_fail_fastqc_ch = fastqc_results.map { sample_pass_fail -> [sample_pass_fail[0].ID, sample_pass_fail[1]] } // Sample ID, Pass/Fail status e.g [ERR14241855, pass] 
 
-        TAXO_PROFILE.out.ch_kraken2_style_bracken_reports
-        | PASS_OR_FAIL_K2B
-        | set { k2b_results }
+        if (params.bracken_profile) {
 
-        pass_fail_k2b_ch = k2b_results.map { sample_pass_fail -> [sample_pass_fail[0].ID, sample_pass_fail[1]] }
-    }
+            TAXO_PROFILE.out.ch_kraken2_style_bracken_reports
+            | PASS_OR_FAIL_K2B
+            | set { k2b_results }
 
-    if (params.sylph_profile) {
+            pass_fail_k2b_ch = k2b_results.map { sample_pass_fail -> [sample_pass_fail[0].ID, sample_pass_fail[1]] }
+        }
+
+        if (params.sylph_profile) {
+            
+            TAXO_PROFILE.out.sylphtax_mpa_report
+                | PASS_OR_FAIL_SYLPH
+                | set { sylph_results }
+
+            pass_fail_sylph_ch = sylph_results.map { sample_pass_fail -> [sample_pass_fail[0].ID, sample_pass_fail[1]] }
+
+        }
+
+        if (params.bracken_profile && params.sylph_profile) {
+            pass_fail_channel = pass_fail_fastqc_ch.join(pass_fail_k2b_ch, remainder: true)
+                                .map { flat -> flat.flatten() }
+                                .join(pass_fail_sylph_ch, remainder: true)
+                                .map { flat -> flat.flatten() }
         
-        TAXO_PROFILE.out.sylphtax_mpa_report
-            | PASS_OR_FAIL_SYLPH
-            | set { sylph_results }
+        } 
+        else if (params.bracken_profile) {
+            pass_fail_channel = pass_fail_fastqc_ch.join(pass_fail_k2b_ch, remainder: true)
+                                .map { flat -> flat.flatten() }
+        } 
+        else if (params.sylph_profile) {
+            pass_fail_channel = pass_fail_fastqc_ch.join(pass_fail_sylph_ch, remainder: true)
+                                .map { flat -> flat.flatten() }
+        } 
+        else {
+            pass_fail_channel = pass_fail_fastqc_ch
+        }
 
-        pass_fail_sylph_ch = sylph_results.map { sample_pass_fail -> [sample_pass_fail[0].ID, sample_pass_fail[1]] }
+        // map dynamic number of columns into a list of sample lists for reporting
+        pass_fail_channel = pass_fail_channel.collect()
+                            .map { flat -> 
+                            int numCols = 2 + (params.bracken_profile ? 1 : 0) + (params.sylph_profile ? 1 : 0)
+                            flat.collate(numCols) }
+        
+        REPORT(pass_fail_channel)
 
+        kraken2_style_bracken_reports = TAXO_PROFILE.out.ch_kraken2_style_bracken_reports
+        bracken_mpa_reports = TAXO_PROFILE.out.ch_mpa_abundance_reports
+        sylphtax_mpa_report = TAXO_PROFILE.out.sylphtax_mpa_report
+        qc_summary = REPORT.out.qc_summary
+
+    } else {
+        multiqc_input = Channel.empty()
+        kraken2_style_bracken_reports = Channel.empty()
+        bracken_mpa_reports = Channel.empty()
+        sylphtax_mpa_report = Channel.empty()
+        qc_summary = Channel.empty()
     }
-
-    if (params.bracken_profile && params.sylph_profile) {
-        pass_fail_channel = pass_fail_fastqc_ch.join(pass_fail_k2b_ch, remainder: true)
-                            .map { flat -> flat.flatten() }
-                            .join(pass_fail_sylph_ch, remainder: true)
-                            .map { flat -> flat.flatten() }
-    
-    } 
-    else if (params.bracken_profile) {
-        pass_fail_channel = pass_fail_fastqc_ch.join(pass_fail_k2b_ch, remainder: true)
-                            .map { flat -> flat.flatten() }
-    } 
-    else if (params.sylph_profile) {
-        pass_fail_channel = pass_fail_fastqc_ch.join(pass_fail_sylph_ch, remainder: true)
-                            .map { flat -> flat.flatten() }
-    } 
-    else {
-        pass_fail_channel = pass_fail_fastqc_ch
-    }
-
-    // map dynamic number of columns into a list of sample lists for reporting
-    pass_fail_channel = pass_fail_channel.collect()
-                        .map { flat -> 
-                        int numCols = 2 + (params.bracken_profile ? 1 : 0) + (params.sylph_profile ? 1 : 0)
-                        flat.collate(numCols) }
-    
-    REPORT(pass_fail_channel)
-
     emit:
     multiqc_input
-    kraken2_style_bracken_reports = TAXO_PROFILE.out.ch_kraken2_style_bracken_reports
-    bracken_mpa_reports = TAXO_PROFILE.out.ch_mpa_abundance_reports
-    sylphtax_mpa_report = TAXO_PROFILE.out.sylphtax_mpa_report
-    qc_summary = REPORT.out.qc_summary
+    kraken2_style_bracken_reports
+    bracken_mpa_reports
+    sylphtax_mpa_report
+    qc_summary
 }
