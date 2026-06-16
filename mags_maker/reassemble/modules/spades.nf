@@ -16,6 +16,7 @@ process SPADES_REASSEMBLE {
     def scaffolds = "reassembled/scaffolds.fasta"
     final_name = "${meta.ID}_bin_${fullBinInfo.bin}_${fullBinInfo.level}.fasta"
     def long_scaffolds = "long_${final_name.name}"
+    def careful = params.careful ? "--careful" : ""
 
     command = "${projectDir}/assorted-sub-workflows/mags_maker/assemble/bin/rm_short_contigs.py"
     min_contig_length = [params.maxbin2_min_contig, params.concoct_min_contig, params.metabat_min_contig].min()
@@ -35,6 +36,7 @@ process SPADES_REASSEMBLE {
             --tmp-dir tmp \\
             -t ${task.cpus} \\
             -m ${task.memory.toGiga()} \\
+            ${careful} \\
             --untrusted-contigs ${bin} \\
             -o reassembled \\
             -1 ${first_read} \\
