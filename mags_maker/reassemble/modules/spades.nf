@@ -35,7 +35,6 @@ process SPADES_REASSEMBLE {
             --tmp-dir tmp \\
             -t ${task.cpus} \\
             -m ${task.memory.toGiga()} \\
-            --careful \\
             --untrusted-contigs ${bin} \\
             -o reassembled \\
             -1 ${first_read} \\
