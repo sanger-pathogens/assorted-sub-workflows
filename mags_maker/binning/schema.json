@@ -18,7 +18,7 @@
                 "help_text": "Minimum threshold for contig size (kb). The lowest accepted value is 1500."
             },
             "maxbin_markers":{
-                "default": "140",
+                "default": "107",
                 "help_text": "Marker set to choose from 107 marker genes present in >95% of bacteria, or 40 marker gene sets that are universal among bacteria and archaea."
             },
             "metabat1":{
