@@ -11,8 +11,8 @@ By default, this workflow assembles sequencing reads using metaSPAdes v3.14. Rea
 
 ### Parameters
 - `--assembly_stats` (Generate assembly statistics default: false)
-- `--fastspades` (Run SPAdes assembly module only default: null)
-- `--lock_phred` (Set PHRED quality offset to 33 (SPAdes option) default: null)
+- `--fastspades` (Run SPAdes assembly module only default: false)
+- `--lock_phred` (Set PHRED quality offset to 33 (SPAdes option) default: false)
 - `--metaspades` (Run metaSPAdes assembly default: true)
 - `--megahit` (Run MEGAHIT assembly default: true)
 - `--megahit_deterministic` (Run MEGAHIT assembly deterministically, please see "Further information" below for runtime impacts default: false)

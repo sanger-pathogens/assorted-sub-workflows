@@ -6,11 +6,11 @@
                 "help_text": "Generate assembly statistics."
             },
             "fastspades":{
-                "default": "null",
+                "default": "false",
                 "help_text": "Run SPAdes assembly module only."
             },
             "lock_phred":{
-                "default": "null",
+                "default": "false",
                 "help_text": "Set PHRED quality offset to 33 (SPAdes option)."
             },
             "metaspades":{
