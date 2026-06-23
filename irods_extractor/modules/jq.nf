@@ -47,7 +47,7 @@ process JSON_PREP {
 
     script:
     json_file="input.json"
-    objectOrCollection = params.read_type != "Illumina" ? '"collection": true' : '"object": true'
+    objectOrCollection = params.read_type.toLowerCase() != "illumina" ? '"collection": true' : '"object": true'
     """
     jq -n '{op: "metaquery", args: {${objectOrCollection}, "avu": true}, target: {avus: ${avuIdQuery(meta)}}}' > ${json_file}
     """
