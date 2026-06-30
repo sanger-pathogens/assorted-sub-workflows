@@ -1,4 +1,4 @@
-process SNP_SITES{
+process SNP_SITES {
     label 'cpu_2'
     label 'mem_100M'
     label 'time_12'
@@ -15,11 +15,10 @@ process SNP_SITES{
     tuple path(output_snpaln), path(output_conscount), emit: snp_aln_channel
 
     script:
-    output_snpaln="${msa}.snp.aln"
-    output_conscount="${msa}.conscount"
+    output_snpaln = "${msa}.snp.aln"
+    output_conscount = "${msa}.conscount"
     """
     snp-sites -o ${output_snpaln} ${msa}
-    snp-sites -C ${msa} | tr ',' '/' > ${msa}.conscount
+    snp-sites -C ${msa} | tr ',' '/' > ${output_conscount}
     """
-
 }

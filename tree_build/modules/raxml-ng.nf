@@ -16,12 +16,12 @@ process BUILD_TREE {
 
     script:
     conssites = conscount.text.trim()
-    raxml_model="${params.raxml_base_model}+ASC_STAM{${conssites}}"
+    raxml_model = "${params.raxml_base_model}+ASC_STAM{${conssites}}"
     """
     raxml-ng --check --msa ${msa} --model ${raxml_model}
     raxml-ng --parse --msa ${msa} --model ${raxml_model}
     raxml-ng --all --msa ${msa}.raxml.rba --model ${raxml_model} \
-    --tree pars{10} --bs-trees 200 \
-    --threads ${params.raxml_threads}
+      --tree pars{10} --bs-trees 200 \
+      --threads ${params.raxml_threads}
     """
 }
