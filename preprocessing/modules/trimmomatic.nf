@@ -1,7 +1,7 @@
 process TRIMMOMATIC {
     tag "${meta.ID}"
     label 'mem_1'
-    label 'time_1'
+    label 'time_12'
     label 'cpu_4'
 
     container "quay.io/biocontainers/trimmomatic:0.39--1"
