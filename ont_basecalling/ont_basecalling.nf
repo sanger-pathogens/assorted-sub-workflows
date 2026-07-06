@@ -1,13 +1,7 @@
-include { CONVERT_FAST5_TO_POD5; MERGE_POD5 } from './modules/pod5.nf'
-include { BASECALL; DEMUX; DORADO_SUMMARY   } from './modules/dorado.nf'
-include { PYCOQC                            } from './modules/pycoqc.nf'
-include { CONVERT_TO_FASTQ; PUBLISH_BAMS    } from './modules/samtools.nf'
-
-def validateSingleFormat(listOfFormats){
-    if (listOfFormats.size() != 1) {
-        log.error("Multiple signal filetypes ${listOfFormats} found in '${params.raw_read_dir}'. Please separate filetypes into distinct directories and process independently.")
-    }
-}
+include { CONVERT_FAST5_TO_POD5; MERGE_POD5; CHECK_POD5_CHEMISTRY } from './modules/pod5.nf'
+include { BASECALL; DEMUX; DORADO_SUMMARY; BASECALL_LEGACY        } from './modules/dorado.nf'
+include { PYCOQC                                                  } from './modules/pycoqc.nf'
+include { CONVERT_TO_FASTQ; PUBLISH_BAMS                          } from './modules/samtools.nf'
 
 def validateBarcodeParams() {
     def kitName = params.barcode_kit_name != null && params.barcode_kit_name.trim()
@@ -30,28 +24,17 @@ workflow ONT_BASECALLING{
     raw_read_signal_files
 
     main:
-
-    raw_read_signal_files.map{ raw_read_signal_file ->
-        tuple(raw_read_signal_file.extension, raw_read_signal_file)
-    }
-    | groupTuple
-    | map { format, files -> 
-            validateSingleFormat([format])
-            return [format, files] 
-    }
-    | set{ input_formats }
-
     /*
     Files in the fast5 format are converted to pod5 and so are branched out into their respective channels
     */
 
-    input_formats
-    | branch { format, files ->
-        fast5: format == "fast5"
-            return files
+    raw_read_signal_files
+    | branch { meta, files ->
+        fast5: meta.format == "fast5"
+            return tuple(meta, files)
 
-        pod5: format == "pod5"
-           return files
+        pod5: meta.format == "pod5"
+            return tuple(meta, files)
     }
     | set{ raw_files }
 
@@ -59,12 +42,28 @@ workflow ONT_BASECALLING{
 
     MERGE_POD5(raw_files.pod5)
     | mix(CONVERT_FAST5_TO_POD5.out.pod5_ch) //mix in files if there are only fast5's
-    | BASECALL
+    | CHECK_POD5_CHEMISTRY
+    | map { meta, report_json, files ->
+        def info = new groovy.json.JsonSlurper().parse(report_json)
+        def merged_meta = meta + info
+        tuple(merged_meta, files)
+    }
+    | branch { meta, _pod5 ->
+        legacy:  meta.dorado_version == '0.9.6'
+        current: true
+    }
+    | set { ready_for_basecalling_ch }
+    
+    BASECALL(ready_for_basecalling_ch.current)
+    BASECALL_LEGACY(ready_for_basecalling_ch.legacy)
 
+    BASECALL.out.called_channel
+    | mix(BASECALL_LEGACY.out.called_channel)
+    | set { called_ch }
     if (params.barcode_kit_name) {
         validateBarcodeParams()
 
-        BASECALL.out.called_channel
+        called_ch
         | DEMUX
         | flatten
         | map{ long_read_bam -> 
@@ -75,11 +74,11 @@ workflow ONT_BASECALLING{
         }
         | set{ bam_ch }
     } else {
-        BASECALL.out.called_channel
+        called_ch
         | set{ bam_ch }
     }
 
-    DORADO_SUMMARY(BASECALL.out.called_channel)
+    DORADO_SUMMARY(called_ch)
     | PYCOQC
 
     if (params.additional_metadata) {
@@ -97,9 +96,8 @@ workflow ONT_BASECALLING{
 
     } else {
         bam_ch
-        | map { called_bam -> 
+        | map { meta, called_bam -> 
             //as we are not performing any meta additon we just generate a name from the input directory
-            def meta = [:]
             def input_directory_name = file(params.raw_read_dir).simpleName
             meta.barcode_kit = "not-reclassified"
             meta.barcode = input_directory_name.contains("barcode") ? input_directory_name.split("barcode")[-1] : input_directory_name

@@ -7,7 +7,7 @@ process PYCOQC {
     publishDir "${params.outdir}/qc/pycoqc", mode: 'copy', overwrite: true
     
     input:
-    path(sequence_summary_file)
+    tuple val(meta), path(sequence_summary_file)
 
     output:
     path("*.html"), emit: html

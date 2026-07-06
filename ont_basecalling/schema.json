@@ -2,8 +2,8 @@
     "pipeline": "Nanopore Basecalling",
     "params": {
         "Basecalling": {
-            "basecall_model": {
-                "default": "",
+            "model": {
+                "default": "sup",
                 "help_text": "Specifies the model for basecalling, which matches specific flow cell and chemistry. Models can be found here https://github.com/nanoporetech/dorado?tab=readme-ov-file"
             },
             "trim_adapters": {
