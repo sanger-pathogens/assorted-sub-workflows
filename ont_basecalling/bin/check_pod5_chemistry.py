@@ -6,10 +6,7 @@ Take the first read and check its run_info against a curated list of chemistry r
 whether the pod5 file is compatible with the current Dorado release. reports as json for nextflow
 
 This is a curated exception list of chemistries we've *observed* to fail
-with current Dorado releases -- it is not a faithful reimplementation of
-Dorado's internal chemistry resolver (which keys off the full
-(flowcell, sequencing_kit, sample_rate) triplet and changes release to
-release). 
+with current Dorado releases
 
 Requires manual Update CHEMISTRY_RULES reactively as new failures are found.
 """
