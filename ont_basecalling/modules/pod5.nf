@@ -1,4 +1,6 @@
 process CONVERT_FAST5_TO_POD5 {
+    tag "${meta.ID}"
+
     label 'cpu_8'
     label 'mem_8'
     label 'time_30m'
@@ -19,6 +21,8 @@ process CONVERT_FAST5_TO_POD5 {
 }
 
 process MERGE_POD5 {
+    tag "${meta.ID}"
+
     label 'cpu_1'
     label 'mem_1'
     label 'time_30m'

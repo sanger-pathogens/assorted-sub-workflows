@@ -1,4 +1,6 @@
 process CONVERT_TO_FASTQ {
+    tag "${meta.ID}"
+
     label 'cpu_2'
     label 'mem_250M'
     label 'time_30m'
@@ -22,6 +24,8 @@ process CONVERT_TO_FASTQ {
 }
 
 process PUBLISH_BAMS {
+    tag "${meta.ID}"
+    
     label 'cpu_1'
     label 'mem_1'
     label 'time_30m'

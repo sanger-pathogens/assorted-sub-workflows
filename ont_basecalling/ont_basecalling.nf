@@ -1,3 +1,5 @@
+import java.nio.file.Files
+
 include { CONVERT_FAST5_TO_POD5; MERGE_POD5; CHECK_POD5_CHEMISTRY } from './modules/pod5.nf'
 include { BASECALL; DEMUX; DORADO_SUMMARY; BASECALL_LEGACY        } from './modules/dorado.nf'
 include { PYCOQC                                                  } from './modules/pycoqc.nf'
@@ -49,17 +51,18 @@ workflow ONT_BASECALLING{
         tuple(merged_meta, files)
     }
     | branch { meta, _pod5 ->
-        legacy:  meta.dorado_version == '0.9.6'
+        legacy_0_9_6:  meta.dorado_version == '0.9.6'
         current: true
     }
     | set { ready_for_basecalling_ch }
     
     BASECALL(ready_for_basecalling_ch.current)
-    BASECALL_LEGACY(ready_for_basecalling_ch.legacy)
+    BASECALL_LEGACY(ready_for_basecalling_ch.legacy_0_9_6)
 
     BASECALL.out.called_channel
     | mix(BASECALL_LEGACY.out.called_channel)
     | set { called_ch }
+
     if (params.barcode_kit_name) {
         validateBarcodeParams()
 
@@ -116,6 +119,14 @@ workflow ONT_BASECALLING{
         bam_ch
         | set { read_ch }
     }
+
+    //cleanup pod5
+    BASECALL.out.basecalling_complete_channel
+    | mix(BASECALL_LEGACY.out.basecalling_complete_channel)
+    | flatten
+    | filter(Path)
+    | map { pod5File -> NextflowTool.safeDelete(pod5File, workflow.workDir, log) }
+
 
     emit:
     read_ch

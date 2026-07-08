@@ -1,10 +1,10 @@
 process BASECALL {
-    label 'cpu_1'
-    label 'mem_4'
-    label 'time_1'
-    label 'gpu'
-
     tag "${meta.ID}"
+
+    label 'cpu_1'
+    label 'mem_2'
+    label 'time_12'
+    label 'gpu'
 
     container 'quay.io/sangerpathogens/cuda_dorado:1.3.1'
     
@@ -13,6 +13,7 @@ process BASECALL {
 
     output:
     tuple val(meta), path("calls.bam"), emit: called_channel
+    tuple val(meta), path(pod5), path("${meta.ID}_basecalling_complete.txt"), emit: basecalling_complete_channel
 
     script:
     def barcodeArgs = ""
@@ -34,16 +35,18 @@ process BASECALL {
     
     """
     ${basecallCommand}
+
+    touch ${meta.ID}_basecalling_complete.txt
     """
 }
 
 process BASECALL_LEGACY {
-    label 'cpu_1'
-    label 'mem_4'
-    label 'time_1'
-    label 'gpu'
-
     tag "${meta.ID}"
+
+    label 'cpu_1'
+    label 'mem_2'
+    label 'time_12'
+    label 'gpu'
 
     container 'quay.io/sangerpathogens/cuda_dorado:0.9.6'
     
@@ -52,6 +55,7 @@ process BASECALL_LEGACY {
 
     output:
     tuple val(meta), path("calls.bam"), emit: called_channel
+    tuple val(meta), path(pod5), path("${meta.ID}_basecalling_complete.txt"), emit: basecalling_complete_channel
 
     script:
     def barcodeArgs = ""
@@ -66,17 +70,21 @@ process BASECALL_LEGACY {
     def min_qscore_args = params.min_qscore == "" ? "" : "--min-qscore ${params.min_qscore}"
 
     def methylation_models_args = params.modified_bases_models ? "--modified-bases-models  ${params.modified_bases_models}" : ""
-    
+
     def basecallCommand =
         "dorado basecaller ${params.model} --trim ${params.trim_adapters} " +
         "${min_qscore_args} ${barcodeArgs} ${methylation_models_args} ${pod5} > calls.bam"
     
     """
     ${basecallCommand}
+
+    touch ${meta.ID}_basecalling_complete.txt
     """
 }
 
 process DEMUX {
+    tag "${meta.ID}"
+
     label 'cpu_1'
     label 'mem_1'
     label 'time_1'
@@ -97,14 +105,16 @@ process DEMUX {
     """
 }
 
-process DORADO_SUMMARY { 
+process DORADO_SUMMARY {
+    tag "${meta.ID}"
+    
     label 'cpu_1'
     label 'mem_500M'
     label 'time_1'
     
     tag "${params.barcode_kit_name}"
 
-    publishDir path: "${params.outdir}/sequencing_summary/", mode: 'copy', overwrite: true, pattern: "summary.tsv"
+    publishDir path: "${params.outdir}/qc/", mode: 'copy', overwrite: true
 
     container 'quay.io/sangerpathogens/cuda_dorado:1.3.1'
     
@@ -112,10 +122,11 @@ process DORADO_SUMMARY {
     tuple val(meta), path(called_bam)
 
     output:
-    tuple val(meta), path("summary.tsv"), emit: summary_channel
+    tuple val(meta), path(summary), emit: summary_channel
 
     script:
+    summary = "${meta.ID}_sequencing_summary.txt"
     """
-    dorado summary ${called_bam} > summary.tsv
+    dorado summary ${called_bam} > ${summary}
     """
 }
