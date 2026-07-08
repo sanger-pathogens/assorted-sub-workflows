@@ -1,5 +1,3 @@
-import java.nio.file.Files
-
 include { CONVERT_FAST5_TO_POD5; MERGE_POD5; CHECK_POD5_CHEMISTRY } from './modules/pod5.nf'
 include { BASECALL; DEMUX; DORADO_SUMMARY; BASECALL_LEGACY        } from './modules/dorado.nf'
 include { PYCOQC                                                  } from './modules/pycoqc.nf'
