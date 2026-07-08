@@ -50,7 +50,7 @@ process BEEFEATER {
 
     // If any preprocessing steps result in publishing _preprecessed.fastq.gz files then directory passed
     def preprocessing_params = [params.run_trimmomatic, params.run_trf, params.run_bmtagger]
-    if (preprocessing_params.any { it == true }) {
+    if (preprocessing_params.any { it == true } && params.prevent_redownloads_choice == "preprocessed") {
         final_directory = "preprocessing/"} else {
         final_directory = "${params.raw_reads_prefix}fastqs/"}
     // If the directory is nested feed the top level out dir to beefeater, if preprocessing and flat then point to preprocessing
@@ -58,11 +58,11 @@ process BEEFEATER {
 
     // Options required for preventing the redownload of Illumina reads
     def illumina_read_output_directory = params.prevent_redownloads ? "--illumina_read_output_directory ${dir_structure}" : ""
-    def illumina_publish_output = "--illumina_publish_output ${params.preexisting_output_tag}"
+    def illumina_publish_output = "--illumina_publish_output ${final_directory}"
     def illumina_id_suffix = "--illumina_id_suffix ${params.existing_output_id_suffix}"
     def illumina_output_extension = "--illumina_output_extension ${params.existing_output_extension}"
     def illumina_publish_structure = ("${params.save_method}" == "nested") ? "--illumina_publish_structure nested" : "--illumina_publish_structure flat"
-    def prevent_redownload_opts = params.prevent_redownloads ? "${illumina_read_output_directory} ${illumina_publish_output} ${illumina_id_suffix} ${illumina_output_extension} ${illumina_publish_structure}" : ""
+    prevent_redownload_opts = params.prevent_redownloads ? "${illumina_read_output_directory} ${illumina_publish_output} ${illumina_id_suffix} ${illumina_output_extension} ${illumina_publish_structure}" : ""
 
 
     def query    = generate_query(params)
