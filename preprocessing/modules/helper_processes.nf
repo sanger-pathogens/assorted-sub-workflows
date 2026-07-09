@@ -2,7 +2,7 @@ process COMPRESS_READS {
     tag "${meta.ID}"
     label 'mem_4'
     label 'cpu_1'
-    label 'time_queue_from_small_slow2'
+    label 'time_queue_from_normal_slow2'
 
     publishDir path: { if ("${params.save_method}" == "nested") "${params.outdir}/${meta.ID}/preprocessing/" else "${params.outdir}/preprocessing/" }, mode: "copy", enabled: params.publish_clean_reads
 
@@ -25,7 +25,7 @@ process DECOMPRESS_READS {
     tag "${meta.ID}"
     label 'mem_4'
     label 'cpu_1'
-    label 'time_queue_from_small_slow2'
+    label 'time_queue_from_normal_slow2'
 
     input:
     tuple val(meta), path(read_1), path(read_2)

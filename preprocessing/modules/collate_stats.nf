@@ -10,13 +10,12 @@ process COLLATE_STATS_BMTAGGER {
     path(stats_files)
 
     output:
-    tuple val(fakemeta), path(host_read_removal_stats_file), emit: host_reads_stats_ch
+    path(host_read_removal_stats_file), emit: host_reads_stats_ch
 
     script:
-    fakemeta = [:]  // dummy meta to allow tuple output compatibility with PIPELINE_EVENTS:GATHER_RESULTFILE_INFO's input
     host_read_removal_stats_file="host_read_removal_statistics.csv"
     """
-    echo "Sample_id,Total_host_reads,Total_non_host_reads,Total_trimmed_reads,host_reads_%,non_host_reads_%,Total_original_reads,reads_trimmed_%" > "${host_read_removal_stats_file}"
+    echo "Sample_id,Total_host_reads,Total_non_host_reads,Total_trimmed_reads,host_reads_percent,non_host_reads_percent,Total_original_reads,reads_trimmed_percent" > "${host_read_removal_stats_file}"
     cat *_stats.csv >> "${host_read_removal_stats_file}"
     """
 }
@@ -33,10 +32,9 @@ process COLLATE_STATS_TRIMMOMATIC {
     path(stats_files)
 
     output:
-    tuple val(fakemeta), path(trimming_stats_file), emit: trimming_stats_ch
+    path(trimming_stats_file), emit: trimming_stats_ch
 
     script:
-    fakemeta = [:]  // dummy meta to allow tuple output compatibility with PIPELINE_EVENTS:GATHER_RESULTFILE_INFO's input
     trimming_stats_file="trimmomatic_statistics.csv"
     """
     echo "Sample_id,Input_read_pairs,Both_surviving_reads,Both_surviving_read_percent,Forward_only_surviving_reads,Forward_only_surviving_read_percent,Reverse_only_surviving_reads,Reverse_only_surviving_read_percent,Dropped_reads,Dropped_read_percent" > "${trimming_stats_file}"
