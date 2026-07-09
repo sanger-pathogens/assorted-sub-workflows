@@ -18,10 +18,10 @@ workflow PREPROCESSING {
     reads_ch
 
     main:
-    reads_ch.branch{ meta_map ->
-        illumina_to_unpack: meta_map.Platform == "ILLUMINA"
+    reads_ch.branch{ meta, fwd, rev ->
+        illumina_to_unpack: meta.Platform == "ILLUMINA"
 
-        ONT: meta_map.Platform == "ONT"
+        ONT: meta.Platform == "ONT"
 
         other: true
     }
