@@ -1,7 +1,7 @@
 process GUNC {
     tag "${meta.ID}"
-    label "cpu_8"
-    label "mem_8"
+    label params.batch_size > 100 ? "cpu_32" : "cpu_16"
+    label params.batch_size > 100 ? "mem_32" : "mem_8"
     label "time_12"
 
     container  'quay.io/biocontainers/gunc:1.0.6--pyhdfd78af_0'

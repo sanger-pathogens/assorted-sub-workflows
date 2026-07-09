@@ -1,6 +1,6 @@
 process MDMCLEANER {
     tag "${meta.ID}"
-    label "cpu_32"
+    label "cpu_16"
     label "mem_8"
     label "time_12"
 
@@ -9,17 +9,17 @@ process MDMCLEANER {
     publishDir mode: 'copy', path: "${params.outdir}/mdmcleaner/"
 
     input:
-    tuple val(meta), path(fastas, stageAs: "fastas/*")
+    tuple val(group_key), val(meta), path(fasta)
 
     output:
-    tuple val(meta), path("*.${output_fasta_ext}"), emit: results
+    tuple val(group_key), val(meta), path("*.${output_fasta_ext}"), emit: results
 
     script:
     fasta_ext = params.fasta_ext.replaceAll(/^\./, '')
     output_fasta_ext = "${fasta_ext}.gz"
     """
     mdmcleaner set_configs --db_basedir ${params.mdmcleaner_db} --threads ${task.cpus}
-    mdmcleaner clean -i fastas/*.${fasta_ext} -o mdmcleaner_output -t ${task.cpus} -c mdmcleaner.config --fast_run
+    mdmcleaner clean -i ${fasta} -o mdmcleaner_output -t ${task.cpus} -c mdmcleaner.config --fast_run
 
     # Rename files to match desired extension as mdmcleaner is always fasta
     for file in mdmcleaner_output/*/*.fasta.gz; do
