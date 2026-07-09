@@ -57,7 +57,7 @@ process PIPELINE_EVENTS_OPEN_BATCH {
     files_created == true
 
     output:
-    tuple val(batch_mani_params), path(batch_mani_params_out), emit: batch_manifest_params
+    path(batch_mani_params_out), emit: batch_manifest_params
     val(batch_id),  emit: batch_id
 
     script:
@@ -134,21 +134,41 @@ process PIPELINE_EVENTS_CREATE_FILE {
     tuple val(meta), path(resultfileWorkPath), val(resultfilePublishedDir), val(file_type), val(batch_id) // val(resultfilePublishedDir), not path() so not to stage folder
 
     output:
-    tuple val(outid), val(resultfilePublishedFullPath), val(file_type),  emit: created_file_info // val(resultfilePublishedFullPath), not path() so not to stage the file that's outside the work folder
+    tuple val(runid), val(resultfilePublishedFullPath), val(file_type),  emit: created_file_info // val(resultfilePublishedFullPath), not path() so not to stage the file that's outside the work folder
 
     script:
     runid = meta.ID
-    outid = (runid == null) ? batch_id : runid
     resultfileName = resultfileWorkPath.name.toString()
     resultfilePublishedFullPath = "${resultfilePublishedDir}/${resultfileName}"
-    // runassociationOptString = (file_type == "batch_manifest") ? "" : "--association RUN --association_id ${runid}"
-    runassociationOptString = "--association RUN --association_id ${runid}" // in waiting for the API to allow not using these options for batch_manifest type
+    runassociationOptString = "--association RUN --association_id ${runid}"
     """
     filemd5=\$(md5sum ${resultfileWorkPath} | cut -d' ' -f1)
     send_pipeline_event file --batch_id ${batch_id} --path ${resultfilePublishedFullPath} --file_type ${file_type} \\
-                                --md5sum \${filemd5} ${runassociationOptString} \\
-                                --username \$(id -un) --group \$(id -gn)
+                                --md5sum \${filemd5} ${runassociationOptString}
     """
 
     
+}
+
+process PIPELINE_EVENTS_INGEST_FILES {
+    label 'cpu_1'
+    label 'mem_1'
+    label 'time_queue_from_small'
+    cache false
+
+    container "${params.pipeline_events_container}"
+
+    input:
+    tuple path(rawingestmanifest), val(batch_id)
+
+    output:
+    path(ingestmanifest)
+
+    script:
+    ingestmanifest = "pipevdb_ingest_manifest.tsv"
+    """
+    echo "type,path" > ${ingestmanifest}
+    cat ${rawingestmanifest} >> ${ingestmanifest}
+    send_pipeline_event ingest --batch_id ${batch_id} --path ${ingestmanifest} 
+    """
 }
