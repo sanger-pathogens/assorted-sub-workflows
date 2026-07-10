@@ -73,7 +73,7 @@ workflow PREPROCESSING {
         // for when turning off preprocessing or for non-illumina data, 
         // just pass through the reads without preprocessing and empty channels for stats
         // so to streamline downstream workflow compatibility
-        preprocessed_reads_ch = reads_ch
+        preprocessed_reads_ch = reads_ch.illumina_to_unpack
         collated_trimming_stats_ch = Channel.empty()
         collated_host_reads_stats_ch = Channel.empty()
     }
