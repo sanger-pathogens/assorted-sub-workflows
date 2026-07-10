@@ -38,7 +38,7 @@ process BEEFEATER {
     label 'mem_2'
     label 'time_1'
 
-    container 'quay.io/sangerpathogens/beefeater:dev-v1.0.4'
+    container 'quay.io/sangerpathogens/beefeater:v1.1.0'
 
     output:
     path("*output.csv"), emit: csv_ch //this is a json but the output file name is messed up to fix
