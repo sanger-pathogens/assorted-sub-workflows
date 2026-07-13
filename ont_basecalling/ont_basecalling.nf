@@ -2,6 +2,7 @@ include { CONVERT_FAST5_TO_POD5; MERGE_POD5; CHECK_POD5_CHEMISTRY } from './modu
 include { BASECALL; DEMUX; DORADO_SUMMARY; BASECALL_LEGACY        } from './modules/dorado.nf'
 include { PYCOQC                                                  } from './modules/pycoqc.nf'
 include { CONVERT_TO_FASTQ; PUBLISH_BAMS                          } from './modules/samtools.nf'
+include { METADATA                                                } from '../irods_extractor/modules/metadata_save.nf'
 
 def validateBarcodeParams() {
     def kitName = params.barcode_kit_name != null && params.barcode_kit_name.trim()
@@ -59,7 +60,15 @@ workflow ONT_BASECALLING{
 
     BASECALL.out.called_channel
     | mix(BASECALL_LEGACY.out.called_channel)
+    | map { meta, bam, model -> tuple(meta + [model: model], bam) }
     | set { called_ch }
+
+    called_ch
+    | map{metadata_map, path -> metadata_map}
+    | collectFile() { map -> [ "lane_metadata.txt", map.collect{it}.join(', ') + '\n' ] }
+    | set{ metadata_only }
+
+    METADATA(metadata_only, "basecalled")
 
     if (params.barcode_kit_name) {
         validateBarcodeParams()
@@ -82,6 +91,7 @@ workflow ONT_BASECALLING{
     DORADO_SUMMARY(called_ch)
     | PYCOQC
 
+    /*
     if (params.additional_metadata) {
         bam_ch
         | map { meta, reads -> ["${meta.barcode_kit}_${meta.barcode}", meta, reads]}
@@ -106,6 +116,7 @@ workflow ONT_BASECALLING{
         }
         | set { bam_ch }
     }
+    */
     
     if (params.read_format == "fastq") {
         CONVERT_TO_FASTQ(bam_ch)
@@ -124,7 +135,6 @@ workflow ONT_BASECALLING{
     | flatten
     | filter(Path)
     | map { pod5File -> NextflowTool.safeDelete(pod5File, workflow.workDir, log) }
-
 
     emit:
     read_ch

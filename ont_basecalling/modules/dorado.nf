@@ -12,7 +12,7 @@ process BASECALL {
     tuple val(meta), path(pod5)
 
     output:
-    tuple val(meta), path("calls.bam"), emit: called_channel
+    tuple val(meta), path("calls.bam"), env(MODEL), emit: called_channel
     tuple val(meta), path(pod5), path("${meta.ID}_basecalling_complete.txt"), emit: basecalling_complete_channel
 
     script:
@@ -31,10 +31,17 @@ process BASECALL {
     
     def basecallCommand =
         "dorado basecaller ${params.model} --trim ${params.trim_adapters} " +
-        "${min_qscore_args} ${barcodeArgs} ${methylation_models_args} ${pod5} > calls.bam"
+        "${min_qscore_args} ${barcodeArgs} ${methylation_models_args} ${pod5} > calls.bam  2> dorado.log"
     
     """
     ${basecallCommand}
+
+    MODEL=\$(grep -oP '(?<=downloading )\\S+(?= with httplib)' dorado.log)
+
+    # if already cached incase we add that
+    if [ -z "\$MODEL" ]; then
+        MODEL=\$(grep -oP '(?<=and model )\\S+(?=\\.)' dorado.log)
+    fi
 
     touch ${meta.ID}_basecalling_complete.txt
     """
@@ -54,7 +61,7 @@ process BASECALL_LEGACY {
     tuple val(meta), path(pod5)
 
     output:
-    tuple val(meta), path("calls.bam"), emit: called_channel
+    tuple val(meta), path("calls.bam"), env(MODEL), emit: called_channel
     tuple val(meta), path(pod5), path("${meta.ID}_basecalling_complete.txt"), emit: basecalling_complete_channel
 
     script:
@@ -73,10 +80,17 @@ process BASECALL_LEGACY {
 
     def basecallCommand =
         "dorado basecaller ${params.model} --trim ${params.trim_adapters} " +
-        "${min_qscore_args} ${barcodeArgs} ${methylation_models_args} ${pod5} > calls.bam"
+        "${min_qscore_args} ${barcodeArgs} ${methylation_models_args} ${pod5} > calls.bam  2> dorado.log"
     
     """
     ${basecallCommand}
+
+    MODEL=\$(grep -oP '(?<=downloading )\\S+(?= with httplib)' dorado.log)
+
+    # if already cached incase we add that
+    if [ -z "\$MODEL" ]; then
+        MODEL=\$(grep -oP '(?<=and model )\\S+(?=\\.)' dorado.log)
+    fi
 
     touch ${meta.ID}_basecalling_complete.txt
     """
@@ -114,7 +128,7 @@ process DORADO_SUMMARY {
     
     tag "${params.barcode_kit_name}"
 
-    publishDir path: "${params.outdir}/qc/", mode: 'copy', overwrite: true
+    publishDir path: "${params.outdir}/qc/${meta.ID}/", mode: 'copy', overwrite: true
 
     container 'quay.io/sangerpathogens/cuda_dorado:1.3.1'
     

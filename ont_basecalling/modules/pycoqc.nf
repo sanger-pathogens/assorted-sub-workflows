@@ -6,7 +6,7 @@ process PYCOQC {
     label 'time_30m'
 
     container "quay.io/biocontainers/pycoqc:2.5.2--py_0"
-    publishDir "${params.outdir}/qc/", mode: 'copy', overwrite: true
+    publishDir "${params.outdir}/qc/${meta.ID}/", mode: 'copy', overwrite: true
     
     input:
     tuple val(meta), path(sequence_summary_file)

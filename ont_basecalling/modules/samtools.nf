@@ -19,7 +19,7 @@ process CONVERT_TO_FASTQ {
     //fall back to barcode_kit_barcode if no ID
     fastq_output = "${meta.ID ?: "${meta.barcode_kit}_B${meta.barcode}"}.fastq.gz"
     """
-    samtools fastq -@ ${task.cpus} -0 ${fastq_output} ${reads_bam}
+    samtools fastq -@ ${task.cpus} -T '*' ${reads_bam} | gzip -c > ${fastq_output}
     """
 }
 
