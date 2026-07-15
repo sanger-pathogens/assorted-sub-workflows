@@ -27,7 +27,7 @@ process BWA_INDEX {
     tag "${meta.ID}"
     label 'cpu_1'
     label 'mem_250M'
-    label 'time_30m'
+    label 'time_12'
 
     container 'quay.io/sangerpathogens/bwa:0.7.19'
 

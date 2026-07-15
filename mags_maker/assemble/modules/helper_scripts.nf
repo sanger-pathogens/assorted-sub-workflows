@@ -2,7 +2,7 @@ process REMOVE_SMALL_CONTIGS {
     tag "${meta.ID}"
     label 'cpu_1'
     label 'mem_100M'
-    label 'time_30m'
+    label 'time_12'
 
     container 'quay.io/sangerpathogens/python-curl:3.11'
 
@@ -26,7 +26,7 @@ process FIX_MEGAHIT_CONTIG_NAMING {
     tag "${meta.ID}"
     label 'cpu_1'
     label 'mem_100M'
-    label 'time_30m'
+    label 'time_12'
 
     container 'quay.io/sangerpathogens/python-curl:3.11'
 
@@ -49,7 +49,7 @@ process SORT_CONTIGS {
     tag "${meta.ID}"
     label 'cpu_1'
     label 'mem_100M'
-    label 'time_30m'
+    label 'time_12'
 
     container 'quay.io/sangerpathogens/python-curl:3.11'
 

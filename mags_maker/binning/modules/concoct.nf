@@ -2,7 +2,7 @@ process CUT_UP_FASTA {
     tag "${meta.ID}"
     label 'cpu_1'
     label 'mem_100M'
-    label 'time_30m'
+    label 'time_12'
 
     container 'quay.io/biocontainers/concoct:1.0.0--py36h88e4a8a_5'
 
@@ -25,7 +25,7 @@ process ESTIMATE_ABUNDANCE {
     tag "${meta.ID}"
     label 'cpu_1'
     label 'mem_250M'
-    label 'time_30m'
+    label 'time_12'
 
     container 'quay.io/biocontainers/concoct:1.0.0--py36h88e4a8a_5'
 
@@ -46,7 +46,7 @@ process CONCOCT {
     tag "${meta.ID}"
     label 'cpu_1'
     label 'mem_1'
-    label 'time_30m'
+    label 'time_12'
 
     container 'quay.io/biocontainers/concoct:1.0.0--py36h88e4a8a_5'
 
@@ -72,7 +72,7 @@ process CUTUP_CLUSTERING {
     tag "${meta.ID}"
     label 'cpu_1'
     label 'mem_250M'
-    label 'time_30m'
+    label 'time_12'
 
     container 'quay.io/biocontainers/concoct:1.0.0--py36h88e4a8a_5'
 
@@ -93,7 +93,7 @@ process SPLIT_BINS {
     tag "${meta.ID}"
     label 'cpu_1'
     label 'mem_100M'
-    label 'time_30m'
+    label 'time_12'
 
     container 'quay.io/sangerpathogens/python-curl:3.11'
 

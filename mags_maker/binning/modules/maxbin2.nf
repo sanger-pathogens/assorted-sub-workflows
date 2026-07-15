@@ -2,7 +2,7 @@ process SPLIT_DEPTHS {
     tag "${meta.ID}"
     label 'cpu_1'
     label 'mem_100M'
-    label 'time_30m'
+    label 'time_12'
 
     container 'quay.io/sangerpathogens/python-curl:3.11'
 
@@ -24,7 +24,7 @@ process MAXBIN2 {
     tag "${meta.ID}"
     label 'cpu_2'
     label 'mem_1'
-    label 'time_30m'
+    label 'time_12'
 
     container 'quay.io/biocontainers/maxbin2:2.2.6--h14c3975_0'
 
