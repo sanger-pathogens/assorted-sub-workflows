@@ -2,7 +2,7 @@ process INDEX {
     tag "${meta.ID}"
     label 'cpu_1'
     label 'mem_100M'
-    label 'time_30m'
+    label 'time_12'
 
     container 'quay.io/biocontainers/samtools:1.22--h96c455f_0'
 

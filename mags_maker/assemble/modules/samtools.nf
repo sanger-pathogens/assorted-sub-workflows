@@ -2,7 +2,7 @@ process MAPPED_READS_TO_FASTQ {
     tag "${meta.ID}"
     label 'cpu_2'
     label 'mem_100M'
-    label 'time_30m'
+    label 'time_12'
     
     container 'quay.io/biocontainers/samtools:1.22--h96c455f_0'
 
