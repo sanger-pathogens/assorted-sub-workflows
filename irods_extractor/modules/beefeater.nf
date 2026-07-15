@@ -68,10 +68,11 @@ process BEEFEATER {
     def query    = generate_query(params)
     def manifest = params.manifest_of_lanes ? "--manifest ${params.manifest_of_lanes}" : ""
     def search   = params.search ? "" : "--get"
-
+    def service_user = params.service_user ? "--su ${params.service_user}" : ""
     """
     beefeater search \\
         --file_format json \\
+        ${service_user} \\
         ${query} \\
         ${manifest} \\
         ${search} \\
