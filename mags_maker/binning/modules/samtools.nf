@@ -1,4 +1,5 @@
 process INDEX {
+    tag "${meta.ID}"
     label 'cpu_1'
     label 'mem_100M'
     label 'time_30m'

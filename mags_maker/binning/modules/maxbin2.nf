@@ -21,6 +21,7 @@ process SPLIT_DEPTHS {
 }
 
 process MAXBIN2 {
+    tag "${meta.ID}"
     label 'cpu_2'
     label 'mem_1'
     label 'time_30m'

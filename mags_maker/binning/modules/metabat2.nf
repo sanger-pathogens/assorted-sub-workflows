@@ -1,4 +1,5 @@
 process CONTIG_DEPTHS {
+    tag "${meta.ID}"
     label 'cpu_2'
     label 'mem_100M'
     label 'time_30m'
@@ -19,6 +20,7 @@ process CONTIG_DEPTHS {
 }
 
 process CONTIG_DEPTHS_NO_INTRA {
+    tag "${meta.ID}"
     label 'cpu_1'
     label 'mem_100M'
     label 'time_30m'
@@ -40,6 +42,7 @@ process CONTIG_DEPTHS_NO_INTRA {
 
 
 process METABAT1 {
+    tag "${meta.ID}"
     label 'cpu_2'
     label 'mem_1'
     label 'time_30m'
@@ -71,6 +74,7 @@ process METABAT1 {
 }
 
 process METABAT2 {
+    tag "${meta.ID}"
     label 'cpu_2'
     label 'mem_1'
     label 'time_30m'
