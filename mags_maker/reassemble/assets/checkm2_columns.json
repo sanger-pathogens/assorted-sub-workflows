@@ -1,0 +1,6 @@
+{
+    "bin": "Name",
+    "completeness": "Completeness",
+    "contamination": "Contamination",
+    "n50": "Contig_N50"
+}

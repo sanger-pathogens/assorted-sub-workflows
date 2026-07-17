@@ -5,7 +5,7 @@ include { REMOVE_SMALL_CONTIGS;
           SORT_CONTIGS               } from './modules/helper_scripts.nf'
 include { BWA_INDEX;
           BWA                        } from './modules/bwa.nf'
-include { SAM_TO_FASTQ               } from './modules/samtools.nf'
+include { MAPPED_READS_TO_FASTQ      } from './modules/samtools.nf'
 include { QUAST                      } from './modules/quast.nf'
 
 /*
@@ -56,7 +56,7 @@ workflow METAWRAP_ASSEMBLE {
 
             reads_ch.join(indexed_scaffolds)
             | BWA
-            | SAM_TO_FASTQ
+            | MAPPED_READS_TO_FASTQ
             | set { final_reads_ch }
         }
 

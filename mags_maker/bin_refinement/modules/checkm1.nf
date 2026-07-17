@@ -2,7 +2,8 @@ process CHECKM {
     tag "${meta.ID}"
     label "cpu_4"
     label "mem_64"
-    label "time_30m"
+    label "time_12"
+    scratch true
 
     container 'quay.io/biocontainers/checkm-genome:1.2.4--pyhdfd78af_0'
 
@@ -26,7 +27,7 @@ process SUMMARISE_CHECKM {
     tag "${meta.ID}"
     label 'cpu_1'
     label 'mem_250M'
-    label 'time_30m'
+    label 'time_12'
 
     publishDir mode: 'copy', path: "${params.outdir}/${meta.ID}/checkm1/", pattern: "${meta.ID}_${bin_name}checkm_summary.tsv"
 

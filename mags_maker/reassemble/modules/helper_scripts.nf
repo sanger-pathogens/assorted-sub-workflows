@@ -2,7 +2,7 @@ process COMBINE_BINS {
     tag "${meta.ID}"
     label 'cpu_1'
     label 'mem_100M'
-    label 'time_30m'
+    label 'time_12'
 
     container 'quay.io/sangerpathogens/python-curl:3.11'
 
@@ -25,10 +25,10 @@ process SPLIT_READS {
     label 'mem_1'
     label 'time_12'
 
-    container 'quay.io/sangerpathogens/python-curl:3.11'
+    container 'quay.io/biocontainers/pysam:0.23.3--py39hdd5828d_1'
 
     input:
-    tuple val(meta), path(untrusted_contigs), path(sam)
+    tuple val(meta), path(untrusted_contigs), path(mapped_reads)
 
     output:
     tuple val(meta), path("bin.*.{permissive,strict}_{1,2}.fastq.gz"),  emit: split_reads
@@ -36,7 +36,7 @@ process SPLIT_READS {
     script:
     command = "${projectDir}/assorted-sub-workflows/mags_maker/reassemble/modules/bin/filter_reads_for_bin_reassembly.py"
     """
-    ${command} ${untrusted_contigs} . ${params.strict_max} ${params.permissive_max} --sam ${sam}
+    ${command} ${untrusted_contigs} . ${params.strict_max} ${params.permissive_max} --mapped_reads ${mapped_reads}
     """
 }
 
@@ -44,7 +44,7 @@ process REMOVE_SMALL_CONTIGS {
     tag "${meta.ID}"
     label 'cpu_1'
     label 'mem_100M'
-    label 'time_30m'
+    label 'time_12'
 
     container 'quay.io/sangerpathogens/python-curl:3.11'
 
@@ -67,7 +67,7 @@ process COLLECT_BINS {
     tag "${meta.ID}"
     label 'cpu_1'
     label 'mem_100M'
-    label 'time_30m'
+    label 'time_12'
 
     container 'quay.io/sangerpathogens/python-curl:3.11'
 
@@ -89,7 +89,7 @@ process RENAME_ORIGINAL {
     tag "${meta.ID}"
     label 'cpu_1'
     label 'mem_100M'
-    label 'time_30m'
+    label 'time_12'
 
     container 'quay.io/sangerpathogens/python-curl:3.11'
 
@@ -100,7 +100,7 @@ process RENAME_ORIGINAL {
     tuple val(meta), path(final_name), emit: renamed_file
 
     script:
-    final_name = "long_${meta.ID}_${fasta.baseName.replaceAll('\\.', '_')}_orgin.fasta"
+    final_name = "long_${meta.ID}_${fasta.baseName.replaceAll('\\.', '_')}_origin.fasta"
     """
     cp ${fasta} ${final_name}
     """
@@ -110,7 +110,7 @@ process CHOOSE_BEST_BIN {
     tag "${meta.ID}"
     label 'cpu_1'
     label 'mem_100M'
-    label 'time_30m'
+    label 'time_12'
 
     container 'quay.io/sangerpathogens/python-curl:3.11'
 
@@ -122,8 +122,10 @@ process CHOOSE_BEST_BIN {
 
     script:
     command = "${projectDir}/assorted-sub-workflows/mags_maker/reassemble/modules/bin/choose_best_bin.py"
+    config_dir = "${projectDir}/assorted-sub-workflows/mags_maker/reassemble/assets"
     final_bin = "${meta.ID}_best_bins"
+    summary_config = params.checkm1 ? "${config_dir}/checkm1_columns.json" : "${config_dir}/checkm2_columns.json"
     """
-    ${command} ${summary} ${bin} ${final_bin} --min-completeness ${params.min_completeness} --max-contamination ${params.max_contamination}
+    ${command} ${summary} ${bin} ${final_bin} --min-completeness ${params.min_completeness} --max-contamination ${params.max_contamination} --config ${summary_config}
     """
 }
