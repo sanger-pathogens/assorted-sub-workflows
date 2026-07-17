@@ -38,8 +38,10 @@ workflow METAWRAP_ASSEMBLE {
     
 
     if (params.metaspades) {
-        METASPADES(reads_ch)
-        | REMOVE_SMALL_CONTIGS
+        reads_ch
+            | METASPADES_RESOURCES
+            | METASPADES
+            | REMOVE_SMALL_CONTIGS
         REMOVE_SMALL_CONTIGS.out.long_contigs.set { metaspades_scaffolds }
 
         REMOVE_SMALL_CONTIGS.out.warning_log.subscribe { file ->

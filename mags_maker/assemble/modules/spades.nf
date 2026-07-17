@@ -1,13 +1,37 @@
+process METASPADES_RESOURCES {
+    tag "${meta.ID}"
+    label 'cpu_1'
+    label 'mem_250M'
+    label 'time_12'
+
+    input:
+    tuple val(meta), path(R1), path(R2), path(sylph_report)
+
+    output:
+    tuple val(meta), path(R1), path(R2), env(RESOURCE_LABEL)
+
+    script:
+    def model = "${projectDir}/models/metaspades_memory.joblib"
+    """
+    RESOURCE_LABEL=\$(
+        ${projectDir}/assorted-sub-workflows/mags_maker/assemble/bin/merge_reports.py \
+            --model ${model} \
+            --fastq ${R1} \
+            --sylph ${sylph_report}
+    )
+    """
+}
+
 process METASPADES {
     tag "${meta.ID}"
     label 'cpu_8'
-    label 'mem_32'
+    label "${RESOURCE_LABEL}"
     label 'time_12'
 
     container 'quay.io/biocontainers/spades:3.15.5--h95f258a_1'
 
     input:
-    tuple val(meta), path(first_read), path(second_read)
+    tuple val(meta), path(first_read), path(second_read), env(RESOURCE_LABEL)
 
     output:
     tuple val(meta), path(assembly), emit: scaffolds
