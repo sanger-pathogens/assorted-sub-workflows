@@ -65,13 +65,11 @@ process BEEFEATER {
     prevent_redownload_opts = params.prevent_redownloads ? "${illumina_read_output_directory} ${illumina_publish_output} ${illumina_id_suffix} ${illumina_output_extension} ${illumina_publish_structure}" : ""
 
     // Options required for the download of ONT reads
-    def ont_basecall_option = params.ont_get_unbasecalled ? "--unbasecalled False" : "--unbasecalled True"
-    def ont_reads_option = params.ont_get_reads ? "--pick_best_ont True" : "--pick_best_ont False"
+    def ont_basecall_option = params.ont_get_unbasecalled ? "--unbasecalled" : ""
+    def ont_reads_option = params.ont_get_reads ? "--pick_best_ont" : ""
 
-    if (params.read_type.toLowerCase() =="ont") {
+    if (params.read_type.toLowerCase() == "ont") {
         ont_options = "${ont_basecall_option} ${ont_reads_option}"
-    } else {
-        ont_options = "--pick_best_ont False --unbasecalled False"
     }
 
     def query    = generate_query(params)
