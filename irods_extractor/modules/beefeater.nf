@@ -36,7 +36,7 @@ def generate_query(params) {
 process BEEFEATER {
     label 'cpu_1'
     label 'mem_2'
-    label 'time_1'
+    label 'time_12'
 
     container 'quay.io/sangerpathogens/beefeater:v1.1.0'
 

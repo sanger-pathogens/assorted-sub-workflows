@@ -2,7 +2,7 @@ process PUBLISH_FASTQ {
     tag "${meta.ID}"
     label 'cpu_1'
     label 'mem_1'
-    label 'time_30m'
+    label 'time_12'
 
     publishDir path: { if ("${params.save_method}" == "nested") "${params.outdir}/${meta.ID}/${params.raw_reads_prefix}fastqs/" else "${params.outdir}/${params.raw_reads_prefix}fastqs/" }, enabled: params.save_fastqs, mode: 'copy', overwrite: true, pattern: "${final_name}"
 
@@ -16,5 +16,27 @@ process PUBLISH_FASTQ {
     final_name="${meta.ID}.fastq.gz"
     """
     cat ${meta.local_path}/*fastq.gz > ${final_name}
+    """
+}
+
+
+process PUBLISH_UNBASECALLED {
+    tag "${meta.ID}"
+    label 'cpu_1'
+    label 'mem_1'
+    label 'time_12'
+
+    // Only nested publishing for unbasecalled squiggles
+    publishDir path: "${params.outdir}/${meta.ID}/${params.raw_reads_prefix}unbasecalled/", enabled: params.ont_get_unbasecalled, mode: 'copy', overwrite: true
+
+    input:
+    val(meta)
+
+    output:
+    tuple val(meta), path("*.{pod5,fast5}"), emit: path_channel
+
+    script:
+    """
+    ln -s ${meta.local_path}/*.{pod5,fast5} .
     """
 }

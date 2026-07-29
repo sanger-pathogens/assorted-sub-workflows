@@ -1,7 +1,8 @@
 include { BEEFEATER                     } from '../modules/beefeater.nf'
 include { COLLATE_FASTQ                 } from '../modules/samtools.nf'
 include { METADATA as METADATA_QUERIED  } from '../modules/metadata_save.nf'
-include { PUBLISH_FASTQ                 } from '../modules/publish.nf'
+include { PUBLISH_FASTQ                 
+          PUBLISH_UNBASECALLED          } from '../modules/publish.nf'
 
 workflow IRODS_QUERY {
         main:
@@ -39,7 +40,19 @@ workflow IRODS_EXTRACTOR {
 
         CRAM_EXTRACT(downloaded_objects.illumina_to_unpack)
 
-        PUBLISH_FASTQ(downloaded_objects.ONT)
+        // Establish the read type and branch the channel
+        downloaded_objects.ONT.branch{ meta_map ->
+            ont_format_fastq: meta_map.ont_format == "fastq"
+
+            ont_format_unbasecalled: meta_map.ont_format == "pod5" || meta_map.ont_format == "fast5"
+
+            other: true
+        }
+        | set { downloaded_ont_objects }
+
+        // Publish the reads and squiggles
+        PUBLISH_FASTQ(downloaded_ont_objects.ont_format_fastq)
+        PUBLISH_UNBASECALLED(downloaded_ont_objects.ont_format_unbasecalled)
 
     emit:
     reads_ch = CRAM_EXTRACT.out.reads_ch // tuple val(meta), path(forward_fastq), path(reverse_fastq)
