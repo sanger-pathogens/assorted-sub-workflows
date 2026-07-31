@@ -40,11 +40,11 @@
             },
             "prevent_redownloads": {
                 "default": true,
-                "help_text": "Don't re-download fastq files that have been downlaoded to the give outdir."
+                "help_text": "Don't re-download fastq files that have been downloaded to the given outdir."
             },
             "prevent_redownloads_choice": {
                 "default": true,
-                "help_text": "The choice to redownload or not is based on whether raw or pre-processed reads are present. Choices[raw, preprocessed]."
+                "help_text": "The choice to re-download or not is based on whether raw or preprocessed reads are present. Choices[raw, preprocessed]."
             },
             "save_metadata": {
                 "default": true,
@@ -60,7 +60,7 @@
             },
             "ont_get_reads": {
                 "default": true,
-                "help_text": "If true and --read_type is set to 'ont' then basecalled reads will be retirieved. Beefeater will retieve reads in this priority: fastq > pass fastq > pass bam > unbasecalled 'squiggles' (pod5/fast5)"
+                "help_text": "If true and --read_type is set to 'ont' then basecalled reads will be retrieved. Beefeater will retrieve reads in this priority: fastq > pass fastq > pass bam > unbasecalled 'squiggles' (pod5/fast5)"
             }
         }
     }
