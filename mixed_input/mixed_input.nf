@@ -3,6 +3,7 @@ include { INPUT_CHECK              } from './subworkflows/input_check.nf'
 include { ENA_DOWNLOAD             } from './subworkflows/ena_input.nf'
 include { IRODS_EXTRACTOR          } from '../irods_extractor/subworkflows/irods.nf'
 include { MANIFEST_FROM_DIR        } from './subworkflows/manifest_from_dir.nf'
+
 include { validate_parameters      } from './modules/validate_parameters'
 
 workflow MIXED_INPUT {
