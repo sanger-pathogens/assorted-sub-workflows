@@ -2,7 +2,7 @@ process QUAST {
     tag "${meta.ID}"
     label "cpu_1"
     label "mem_250M"
-    label "time_30m"
+    label "time_12"
 
     container  'quay.io/biocontainers/quast:5.0.2--py36pl5321hcac48a8_7'
 

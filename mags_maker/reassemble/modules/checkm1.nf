@@ -3,6 +3,7 @@ process CHECKM {
     label "cpu_4"
     label "mem_64"
     label "time_1"
+    scratch true
 
     container 'quay.io/biocontainers/checkm-genome:1.2.4--pyhdfd78af_0'
 
@@ -24,7 +25,7 @@ process SUMMARISE_CHECKM {
     tag "${meta.ID}"
     label 'cpu_1'
     label 'mem_250M'
-    label 'time_30m'
+    label 'time_12'
 
     container 'quay.io/sangerpathogens/python-curl:3.11'
 

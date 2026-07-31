@@ -2,7 +2,7 @@ process MERGE_BINS {
     tag "${meta.ID}"
     label 'cpu_1'
     label 'mem_100M'
-    label 'time_30m'
+    label 'time_12'
 
     publishDir mode: 'copy', path: "${params.outdir}/bin_merging/", pattern: "${meta.ID}_merge.log"
     publishDir mode: 'copy', path: "${params.outdir}/bin_merging/", pattern: "${meta.ID}_best_bins.stats"

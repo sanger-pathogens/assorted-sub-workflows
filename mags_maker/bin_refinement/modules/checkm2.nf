@@ -2,7 +2,7 @@ process CHECKM2 {
     tag "${meta.ID}"
     label "cpu_4"
     label "mem_8"
-    label "time_30m"
+    label "time_12"
 
     container 'quay.io/biocontainers/checkm2:1.0.2--pyh7cba7a3_0'
 

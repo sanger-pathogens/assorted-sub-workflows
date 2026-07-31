@@ -1,18 +1,17 @@
 include { BWA_INDEX;
           BWA                     } from '../assemble/modules/bwa.nf'
-include { SORT_BAM; 
-          INDEX                   } from './modules/samtools.nf'
+include { INDEX                   } from './modules/samtools.nf'
 include { CONTIG_DEPTHS;
           METABAT1; 
           METABAT2;
           CONTIG_DEPTHS_NO_INTRA  } from './modules/metabat2.nf'
 include { SPLIT_DEPTHS; 
           MAXBIN2                 } from './modules/maxbin2.nf'
-include {CUT_UP_FASTA ;
-         ESTIMATE_ABUNDANCE;
-         CONCOCT;
-         CUTUP_CLUSTERING;
-         SPLIT_BINS               } from './modules/concoct.nf'
+include { CUT_UP_FASTA;
+          ESTIMATE_ABUNDANCE;
+          CONCOCT;
+          CUTUP_CLUSTERING;
+          SPLIT_BINS               } from './modules/concoct.nf'
 
 /*
 ##############################################################################################################################################################
@@ -21,8 +20,8 @@ include {CUT_UP_FASTA ;
 # Ideally it should take in the assembly file of all of your samples, followed by the reads of all the samples that went into the assembly.
 # The more samples, the better the binning. 
 #
-# The script uses metaBAT2 and/or CONCOCT and/or MaxBin2 to bin the contigs. MetaBAT2 is the defualt due to its speed and great performance,
-# but all these binners have their advantages and disadvantages, so it recomended to run the bin_refinement module to QC the bins, get the 
+# The script uses metaBAT2 and/or CONCOCT and/or MaxBin2 to bin the contigs. MetaBAT2 is the default due to its speed and great performance,
+# but all these binners have their advantages and disadvantages, so it recommended to run the bin_refinement module to QC the bins, get the 
 # best bins of all of each method, and to reassembly and refine the final bins. 
 #
 # Author of pipeline: German Uritskiy. I do not clain any authorship of the many programs this pipeline uses.
@@ -70,20 +69,19 @@ workflow METAWRAP_BINNING {
 
     reads.join(indexed_contigs)
     | BWA
-    | SORT_BAM
     | set { bam } 
     
     METABAT_WF(bam, contigs)
     | set { metabat_bins }
 
     MAXBIN_WF(bam, contigs)
-    | set { maxbins_bins }
+    | set { maxbin_bins }
 
     CONCOCT_WF(bam, contigs)
     | set { concoct_bins }
 
     metabat_bins
-    | join(maxbins_bins)
+    | join(maxbin_bins)
     | join(concoct_bins)
     | set { final_bins }
 

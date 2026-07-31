@@ -44,10 +44,10 @@ workflow METAWRAP_REASSEMBLY {
     reads_ch
     | join(index)
     | BWA
-    | set { sam }
+    | set { mapped_reads }
 
     to_reassemble_bins
-    | join(sam)
+    | join(mapped_reads)
     | SPLIT_READS
 	| transpose
 	| map { meta, path -> 
@@ -116,7 +116,12 @@ workflow METAWRAP_REASSEMBLY {
         | SUMMARISE_CHECKM
         | set { checkm }
     } else {
-        CHECKM2(reassembled_bins)
+		channel.fromPath(params.checkm2_db, checkIfExists: true)
+		| set { checkm2_db }
+
+        CHECKM2(
+			reassembled_bins.combine(checkm2_db)
+		)
 
 		CHECKM2.out.results_with_bin
         | set { checkm }
