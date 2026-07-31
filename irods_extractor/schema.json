@@ -54,13 +54,9 @@
                 "default": false,
                 "help_text": "Use a short date instead of a full timestamp in metadata filenames."
             },
-            "ont_get_unbasecalled": {
-                "default": false,
-                "help_text": "If true and --read_type is set to 'ont' then unbasecalled 'squiggle' (pod5/fast5) files will be retrieved."
-            },
-            "ont_get_reads": {
-                "default": true,
-                "help_text": "If true and --read_type is set to 'ont' then basecalled reads will be retrieved. Beefeater will retrieve reads in this priority: fastq > pass fastq > pass bam > unbasecalled 'squiggles' (pod5/fast5)"
+            "ont_get_read_type": {
+                "default": "reads",
+                "help_text": "Retrieves the reads based on the selected option [Default: reads, unbasecalled]. If 'reads' is selecred, Beefeater will retieve reads in this priority: fastq > pass fastq > pass bam > unbasecalled 'squiggles' (pod5/fast5)"
             }
         }
     }
