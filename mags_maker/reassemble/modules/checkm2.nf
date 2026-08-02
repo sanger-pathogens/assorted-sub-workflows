@@ -3,6 +3,7 @@ process CHECKM2 {
     label "cpu_4"
     label "mem_10"
     label "time_12"
+    scratch true
 
     container 'quay.io/biocontainers/checkm2:1.0.2--pyh7cba7a3_0'
 

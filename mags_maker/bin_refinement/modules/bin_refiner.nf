@@ -3,6 +3,7 @@ process BINNING_REFINER {
     label 'cpu_1'
     label 'mem_1'
     label 'time_1'
+    scratch true
 
     container 'quay.io/sangerpathogens/bin_refiner:1.4.3'
 

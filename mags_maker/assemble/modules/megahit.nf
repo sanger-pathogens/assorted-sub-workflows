@@ -3,6 +3,7 @@ process MEGAHIT {
     label params.megahit_deterministic ? 'cpu_1' : 'cpu_8'
     label 'mem_8'
     label 'time_12'
+    scratch true
 
     container 'quay.io/biocontainers/megahit:1.2.9--h5ca1c30_6'
 
