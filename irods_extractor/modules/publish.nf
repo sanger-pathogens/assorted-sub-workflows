@@ -27,7 +27,7 @@ process PUBLISH_UNBASECALLED {
     label 'time_12'
 
     // Only nested publishing for unbasecalled squiggles
-    publishDir path: "${params.outdir}/${meta.ID}/${params.raw_reads_prefix}unbasecalled/", mode: 'copy', overwrite: true
+    publishDir path: "${params.outdir}/${params.raw_reads_prefix}unbasecalled/${meta.ID}/", mode: 'copy', overwrite: true
 
     input:
     val(meta)
