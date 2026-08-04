@@ -80,7 +80,7 @@ process BEEFEATER {
         def orig_manifest  = file(params.manifest_of_lanes)
         def lines          = orig_manifest.readLines()
         def new_header     = lines[0].split(',').collect { translateKey(it.trim()) }.join(',')
-        def translated_csv = file("${task.workDir}/translated_manifest_of_lanes.csv")
+        def translated_csv = file("translated_manifest_of_lanes.csv")
         translated_csv.text = ([new_header] + lines.drop(1)).join('\n') + '\n'
         manifest = "--manifest ${translated_csv}"
     }
