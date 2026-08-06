@@ -1,0 +1,1 @@
+README.md — input channel shape + params, same style as qc_isolates/README.md.
