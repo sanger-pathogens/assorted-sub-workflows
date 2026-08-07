@@ -15,7 +15,7 @@ process GGCAT {
     tuple val(meta), path(unitigs_fna), emit: unitigs
 
     script:
-    def temp_dir = params.temp_dir ? "${params.temp_dir}/${meta.ID}/ggcat" : "ggcat_temp"
+    def temp_dir = params.temp_dir ? "${params.temp_dir}/ggcat" : "ggcat_temp"
     unitigs_fna = "unitigs-k${params.kmer_size}.fna"
     // Cap at 95% of the allocated memory -- LSF can kill the job for exceeding its
     // limit even if ggcat asks for exactly what was granted (scheduler overhead eats

@@ -26,7 +26,7 @@
     "Shared across GGCAT / SBWT / Themisto2 builds": {
       "temp_dir": {
         "default": "",
-        "help_text": "Shared scratch root for GGCAT/SBWT (and future set_diff_calculations.nf) temp/working dirs. Optional -- falls back to a task-local work directory per tool, which is fine at species scale. Only set this to a Lustre scratch path with confirmed free space if running at full background-DB scale (ATB/GTDB), which needs terabytes free. Each tool writes under '<temp_dir>/<build ID>/<tool>/' so concurrent builds don't collide."
+        "help_text": "Shared scratch root for GGCAT/SBWT (and future set_diff_calculations.nf) temp/working dirs. Optional -- falls back to a task-local work directory per tool, which is fine at species scale. Only set this to a Lustre scratch path with confirmed free space if running at full background-DB scale (ATB/GTDB), which needs terabytes free. Each tool writes under '<temp_dir>/<tool>/' -- assumes only one build runs against a given temp_dir at a time."
       }
     },
     "ggcat": {
