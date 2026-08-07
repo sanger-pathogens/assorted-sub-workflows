@@ -2,13 +2,9 @@
   "pipeline": "build_colour_index",
   "params": {
     "Input options preprocessed with color_mapping.nf": {
-      "assembly_paths": {
+      "assembly_input": {
         "default": "",
-        "help_text": "Text file listing one assembly path per line. Mutually exclusive with assembly_dir/assembly_suffix."
-      },
-      "assembly_dir": {
-        "default": "",
-        "help_text": "Directory containing assembly FASTA files. Mutually exclusive with assembly_paths; used together with assembly_suffix."
+        "help_text": "A directory of assembly FASTA files, or a .txt file listing one assembly path per line. Which kind it is gets detected automatically."
       },
       "assembly_suffix": {
         "default": ".fasta",

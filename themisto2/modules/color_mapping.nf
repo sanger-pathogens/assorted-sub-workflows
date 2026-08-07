@@ -9,7 +9,7 @@ process COLOR_MAPPING {
     publishDir mode: 'copy', path: "${params.outdir}/colour_mapping/${meta.ID}/"
 
     input:
-    tuple val(meta), path(metadata_csv), path(assembly_input)
+    tuple val(meta), path(metadata), path(assembly_input)
 
     output:
     tuple val(meta), path("file_colors_input.txt"), emit: file_colors
@@ -18,13 +18,14 @@ process COLOR_MAPPING {
 
     script:
     // color_mapping.py takes --assembly-dir (+ --assembly-suffix) OR --assembly-paths,
-    // never both
-    def assembly_arg = params.assembly_paths \
-        ? "--assembly-paths ${assembly_input}" \
-        : "--assembly-dir ${assembly_input} --assembly-suffix ${params.assembly_suffix}"
+    // never both -- sniff which one assembly_input actually is (directory vs txt file
+    // of paths), rather than relying on which CLI param the user set (there's only one now).
+    def assembly_arg = assembly_input.isDirectory() \
+        ? "--assembly-dir ${assembly_input} --assembly-suffix ${params.assembly_suffix}" \
+        : "--assembly-paths ${assembly_input}"
     """
     color_mapping.py \\
-        --metadata ${metadata_csv} \\
+        --metadata ${metadata} \\
         --sample-col ${params.sample_col} \\
         --label-col ${params.label_col} \\
         ${assembly_arg} \\

@@ -24,10 +24,28 @@ process THEMISTO_BUILD {
         -l ${lcs_index} \\
         -k ${params.kmer_size} \\
         -t ${task.cpus}
+    """
+}
 
-    # sanity check the index loads and reports counts -- cross-check k-mer/colour
-    # counts against Step 04's SBWT index and Step 02's colour-mapping output by eye,
-    # this only catches a hard failure to load, not a silent count mismatch.
+process THEMISTO_STATS {
+    tag "${meta.ID}"
+    label 'cpu_4'
+    label 'mem_16' // provisional guess -- much lighter workload than the build, revisit after seeing real usage in test runs
+    label 'time_queue_from_small'
+
+    container "gitlab-registry.internal.sanger.ac.uk/sanger-pathogens/docker-images/themisto2:0.0.1"
+
+    input:
+    tuple val(meta), path(index_thm2)
+
+    output:
+    tuple val(meta), path(index_thm2), emit: index
+
+    script:
+    // sanity check the index loads and reports counts -- cross-check k-mer/colour
+    // counts against Step 04's SBWT index and Step 02's colour-mapping output by eye,
+    // this only catches a hard failure to load, not a silent count mismatch.
+    """
     themisto2 stats -i ${index_thm2} -t ${task.cpus}
     """
 }

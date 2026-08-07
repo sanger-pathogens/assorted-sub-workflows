@@ -7,7 +7,8 @@
 - [X] Write `modules/ggcat.nf`
 - [X] Write `modules/sbwt_build.nf`
 - [X] Write `modules/themisto2.nf` (Themisto2 build + export)
-- [ ] Write `build_colour_index.nf` orchestrator
+- [X] Write `build_colour_index.nf` orchestrator
 - [X] Write `build_colour_index.config`
 - [ ] Write `README.md`
 - [ ] Wire into lsmd `main.nf` and test on v_tarriae
+- [ ] Run `nextflow run main.nf -profile test` and see what actually happens
