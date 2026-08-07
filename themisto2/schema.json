@@ -23,6 +23,12 @@
         "help_text": "Column name in the metadata file to use for grouping genome assemblies into colour sets."
       }
     },
+    "Shared across GGCAT / SBWT / Themisto2 builds": {
+      "temp_dir": {
+        "default": "",
+        "help_text": "Shared scratch root for GGCAT/SBWT (and future set_diff_calculations.nf) temp/working dirs. Optional -- falls back to a task-local work directory per tool, which is fine at species scale. Only set this to a Lustre scratch path with confirmed free space if running at full background-DB scale (ATB/GTDB), which needs terabytes free. Each tool writes under '<temp_dir>/<build ID>/<tool>/' so concurrent builds don't collide."
+      }
+    },
     "ggcat": {
       "kmer_size": {
         "default": "31",
@@ -33,10 +39,6 @@
       "kmer_size": {
         "default": "31",
         "help_text": "k-mer size used consistently across the GGCAT, SBWT and Themisto2 builds in this subworkflow. Must match the k-mer size of any existing index (e.g. background SBWT/ATB/GTDB) this output will later be compared or set-differenced against."
-      },
-      "sbwt_temp_dir": {
-        "default": "",
-        "help_text": "Scratch directory for the SBWT build's --temp-dir. Optional -- falls back to a task-local work directory, which is fine at species scale. Only set this to a Lustre scratch path with confirmed free space if running at full background-DB scale (ATB/GTDB), which needs terabytes free."
       }
     },
     "themisto2": {

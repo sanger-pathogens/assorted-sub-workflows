@@ -15,6 +15,7 @@ process GGCAT {
     tuple val(meta), path(unitigs_fna), emit: unitigs
 
     script:
+    def temp_dir = params.temp_dir ? "${params.temp_dir}/${meta.ID}/ggcat" : "ggcat_temp"
     unitigs_fna = "unitigs-k${params.kmer_size}.fna"
     // Cap at 95% of the allocated memory -- LSF can kill the job for exceeding its
     // limit even if ggcat asks for exactly what was granted (scheduler overhead eats
@@ -24,12 +25,13 @@ process GGCAT {
     // for a pattern that sizes the request from real input + escalates on retry.
     def mem_gb = Math.floor(task.memory.toGiga() * 0.95) as int
     """
+    mkdir -p ${temp_dir}
     ggcat build \\
         -l ${file_colors_input} \\
         -o ${unitigs_fna} \\
         -s 1 \\
         -k ${params.kmer_size} \\
-        -t ${params.ggcat_temp_dir} \\
+        -t ${temp_dir} \\
         -j ${task.cpus} \\
         -m ${mem_gb} \\
         -p

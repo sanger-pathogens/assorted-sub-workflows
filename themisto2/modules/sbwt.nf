@@ -18,7 +18,7 @@ process SBWT_BUILD {
     script:
     sbwt_index   = "unitigs-k${params.kmer_size}.sbwt"
     lcs_index    = "unitigs-k${params.kmer_size}.lcs"
-    def temp_dir = params.sbwt_temp_dir ?: "sbwt_temp"
+    def temp_dir = params.temp_dir ? "${params.temp_dir}/${meta.ID}/sbwt" : "sbwt_temp"
     // Cap at 95% of the allocated memory -- LSF can kill the job for exceeding its
     // limit even if sbwt asks for exactly what was granted (scheduler overhead eats
     // a little of that headroom), so leave a safety margin.
