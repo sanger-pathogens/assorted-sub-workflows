@@ -28,17 +28,20 @@ def calculate_alpha_sylph(abund_matrix):
 
     # Observed richness (number of taxa with abundance > 0)
     richness = alpha_diversity(metric="observed_otus", counts=counts, ids=sample_ids)
-    print(f"Shannon: {shannon}\nSimpson: {simpson}\nRichness: {richness}")
 
     # Pielou's evenness
     pielou = alpha_diversity(metric="pielou_e", counts=counts, ids=sample_ids)
 
+    berger_parker = alpha_diversity(metric="berger_parker_d", counts=counts, ids=sample_ids)
+
     results = pd.DataFrame({
-    "shannon": shannon,
-    "simpson": simpson,
-    "richness": richness,
-    "pielou_evenness": pielou
+        "shannon": shannon,
+        "simpson": simpson,
+        "richness": richness,
+        "pielou_evenness": pielou, 
+        "berger_parker_dominance":berger_parker
     })
+
     results.index.name = "ID"
     return results
 
@@ -60,7 +63,7 @@ def load_data(data_summary: list, abundance_threshold=None):
         )
         abund_matrices.append(abund_matrix)
     combined_matrix = pd.concat(abund_matrices, axis=0).fillna(0)
-    # print(combined)
+
     return combined_matrix 
 
 def main():
@@ -72,10 +75,7 @@ def main():
         abund_matrix = load_data(args.sylph_summary_input, abundance_threshold=args.taxonomic_abundance_threshold)
     
     results = calculate_alpha_sylph(abund_matrix)
-    print(results)
-    results.to_csv(args.outdir / "diversity.tsv", sep='\t')
-
-
+    results.to_csv(args.outdir / "diversity_estimates.tsv", sep='\t')
 
 if __name__ == "__main__":
     main()
