@@ -73,8 +73,12 @@ process THEMISTO_EXPORT {
     // flag -- single-threaded compression was slow enough at s_pneumoniae scale
     // (~2.3h projected) that the project chose to just leave export uncompressed.
     def gzip_cmd = params.gzip_export ? "gzip -f export.color_sets.txt" : ""
+    // -o is a filename prefix, not a directory -- themisto2 appends its own
+    // dot-leading suffixes (.unitigs.fa, .color_sets.txt, .metadata.txt) directly
+    // onto it. "-o ." previously produced "..unitigs.fa" etc (prefix "." + suffix
+    // ".unitigs.fa"), not the "export.*" names declared in `output:` above.
     """
-    themisto2 export -i ${index_thm2} -o .
+    themisto2 export -i ${index_thm2} -o export
     ${gzip_cmd}
     """
 }

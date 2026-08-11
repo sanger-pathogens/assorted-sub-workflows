@@ -4,8 +4,14 @@ process SBWT_BUILD {
     label 'mem_32'
     label 'time_queue_from_small'
 
-    // Draft registry path -- unconfirmed as the right way to ship this, per team check-in.
-    container "gitlab-registry.internal.sanger.ac.uk/sanger-pathogens/farm_installs/farm-etc/sbwt-rs-cli/0.4.2-f93d92c/apptainer"
+    // Local .sif, not a registry pull -- the registry path (gitlab-registry.internal.sanger.ac.uk/
+    // sanger-pathogens/farm_installs/farm-etc/sbwt-rs-cli/0.4.2-f93d92c) was never actually
+    // published (404s on tag `latest` under both /apptainer and /docker). This .sif ships
+    // alongside the verified-fixed module install instead -- see [[sbwt_setdiff_bugfix_module]]
+    // in project memory: 0.4.2-f93d92c (this one) is the module confirmed to contain the actual
+    // set-diff fix (2026-08-04); the older 0.4.2-7c5fcc0 looked fixed but was reconfirmed to
+    // still corrupt output on 2026-07-31 -- don't swap back to that one.
+    container "/data/pam/installs/packages/sbwt-rs-cli/bug_fix_setdiff_commit_f93d92_2026.08.04.13.38.59/sbwt-rs-cli-0.4.2-f93d92c/image/sbwt-rs-cli_bug_fix_setdiff_commit_f93d92_2026.08.04.13.38.59.sif"
 
     publishDir mode: 'copy', path: "${params.outdir}/sbwt/${meta.ID}/"
 
@@ -27,12 +33,16 @@ process SBWT_BUILD {
     // for a pattern that sizes the request from real input + escalates on retry.
     def mem_gb = Math.floor(task.memory.toGiga() * 0.95) as int
 
+    // -l/--build-lcs is required -- without it `sbwt build` only writes the .sbwt file,
+    // not the .lcs array, but this process's `output:` above declares lcs_index as
+    // mandatory (caused a "Missing output file(s)" failure before this was added).
     """
     mkdir -p ${temp_dir}
     sbwt build \\
         -i ${unitigs_fna} \\
         -o unitigs-k${params.kmer_size} \\
         -r \\
+        -l \\
         -k ${params.kmer_size} \\
         -m ${mem_gb} \\
         -t ${task.cpus} \\
@@ -46,7 +56,8 @@ process SBWT_CHECK {
     label 'mem_16' // provisional guess -- much lighter workload than the build, revisit after seeing real usage in test runs
     label 'time_queue_from_small'
 
-    container "gitlab-registry.internal.sanger.ac.uk/sanger-pathogens/farm_installs/farm-etc/sbwt-rs-cli/0.4.2-f93d92c/apptainer"
+    // Same .sif as SBWT_BUILD above -- see that process's comment for why.
+    container "/data/pam/installs/packages/sbwt-rs-cli/bug_fix_setdiff_commit_f93d92_2026.08.04.13.38.59/sbwt-rs-cli-0.4.2-f93d92c/image/sbwt-rs-cli_bug_fix_setdiff_commit_f93d92_2026.08.04.13.38.59.sif"
 
     input:
     tuple val(meta), path(sbwt_index), path(lcs_index)
