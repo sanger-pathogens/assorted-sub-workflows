@@ -20,27 +20,16 @@ def calculate_alpha_sylph(abund_matrix):
     counts = abund_matrix.values
     sample_ids = abund_matrix.index.tolist()
 
-    # Shannon diversity
-    shannon = alpha_diversity(metric="shannon", counts=counts, ids=sample_ids)
-
-    # Simpson's index
-    simpson = alpha_diversity(metric="simpson", counts=counts, ids=sample_ids)
-
-    # Observed richness (number of taxa with abundance > 0)
-    richness = alpha_diversity(metric="observed_otus", counts=counts, ids=sample_ids)
-
-    # Pielou's evenness
-    pielou = alpha_diversity(metric="pielou_e", counts=counts, ids=sample_ids)
-
-    berger_parker = alpha_diversity(metric="berger_parker_d", counts=counts, ids=sample_ids)
-
-    results = pd.DataFrame({
-        "shannon": shannon,
-        "simpson": simpson,
-        "richness": richness,
-        "pielou_evenness": pielou, 
-        "berger_parker_dominance":berger_parker
-    })
+    # Keys metric name for alpha_diversity, values output table headers
+    diversity_list = {"shannon":"shannon", 
+                      "simpson":"simpson", # Simpson's diversity
+                      "observed_otus":"richness", # 
+                      "pielou_e":"pielou_evenness", # Pielou Evenness
+                      "berger_parker_d":"berger_parker_dominance",
+                      "gini_index":"gini_index", 
+                      "dominance":"simpsons_dominance" # Simpson's dominance / Gini-Simpson Index
+                      }
+    results = pd.DataFrame({v:alpha_diversity(k, counts=counts, ids=sample_ids) for k, v in diversity_list.items()})
 
     results.index.name = "ID"
     return results
