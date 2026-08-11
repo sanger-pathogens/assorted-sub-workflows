@@ -36,6 +36,14 @@
             "bracken_profile":{
                 "default": "false",
                 "help_text": "Run Kraken2Bracken taxonomic classification."
+            },
+            "calculate_alpha_diverity":{
+                "default": "true",
+                "help_text": "Runs a script to calculate a series of alpha diversity statistics from the taxonomic_abundance estimates in *_syph_profile.tsv files."
+            },
+            "taxonomic_abundance_threshold":{
+                "default": "0.01",
+                "help_text": "When calculating alpha diversity only calculate diversity on taxa with taxonomic abundance > taxonomic_abundance_threshold"
             }
         }
     },
