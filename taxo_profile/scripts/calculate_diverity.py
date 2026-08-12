@@ -42,6 +42,7 @@ def load_data(data_summary: list, abundance_threshold: float | None = None) -> p
         df = pd.read_csv(sylph, sep="\t")
         if abundance_threshold:
             df = df[df["Taxonomic_abundance"] >= abundance_threshold]
+            
         abund_matrix = df.pivot_table(
             index="Sample_file",
             columns="Genome_file",
