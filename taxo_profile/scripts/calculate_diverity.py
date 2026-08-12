@@ -13,7 +13,7 @@ def parse_args():
     parser.add_argument("-o", "--outdir", type=Path, default=Path.cwd(), help="")
     return parser.parse_args() 
 
-def calculate_alpha_sylph(abund_matrix):
+def calculate_alpha_sylph(abund_matrix) -> pd.DataFrame:
     """
     Calculates alpha diversity from sylph abundanc estimate
     """
@@ -36,7 +36,7 @@ def calculate_alpha_sylph(abund_matrix):
 
     
 
-def load_data(data_summary: list, abundance_threshold=None):
+def load_data(data_summary: list, abundance_threshold: float | None = None) -> pd.DataFrame:
     abund_matrices = []
     for sylph in data_summary:
         df = pd.read_csv(sylph, sep="\t")
