@@ -13,7 +13,7 @@ def parse_args():
     parser.add_argument("-o", "--outdir", type=Path, default=Path.cwd(), help="")
     return parser.parse_args() 
 
-def calculate_alpha_sylph(abund_matrix) -> pd.DataFrame:
+def calculate_alpha_sylph(abund_matrix: pd.DataFrame) -> pd.DataFrame:
     """
     Calculates alpha diversity from sylph abundanc estimate
     """
