@@ -51,7 +51,7 @@ def load_data(data_summary: list, abundance_threshold: float | None = None) -> p
             fill_value=0
         )
         abund_matrices.append(abund_matrix)
-    combined_matrix = pd.concat(abund_matrices, axis=0).fillna(0)
+    combined_matrix = pd.concat(abund_matrices, axis=0)
 
     return combined_matrix 
 
