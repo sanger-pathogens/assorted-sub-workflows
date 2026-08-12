@@ -40,9 +40,7 @@ def load_data(data_summary: list, abundance_threshold: float | None = None) -> p
     abund_matrices = []
     for sylph in data_summary:
         df = pd.read_csv(sylph, sep="\t")
-        if not abundance_threshold:
-            pass
-        else:
+        if abundance_threshold:
             df = df[df["Taxonomic_abundance"] >= abundance_threshold]
         abund_matrix = df.pivot_table(
             index="Sample_file",
@@ -58,10 +56,7 @@ def load_data(data_summary: list, abundance_threshold: float | None = None) -> p
 def main():
     args = parse_args()
 
-    if not args.taxonomic_abundance_threshold:
-        abund_matrix = load_data(args.sylph_summary_input)
-    else: 
-        abund_matrix = load_data(args.sylph_summary_input, abundance_threshold=args.taxonomic_abundance_threshold)
+    abund_matrix = load_data(args.sylph_summary_input, abundance_threshold=args.taxonomic_abundance_threshold)
     
     results = calculate_alpha_sylph(abund_matrix)
     results.to_csv(args.outdir / "diversity_estimates.tsv", sep='\t')
