@@ -3,7 +3,7 @@ process MULTIQC {
     label 'mem_64'
     label 'time_30m'
 
-    container 'quay.io/biocontainers/multiqc:1.19--pyhdfd78af_0'
+    container 'quay.io/biocontainers/multiqc:1.35--pyhdfd78af_1'
 
     publishDir "${params.outdir}/multiqc/", mode: 'copy', overwrite: true
 
