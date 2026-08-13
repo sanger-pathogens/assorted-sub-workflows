@@ -25,6 +25,7 @@ workflow QC {
 
         FASTQC.out.zip.collect{it[1,2]}
             | mix(TAXO_PROFILE.out.ch_kraken2_style_bracken_reports.collect{it[1]})
+            | mix(TAXO_PROFILE.out.sylphtax_mpa_report.collect{it[1]})
             | collect
             | set { multiqc_input }
 
