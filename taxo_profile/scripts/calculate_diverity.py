@@ -8,7 +8,7 @@ import pandas as pd
 
 def parse_args():
     parser = argparse.ArgumentParser(description="A Basic tool to calculate diversity of a metagenomic sample using abundance estimates derived from sylph output")
-    parser.add_argument("-i", "--sylph-summary-input", nargs="+", required=True, help="A sylph summary file derived from the taxo_profile subworkflow")
+    parser.add_argument("-i", "--sylph-summary-input", required=True, help="A line delimited text file with each entry being the path to a sylph profile summary file derived from the taxo_profile subworkflow")
     parser.add_argument("-a", "--taxonomic-abundance-threshold", type=float, required=False, help="Only calculate diversity based on the samples with taxonomic_abundance >= taxonomic-abundance-threshold")
     parser.add_argument("-o", "--outdir", type=Path, default=Path.cwd(), help="")
     return parser.parse_args() 
@@ -36,30 +36,32 @@ def calculate_alpha_sylph(abund_matrix: pd.DataFrame) -> pd.DataFrame:
 
     
 
-def load_data(data_summary: list, abundance_threshold: float | None = None) -> pd.DataFrame:
+def load_data(data_summary: str, abundance_threshold: float | None = None) -> pd.DataFrame:
     abund_matrices = []
-    for sylph in data_summary:
-        df = pd.read_csv(sylph, sep="\t")
-        if abundance_threshold:
-            df = df[df["Taxonomic_abundance"] >= abundance_threshold]
+    with open(data_summary, 'r') as file:
+        for sylph in file:
+            sylph = sylph.strip()
+            df = pd.read_csv(sylph, sep="\t")
             
-        abund_matrix = df.pivot_table(
-            index="Sample_file",
-            columns="Genome_file",
-            values="Taxonomic_abundance",
-            fill_value=0
-        )
-        abund_matrices.append(abund_matrix)
-    combined_matrix = pd.concat(abund_matrices, axis=0)
+            if abundance_threshold:
+                df = df[df["Taxonomic_abundance"] >= abundance_threshold]
+            
+            abund_matrix = df.pivot_table(
+                index="Sample_file",
+                columns="Genome_file",
+                values="Taxonomic_abundance",
+                fill_value=0
+            )
+            alpha_calcs = calculate_alpha_sylph(abund_matrix)
+            abund_matrices.append(alpha_calcs)
+
+        combined_matrix = pd.concat(abund_matrices, axis=0)
 
     return combined_matrix 
 
 def main():
     args = parse_args()
-
-    abund_matrix = load_data(args.sylph_summary_input, abundance_threshold=args.taxonomic_abundance_threshold)
-    
-    results = calculate_alpha_sylph(abund_matrix)
+    results = load_data(args.sylph_summary_input, abundance_threshold=args.taxonomic_abundance_threshold)
     results.to_csv(args.outdir / "diversity_estimates.tsv", sep='\t')
 
 if __name__ == "__main__":
