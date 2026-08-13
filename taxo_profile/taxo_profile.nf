@@ -62,7 +62,7 @@ workflow TAXO_PROFILE {
     if (params.calculate_alpha_diverity) {
         sylph_report
         | map { meta, file -> file }   
-        | collect
+        | collectFile(name: 'sylph_profiles.txt', newLine: true)
         | set{ diversity_in }
         CALC_DIVERSITY(diversity_in)      
     }

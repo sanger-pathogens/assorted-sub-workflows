@@ -15,7 +15,7 @@ process CALC_DIVERSITY {
     script:
     def diversity = "${moduleDir}/../scripts/calculate_diverity.py"
     """
-    ${diversity} -i *_sylph_profile.tsv \
+    ${diversity} -i ${sylph_profiles} \
         --outdir ./ \
         --taxonomic-abundance-threshold ${params.taxonomic_abundance_threshold} 
     """
