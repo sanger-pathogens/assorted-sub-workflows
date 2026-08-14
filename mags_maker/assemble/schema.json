@@ -28,8 +28,11 @@
             "output_transposed": {
                 "default": "false",
                 "help_text": "Output transposed quast reports."
+            },
+            "publish_unbinned_contigs": {
+                "default": "false",
+                "help_text": "Publish size-filtered contigs from METASPADES and MEGAHIT prior to binning."
             }
-
         }
     }
 }
