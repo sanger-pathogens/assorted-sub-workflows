@@ -16,7 +16,7 @@ By default, this workflow assembles sequencing reads using metaSPAdes v3.14. Rea
 - `--metaspades` (Run metaSPAdes assembly default: true)
 - `--megahit` (Run MEGAHIT assembly default: true)
 - `--megahit_deterministic` (Run MEGAHIT assembly deterministically, please see "Further information" below for runtime impacts default: false)
-- `--output_transposed` (Output transposed quast reports default: false)
+- `--transpose_quast_report` (Output transposed QUAST reports default: false)
 - `--publish_unbinned_contigs` (Publish size-filtered contigs from METASPADES and MEGAHIT prior to binning. default: false)
 
 ### Input
