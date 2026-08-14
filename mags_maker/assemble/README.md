@@ -7,7 +7,7 @@ This script performs metagenomic binning of assembled contigs using MetaBAT2 (de
 
 ## Workflow Summary
 
-By default, this workflow assembles sequencing reads using metaSPAdes v3.14. Reads that do not map back to the resulting contigs are then re-assembled using MEGAHIT, which is better suited for recovering low-coverage regions. Users can choose to run only metaSPAdes or only MEGAHIT by specifying the --metaspades or --megahit parameters, respectively. The final output consists of the combined and sorted assemblies, with short contigs filtered out.
+By default, this workflow assembles sequencing reads using metaSPAdes. Reads that do not map back to the resulting contigs are then re-assembled using MEGAHIT, which is better suited for recovering low-coverage regions. Users can choose to run only metaSPAdes or only MEGAHIT by specifying the --metaspades or --megahit parameters, respectively. The final output consists of the combined and sorted assemblies, with short contigs filtered out.
 
 ### Parameters
 - `--assembly_stats` (Generate assembly statistics default: false)
