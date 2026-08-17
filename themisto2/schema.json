@@ -1,5 +1,5 @@
 {
-  "pipeline": "build_colour_index",
+  "pipeline": "themisto2",
   "params": {
     "Input options preprocessed with color_mapping.nf": {
       "assembly_input": {
@@ -7,7 +7,7 @@
         "help_text": "A directory of assembly FASTA files, or a .txt file listing one assembly path per line. Which kind it is gets detected automatically."
       },
       "assembly_suffix": {
-        "default": ".fasta",
+        "default": ".contigs.fasta",
         "help_text": "Suffix appended to each sample_col value to form the assembly filename. Only used with assembly_dir."
       },
       "metadata": {
@@ -21,6 +21,12 @@
       "label_col": {
         "default": "",
         "help_text": "Column name in the metadata file to use for grouping genome assemblies into colour sets."
+      }
+    },
+    "User-selected lineages-specific index input files": {
+      "target_groups": {
+        "default": "",
+        "help_text": "Comma-separated label(s), e.g. GPSC1,GPSC2, to also build lineage-scoped colour indexes for, alongside the species-wide one. Leave empty for species-wide only. Written to disk but not yet built into a Themisto2 index -- see README."
       }
     },
     "Shared across GGCAT / SBWT / Themisto2 builds": {

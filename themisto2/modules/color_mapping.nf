@@ -12,9 +12,14 @@ process COLOR_MAPPING {
     tuple val(meta), path(metadata), path(assembly_input)
 
     output:
-    tuple val(meta), path("file_colors_input.txt"), emit: file_colors
-    tuple val(meta), path("label_mapping.tsv"),      emit: label_mapping
-    tuple val(meta), path("stats.txt"),              emit: stats
+    // Index A -- always built, species-wide.
+    tuple val(meta), path("index_species/file_colors_input.txt"), emit: file_colors
+    tuple val(meta), path("index_species/label_mapping.tsv"),      emit: label_mapping
+    tuple val(meta), path("index_species/stats.json"),             emit: stats
+    // Index B -- one subdirectory per requested lineage, only present when
+    // target_groups is set. Not yet consumed downstream (GGCAT/SBWT/Themisto2
+    // still only build from Index A) -- wiring that up is separate work.
+    tuple val(meta), path("index_target_group/*"), emit: target_group_indexes, optional: true
 
     script:
     // color_mapping.py takes --assembly-dir (+ --assembly-suffix) OR --assembly-paths,
@@ -23,8 +28,9 @@ process COLOR_MAPPING {
     def assembly_arg = assembly_input.isDirectory() \
         ? "--assembly-dir ${assembly_input} --assembly-suffix ${params.assembly_suffix}" \
         : "--assembly-paths ${assembly_input}"
-    // Index B: restrict to user-selected lineages (e.g. GPSC1,GPSC2). Empty by
-    // default, which color_mapping.py treats as "keep everything" (Index A).
+    // Index B: also build lineage-scoped indexes for user-selected groups (e.g.
+    // GPSC1,GPSC2), written alongside the species-wide index. Empty by default,
+    // which color_mapping.py treats as "species-wide only".
     def target_groups_arg = params.target_groups ? "--target-groups ${params.target_groups}" : ""
     """
     color_mapping.py \\
@@ -33,6 +39,6 @@ process COLOR_MAPPING {
         --label-col ${params.label_col} \\
         ${assembly_arg} \\
         ${target_groups_arg} \\
-        --out-dir .
+        --output_dir .
     """
 }
