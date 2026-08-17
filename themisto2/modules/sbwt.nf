@@ -60,10 +60,15 @@ process SBWT_CHECK {
     container "/data/pam/installs/packages/sbwt-rs-cli/bug_fix_setdiff_commit_f93d92_2026.08.04.13.38.59/sbwt-rs-cli-0.4.2-f93d92c/image/sbwt-rs-cli_bug_fix_setdiff_commit_f93d92_2026.08.04.13.38.59.sif"
 
     input:
-    tuple val(meta), path(sbwt_index), path(lcs_index)
+// Generic -- never touches .lcs (sbwt check only ever takes -i), so this is
+    // reused via include-aliasing after both SBWT_BUILD and SBWT_DIFFERENCE.
+    // build_color_index.nf re-pairs the checked .sbwt with its .lcs afterward for
+    // the Themisto2 build step, since that pairing is plumbing this process
+    // doesn't need. 
+    tuple val(meta), path(sbwt_index)
 
     output:
-    tuple val(meta), path(sbwt_index), path(lcs_index), emit: index
+    tuple val(meta), path(sbwt_index), emit: index
 
     script:
     """
