@@ -15,11 +15,24 @@ Use package SeqUtils to calculate GC%
 """
 import argparse
 import sys
+from dataclasses import dataclass, field
 from pathlib import Path
-from typing import List, Tuple
+from typing import List, Optional, Tuple
 
 from Bio import SeqIO
 from Bio.SeqUtils import GC
+
+
+@dataclass
+class UnitigResult:
+    """One unitig's filtering result -- shared by both passed and rejected lists."""
+
+    id: str
+    seq: str
+    gc_pct: float
+    length: int
+    non_designable: List[Tuple[int, int]] = field(default_factory=list)  # passed only
+    reason: Optional[str] = None  # rejected only
 
 
 def calculate_gc(seq: str) -> float:
@@ -59,7 +72,7 @@ def filter_unitigs(
     min_gc: float = 35.0,
     max_gc: float = 60.0,
     window_size: int = 31,
-) -> Tuple[List[Tuple[str, str, float, int, List[Tuple[int, int]]]], List[Tuple[str, str, float, int, str]]]:
+) -> Tuple[List[UnitigResult], List[UnitigResult]]:
     # Filter unitigs by length and global GC content; flag (don't reject) local
     # sliding-window GC dips as non-designable coordinates.
 
@@ -78,45 +91,53 @@ def filter_unitigs(
 
         # Filter by length first:
         if seq_len < min_length:
-            rejected.append((record.id, seq_str, gc_pct, seq_len, f"length_too_short({seq_len}< {min_length})"))
+            rejected.append(
+                UnitigResult(record.id, seq_str, gc_pct, seq_len, reason=f"length_too_short({seq_len} < {min_length})")
+            )
             continue
 
         # Filter by global GC content second:
         if not (min_gc <= gc_pct <= max_gc):
             rejected.append(
-                (record.id, seq_str, gc_pct, seq_len, f"GC_out_of_range ({gc_pct:.2f}% not in {min_gc}-{max_gc})")
+                UnitigResult(
+                    record.id,
+                    seq_str,
+                    gc_pct,
+                    seq_len,
+                    reason=f"GC_out_of_range ({gc_pct:.2f}% not in {min_gc}-{max_gc})",
+                )
             )
             continue
 
         # Sliding-window GC third: flag non-designable coordinates, don't reject.
         non_designable = find_non_designable_windows(seq_str, window_size, min_gc, max_gc)
 
-        passed.append((record.id, seq_str, gc_pct, seq_len, non_designable))
+        passed.append(UnitigResult(record.id, seq_str, gc_pct, seq_len, non_designable=non_designable))
 
     # Ranked by length - longest sequences first then by how far the GC% is from 50%
-    passed.sort(key=lambda x: (-x[3], abs(x[2] - 50.0)))
+    passed.sort(key=lambda r: (-r.length, abs(r.gc_pct - 50.0)))
 
     return passed, rejected
 
 
-def write_output(results: List[Tuple[str, str, float, int, List[Tuple[int, int]]]], output_path: str):
+def write_output(results: List[UnitigResult], output_path: str):
     """Write filtered unitigs to FASTA with ranking + non-designable coordinates."""
     with open(output_path, "w") as f:
-        for rank, (uid, seq, gc_pct, length, non_designable) in enumerate(results, 1):
-            regions = ",".join(f"{s}-{e}" for s, e in non_designable) or "none"
-            f.write(f">{uid} rank={rank} length={length} gc={gc_pct:.2f} non_designable={regions}\n")
-            f.write(f"{seq}\n")
+        for rank, r in enumerate(results, 1):
+            regions = ",".join(f"{s}-{e}" for s, e in r.non_designable) or "none"
+            f.write(f">{r.id} rank={rank} length={r.length} gc={r.gc_pct:.2f} non_designable={regions}\n")
+            f.write(f"{r.seq}\n")
 
 
-def write_rejected(rejected: List[Tuple[str, str, float, int, str]], output_path: str):
+def write_rejected(rejected: List[UnitigResult], output_path: str):
     """Write rejected unitigs to FASTA with failure reason in header."""
     with open(output_path, "w") as f:
-        for uid, seq, gc_pct, length, reason in rejected:
-            f.write(f">{uid} length={length} gc={gc_pct:.2f} reason={reason}\n")
-            f.write(f"{seq}\n")
+        for r in rejected:
+            f.write(f">{r.id} length={r.length} gc={r.gc_pct:.2f} reason={r.reason}\n")
+            f.write(f"{r.seq}\n")
 
 
-def plot_results(results: List[Tuple[str, str, float, int]], output_path: str, min_gc: float, max_gc: float):
+def plot_results(results: List[UnitigResult], output_path: str, min_gc: float, max_gc: float):
     """
     Generate 4-panel visualization:
     - Length histogram
@@ -135,8 +156,8 @@ def plot_results(results: List[Tuple[str, str, float, int]], output_path: str, m
         return
 
     ranks = list(range(1, len(results) + 1))
-    gcs = [x[2] for x in results]
-    lengths = [x[3] for x in results]
+    gcs = [r.gc_pct for r in results]
+    lengths = [r.length for r in results]
 
     # Create figure
     fig, axes = plt.subplots(2, 2, figsize=(14, 10))
@@ -182,7 +203,7 @@ def plot_results(results: List[Tuple[str, str, float, int]], output_path: str, m
     ax.axhspan(min_gc, max_gc, alpha=0.1, color="green")
     ax.set_xlabel("Unitig Index (sorted by GC%)")
     ax.set_ylabel("GC Content (%)")
-    ax.set_title(f"GC%% Profile ({gc_sorted[0]:.1f}–{gc_sorted[-1]:.1f}%)")
+    ax.set_title(f"GC% Profile ({gc_sorted[0]:.1f}–{gc_sorted[-1]:.1f}%)")
     ax.grid(alpha=0.3)
     ax.legend()
 
@@ -248,15 +269,15 @@ def main():
     print("\nResults:", file=sys.stderr)
     print(f"  Input: {args.input}", file=sys.stderr)
     print(f"  Output (passed): {args.output}", file=sys.stderr)
-    print(f"  Passed filters: {len(passed)}", file=sys.stderr)
-    print(f"  Rejected: {len(rejected)}", file=sys.stderr)
     if args.reject_output:
         print(f"  Output (rejected): {args.reject_output}", file=sys.stderr)
+    print(f"  Passed filters: {len(passed)}", file=sys.stderr)
+    print(f"  Rejected: {len(rejected)}", file=sys.stderr)
     if passed:
-        lengths = [x[3] for x in passed]
-        gcs = [x[2] for x in passed]
+        lengths = [r.length for r in passed]
+        gcs = [r.gc_pct for r in passed]
         print(f"  Length range: {min(lengths)}–{max(lengths)} bp", file=sys.stderr)
-        print(f"  GC%% range: {min(gcs):.1f}–{max(gcs):.1f}%", file=sys.stderr)
+        print(f"  GC% range: {min(gcs):.1f}–{max(gcs):.1f}%", file=sys.stderr)
 
     # Plot (if requested)
     if args.plot:
