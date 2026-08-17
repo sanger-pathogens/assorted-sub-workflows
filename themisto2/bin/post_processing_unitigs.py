@@ -212,12 +212,21 @@ def plot_results(results: List[UnitigResult], output_path: str, min_gc: float, m
     print(f"Saved visualization to {output_path}", file=sys.stderr)
 
 
+OUTPUT_FILENAME = "filtered_unitigs.fasta"
+REJECTED_FILENAME = "rejected_unitigs.fasta"
+PLOT_FILENAME = "unitig_analysis.png"
+
+
 def parse_args():
     """Parse command-line arguments."""
     parser = argparse.ArgumentParser(description="Filter unitigs by length and GC content, with optional visualization")
     parser.add_argument("input", help="Input FASTA file")
     parser.add_argument(
-        "-o", "--output", default="filtered_unitigs.fasta", help="Output FASTA file (default: filtered_unitigs.fasta)"
+        "-o",
+        "--outdir",
+        default=".",
+        help=f"Output directory (default: '.'). Filenames are fixed: {OUTPUT_FILENAME}, {REJECTED_FILENAME}, "
+        f"{PLOT_FILENAME}",
     )
     parser.add_argument(
         "-l", "--min-length", type=int, default=100, help="Minimum sequence length in bp (default: 100)"
@@ -232,10 +241,7 @@ def parse_args():
         help="Sliding window size for GC check in bp (default: 31, kmer size)",
     )
     parser.add_argument("--plot", action="store_true", help="Generate visualization plots (requires matplotlib)")
-    parser.add_argument(
-        "-p", "--plot-output", default="unitig_analysis.png", help="Output plot file (default: unitig_analysis.png)"
-    )
-    parser.add_argument("-r", "--reject-output", default=None, help="Output FASTA file for rejected unitigs (optional)")
+    parser.add_argument("-r", "--write-rejected", action="store_true", help="Also write rejected unitigs to FASTA")
 
     return parser.parse_args()
 
@@ -248,6 +254,12 @@ def main():
         print(f"Error: {args.input} not found", file=sys.stderr)
         sys.exit(1)
 
+    outdir = Path(args.outdir)
+    outdir.mkdir(parents=True, exist_ok=True)
+    output_path = outdir / OUTPUT_FILENAME
+    reject_output_path = outdir / REJECTED_FILENAME
+    plot_output_path = outdir / PLOT_FILENAME
+
     # Filter
     print(f"Filtering {args.input}...", file=sys.stderr)
     passed, rejected = filter_unitigs(
@@ -259,18 +271,18 @@ def main():
     )
 
     # Output passed
-    write_output(passed, args.output)
+    write_output(passed, output_path)
 
     # Output rejected (if requested)
-    if args.reject_output:
-        write_rejected(rejected, args.reject_output)
+    if args.write_rejected:
+        write_rejected(rejected, reject_output_path)
 
     # Summary
     print("\nResults:", file=sys.stderr)
     print(f"  Input: {args.input}", file=sys.stderr)
-    print(f"  Output (passed): {args.output}", file=sys.stderr)
-    if args.reject_output:
-        print(f"  Output (rejected): {args.reject_output}", file=sys.stderr)
+    print(f"  Output (passed): {output_path}", file=sys.stderr)
+    if args.write_rejected:
+        print(f"  Output (rejected): {reject_output_path}", file=sys.stderr)
     print(f"  Passed filters: {len(passed)}", file=sys.stderr)
     print(f"  Rejected: {len(rejected)}", file=sys.stderr)
     if passed:
@@ -281,7 +293,7 @@ def main():
 
     # Plot (if requested)
     if args.plot:
-        plot_results(passed, args.plot_output, args.gc_min, args.gc_max)
+        plot_results(passed, plot_output_path, args.gc_min, args.gc_max)
 
 
 if __name__ == "__main__":
