@@ -33,14 +33,25 @@ workflow BUILD_COLOR_INDEX {
 
     // Step 04 - build the SBWT index from the unitigs, then verify it loads correctly
     // (verification split into its own process -- much lighter workload than the build,
-    // no reason to hold a cpu_16/mem_32 reservation just to run a quick check)
+    // no reason to hold a cpu_16/mem_32 reservation just to run a quick check).
+    // SBWT_CHECK is generic (also reused by set_diff_calculations.nf) and never
+    // touches .lcs, so check the .sbwt alone and re-pair it with its (untouched,
+    // already-produced-by-build) .lcs afterward for the Themisto2 build below.
     SBWT_BUILD(GGCAT.out.unitigs)
-    SBWT_CHECK(SBWT_BUILD.out.index)
 
+    SBWT_BUILD.out.index
+    | map { meta, sbwt, lcs -> [meta, sbwt] }
+    | set { sbwt_only }
+
+    SBWT_CHECK(sbwt_only)
+
+    SBWT_CHECK.out.index
+    | join(SBWT_BUILD.out.index.map { meta, sbwt, lcs -> [meta, lcs] })
+    | set { checked_index } // tuple(meta, sbwt, lcs)
 
     // Step 05 - build the Themisto2 index (needs the colour file *and* the verified SBWT index)
     COLOR_MAPPING.out.file_colors
-    | join(SBWT_CHECK.out.index)
+    | join(checked_index)
     | set { themisto_build_input }
 
     THEMISTO_BUILD(themisto_build_input)
@@ -51,6 +62,7 @@ workflow BUILD_COLOR_INDEX {
 
     emit:
     index            = THEMISTO_STATS.out.index      // tuple(meta, index_thm2)
+    sbwt_index       = checked_index                 // tuple(meta, sbwt, lcs) -- feeds set_diff_calculations.nf as A or B
     export_unitigs   = THEMISTO_EXPORT.out.unitigs
     color_sets       = THEMISTO_EXPORT.out.color_sets
     export_metadata  = THEMISTO_EXPORT.out.metadata

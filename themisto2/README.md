@@ -66,3 +66,29 @@ As it stands today, setting `--target_groups` does not skip or shrink the specie
 ### Dependencies
 
 All software dependencies are containerised (GGCAT, SBWT, Themisto2, and a `pandas` container for [color_mapping.py](./bin/color_mapping.py)).
+
+## Set-difference subworkflow (`setdiff_filter.nf`)
+
+Computes step08's index-native set-difference chain
+(`08_set_difference_filtering.md`, stages `C`/`D`/`F`/`G`) as workflow
+`SET_DIFF_CALCULATIONS`. Earlier drafts of this pipeline referred to each
+stage by that doc's bare letters (`A`-`G`) directly in the code; that's been
+dropped in favour of descriptive stage/variable names, since bare letters
+aren't self-documenting to read in `.nf` files without this table open
+alongside them. This is the current mapping:
+
+| step08 | stage name (code) | formula | produced by | process aliases | emit name |
+| --- | --- | --- | --- | --- | --- |
+| A | `species_index` | — (built, not diffed) | `BUILD_COLOR_INDEX` (species-wide `index_species/`) | `SBWT_BUILD`, `SBWT_CHECK` | `BUILD_COLOR_INDEX.out.sbwt_index` |
+| B | `lineage_index` | — (built, not diffed) | **not built yet** — `--target_groups` colour files already exist (`index_target_group/<group>/`, see [Index B](#index-b-target_groups) above) but nothing downstream builds an SBWT index from them yet | n/a | n/a |
+| C | `bg_excl` | background − `species_index` | `SET_DIFF_CALCULATIONS` | `SBWT_DIFFERENCE_BG_EXCL`, `SBWT_CHECK_BG_EXCL` | `.out.bg_excl` |
+| D | `xlin_bg` | `species_index` − `lineage_index` | `SET_DIFF_CALCULATIONS` (blocked on B) | `SBWT_DIFFERENCE_XLIN_BG`, `SBWT_CHECK_XLIN_BG` | `.out.xlin_bg` |
+| E | `candidate_index` | — (built, not diffed) | **not implemented anywhere yet** — Step07-derived per-lineage candidate core | n/a | n/a |
+| F | `lin_cand` | `candidate_index` − `xlin_bg` | `SET_DIFF_CALCULATIONS` (blocked on E and D) | `SBWT_DIFFERENCE_LIN_CAND`, `SBWT_CHECK_LIN_CAND` | `.out.lin_cand` |
+| G | `markers` | `lin_cand` − `bg_excl` | `SET_DIFF_CALCULATIONS` (blocked on F) | `SBWT_DIFFERENCE_MARKERS`, `SBWT_CHECK_MARKERS` | `.out.markers` |
+
+Every diff (`bg_excl`, `xlin_bg`, `lin_cand`, `markers`) is immediately
+followed by an `sbwt check` on its output — `sbwt difference` has a
+confirmed history of silently producing a structurally-corrupt index that
+LSF still reports as "successfully completed" (see the step08 doc), so
+never trust a diff's exit code alone.

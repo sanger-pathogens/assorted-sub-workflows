@@ -76,10 +76,25 @@ process SBWT_CHECK {
     """
 }
 
-// TODO: SBWT_DIFFERENCE process goes here -- will be called by the upcoming
-// set_diff_calculations.nf subworkflow. Note from experience: sbwt diff jobs have
-// taken a lot of memory when calculating -- try the sbwt `--low-ram` option during
-// test runs and see if it helps before locking in a memory label for this process.
+process SBWT_DIFFERENCE {
+    tag "${meta.ID}"
+    label 'cpu_16'
+    label 'mem_32' // provisional, sized like SBWT_BUILD -- bg_excl vs ATB needs far more (900GB, hugemem), give it its own withName: override rather than bumping this
+    label 'time_queue_from_normal'
 
-//process SBWT_DIFFERENCE {
-//}
+    // Same .sif as SBWT_BUILD/SBWT_CHECK -- always pair with SBWT_CHECK on the output (setdiff_filter.nf already does)
+    container "/data/pam/installs/packages/sbwt-rs-cli/bug_fix_setdiff_commit_f93d92_2026.08.04.13.38.59/sbwt-rs-cli-0.4.2-f93d92c/image/sbwt-rs-cli_bug_fix_setdiff_commit_f93d92_2026.08.04.13.38.59.sif"
+
+    input:
+    tuple val(meta), path(sbwt_a), path(sbwt_b) // sbwt_a - sbwt_b
+
+    output:
+    tuple val(meta), path(diff_index), emit: index
+
+    script:
+    diff_index = "${meta.ID}.sbwt"
+    def low_ram_flag = params.sbwt_diff_low_ram ? "--low-ram" : "" // peak-RAM optimization only, not a correctness fix
+    """
+    sbwt difference ${sbwt_a} ${sbwt_b} -o ${diff_index} -t ${task.cpus} -v ${low_ram_flag}
+    """
+}
