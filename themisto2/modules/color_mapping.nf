@@ -23,12 +23,16 @@ process COLOR_MAPPING {
     def assembly_arg = assembly_input.isDirectory() \
         ? "--assembly-dir ${assembly_input} --assembly-suffix ${params.assembly_suffix}" \
         : "--assembly-paths ${assembly_input}"
+    // Index B: restrict to user-selected lineages (e.g. GPSC1,GPSC2). Empty by
+    // default, which color_mapping.py treats as "keep everything" (Index A).
+    def target_groups_arg = params.target_groups ? "--target-groups ${params.target_groups}" : ""
     """
     color_mapping.py \\
         --metadata ${metadata} \\
         --sample-col ${params.sample_col} \\
         --label-col ${params.label_col} \\
         ${assembly_arg} \\
+        ${target_groups_arg} \\
         --out-dir .
     """
 }
