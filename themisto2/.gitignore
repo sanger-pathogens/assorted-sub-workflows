@@ -1,1 +1,9 @@
 CHECKLIST.md
+
+# Python bytecode cache -- shows up under bin/ whenever a .py script here gets
+# run directly with a bare `python`/`python3` (e.g. ad-hoc syntax checks); never
+# needed, never intentional. Set PYTHONPYCACHEPREFIX=<some dir outside any repo>
+# to stop it from being written here at all, if you'd rather avoid even the
+# untracked-file clutter than rely on this ignore rule.
+__pycache__/
+*.py[cod]
