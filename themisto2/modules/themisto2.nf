@@ -4,7 +4,7 @@ process THEMISTO_BUILD {
     label 'mem_32'
     label 'time_queue_from_small'
 
-    container "gitlab-registry.internal.sanger.ac.uk/sanger-pathogens/docker-images/themisto2:0.0.1"
+    container "quay.io/sangerpathogens/themisto2:0.0.1"
 
     publishDir mode: 'copy', path: "${params.outdir}/themisto2/${meta.ID}/build/"
 
