@@ -92,7 +92,7 @@ def filter_unitigs(
         # Filter by length first:
         if seq_len < min_length:
             rejected.append(
-                UnitigResult(record.id, seq_str, gc_pct, seq_len, reason=f"length_too_short({seq_len} < {min_length})")
+                UnitigResult(record.id, seq_str, gc_pct, seq_len, reason=f"length_too_short ({seq_len} < {min_length})")
             )
             continue
 
