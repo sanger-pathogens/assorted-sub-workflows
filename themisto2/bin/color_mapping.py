@@ -5,8 +5,7 @@ Generic color mapping script for Themisto2 --file-colors input.
 Reads metadata CSV, sorts by group label column, matches samples to
 assemblies, and prepares index input files organized in subdirectories:
   - index_species/ : whole-species index files
-  - index_species/<target_group>/ : per-group indexes, nested inside
-    index_species/ (if --target-groups provided)
+  - index_target_group/<group>/ : per-group indexes (if --target-groups provided)
 """
 
 import argparse
@@ -99,21 +98,23 @@ def write_index_files(
     """Write file_colors_input.txt, label_mapping.tsv and stats.json to the appropriate subdirectory."""
     if index_type == "species":
         index_dir = output_dir / "index_species"
+        tag = "species"
     else:
         if not group_name or group_name in (".", "..") or "/" in group_name or "\\" in group_name:
             sys.exit(f"Error: invalid --target-groups entry {group_name!r} -- must not contain path separators.")
-        index_dir = output_dir / "index_species" / group_name
+        index_dir = output_dir / "index_target_group" / group_name
+        tag = group_name
 
     index_dir.mkdir(parents=True, exist_ok=True)
 
-    metadata["file_path"].to_csv(index_dir / "file_colors_input.txt", index=False, header=False)
+    metadata["file_path"].to_csv(index_dir / f"{tag}_file_colors_input.txt", index=False, header=False)
 
     label_mapping = (
         metadata[[sample_col, group_label]]
         .drop_duplicates()
         .rename(columns={sample_col: "Sample_ID", group_label: "label"})
     )
-    label_mapping.to_csv(index_dir / "label_mapping.tsv", index=False, sep="\t")
+    label_mapping.to_csv(index_dir / f"{tag}_label_mapping.tsv", index=False, sep="\t")
 
     stats = {
         "index_type": index_type,
@@ -129,7 +130,7 @@ def write_index_files(
         stats["assemblies_excluded_missing_metadata"] = int(on_disk_no_metadata)
     stats["total_assemblies_written"] = int(len(metadata))
 
-    stats_path = index_dir / "stats.json"
+    stats_path = index_dir / f"{tag}_stats.json"
     with open(stats_path, "w") as f:
         json.dump(stats, f, indent=2)
 
