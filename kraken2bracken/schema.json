@@ -3,7 +3,7 @@
     "params": {
         "kraken2bracken options": {
             "kraken2_db": {
-                "default": null,
+                "required": true,
                 "help_text": "Path to the Kraken2 database"
             },
             "memory_mapping": {
@@ -23,7 +23,7 @@
                 "help_text": "K-mer length for Bracken"
             },
             "read_len": {
-                "default": null,
+                "required": true,
                 "help_text": "Ideal length of reads in sample"
             },
             "bracken_classification_level": {
