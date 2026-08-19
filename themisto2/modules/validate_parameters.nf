@@ -31,9 +31,9 @@ def validate_parameters() {
         errors += 1
     }
 
-    // --label_col is always required -- color_mapping.py needs a real column name, not a blank
-    if (!params.label_col) {
-        log.error("No --label_col specified. Please specify the metadata column to use as the label.")
+    // --group_label is always required -- color_mapping.py needs a real column name, not a blank
+    if (!params.group_label) {
+        log.error("No --group_label specified. Please specify the metadata column to use as the group label.")
         errors += 1
     }
 

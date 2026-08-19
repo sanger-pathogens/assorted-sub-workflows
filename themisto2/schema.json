@@ -12,13 +12,13 @@
       },
       "metadata": {
         "default": "",
-        "help_text": "tsv or csv file containing metadata for each genome assembly. Must contain a column to group the assemblies into colour sets. The column name must be specified in the 'label_col' parameter."
+        "help_text": "tsv or csv file containing metadata for each genome assembly. Must contain a column to group the assemblies into colour sets. The column name must be specified in the 'group_label' parameter."
       },
       "sample_col": {
         "default": "Sample_ID",
         "help_text": "Column name in metadata containing sample identifiers, matched against assembly filenames."
       },
-      "label_col": {
+      "group_label": {
         "default": "",
         "help_text": "Column name in the metadata file to use for grouping genome assemblies into colour sets."
       }
