@@ -24,7 +24,9 @@ process SBWT_BUILD {
     script:
     sbwt_index   = "unitigs-k${params.kmer_size}.sbwt"
     lcs_index    = "unitigs-k${params.kmer_size}.lcs"
-    def temp_dir = params.temp_dir ? "${params.temp_dir}/sbwt" : "sbwt_temp"
+    // Per-meta.ID subpath -- see ggcat.nf's temp_dir for why (shared params.temp_dir
+    // path would otherwise collide across concurrent species/lineage/candidate tasks).
+    def temp_dir = params.temp_dir ? "${params.temp_dir}/sbwt/${meta.ID}" : "sbwt_temp"
     // Cap at 95% of the allocated memory -- LSF can kill the job for exceeding its
     // limit even if sbwt asks for exactly what was granted (scheduler overhead eats
     // a little of that headroom), so leave a safety margin.
