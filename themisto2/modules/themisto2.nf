@@ -35,7 +35,7 @@ process THEMISTO_STATS {
     label 'mem_16' // provisional guess -- much lighter workload than the build, revisit after seeing real usage in test runs
     label 'time_queue_from_small'
 
-    container "gitlab-registry.internal.sanger.ac.uk/sanger-pathogens/docker-images/themisto2:0.0.1"
+    container "quay.io/sangerpathogens/themisto2:0.0.1"
 
     input:
     tuple val(meta), path(index_thm2)
@@ -58,7 +58,7 @@ process THEMISTO_EXPORT {
     label 'mem_16'
     label 'time_queue_from_normal'
 
-    container "gitlab-registry.internal.sanger.ac.uk/sanger-pathogens/docker-images/themisto2:0.0.1"
+    container "quay.io/sangerpathogens/themisto2:0.0.1"
 
     publishDir mode: 'copy', path: "${params.outdir}/themisto2/${meta.stage ? "${meta.stage}/" : ''}${meta.ID}/export/"
 
