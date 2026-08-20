@@ -7,7 +7,7 @@ process CHECKM {
 
     container 'quay.io/biocontainers/checkm-genome:1.2.4--pyhdfd78af_0'
 
-    publishDir mode: 'copy', path: "${params.outdir}/checkm2/", pattern: "${meta.ID}_${bin_name}_checkm2_report.tsv"
+    publishDir mode: 'copy', path: "${params.outdir}/checkm1/", pattern: "${meta.ID}_${bin_name}_checkm_report.tsv"
 
     input:
     tuple val(meta), val(bin_name), path(fastas)
@@ -29,7 +29,7 @@ process SUMMARISE_CHECKM {
     label 'mem_250M'
     label 'time_12'
 
-    publishDir mode: 'copy', path: "${params.outdir}/${meta.ID}/checkm1/", pattern: "${meta.ID}_${bin_name}checkm_summary.tsv"
+    publishDir mode: 'copy', path: "${params.outdir}/${meta.ID}/checkm1/", pattern: "${summary}"
 
     container 'quay.io/sangerpathogens/python-curl:3.11'
 
@@ -41,7 +41,7 @@ process SUMMARISE_CHECKM {
 
     script:
     command = "${projectDir}/assorted-sub-workflows/mags_maker/bin_refinement/bin/summarise_checkm.py"
-    summary = "${meta.ID}_${bin_name}checkm_summary.tsv"
+    summary = "${meta.ID}_${bin_name}_checkm_summary.tsv"
     """
     ${command} ${report} ${bin_name} > ${summary}
     """    

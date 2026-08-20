@@ -25,11 +25,14 @@
                 "default": "false",
                 "help_text": "Run MEGAHIT assembly deterministically, please see 'Further information' in README for runtime impacts."
             },
-            "output_transposed": {
+            "transpose_quast_report": {
                 "default": "false",
-                "help_text": "Output transposed quast reports."
+                "help_text": "Output transposed QUAST reports."
+            },
+            "publish_unbinned_contigs": {
+                "default": "false",
+                "help_text": "Publish size-filtered contigs from METASPADES and MEGAHIT prior to binning."
             }
-
         }
     }
 }
