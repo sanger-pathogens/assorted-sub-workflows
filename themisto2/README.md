@@ -61,7 +61,7 @@ The species-wide Themisto2 build/export and `COLOR_MAPPING`'s species `label_map
 
 #### stats.json fields
 
-Every `index_species/` and `index_species/<group>/` directory gets its own `stats.json`. Some fields only make sense at species-wide scope -- a sample with no label, or an assembly with no metadata row at all, can't be attributed to one specific group, so those fields are simply omitted (not reported as `0`) from per-group `stats.json` files.
+Every `index_species/` and `index_target_group/<group>/` directory gets its own `stats.json`. Some fields only make sense at species-wide scope -- a sample with no label, or an assembly with no metadata row at all, can't be attributed to one specific group, so those fields are simply omitted (not reported as `0`) from per-group `stats.json` files.
 
 | field                                  | species-wide | per-group | meaning                                                                                                                               |
 | -------------------------------------- | ------------ | --------- | ------------------------------------------------------------------------------------------------------------------------------------- |
