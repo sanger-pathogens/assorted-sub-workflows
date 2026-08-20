@@ -6,7 +6,11 @@ process GGCAT {
 
     container "quay.io/biocontainers/ggcat:2.2.0--hf1b6044_0"
 
-    publishDir mode: 'copy', path: "${params.outdir}/ggcat/${meta.ID}/"
+    // meta.stage (only set for the candidate rebuild) keeps this from colliding with
+    // that same lineage's own GGCAT_GROUP output at the same meta.ID -- lineage_index
+    // and candidate_index deliberately share meta.ID (the lineage name), required for
+    // SET_DIFF_CALCULATIONS' join, so meta.ID alone can't disambiguate them on disk.
+    publishDir mode: 'copy', path: "${params.outdir}/ggcat/${meta.stage ? "${meta.stage}/" : ''}${meta.ID}/"
 
     input:
     tuple val(meta), path(file_colors_input)

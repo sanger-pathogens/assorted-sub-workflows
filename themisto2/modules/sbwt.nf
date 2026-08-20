@@ -13,7 +13,9 @@ process SBWT_BUILD {
     // still corrupt output on 2026-07-31 -- don't swap back to that one.
     container "/data/pam/installs/packages/sbwt-rs-cli/bug_fix_setdiff_commit_f93d92_2026.08.04.13.38.59/sbwt-rs-cli-0.4.2-f93d92c/image/sbwt-rs-cli_bug_fix_setdiff_commit_f93d92_2026.08.04.13.38.59.sif"
 
-    publishDir mode: 'copy', path: "${params.outdir}/sbwt/${meta.ID}/"
+    // meta.stage disambiguates the candidate rebuild from that same lineage's own
+    // SBWT_BUILD_GROUP output -- see ggcat.nf's publishDir for why meta.ID alone can't.
+    publishDir mode: 'copy', path: "${params.outdir}/sbwt/${meta.stage ? "${meta.stage}/" : ''}${meta.ID}/"
 
     input:
     tuple val(meta), path(unitigs_fna)

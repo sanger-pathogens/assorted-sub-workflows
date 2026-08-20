@@ -6,7 +6,9 @@ process THEMISTO_BUILD {
 
     container "quay.io/sangerpathogens/themisto2:0.0.1"
 
-    publishDir mode: 'copy', path: "${params.outdir}/themisto2/${meta.ID}/build/"
+    // meta.stage disambiguates the candidate rebuild from that same lineage's own
+    // THEMISTO_BUILD_GROUP output -- see ggcat.nf's publishDir for why meta.ID alone can't.
+    publishDir mode: 'copy', path: "${params.outdir}/themisto2/${meta.stage ? "${meta.stage}/" : ''}${meta.ID}/build/"
 
     input:
     tuple val(meta), path(file_colors_input), path(sbwt_index), path(lcs_index)
@@ -58,7 +60,7 @@ process THEMISTO_EXPORT {
 
     container "gitlab-registry.internal.sanger.ac.uk/sanger-pathogens/docker-images/themisto2:0.0.1"
 
-    publishDir mode: 'copy', path: "${params.outdir}/themisto2/${meta.ID}/export/"
+    publishDir mode: 'copy', path: "${params.outdir}/themisto2/${meta.stage ? "${meta.stage}/" : ''}${meta.ID}/export/"
 
     input:
     tuple val(meta), path(index_thm2)

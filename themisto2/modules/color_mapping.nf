@@ -25,7 +25,7 @@ process COLOR_MAPPING {
         : "--assembly-paths ${assembly_input} --assembly-suffix ${params.assembly_suffix}"
     def target_groups_arg = params.target_groups ? "--target-groups ${params.target_groups}" : ""
     """
-    color_mapping.py \\
+    ${moduleDir}/../bin/color_mapping.py \\
         --metadata ${metadata} \\
         --sample-col ${params.sample_col} \\
         --group-label ${params.group_label} \\
