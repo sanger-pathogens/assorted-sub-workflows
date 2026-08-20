@@ -29,25 +29,22 @@
         "help_text": "Comma-separated label(s), e.g. GPSC1,GPSC2, to also build lineage-scoped colour indexes for, alongside the species-wide one. Leave empty for species-wide only. Written to disk but not yet built into a Themisto2 index -- see README."
       }
     },
+    "Step08 - Set-difference calculations (setdiff_filter.nf)": {
+      "bg_index": {
+        "default": "/data/pam/team230/sm71/scratch/gps_project/04_sbwt_kmer_index/ATB/ATB_all.sbwt",
+        "help_text": "Pre-built background SBWT index (ATB) that bg_excl (C)/markers (G) are diffed against when --bg_excl_index isn't set. Must be built at the same --kmer_size as the rest of this pipeline's indexes."
+      },
+      "bg_excl_index": {
+        "default": "",
+        "help_text": "Path to an already-built bg_excl (step08 'C', background - species_index) SBWT index to reuse directly, skipping the hugemem-scale --bg_index diff. Leave empty to compute bg_excl from --bg_index instead."
+      }
+    },
     "Shared across GGCAT / SBWT / Themisto2 builds": {
       "temp_dir": {
         "default": "",
         "help_text": "Shared scratch root for GGCAT/SBWT (and future set_diff_calculations.nf) temp/working dirs. Optional -- falls back to a task-local work directory per tool, which is fine at species scale. Only set this to a Lustre scratch path with confirmed free space if running at full background-DB scale (ATB/GTDB), which needs terabytes free. Each tool writes under '<temp_dir>/<tool>/' -- assumes only one build runs against a given temp_dir at a time."
       }
     },
-    "ggcat": {
-      "kmer_size": {
-        "default": "31",
-        "help_text": "k-mer size used consistently across the GGCAT, SBWT and Themisto2 builds in this subworkflow. Must match the k-mer size of any existing index (e.g. background SBWT/ATB/GTDB) this output will later be compared or set-differenced against."
-      }
-    },
-    "sbwt": {
-      "kmer_size": {
-        "default": "31",
-        "help_text": "k-mer size used consistently across the GGCAT, SBWT and Themisto2 builds in this subworkflow. Must match the k-mer size of any existing index (e.g. background SBWT/ATB/GTDB) this output will later be compared or set-differenced against."
-      }
-    },
-    "themisto2": {
       "kmer_size": {
         "default": "31",
         "help_text": "k-mer size used consistently across the GGCAT, SBWT and Themisto2 builds in this subworkflow. Must match the k-mer size of any existing index (e.g. background SBWT/ATB/GTDB) this output will later be compared or set-differenced against."
@@ -56,6 +53,6 @@
         "default": "false",
         "help_text": "Gzip the Themisto2 export's color_sets.txt output. Off by default -- compression is single-threaded and slow at full species scale (~2.3h projected for s_pneumoniae) for no benefit beyond disk space, which hasn't been a constraint."
       }
-    }
   }
 }
+

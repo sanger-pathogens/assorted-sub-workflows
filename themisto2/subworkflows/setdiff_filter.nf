@@ -13,34 +13,68 @@ include { SBWT_DIFFERENCE as SBWT_DIFFERENCE_BG_EXCL; SBWT_CHECK as SBWT_CHECK_B
 include { SBWT_DIFFERENCE as SBWT_DIFFERENCE_XLIN_BG; SBWT_CHECK as SBWT_CHECK_XLIN_BG } from '../modules/sbwt.nf'
 include { SBWT_DIFFERENCE as SBWT_DIFFERENCE_LIN_CAND; SBWT_CHECK as SBWT_CHECK_LIN_CAND } from '../modules/sbwt.nf'
 include { SBWT_DIFFERENCE as SBWT_DIFFERENCE_MARKERS; SBWT_CHECK as SBWT_CHECK_MARKERS } from '../modules/sbwt.nf'
+// Not a step08 diff stage -- just verifies --bg_excl_index (an arbitrary,
+// unverified user-supplied file used directly AS bg_excl -- see the bg_excl
+// block below) actually loads before it's used downstream.
+include { SBWT_CHECK as SBWT_CHECK_BACKGROUND } from '../modules/sbwt.nf'
 
 workflow SET_DIFF_CALCULATIONS {
     take:
-    /// tuple(meta, sbwt) -- e.g. ATB. meta.ID = "ATB"; broadcast to every species below.
-    background_ch
+    // (no background_ch here -- it's built from params.bg_excl_index / params.bg_index
+    // in main: below, not threaded through by the caller. See that block's comment.)
     /// tuple(meta, sbwt, lcs) -- A: species/group-wide index. meta.ID = species id.
     /// From BUILD_COLOR_INDEX.out.sbwt_index (whole-species genome set).
     species_index_ch
     /// tuple(meta, sbwt, lcs) -- B: lineage-only index. meta.ID = lineage id,
     /// meta.species = parent species id (must match a species_index_ch meta.ID).
-    /// PREREQUISITE, not built here -- see note at the bottom of this file.
+    /// From BUILD_COLOR_INDEX.out.lineage_index -- only non-empty when
+    /// --target_groups is set (see build_color_index.nf).
     lineage_index_ch
     /// tuple(meta, sbwt, lcs) -- E: per-lineage candidate index (Step07-derived,
     /// built+checked upstream). meta.ID = lineage id, meta.species = parent species id.
     candidate_index_ch
 
     main:
-    // bg_excl (step08 "C") = background - species. Species-agnostic, computed
-    // once per species, reused by every lineage of that species below.
-    background_ch
-    | combine(species_index_ch)
-    | map { bg_meta, bg_sbwt, sp_meta, sp_sbwt, sp_lcs ->
-        [[ID: "bg_excl_${sp_meta.ID}", species: sp_meta.ID], bg_sbwt, sp_sbwt]
-    }
-    | set { bg_excl_input }
+    // bg_excl (step08 "C") = background - species. --bg_excl_index lets the user
+    // reuse an already-built bg_excl directly and skip re-running the hugemem-scale
+    // diff against --bg_index (the raw background, e.g. ATB); if not given, it's
+    // computed for real below. Either way this converges on bg_excl_checked, one
+    // entry per species -- in the --bg_index branch, combine(species_index_ch) is
+    // what makes the diff PER SPECIES (not one global diff); the --bg_excl_index
+    // branch just tags the reused file with each species_index_ch entry's ID the
+    // same way, since there's no diff left to run.
+    if (params.bg_excl_index) {
+        // bg_excl_index is an arbitrary user-supplied file, never verified by this
+        // pipeline -- check it loads before using it downstream. Tag with the
+        // file's own basename (e.g. ATB_all) instead of a generic label, so
+        // publishDir paths/output filenames/logs identify which background
+        // file was actually used.
+        def bg_excl_name = file(params.bg_excl_index).baseName
 
-    SBWT_DIFFERENCE_BG_EXCL(bg_excl_input)
-    SBWT_CHECK_BG_EXCL(SBWT_DIFFERENCE_BG_EXCL.out.index)
+        SBWT_CHECK_BACKGROUND(
+            Channel.fromPath(params.bg_excl_index, checkIfExists: true)
+                .map { sbwt -> [[ID: "bg_excl_${bg_excl_name}"], sbwt] }
+        )
+
+        SBWT_CHECK_BACKGROUND.out.index
+        | combine(species_index_ch)
+        | map { bg_meta, bg_sbwt, sp_meta, sp_sbwt, sp_lcs ->
+            [[ID: "bg_excl_${bg_excl_name}_${sp_meta.ID}", species: sp_meta.ID], bg_sbwt]
+        }
+        | set { bg_excl_checked }
+    } else {
+        Channel.fromPath(params.bg_index, checkIfExists: true)
+        | map { sbwt -> [[ID: 'bg_index'], sbwt] }
+        | combine(species_index_ch)
+        | map { bg_meta, bg_sbwt, sp_meta, sp_sbwt, sp_lcs ->
+            [[ID: "bg_excl_${sp_meta.ID}", species: sp_meta.ID], bg_sbwt, sp_sbwt]
+        }
+        | set { bg_excl_input }
+
+        SBWT_DIFFERENCE_BG_EXCL(bg_excl_input)
+        SBWT_CHECK_BG_EXCL(SBWT_DIFFERENCE_BG_EXCL.out.index)
+        SBWT_CHECK_BG_EXCL.out.index | set { bg_excl_checked }
+    }
 
     // xlin_bg (step08 "D") = species-wide index (A) - lineage-only index (B)
     species_index_ch
@@ -75,7 +109,7 @@ workflow SET_DIFF_CALCULATIONS {
     SBWT_CHECK_LIN_CAND(SBWT_DIFFERENCE_LIN_CAND.out.index)
 
     // markers (step08 "G") = lin_cand - bg_excl
-    SBWT_CHECK_BG_EXCL.out.index
+    bg_excl_checked
     | map { meta, sbwt -> [meta.species, sbwt] }
     | set { bg_excl_by_species }
 
@@ -91,40 +125,21 @@ workflow SET_DIFF_CALCULATIONS {
     SBWT_CHECK_MARKERS(SBWT_DIFFERENCE_MARKERS.out.index)
 
     emit:
-    bg_excl  = SBWT_CHECK_BG_EXCL.out.index   // step08 "C" -- background_exclusion, see README glossary
+    bg_excl  = bg_excl_checked                // step08 "C" -- background_exclusion, see README glossary
     xlin_bg  = SBWT_CHECK_XLIN_BG.out.index   // step08 "D" -- cross_lineage_background
     lin_cand = SBWT_CHECK_LIN_CAND.out.index  // step08 "F" -- lineage_specific_candidates
     markers  = SBWT_CHECK_MARKERS.out.index   // step08 "G" -- final_candidate_markers
 }
 
-// TODO -- none of this subworkflow's take: channels have a real producer yet.
-// main.nf includes BUILD_COLOR_INDEX but doesn't call SET_DIFF_CALCULATIONS at
-// all. In call order:
+// STATUS: all inputs this subworkflow needs now have real producers -- the three
+// take: channels (species_index_ch/lineage_index_ch/candidate_index_ch) come from
+// BUILD_COLOR_INDEX.out.sbwt_index/.lineage_index/.candidate_index (wired in
+// main.nf; meta.species is set correctly on both B and E for the join()s above),
+// and bg_excl (C) is built from params.bg_excl_index/params.bg_index inside this
+// subworkflow itself -- neither is a take: input. lineage_index_ch/
+// candidate_index_ch (B/E) are only non-empty when --target_groups is set.
 //
-// 1. background_ch (ATB/GTDB) -- not built by any subworkflow. Needs a param
-//    for pre-built external .sbwt path(s), fed in via Channel.fromPath(...) in
-//    main.nf. Doesn't exist yet.
-//
-// 2. lineage_index_ch (B) -- per 08_set_difference_filtering.md, get this by
-//    calling BUILD_COLOR_INDEX again with metadata_ch/assembly_ch filtered to
-//    one lineage's genomes (same mechanism as species-wide A, scoped smaller;
-//    one real ggcat+sbwt build per lineage -- 765 GPSCs for s_pneumoniae, so
-//    not free). Two blockers before that actually works:
-//      - BUILD_COLOR_INDEX's emitted meta is just [ID: ...], no .species key,
-//        but this channel needs meta.species to join() against species_index_ch.
-//        Nothing injects that yet -- has to happen wherever this second call
-//        is made.
-//      - This is exactly what --target_groups/Index B (color_mapping.py) was
-//        built for, but index_target_group/<group>/ isn't fed into
-//        GGCAT/SBWT_BUILD anywhere -- BUILD_COLOR_INDEX still only ever builds
-//        from index_species/, regardless of --target_groups.
-//
-// 3. candidate_index_ch (E) -- core_catchall_filter.py's output, rebuilt as a
-//    real SBWT index (doc's "Step 4a"). No process wraps
-//    core_catchall_filter.py as a Nextflow step yet, and no process rebuilds
-//    its unitig-ID-list output via GGCAT+SBWT_BUILD.
-//
-// Also still out of scope, per the doc's own open question: G_gtdb
-// (markers - a GTDB-based bg_excl) -- add a second background_ch/combine pair
-// once GTDB is actually built and the "replaces vs. supplements ATB" question
-// is settled, not before.
+// Still out of scope, per 08_set_difference_filtering.md's own open question:
+// G_gtdb (markers - a GTDB-based bg_excl) -- add a second background/combine
+// pair once GTDB is actually built and the "replaces vs. supplements ATB"
+// question is settled, not before.
