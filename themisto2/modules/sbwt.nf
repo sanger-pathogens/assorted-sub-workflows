@@ -70,6 +70,19 @@ process SBWT_CHECK {
     // Same .sif as SBWT_BUILD above -- see that process's comment for why.
     container "/data/pam/installs/packages/sbwt-rs-cli/bug_fix_setdiff_commit_f93d92_2026.08.04.13.38.59/sbwt-rs-cli-0.4.2-f93d92c/image/sbwt-rs-cli_bug_fix_setdiff_commit_f93d92_2026.08.04.13.38.59.sif"
 
+    // Publishes the *checked* .sbwt for every SBWT_CHECK_* alias (BUILD/DIFFERENCE
+    // callers, and setdiff_filter.nf's XLIN_BG/LIN_CAND/MARKERS/BG_EXCL/BACKGROUND) --
+    // previously nothing published SET_DIFF_CALCULATIONS' D/F/G/C outputs at all,
+    // they only existed in the Nextflow work/ dir.
+    // MARKERS (G, the final candidate markers -- setdiff_filter.nf's "markers_"
+    // tag prefix) gets its own top-level folder instead of the shared sbwt/
+    // bucket that D/F/C/build outputs land in -- it's the actual deliverable.
+    publishDir mode: 'copy', path: {
+        meta.ID.startsWith('markers_')
+            ? "${params.outdir}/candidate_markers/${meta.ID}/"
+            : "${params.outdir}/sbwt/${meta.stage ? "${meta.stage}/" : ''}${meta.ID}/"
+    }
+
     input:
 // Generic -- never touches .lcs (sbwt check only ever takes -i), so this is
     // reused via include-aliasing after both SBWT_BUILD and SBWT_DIFFERENCE.
@@ -113,5 +126,36 @@ process SBWT_DIFFERENCE {
     def low_ram_flag = params.sbwt_diff_low_ram ? "--low-ram" : "" // peak-RAM optimization only, not a correctness fix
     """
     sbwt difference a.sbwt b.sbwt -o ${diff_index} -t ${task.cpus} -v ${low_ram_flag}
+    """
+}
+
+process SBWT_DUMP_UNITIGS {
+    tag "${meta.ID}"
+    label 'cpu_4'
+    label 'mem_2'
+    label 'time_30m'
+
+    // Same .sif as SBWT_BUILD/SBWT_CHECK/SBWT_DIFFERENCE -- see SBWT_BUILD's comment for why.
+    container "/data/pam/installs/packages/sbwt-rs-cli/bug_fix_setdiff_commit_f93d92_2026.08.04.13.38.59/sbwt-rs-cli-0.4.2-f93d92c/image/sbwt-rs-cli_bug_fix_setdiff_commit_f93d92_2026.08.04.13.38.59.sif"
+
+    // Only ever called on G (markers) in this pipeline -- see main.nf -- so this
+    // goes straight into its dedicated folder, no branching needed like SBWT_CHECK's.
+    publishDir mode: 'copy', path: "${params.outdir}/candidate_markers/${meta.ID}/"
+
+    input:
+    // Generic -- works on any SBWT index (BUILD or DIFFERENCE output), not
+    // paired with an .lcs. Reconstructs unitig sequences directly from the
+    // SBWT structure -- no --file-colors/reference-file input needed, unlike
+    // themisto2 build (which needs those to build a *colored* index; a plain
+    // SBWT set like a set-difference result has no per-file color info to give it).
+    tuple val(meta), path(sbwt_index)
+
+    output:
+    tuple val(meta), path(unitigs_fasta), emit: unitigs
+
+    script:
+    unitigs_fasta = "${meta.ID}_unitigs.fasta"
+    """
+    sbwt dump-unitigs -i ${sbwt_index} -o ${unitigs_fasta} -t ${task.cpus} -v
     """
 }
