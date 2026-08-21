@@ -1,8 +1,16 @@
 process SBWT_BUILD {
     tag "${meta.ID}"
-    label 'cpu_16'
-    label 'mem_32'
-    label 'time_queue_from_small'
+    label 'cpu_32'
+    label 'mem_8'
+    label 'time_queue_from_normal'
+
+    // Only request /tmp space if /tmp is being used (assumes TMPDIR is not set)
+    if (!params.temp_dir || params.temp_dir.startsWith("/tmp")) {
+        label 'request_temp'
+    }
+
+    // scratch used for fast node-local temp storage
+    scratch true
 
     // Local .sif, not a registry pull -- the registry path (gitlab-registry.internal.sanger.ac.uk/
     // sanger-pathogens/farm_installs/farm-etc/sbwt-rs-cli/0.4.2-f93d92c) was never actually
@@ -32,9 +40,8 @@ process SBWT_BUILD {
     // Cap at 95% of the allocated memory -- LSF can kill the job for exceeding its
     // limit even if sbwt asks for exactly what was granted (scheduler overhead eats
     // a little of that headroom), so leave a safety margin.
-    // TODO: if the fixed 'mem_32' label ever proves too small for real data (actual
-    // OOM-kill, not speculation), see kraken2bracken.config's estimate_kraken_mem()
-    // for a pattern that sizes the request from real input + escalates on retry.
+    // TODO: mem_8 escalates to 16/32.GB on retry -- if that's ever not enough,
+    // see kraken2bracken.config's estimate_kraken_mem() for input-based sizing.
     def mem_gb = Math.floor(task.memory.toGiga() * 0.95) as int
 
     // -l/--build-lcs is required -- without it `sbwt build` only writes the .sbwt file,
@@ -56,9 +63,9 @@ process SBWT_BUILD {
 
 process SBWT_CHECK {
     tag "${meta.ID}"
-    label 'cpu_1'
-    label 'mem_16' // provisional guess -- much lighter workload than the build, revisit after seeing real usage in test runs
-    label 'time_queue_from_small'
+    label 'cpu_4'
+    label 'mem_2' // sized from real test-run peak RSS (<14 MB) -- much lighter than the build, as expected
+    label 'time_30m'
 
     // Same .sif as SBWT_BUILD above -- see that process's comment for why.
     container "/data/pam/installs/packages/sbwt-rs-cli/bug_fix_setdiff_commit_f93d92_2026.08.04.13.38.59/sbwt-rs-cli-0.4.2-f93d92c/image/sbwt-rs-cli_bug_fix_setdiff_commit_f93d92_2026.08.04.13.38.59.sif"
@@ -76,21 +83,27 @@ process SBWT_CHECK {
 
     script:
     """
-    sbwt check -i ${sbwt_index}
+    sbwt check -i ${sbwt_index} -t ${task.cpus}
     """
 }
 
 process SBWT_DIFFERENCE {
     tag "${meta.ID}"
     label 'cpu_16'
-    label 'mem_32' // provisional, sized like SBWT_BUILD -- bg_excl vs ATB needs far more (900GB, hugemem), give it its own withName: override rather than bumping this
+    // Sized for XLIN_BG/LIN_CAND (<1.3GB peak, real runs). MARKERS/BG_EXCL diff
+    // against ATB-scale data instead -- see setdiff_filter.config's withName override.
+    label 'mem_8'
     label 'time_queue_from_normal'
 
     // Same .sif as SBWT_BUILD/SBWT_CHECK -- always pair with SBWT_CHECK on the output (setdiff_filter.nf already does)
     container "/data/pam/installs/packages/sbwt-rs-cli/bug_fix_setdiff_commit_f93d92_2026.08.04.13.38.59/sbwt-rs-cli-0.4.2-f93d92c/image/sbwt-rs-cli_bug_fix_setdiff_commit_f93d92_2026.08.04.13.38.59.sif"
 
     input:
-    tuple val(meta), path(sbwt_a), path(sbwt_b) // sbwt_a - sbwt_b
+    // stageAs required: every SBWT_BUILD output is named unitigs-k${kmer_size}.sbwt
+    // regardless of species/lineage/group, so sbwt_a and sbwt_b routinely arrive
+    // with the same basename -- without distinct stageAs names Nextflow can't
+    // stage both into the task dir ("input file name collision").
+    tuple val(meta), path(sbwt_a, stageAs: 'a.sbwt'), path(sbwt_b, stageAs: 'b.sbwt') // sbwt_a - sbwt_b
 
     output:
     tuple val(meta), path(diff_index), emit: index
@@ -99,6 +112,6 @@ process SBWT_DIFFERENCE {
     diff_index = "${meta.ID}.sbwt"
     def low_ram_flag = params.sbwt_diff_low_ram ? "--low-ram" : "" // peak-RAM optimization only, not a correctness fix
     """
-    sbwt difference ${sbwt_a} ${sbwt_b} -o ${diff_index} -t ${task.cpus} -v ${low_ram_flag}
+    sbwt difference a.sbwt b.sbwt -o ${diff_index} -t ${task.cpus} -v ${low_ram_flag}
     """
 }

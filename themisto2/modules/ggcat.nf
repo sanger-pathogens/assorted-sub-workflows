@@ -1,8 +1,16 @@
 process GGCAT {
     tag "${meta.ID}"
     label 'cpu_32'
-    label 'mem_64'
-    label 'time_queue_from_small'
+    label "mem_8"
+    label 'time_queue_from_normal'
+
+    // Only request /tmp space if /tmp is being used (assumes TMPDIR is not set)
+    if (!params.temp_dir || params.temp_dir.startsWith("/tmp")) {
+        label 'request_temp'
+    }
+
+    // scratch used for fast node-local temp storage
+    scratch true
 
     container "quay.io/biocontainers/ggcat:2.2.0--hf1b6044_0"
 
@@ -29,9 +37,8 @@ process GGCAT {
     // Cap at 95% of the allocated memory -- LSF can kill the job for exceeding its
     // limit even if ggcat asks for exactly what was granted (scheduler overhead eats
     // a little of that headroom), so leave a safety margin.
-    // TODO: if the fixed 'mem_64' label ever proves too small for real data (actual
-    // OOM-kill, not speculation), see kraken2bracken.config's estimate_kraken_mem()
-    // for a pattern that sizes the request from real input + escalates on retry.
+    // TODO: mem_8 escalates to 16/32.GB on retry -- if that's ever not enough,
+    // see kraken2bracken.config's estimate_kraken_mem() for input-based sizing.
     def mem_gb = Math.floor(task.memory.toGiga() * 0.95) as int
     """
     mkdir -p ${temp_dir}

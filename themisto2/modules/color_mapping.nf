@@ -2,7 +2,7 @@ process COLOR_MAPPING {
     tag "${meta.ID}"
     label 'cpu_1'
     label 'mem_2'
-    label 'time_queue_from_small'
+    label 'time_30m'
 
     container 'quay.io/sangerpathogens/pandas:2.2.1'
 
