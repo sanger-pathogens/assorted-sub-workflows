@@ -43,8 +43,7 @@
       "temp_dir": {
         "default": "",
         "help_text": "Shared scratch root for GGCAT/SBWT (and future set_diff_calculations.nf) temp/working dirs. Optional -- falls back to a task-local work directory per tool, which is fine at species scale. Only set this to a Lustre scratch path with confirmed free space if running at full background-DB scale (ATB/GTDB), which needs terabytes free. Each tool writes under '<temp_dir>/<tool>/' -- assumes only one build runs against a given temp_dir at a time."
-      }
-    },
+      },
       "kmer_size": {
         "default": "31",
         "help_text": "k-mer size used consistently across the GGCAT, SBWT and Themisto2 builds in this subworkflow. Must match the k-mer size of any existing index (e.g. background SBWT/ATB/GTDB) this output will later be compared or set-differenced against."
@@ -53,6 +52,7 @@
         "default": "false",
         "help_text": "Gzip the Themisto2 export's color_sets.txt output. Off by default -- compression is single-threaded and slow at full species scale (~2.3h projected for s_pneumoniae) for no benefit beyond disk space, which hasn't been a constraint."
       }
+    }
   }
 }
 
