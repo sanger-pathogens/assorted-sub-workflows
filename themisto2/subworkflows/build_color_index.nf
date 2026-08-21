@@ -5,9 +5,9 @@ include { GGCAT as GGCAT_CANDIDATE                          } from '../modules/g
 include { SBWT_BUILD as SBWT_BUILD_SPECIES; SBWT_CHECK as SBWT_CHECK_SPECIES } from '../modules/sbwt.nf'
 include { SBWT_BUILD as SBWT_BUILD_GROUP; SBWT_CHECK as SBWT_CHECK_GROUP } from '../modules/sbwt.nf'
 include { SBWT_BUILD as SBWT_BUILD_CANDIDATE; SBWT_CHECK as SBWT_CHECK_CANDIDATE } from '../modules/sbwt.nf'
-include { THEMISTO_BUILD as THEMISTO_BUILD_SPECIES; THEMISTO_STATS as THEMISTO_STATS_SPECIES; THEMISTO_EXPORT as THEMISTO_EXPORT_SPECIES } from '../modules/themisto2.nf'
-include { THEMISTO_BUILD as THEMISTO_BUILD_GROUP; THEMISTO_STATS as THEMISTO_STATS_GROUP; THEMISTO_EXPORT as THEMISTO_EXPORT_GROUP } from '../modules/themisto2.nf'
-include { THEMISTO_BUILD as THEMISTO_BUILD_CANDIDATE; THEMISTO_STATS as THEMISTO_STATS_CANDIDATE } from '../modules/themisto2.nf'
+include { THEMISTO2_BUILD as THEMISTO2_BUILD_SPECIES; THEMISTO2_STATS as THEMISTO2_STATS_SPECIES; THEMISTO2_EXPORT as THEMISTO2_EXPORT_SPECIES } from '../modules/themisto2.nf'
+include { THEMISTO2_BUILD as THEMISTO2_BUILD_GROUP; THEMISTO2_STATS as THEMISTO2_STATS_GROUP; THEMISTO2_EXPORT as THEMISTO2_EXPORT_GROUP } from '../modules/themisto2.nf'
+include { THEMISTO2_BUILD as THEMISTO2_BUILD_CANDIDATE; THEMISTO2_STATS as THEMISTO2_STATS_CANDIDATE } from '../modules/themisto2.nf'
 include { CANDIDATE_FILTER; CANDIDATE_COLOR_LIST            } from '../modules/lineage_index_filtering.nf'
 include { validate_parameters                               } from '../modules/validate_parameters.nf'
 
@@ -78,11 +78,11 @@ workflow BUILD_COLOR_INDEX {
     | join(checked_index)
     | set { themisto_build_input }
 
-    THEMISTO_BUILD_SPECIES(themisto_build_input)
-    THEMISTO_STATS_SPECIES(THEMISTO_BUILD_SPECIES.out.index)
+    THEMISTO2_BUILD_SPECIES(themisto_build_input)
+    THEMISTO2_STATS_SPECIES(THEMISTO2_BUILD_SPECIES.out.index)
 
     // Step 06 - export the index
-    THEMISTO_EXPORT_SPECIES(THEMISTO_STATS_SPECIES.out.index)
+    THEMISTO2_EXPORT_SPECIES(THEMISTO2_STATS_SPECIES.out.index)
 
 
     // ===================================================================
@@ -131,9 +131,9 @@ workflow BUILD_COLOR_INDEX {
     | join(lineage_checked_index)
     | set { lineage_themisto_build_input }
 
-    THEMISTO_BUILD_GROUP(lineage_themisto_build_input)
-    THEMISTO_STATS_GROUP(THEMISTO_BUILD_GROUP.out.index)
-    THEMISTO_EXPORT_GROUP(THEMISTO_STATS_GROUP.out.index)
+    THEMISTO2_BUILD_GROUP(lineage_themisto_build_input)
+    THEMISTO2_STATS_GROUP(THEMISTO2_BUILD_GROUP.out.index)
+    THEMISTO2_EXPORT_GROUP(THEMISTO2_STATS_GROUP.out.index)
 
 
     // ===================================================================
@@ -144,9 +144,9 @@ workflow BUILD_COLOR_INDEX {
     // yet a real SBWT index.
     // ===================================================================
 
-    THEMISTO_EXPORT_GROUP.out.unitigs
-    | join(THEMISTO_EXPORT_GROUP.out.color_sets)
-    | join(THEMISTO_EXPORT_GROUP.out.metadata)
+    THEMISTO2_EXPORT_GROUP.out.unitigs
+    | join(THEMISTO2_EXPORT_GROUP.out.color_sets)
+    | join(THEMISTO2_EXPORT_GROUP.out.metadata)
     | join(lineage_label_mapping)
     | set { candidate_filter_input } // tuple(meta, unitigs, color_sets, export_metadata, label_mapping)
 
@@ -166,14 +166,14 @@ workflow BUILD_COLOR_INDEX {
         true
     }
     // stage: 'candidate' -- meta.ID/species stay exactly the lineage's own (required
-    // for SET_DIFF_CALCULATIONS' join), so this is what lets GGCAT/SBWT/THEMISTO_BUILD's
+    // for SET_DIFF_CALCULATIONS' join), so this is what lets GGCAT/SBWT/THEMISTO2_BUILD's
     // shared publishDir tell this rebuild's output apart from that lineage's own.
     | map { meta, fasta -> [meta + [stage: 'candidate'], fasta] }
     | set { candidate_fasta_nonempty }
 
     // Step 4a (per core_catchall_filter.py's docstring) - rebuild the filtered
     // candidate FASTA into a real index. CANDIDATE_COLOR_LIST wraps it as a one-line
-    // colour-list file first -- GGCAT/THEMISTO_BUILD expect that shape (a list of
+    // colour-list file first -- GGCAT/THEMISTO2_BUILD expect that shape (a list of
     // input file paths, one colour per line), not a raw sequences FASTA directly.
     CANDIDATE_COLOR_LIST(candidate_fasta_nonempty)
 
@@ -191,15 +191,15 @@ workflow BUILD_COLOR_INDEX {
     | set { candidate_checked_index } // tuple(meta, sbwt, lcs)
 
     // QC gate only, not a data source -- confirms Themisto2 can build a structurally
-    // sound index from the rebuild and reports sane counts. No THEMISTO_EXPORT_CANDIDATE:
+    // sound index from the rebuild and reports sane counts. No THEMISTO2_EXPORT_CANDIDATE:
     // candidate_index only ever feeds sbwt difference downstream, which never touches
     // exported unitigs/color_sets, so exporting them would be wasted compute.
     CANDIDATE_COLOR_LIST.out.file_colors
     | join(candidate_checked_index)
     | set { candidate_themisto_build_input }
 
-    THEMISTO_BUILD_CANDIDATE(candidate_themisto_build_input)
-    THEMISTO_STATS_CANDIDATE(THEMISTO_BUILD_CANDIDATE.out.index)
+    THEMISTO2_BUILD_CANDIDATE(candidate_themisto_build_input)
+    THEMISTO2_STATS_CANDIDATE(THEMISTO2_BUILD_CANDIDATE.out.index)
 
     emit:
     // Only the SBWT indexes set_diff_calculations.nf actually needs. The species
