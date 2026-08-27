@@ -8,6 +8,8 @@ include { BWA_INDEX;
 include { MAPPED_READS_TO_FASTQ      } from './modules/samtools.nf'
 include { QUAST                      } from './modules/quast.nf'
 
+include { GET_LABEL                  } from  '../../pipeline_resource_optimisation/get_label.nf'
+
 /*
 #############################################################################################################################################################
 #
@@ -38,7 +40,12 @@ workflow METAWRAP_ASSEMBLE {
     
 
     if (params.metaspades) {
-        METASPADES(reads_ch)
+        GET_LABEL()
+
+        label_ch = GET_LABEL.out.label_file
+            .map { file -> file.text.trim() + " MB" }
+
+        METASPADES(reads_ch, label_ch)
         | REMOVE_SMALL_CONTIGS
         REMOVE_SMALL_CONTIGS.out.long_contigs.set { metaspades_scaffolds }
 

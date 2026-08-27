@@ -1,13 +1,14 @@
 process METASPADES {
     tag "${meta.ID}"
     label 'cpu_8'
-    label 'mem_32'
+    memory "${MEMORY_LABEL}"
     label 'time_12'
 
     container 'quay.io/biocontainers/spades:3.15.5--h95f258a_1'
 
     input:
     tuple val(meta), path(first_read), path(second_read)
+    val(MEMORY_LABEL)
 
     output:
     tuple val(meta), path(assembly), emit: scaffolds
