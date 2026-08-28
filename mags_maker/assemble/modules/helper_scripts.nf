@@ -51,6 +51,8 @@ process SORT_CONTIGS {
     label 'mem_100M'
     label 'time_12'
 
+    publishDir mode: 'copy', path: "${params.outdir}/${meta.ID}/pre_binning", saveAs: { filename -> "${meta.ID}_unbinned_contigs.fasta" }, enabled: params.publish_unbinned_contigs
+
     container 'quay.io/sangerpathogens/python-curl:3.11'
 
     input:

@@ -13,6 +13,7 @@
 include { SYLPH_SKETCH 
           SYLPH_PROFILE
           SYLPHTAX_TAXPROF } from './modules/sylph.nf'
+include { CALC_DIVERSITY    } from './modules/diversity.nf'
 
 //
 // SUBWORKFLOWS
@@ -57,6 +58,13 @@ workflow TAXO_PROFILE {
     } else {
         ch_kraken2_style_bracken_reports = channel.empty()
         ch_mpa_abundance_reports = channel.empty()
+    }
+    if (params.calculate_alpha_diverity) {
+        sylph_report
+        | map { meta, file -> file.toString() }   
+        | collectFile(name: 'sylph_profiles.txt', newLine: true)
+        | set{ diversity_in }
+        CALC_DIVERSITY(diversity_in)      
     }
 
     emit:
