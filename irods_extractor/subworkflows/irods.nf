@@ -38,6 +38,7 @@ workflow IRODS_EXTRACTOR {
         }
         | set { downloaded_objects }
 
+        // Extract the Illumina fastqs from the CRAMs and publish them to the output directory
         CRAM_EXTRACT(downloaded_objects.illumina_to_unpack)
 
         // Establish the read type and branch the channel
@@ -50,7 +51,7 @@ workflow IRODS_EXTRACTOR {
         }
         | set { downloaded_ont_objects }
 
-        // Publish the reads and squiggles
+        // Publish the reads and/or squiggles to the output directory
         PUBLISH_FASTQ(downloaded_ont_objects.ont_format_fastq)
         PUBLISH_UNBASECALLED(downloaded_ont_objects.ont_format_unbasecalled)
 
