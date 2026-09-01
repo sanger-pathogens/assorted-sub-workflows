@@ -10,6 +10,7 @@ include { THEMISTO2_BUILD as THEMISTO2_BUILD_GROUP; THEMISTO2_STATS as THEMISTO2
 include { THEMISTO2_BUILD as THEMISTO2_BUILD_CANDIDATE; THEMISTO2_STATS as THEMISTO2_STATS_CANDIDATE } from '../modules/themisto2.nf'
 include { CANDIDATE_FILTER; CANDIDATE_COLOR_LIST            } from '../modules/lineage_index_filtering.nf'
 include { validate_parameters                               } from '../modules/validate_parameters.nf'
+include { CHECKPOINT_COUNT                                  } from '../modules/checkpoint_count.nf'
 
 workflow BUILD_COLOR_INDEX {
     take:
@@ -154,10 +155,28 @@ workflow BUILD_COLOR_INDEX {
     THEMISTO2_BUILD_CANDIDATE(candidate_themisto_build_input)
     THEMISTO2_STATS_CANDIDATE(THEMISTO2_BUILD_CANDIDATE.out.index)
 
+    // ============ Checkpoint counts ============
+    // Side-channel only: tap each key stage's output, never joined back in.
+    // stage keys sort into funnel order (A_ species -> B_ lineage -> E_ candidate).
+    Channel.empty()
+    | mix( COLOR_MAPPING.out.file_colors.map        { meta, f -> [meta, 'A_species_02_colorfile', 'colorfile', f] } )
+    | mix( GGCAT_SPECIES.out.unitigs.map            { meta, f -> [meta, 'A_species_03_ggcat_unitigs', 'fasta', f] } )
+    | mix( THEMISTO2_BUILD_SPECIES.out.index.map    { meta, f -> [meta, 'A_species_05_themisto_index', 'themisto', f] } )
+    | mix( THEMISTO2_EXPORT_SPECIES.out.unitigs.map { meta, f -> [meta, 'A_species_06_export_unitigs', 'fasta', f] } )
+    | mix( GGCAT_GROUP.out.unitigs.map              { meta, f -> [meta, 'B_lineage_03_ggcat_unitigs', 'fasta', f] } )
+    | mix( THEMISTO2_BUILD_GROUP.out.index.map      { meta, f -> [meta, 'B_lineage_05_themisto_index', 'themisto', f] } )
+    | mix( THEMISTO2_EXPORT_GROUP.out.unitigs.map   { meta, f -> [meta, 'B_lineage_06_export_unitigs', 'fasta', f] } )
+    | mix( CANDIDATE_FILTER.out.unitigs.map         { meta, f -> [meta, 'E_candidate_07_core_filter', 'fasta', f] } )
+    | mix( THEMISTO2_BUILD_CANDIDATE.out.index.map  { meta, f -> [meta, 'E_candidate_07_rebuilt_index', 'themisto', f] } )
+    | set { checkpoint_inputs }
+
+    CHECKPOINT_COUNT(checkpoint_inputs)
+
     emit:
     // Public contract = only the SBWT indexes set_diff_calculations.nf needs. The species
     // Themisto2 export still runs above (lineage_specificity_score.py will need it).
     sbwt_index       = checked_index           // tuple(meta, sbwt, lcs) -- species-wide (A)
     lineage_index    = lineage_checked_index   // tuple(meta, sbwt, lcs), meta.species set -- B
     candidate_index  = candidate_checked_index // tuple(meta, sbwt, lcs), meta.species set -- E
+    checkpoints      = CHECKPOINT_COUNT.out.row // tuple(meta, row_tsv) -- per-stage count rows
 }

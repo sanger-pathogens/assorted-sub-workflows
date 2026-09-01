@@ -13,6 +13,7 @@ include { SBWT_DIFFERENCE as SBWT_DIFFERENCE_LIN_CAND; SBWT_CHECK as SBWT_CHECK_
 include { SBWT_DIFFERENCE as SBWT_DIFFERENCE_MARKERS; SBWT_CHECK as SBWT_CHECK_MARKERS } from '../modules/sbwt.nf'
 // Verifies a user-supplied --bg_excl_index loads before it's used below.
 include { SBWT_CHECK as SBWT_CHECK_BACKGROUND } from '../modules/sbwt.nf'
+include { CHECKPOINT_COUNT_SBWT } from '../modules/checkpoint_count.nf'
 
 workflow SET_DIFF_CALCULATIONS {
     take:
@@ -107,11 +108,24 @@ workflow SET_DIFF_CALCULATIONS {
     SBWT_DIFFERENCE_MARKERS(markers_input)
     SBWT_CHECK_MARKERS(SBWT_DIFFERENCE_MARKERS.out.index)
 
+    // ============ Checkpoint counts ============
+    // Distinct k-mers surviving each set-diff stage (see build_color_index.nf).
+    // Side-channel only. stage keys continue the funnel order after A/B/E.
+    Channel.empty()
+    | mix( bg_excl_checked.map               { meta, sbwt -> [meta, 'C_bg_excl_08_diff', sbwt] } )
+    | mix( SBWT_CHECK_XLIN_BG.out.index.map  { meta, sbwt -> [meta, 'D_xlin_bg_08_diff', sbwt] } )
+    | mix( SBWT_CHECK_LIN_CAND.out.index.map { meta, sbwt -> [meta, 'F_lin_cand_08_diff', sbwt] } )
+    | mix( SBWT_CHECK_MARKERS.out.index.map  { meta, sbwt -> [meta, 'G_markers_08_diff', sbwt] } )
+    | set { checkpoint_inputs }
+
+    CHECKPOINT_COUNT_SBWT(checkpoint_inputs)
+
     emit:
     bg_excl  = bg_excl_checked                // C -- background_exclusion
     xlin_bg  = SBWT_CHECK_XLIN_BG.out.index   // D -- cross_lineage_background
     lin_cand = SBWT_CHECK_LIN_CAND.out.index  // F -- lineage_specific_candidates
     markers  = SBWT_CHECK_MARKERS.out.index   // G -- final_candidate_markers
+    checkpoints = CHECKPOINT_COUNT_SBWT.out.row // tuple(meta, row_tsv) -- per-stage count rows
 }
 
 // TODO: G_gtdb (markers - a GTDB-based bg_excl) -- add once GTDB is built.
