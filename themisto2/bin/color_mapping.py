@@ -8,6 +8,8 @@ assemblies, and prepares index input files organized in subdirectories:
   - index_target_group/<group>/ : per-group indexes (if --target-groups provided)
 """
 
+from __future__ import annotations
+
 import argparse
 import json
 import os
@@ -85,17 +87,36 @@ def match_assemblies(metadata, assembly_input, assembly_suffix, sample_col, grou
 
 
 def write_index_files(
-    metadata,
-    output_dir,
-    index_type,
-    group_name,
-    group_label,
-    sample_col,
-    nan_label=None,
-    no_assembly=None,
-    on_disk_no_metadata=None,
-):
-    """Write file_colors_input.txt, label_mapping.tsv and stats.json to the appropriate subdirectory."""
+    metadata: pd.DataFrame,
+    output_dir: Path,
+    index_type: str,
+    group_name: str | None,
+    group_label: str,
+    sample_col: str,
+    nan_label: int | None = None,
+    no_assembly: int | None = None,
+    on_disk_no_metadata: int | None = None,
+) -> None:
+    """Write file_colors_input.txt, label_mapping.tsv and stats.json to the appropriate subdirectory.
+
+    Args:
+        metadata: Rows for this index only (already filtered/sorted), with a
+            ``file_path`` column plus ``sample_col`` and ``group_label``.
+        output_dir: Root output dir; files go under ``index_species/`` or
+            ``index_target_group/<group_name>/``.
+        index_type: ``"species"`` for the whole-species index, anything else
+            for a per-group index.
+        group_name: Target-group label for a per-group index; ``None`` for the
+            species index.
+        group_label: Metadata column used for grouping/labelling.
+        sample_col: Metadata column holding sample identifiers.
+        nan_label: Count of samples dropped for a missing group label. Only
+            meaningful species-wide; pass ``None`` for a per-group index so it
+            is omitted from stats.json (not attributable to one group).
+        no_assembly: Count of samples dropped for having no assembly on disk.
+        on_disk_no_metadata: Count of assemblies on disk with no metadata row.
+            Species-wide only; ``None`` for a per-group index.
+    """
     if index_type == "species":
         index_dir = output_dir / "index_species"
         tag = "species"
