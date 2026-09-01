@@ -1,32 +1,18 @@
 {
   "pipeline": "themisto2",
   "params": {
-    "Input options preprocessed with color_mapping.nf": {
-      "assembly_input": {
-        "default": "",
-        "help_text": "A directory of assembly FASTA files, or a .txt file listing one assembly path per line. Which kind it is gets detected automatically."
-      },
+    "Colour mapping (color_mapping.nf) - run-wide options": {
       "assembly_suffix": {
         "default": ".contigs.fasta",
-        "help_text": "Suffix appended to each sample_col value to form the assembly filename. Only used with assembly_dir."
-      },
-      "metadata": {
-        "default": "",
-        "help_text": "tsv or csv file containing metadata for each genome assembly. Must contain a column to group the assemblies into colour sets. The column name must be specified in the 'group_label' parameter."
+        "help_text": "Suffix appended to each sample_col value to form the assembly filename. Only used when a species' assembly path is a directory."
       },
       "sample_col": {
         "default": "Sample_ID",
-        "help_text": "Column name in metadata containing sample identifiers, matched against assembly filenames."
+        "help_text": "Column name in the metadata containing sample identifiers, matched against assembly filenames."
       },
       "group_label": {
         "default": "",
-        "help_text": "Column name in the metadata file to use for grouping genome assemblies into colour sets."
-      }
-    },
-    "User-selected lineages-specific index input files": {
-      "target_groups": {
-        "default": "",
-        "help_text": "Comma-separated label(s), e.g. GPSC1,GPSC2, to also build lineage-scoped colour indexes for, alongside the species-wide one. Leave empty for species-wide only. Written to disk but not yet built into a Themisto2 index -- see README."
+        "help_text": "Column name in the metadata file used to group genome assemblies into colour sets. The per-species metadata file, assembly path and target_groups come in on BUILD_COLOR_INDEX's samples channel, not as params."
       }
     },
     "Step08 - Set-difference calculations (setdiff_filter.nf)": {

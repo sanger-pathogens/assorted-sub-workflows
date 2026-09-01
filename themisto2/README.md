@@ -6,17 +6,20 @@ Nextflow DSL2 sub-workflow library (no `main.nf` of its own) providing `BUILD_CO
 
 ### Inputs
 
-- `metadata_ch`: channel emitting a single metadata file path.
-- `assembly_ch`: channel emitting a single assembly directory or paths-list file (matching whichever `--assembly_input` points at).
+- `samples_ch`: one item per species -- `tuple(meta, metadata, assembly_input)`:
+  - `meta.ID` -- species name (the output folder, and the join key between `species_index` and `lineage_index`)
+  - `meta.target_groups` -- comma-separated lineage labels for that species (empty/absent = species-wide only)
+  - `metadata` -- that species' metadata table (`.tsv`/`.csv`)
+  - `assembly_input` -- a directory of assembly FASTAs, or a `.txt` file listing one assembly path per line
 
-(Both channels currently only support one metadata/assembly pair per run -- see the `TODO` in [build_color_index.nf](./subworkflows/build_color_index.nf).)
+The parent pipeline builds this channel -- e.g. from a run manifest (see lsmd's [`subworkflows/manifest_parse.nf`](../../subworkflows/manifest_parse.nf)). `--group_label`, `--sample_col` and `--assembly_suffix` stay run-wide.
 
 ### Emitted channels
 
 `BUILD_COLOR_INDEX`'s public contract is narrower than what it computes internally -- only the SBWT indexes `setdiff_filter.nf` actually needs are exposed:
 
 - `sbwt_index`: `tuple(meta, sbwt, lcs)` -- species-wide index.
-- `lineage_index`: `tuple(meta, sbwt, lcs)`, `meta.species` set -- one item per `--target_groups` lineage.
+- `lineage_index`: `tuple(meta, sbwt, lcs)`, `meta.species` set -- one item per requested lineage (`meta.target_groups`).
 - `candidate_index`: `tuple(meta, sbwt, lcs)`, `meta.species` set -- one item per lineage that survived candidate filtering.
 
 The species-wide Themisto2 build/export and `COLOR_MAPPING`'s species `label_mapping`/`stats` still run internally (needed by [lineage_specificity_score.py](./bin/lineage_specificity_score.py), a diagnostic script not yet wired into this subworkflow) -- they're just not part of the emitted contract.
@@ -32,7 +35,7 @@ Computes step08's index-native set-difference chain (`08_set_difference_filterin
 | step08 | stage name (code) | formula | produced by | process aliases | emit name |
 | --- | --- | --- | --- | --- | --- |
 | A | `species_index` | — (built, not diffed) | `BUILD_COLOR_INDEX` (species-wide) | `SBWT_BUILD_SPECIES`, `SBWT_CHECK_SPECIES` | `BUILD_COLOR_INDEX.out.sbwt_index` |
-| B | `lineage_index` | — (built, not diffed) | `BUILD_COLOR_INDEX` (per `--target_groups` lineage) | `SBWT_BUILD_GROUP`, `SBWT_CHECK_GROUP` | `BUILD_COLOR_INDEX.out.lineage_index` |
+| B | `lineage_index` | — (built, not diffed) | `BUILD_COLOR_INDEX` (per requested lineage) | `SBWT_BUILD_GROUP`, `SBWT_CHECK_GROUP` | `BUILD_COLOR_INDEX.out.lineage_index` |
 | C | `bg_excl` | background − `species_index` | `SET_DIFF_CALCULATIONS` | `SBWT_DIFFERENCE_BG_EXCL`, `SBWT_CHECK_BG_EXCL` | `.out.bg_excl` |
 | D | `xlin_bg` | `species_index` − `lineage_index` | `SET_DIFF_CALCULATIONS` | `SBWT_DIFFERENCE_XLIN_BG`, `SBWT_CHECK_XLIN_BG` | `.out.xlin_bg` |
 | E | `candidate_index` | — (built, not diffed) | `BUILD_COLOR_INDEX` ([core_catchall_filter.py](./bin/core_catchall_filter.py) filtering + GGCAT/SBWT/Themisto2-build-stats rebuild, per lineage) | `SBWT_BUILD_CANDIDATE`, `SBWT_CHECK_CANDIDATE` | `BUILD_COLOR_INDEX.out.candidate_index` |

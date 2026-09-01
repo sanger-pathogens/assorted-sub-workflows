@@ -13,18 +13,20 @@ include { validate_parameters                               } from '../modules/v
 
 workflow BUILD_COLOR_INDEX {
     take:
-    metadata_ch
-    assembly_ch
+    // One pre-paired item per species: [ meta, metadata, assembly_input ]
+    //   meta.ID            -- species name; the output folder and the join key
+    //                         between species_index and lineage_index
+    //   meta.target_groups -- comma-separated lineage labels for this species
+    //                         (empty/absent = species-wide only)
+    // The caller pairs metadata+assembly and sets per-species target_groups (see
+    // lsmd subworkflows/manifest_parse.nf) -- replaces the old combine() cross-
+    // multiply and the single global params.target_groups.
+    samples_ch
 
     main:
     validate_parameters()
 
-    // TODO: single-run only -- combine() cross-multiplies with >1 metadata/assembly,
-    // and target_groups is one global param. Manifest/samplesheet refactor: PAT-3553 / PAT-3569.
-    metadata_ch
-    | map { metadata -> [["ID": metadata.baseName], metadata] }
-    | combine(assembly_ch)
-    | set { color_mapping_input }
+    color_mapping_input = samples_ch // [meta, metadata, assembly_input]
 
     // Step 02 - metadata + assemblies -> Themisto colour-file format
     COLOR_MAPPING(color_mapping_input)

@@ -23,7 +23,7 @@ process COLOR_MAPPING {
     def assembly_arg = assembly_input.isDirectory() \
         ? "--assembly-dir ${assembly_input} --assembly-suffix ${params.assembly_suffix}" \
         : "--assembly-paths ${assembly_input} --assembly-suffix ${params.assembly_suffix}"
-    def target_groups_arg = params.target_groups ? "--target-groups ${params.target_groups}" : ""
+    def target_groups_arg = meta.target_groups ? "--target-groups ${meta.target_groups}" : ""
     """
     ${moduleDir}/../bin/color_mapping.py \\
         --metadata ${metadata} \\
