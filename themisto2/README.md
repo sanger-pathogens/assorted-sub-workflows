@@ -22,7 +22,7 @@ The parent pipeline builds this channel -- e.g. from a run manifest (see lsmd's 
 - `lineage_index`: `tuple(meta, sbwt, lcs)`, `meta.species` set -- one item per requested lineage (`meta.target_groups`).
 - `candidate_index`: `tuple(meta, sbwt, lcs)`, `meta.species` set -- one item per lineage that survived candidate filtering.
 
-The species-wide Themisto2 build/export and `COLOR_MAPPING`'s species `label_mapping`/`stats` still run internally (needed by [lineage_specificity_score.py](./bin/lineage_specificity_score.py), a diagnostic script not yet wired into this subworkflow) -- they're just not part of the emitted contract.
+The species-wide Themisto2 build/export and `COLOR_MAPPING`'s species `label_mapping`/`stats` still run internally -- step07 ([lineage_specificity_filter.py](./bin/lineage_specificity_filter.py)) reads them -- they're just not part of the emitted contract.
 
 ### Dependencies
 

@@ -15,6 +15,20 @@
         "help_text": "Column name in the metadata file used to group genome assemblies into colour sets. The per-species metadata file, assembly path and target_groups come in on BUILD_COLOR_INDEX's samples channel, not as params."
       }
     },
+    "Step07 - Lineage-specificity candidate filtering (lineage_specificity_filter.py)": {
+      "candidate_min_freq": {
+        "default": "core",
+        "help_text": "Within-lineage presence-fraction cutoff a unitig must clear: 'core' (>=0.95), 'relaxed' (>=0.5), 'catchall' (>0.0), or a literal fraction e.g. '0.8'."
+      },
+      "candidate_min_genome_count": {
+        "default": "5",
+        "help_text": "Absolute lineage-genome-count floor, on top of candidate_min_freq. Also the size below which a sister lineage is ignored when computing specificity_max_outside."
+      },
+      "specificity_max_outside": {
+        "default": "0.05",
+        "help_text": "Ceiling on the MAX presence fraction across any single other lineage (not a pooled average across all of them -- that hides a unitig concentrated in one sister lineage). null = not applied, i.e. core-only. 0.05 (the PAT-3570 default) also requires lineage-specificity."
+      }
+    },
     "Step08 - Set-difference calculations (setdiff_filter.nf)": {
       "bg_index": {
         "default": "/data/pam/team230/sm71/scratch/gps_project/04_sbwt_kmer_index/ATB/ATB_all.sbwt",
