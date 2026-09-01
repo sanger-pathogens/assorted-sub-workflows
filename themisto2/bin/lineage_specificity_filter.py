@@ -264,20 +264,21 @@ def parse_fasta_records(path):
 
 
 def write_specificity_tsv(unitigs_path, within_frac, max_outside, max_outside_lineage, names, path):
+    """Write specificity scores as percentages. Skip out-of-bounds unitigs."""
     n = len(within_frac)
     with open(path, "w") as tsv:
         tsv.write("unitig_id\twithin_pct\toutside_pct\toutside_lineage\n")
         for header, csid, _ in parse_fasta_records(unitigs_path):
             uid = header[1:].split()[0].split("=", 1)[-1]
             if csid < n:
-                tsv.write(
-                    f"{uid}\t{within_frac[csid]:.6f}\t{max_outside[csid]:.6f}\t{names[max_outside_lineage[csid]]}\n"
-                )
-            else:
-                tsv.write(f"{uid}\t0.000000\t0.000000\t-\n")
+                w = within_frac[csid] * 100
+                o = max_outside[csid] * 100
+                lin = names[int(max_outside_lineage[csid])]
+                tsv.write(f"{uid}\t{w:.2f}\t{o:.2f}\t{lin}\n")
 
 
 def filter_and_write(unitigs_path, keep, fasta_path, tsv_path, within_frac, max_outside, max_outside_lineage, names):
+    """Filter unitigs, write FASTA + TSV with filtering decisions."""
     n = len(keep)
     total = kept = 0
     with open(fasta_path, "w") as fa, open(tsv_path, "w") as tsv:
@@ -286,10 +287,10 @@ def filter_and_write(unitigs_path, keep, fasta_path, tsv_path, within_frac, max_
             total += 1
             uid = header[1:].split()[0].split("=", 1)[-1]
             ok = csid < n and keep[csid]
-            w = within_frac[csid] if csid < n else 0.0
-            o = max_outside[csid] if csid < n else 0.0
-            lin = names[max_outside_lineage[csid]] if csid < n else "-"
-            tsv.write(f"{uid}\t{w:.6f}\t{o:.6f}\t{lin}\t{int(bool(ok))}\n")
+            w = (within_frac[csid] * 100) if csid < n else 0.0
+            o = (max_outside[csid] * 100) if csid < n else 0.0
+            lin = names[int(max_outside_lineage[csid])] if csid < n else "-"
+            tsv.write(f"{uid}\t{w:.2f}\t{o:.2f}\t{lin}\t{int(bool(ok))}\n")
             if ok:
                 kept += 1
                 fa.write(header + "\n" + "\n".join(seq) + "\n")
@@ -299,6 +300,7 @@ def filter_and_write(unitigs_path, keep, fasta_path, tsv_path, within_frac, max_
 def write_stats(
     lineage_id, min_freq_label, min_freq, min_genome_count, max_outside_thresh, lineage_size, total, kept, path
 ):
+    """Write filtering statistics."""
     lines = [
         f"{'Lineage':<24} : {lineage_id}",
         f"{'Lineage genome count':<24} : {lineage_size:,}",
