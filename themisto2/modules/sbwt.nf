@@ -32,8 +32,8 @@ process SBWT_BUILD {
     tuple val(meta), path(sbwt_index), path(lcs_index), emit: index
 
     script:
-    sbwt_index   = "unitigs-k${params.kmer_size}.sbwt"
-    lcs_index    = "unitigs-k${params.kmer_size}.lcs"
+    sbwt_index   = "unitigs-k${params.color_index_kmer_size}.sbwt"
+    lcs_index    = "unitigs-k${params.color_index_kmer_size}.lcs"
     // Per-meta.ID subpath -- see ggcat.nf's temp_dir for why (shared params.temp_dir
     // path would otherwise collide across concurrent species/lineage/candidate tasks).
     def temp_dir = params.temp_dir ? "${params.temp_dir}/sbwt/${meta.ID}" : "sbwt_temp"
@@ -51,10 +51,10 @@ process SBWT_BUILD {
     mkdir -p ${temp_dir}
     sbwt build \\
         -i ${unitigs_fna} \\
-        -o unitigs-k${params.kmer_size} \\
+        -o unitigs-k${params.color_index_kmer_size} \\
         -r \\
         -l \\
-        -k ${params.kmer_size} \\
+        -k ${params.color_index_kmer_size} \\
         -m ${mem_gb} \\
         -t ${task.cpus} \\
         --temp-dir ${temp_dir}
@@ -112,7 +112,7 @@ process SBWT_DIFFERENCE {
     container "/data/pam/installs/packages/sbwt-rs-cli/bug_fix_setdiff_commit_f93d92_2026.08.04.13.38.59/sbwt-rs-cli-0.4.2-f93d92c/image/sbwt-rs-cli_bug_fix_setdiff_commit_f93d92_2026.08.04.13.38.59.sif"
 
     input:
-    // stageAs required: every SBWT_BUILD output is named unitigs-k${kmer_size}.sbwt
+    // stageAs required: every SBWT_BUILD output is named unitigs-k${color_index_kmer_size}.sbwt
     // regardless of species/lineage/group, so sbwt_a and sbwt_b routinely arrive
     // with the same basename -- without distinct stageAs names Nextflow can't
     // stage both into the task dir ("input file name collision").

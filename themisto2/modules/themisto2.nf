@@ -26,7 +26,7 @@ process THEMISTO2_BUILD {
 
     script:
     index_thm2 = "index.thm2"
-    index_build_params = "--file-colors ${file_colors_input} -o ${index_thm2} -s ${sbwt_index} -l ${lcs_index} -k ${params.kmer_size} -t ${task.cpus}"
+    index_build_params = "--file-colors ${file_colors_input} -o ${index_thm2} -s ${sbwt_index} -l ${lcs_index} -k ${params.color_index_kmer_size} -t ${task.cpus}"
 
     // User-provided temp storage if given otherwise use tmp workdir (since scratch is enabled).
     // Per-meta.ID subpath -- see sbwt.nf's temp_dir for why (a shared params.temp_dir
