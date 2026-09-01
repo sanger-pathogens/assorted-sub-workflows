@@ -12,25 +12,24 @@ process COLOR_MAPPING {
     tuple val(meta), path(metadata), path(assembly_input)
 
     output:
+    // Species-wide only. Per-lineage colour files used to be built here for Index B;
+    // Index B is gone (PAT-3570) and step 07 filtering reads the species-wide export,
+    // so meta.target_groups no longer reaches this step -- it selects lineages in
+    // LINEAGE_SPECIFICITY_FILTER instead.
     tuple val(meta), path("index_species/species_file_colors_input.txt"), emit: file_colors
     tuple val(meta), path("index_species/species_label_mapping.tsv"),     emit: label_mapping
     tuple val(meta), path("index_species/species_stats.json"),            emit: stats
-    tuple val(meta), path("index_target_group/*/*_file_colors_input.txt"), emit: target_group_file_colors,   optional: true
-    tuple val(meta), path("index_target_group/*/*_label_mapping.tsv"),     emit: target_group_label_mapping, optional: true
-    tuple val(meta), path("index_target_group/*/*_stats.json"),            emit: target_group_stats,         optional: true
 
     script:
     def assembly_arg = assembly_input.isDirectory() \
         ? "--assembly-dir ${assembly_input} --assembly-suffix ${params.assembly_suffix}" \
         : "--assembly-paths ${assembly_input} --assembly-suffix ${params.assembly_suffix}"
-    def target_groups_arg = meta.target_groups ? "--target-groups ${meta.target_groups}" : ""
     """
     ${moduleDir}/../bin/color_mapping.py \\
         --metadata ${metadata} \\
         --sample-col ${params.sample_col} \\
         --group-label ${params.group_label} \\
         ${assembly_arg} \\
-        ${target_groups_arg} \\
         --output_dir .
     """
 }
