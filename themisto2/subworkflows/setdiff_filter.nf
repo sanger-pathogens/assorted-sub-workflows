@@ -27,12 +27,10 @@ workflow SET_DIFF_CALCULATIONS {
     candidate_index_ch
 
     main:
-    // bg_excl (C) = background - species. --bg_excl_index reuses an already-built
-    // bg_excl and skips the hugemem diff against --bg_index; otherwise it's computed
-    // for real below. Both branches converge on bg_excl_checked, one entry per species.
+    // bg_excl (C) = background - species. --bg_excl_index reuses a pre-built one and
+    // skips the hugemem --bg_index diff. Both branches -> bg_excl_checked, one per species.
     if (params.bg_excl_index) {
-        // Tag with the file's own basename so publishDir/output names identify which
-        // background was used, since bg_excl_index is arbitrary and unverified.
+        // Tag with the file basename so output names show which background was used.
         def bg_excl_name = file(params.bg_excl_index).baseName
 
         SBWT_CHECK_BACKGROUND(
@@ -116,6 +114,4 @@ workflow SET_DIFF_CALCULATIONS {
     markers  = SBWT_CHECK_MARKERS.out.index   // G -- final_candidate_markers
 }
 
-// TODO: G_gtdb (markers - a GTDB-based bg_excl) is still out of scope -- add a
-// second background/combine pair once GTDB is built and the "replaces vs.
-// supplements ATB" question from 08_set_difference_filtering.md is settled.
+// TODO: G_gtdb (markers - a GTDB-based bg_excl) -- add once GTDB is built.

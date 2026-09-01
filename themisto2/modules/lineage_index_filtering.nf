@@ -9,28 +9,16 @@ process CANDIDATE_FILTER {
     publishDir mode: 'copy', path: "${params.outdir}/candidate_filter/${meta.ID}/"
 
     input:
-    // unitigs/color_sets/export_metadata: this lineage's OWN Themisto2 export
-    // (BUILD_COLOR_INDEX's lineage branch), not the species-wide one -- every
-    // colour in it already is a lineage genome. label_mapping: this lineage's own
-    // color_mapping.py output (index_target_group/<group>/label_mapping.tsv), used only
-    // to read back the lineage ID.
+    // This lineage's OWN Themisto2 export (not the species-wide one); label_mapping
+    // is only read back for the lineage ID.
     tuple val(meta), path(unitigs), path(color_sets), path(export_metadata), path(label_mapping)
 
     output:
-    // Filenames are data-driven ('{lineage_id}_{min_freq_label}_...') -- glob rather
-    // than name them explicitly, since min_freq_label depends on params.candidate_min_freq
-    // (a preset name or a custom 'freqXpY' token) and this process only ever produces
-    // one of each per task.
+    // Data-driven filenames ('{lineage_id}_{min_freq_label}_...') -- glob, one per task.
     tuple val(meta), path("*_candidate_unitigs.fasta"), emit: unitigs
     tuple val(meta), path("*_stats.txt"),                emit: stats
 
     script:
-    // Count and fraction filtering. Drop if min_freq is less than N or if the
-    // fraction of unitigs shared across the genomes in that lineage group is less
-    // than the selected mode chosen.
-    //
-    // --stats-output-dir is always passed for now -- TODO: make this optional via
-    // its own config flag once there's a reason not to always want it.
     """
     ${moduleDir}/../bin/core_catchall_filter.py \\
         --unitigs ${unitigs} \\
@@ -53,13 +41,8 @@ process CANDIDATE_COLOR_LIST {
     container 'quay.io/sangerpathogens/pandas:2.2.1'
 
     input:
-    // GGCAT/THEMISTO2_BUILD expect a colour-list file (genome paths, one per line,
-    // each becoming its own colour), not a raw sequences FASTA -- CANDIDATE_FILTER's
-    // output is the latter, so wrap its own resolved path as a one-line list,
-    // matching color_mapping.py's canonical-absolute-path approach for the same
-    // cross-task-directory reason. One colour is correct here: colour/genome-level
-    // distinction was already consumed by CANDIDATE_FILTER's own size-based
-    // thresholding, nothing left to distinguish by colour at this point.
+    // GGCAT/THEMISTO2_BUILD want a colour-list file (paths, one per line), not a raw
+    // FASTA. Wrap the candidate FASTA's absolute path as a one-line, single-colour list.
     tuple val(meta), path(candidate_fasta)
 
     output:
