@@ -20,6 +20,9 @@ process CHECKPOINT_COUNT {
     label 'mem_2'
     label 'time_30m'
 
+    // Diagnostic side-channel: a broken counter must never fail a real run.
+    errorStrategy 'ignore'
+
     container "quay.io/sangerpathogens/themisto2:0.0.1"
 
     publishDir mode: 'copy', path: "${params.outdir}/checkpoints/rows/"
@@ -68,6 +71,9 @@ process CHECKPOINT_COUNT_SBWT {
     label 'cpu_4'
     label 'mem_2'
     label 'time_30m'
+
+    // Diagnostic side-channel: a broken counter must never fail a real run.
+    errorStrategy 'ignore'
 
     // Same bug-fixed local .sif as the rest of the SBWT_* processes (see sbwt.nf).
     container "/data/pam/installs/packages/sbwt-rs-cli/bug_fix_setdiff_commit_f93d92_2026.08.04.13.38.59/sbwt-rs-cli-0.4.2-f93d92c/image/sbwt-rs-cli_bug_fix_setdiff_commit_f93d92_2026.08.04.13.38.59.sif"
