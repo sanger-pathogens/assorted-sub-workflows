@@ -6,6 +6,11 @@ Reads metadata CSV, sorts by group label column, matches samples to
 assemblies, and prepares index input files organized in subdirectories:
   - index_species/ : whole-species index files
   - index_target_group/<group>/ : per-group indexes (if --target-groups provided)
+
+The metadata layout is not fixed: any CSV/TSV works as long as it has one
+row per genome, a sample-identifier column (--sample-col) and a grouping
+column (--group-label). The grouping column can be any level -- lineage,
+sub-lineage, strain, serotype -- the script does not interpret it.
 """
 
 from __future__ import annotations
