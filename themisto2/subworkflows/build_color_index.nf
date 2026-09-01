@@ -88,6 +88,14 @@ workflow BUILD_COLOR_INDEX {
     }
     | set { candidate_fasta_per_lineage } // tuple(meta, fasta) -- one per lineage, may be empty
 
+    // Fan the per-lineage outputs out the same way fan_out_target_group does above
+    // (meta = [ID: lineage, species: species run ID], needed for the SET_DIFF join) --
+    // here the lineage ID comes from the filename, not a colour-file subdirectory.
+    LINEAGE_SPECIFICITY_FILTER.out.unitigs
+    | flatMap { meta, files ->
+        def file_list = files instanceof List ? files : [files]
+        file_list.collect { f -> [[ID: (f.name - '_candidate_unitigs.fasta'), species: meta.ID], f] }
+    }
     // Empty FASTA = nothing cleared the thresholds -- skip the rebuild for that lineage.
     // log.warn so it shows in the main pipeline log, not just the task work-dir.
     candidate_fasta_per_lineage
