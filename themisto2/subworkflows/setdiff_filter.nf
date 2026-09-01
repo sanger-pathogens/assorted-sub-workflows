@@ -4,12 +4,14 @@
 //
 //   stage    step08  formula
 //   bg_excl  C       background - species_index (A)
-//   xlin_bg  D       species_index (A) - lineage_index (B)
-//   lin_cand F       candidate_index (E) - xlin_bg
-//   markers  G       lin_cand - bg_excl
+//   markers  G       candidate_index (E) - bg_excl
+//
+// The old cross-lineage set-diffs (xlin_bg D = A - lineage_index B; lin_cand F =
+// E - xlin_bg) were removed in PAT-3570: sbwt difference is colour-blind, so
+// E - (A - B) == E exactly whenever E's k-mers are lineage-core (they always are).
+// Cross-lineage specificity is now a differential-frequency filter at step 07
+// (lineage_specificity_filter.py), upstream of the candidate index E.
 include { SBWT_DIFFERENCE as SBWT_DIFFERENCE_BG_EXCL; SBWT_CHECK as SBWT_CHECK_BG_EXCL } from '../modules/sbwt.nf'
-include { SBWT_DIFFERENCE as SBWT_DIFFERENCE_XLIN_BG; SBWT_CHECK as SBWT_CHECK_XLIN_BG } from '../modules/sbwt.nf'
-include { SBWT_DIFFERENCE as SBWT_DIFFERENCE_LIN_CAND; SBWT_CHECK as SBWT_CHECK_LIN_CAND } from '../modules/sbwt.nf'
 include { SBWT_DIFFERENCE as SBWT_DIFFERENCE_MARKERS; SBWT_CHECK as SBWT_CHECK_MARKERS } from '../modules/sbwt.nf'
 // Verifies a user-supplied --bg_excl_index loads before it's used below.
 include { SBWT_CHECK as SBWT_CHECK_BACKGROUND } from '../modules/sbwt.nf'
@@ -19,9 +21,6 @@ workflow SET_DIFF_CALCULATIONS {
     // bg_excl (C) isn't a take: input -- built below from params.bg_excl_index/bg_index.
     /// tuple(meta, sbwt, lcs) -- A: species/group-wide index. meta.ID = species id.
     species_index_ch
-    /// tuple(meta, sbwt, lcs) -- B: lineage-only index. meta.ID = lineage id,
-    /// meta.species = parent species id. Only non-empty when --target_groups is set.
-    lineage_index_ch
     /// tuple(meta, sbwt, lcs) -- E: per-lineage candidate index. meta.ID = lineage id,
     /// meta.species = parent species id.
     candidate_index_ch
@@ -58,49 +57,16 @@ workflow SET_DIFF_CALCULATIONS {
         SBWT_CHECK_BG_EXCL.out.index | set { bg_excl_checked }
     }
 
-    // xlin_bg (D) = species-wide index (A) - lineage-only index (B)
-    species_index_ch
-    | map { meta, sbwt, lcs -> [meta.ID, sbwt] }
-    | set { species_by_id }
-
-    lineage_index_ch
-    | map { meta, sbwt, lcs -> [meta.species, meta, sbwt] }
-    | join(species_by_id)
-    | map { species, lin_meta, lin_sbwt, sp_sbwt ->
-        // ID carries species + lineage so the diff_index filename identifies both
-        [[ID: "xlin_bg_${species}_${lin_meta.ID}", species: species, lineage: lin_meta.ID], sp_sbwt, lin_sbwt]
-    }
-    | set { xlin_bg_input }
-
-    SBWT_DIFFERENCE_XLIN_BG(xlin_bg_input)
-    SBWT_CHECK_XLIN_BG(SBWT_DIFFERENCE_XLIN_BG.out.index)
-
-    // lin_cand (F) = candidate index (E) - xlin_bg
-    SBWT_CHECK_XLIN_BG.out.index
-    | map { meta, sbwt -> [meta.lineage, sbwt] }
-    | set { xlin_bg_by_lineage }
-
-    candidate_index_ch
-    | map { meta, sbwt, lcs -> [meta.ID, meta, sbwt] }
-    | join(xlin_bg_by_lineage)
-    | map { lineage, cand_meta, cand_sbwt, d_sbwt ->
-        [[ID: "lin_cand_${cand_meta.species}_${lineage}", species: cand_meta.species, lineage: lineage], cand_sbwt, d_sbwt]
-    }
-    | set { lin_cand_input }
-
-    SBWT_DIFFERENCE_LIN_CAND(lin_cand_input)
-    SBWT_CHECK_LIN_CAND(SBWT_DIFFERENCE_LIN_CAND.out.index)
-
-    // markers (G) = lin_cand - bg_excl
+    // markers (G) = candidate index (E) - bg_excl (C), joined on the parent species
     bg_excl_checked
     | map { meta, sbwt -> [meta.species, sbwt] }
     | set { bg_excl_by_species }
 
-    SBWT_CHECK_LIN_CAND.out.index
-    | map { meta, sbwt -> [meta.species, meta, sbwt] }
+    candidate_index_ch
+    | map { meta, sbwt, lcs -> [meta.species, meta, sbwt] }
     | join(bg_excl_by_species)
-    | map { species, f_meta, f_sbwt, c_sbwt ->
-        [[ID: "markers_${species}_${f_meta.lineage}", species: species, lineage: f_meta.lineage], f_sbwt, c_sbwt]
+    | map { species, cand_meta, cand_sbwt, c_sbwt ->
+        [[ID: "markers_${species}_${cand_meta.ID}", species: species, lineage: cand_meta.ID], cand_sbwt, c_sbwt]
     }
     | set { markers_input }
 
@@ -109,8 +75,6 @@ workflow SET_DIFF_CALCULATIONS {
 
     emit:
     bg_excl  = bg_excl_checked                // C -- background_exclusion
-    xlin_bg  = SBWT_CHECK_XLIN_BG.out.index   // D -- cross_lineage_background
-    lin_cand = SBWT_CHECK_LIN_CAND.out.index  // F -- lineage_specific_candidates
     markers  = SBWT_CHECK_MARKERS.out.index   // G -- final_candidate_markers
 }
 

@@ -12,8 +12,8 @@ process GGCAT {
 
     container "quay.io/biocontainers/ggcat:2.2.0--hf1b6044_0"
 
-    // meta.stage disambiguates the candidate rebuild from the lineage's own GGCAT_GROUP
-    // output -- both deliberately share meta.ID (needed for the SET_DIFF join).
+    // meta.stage disambiguates the candidate rebuild (GGCAT_CANDIDATE) from the
+    // species-wide GGCAT_SPECIES output when they share a publishDir root.
     publishDir mode: 'copy', path: "${params.outdir}/ggcat/${meta.stage ? "${meta.stage}/" : ''}${meta.ID}/"
 
     input:

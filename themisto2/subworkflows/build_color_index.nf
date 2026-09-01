@@ -1,9 +1,7 @@
 include { COLOR_MAPPING                                    } from '../modules/color_mapping.nf'
 include { GGCAT as GGCAT_SPECIES                            } from '../modules/ggcat.nf'
-include { GGCAT as GGCAT_GROUP                              } from '../modules/ggcat.nf'
 include { GGCAT as GGCAT_CANDIDATE                          } from '../modules/ggcat.nf'
 include { SBWT_BUILD as SBWT_BUILD_SPECIES; SBWT_CHECK as SBWT_CHECK_SPECIES } from '../modules/sbwt.nf'
-include { SBWT_BUILD as SBWT_BUILD_GROUP; SBWT_CHECK as SBWT_CHECK_GROUP } from '../modules/sbwt.nf'
 include { SBWT_BUILD as SBWT_BUILD_CANDIDATE; SBWT_CHECK as SBWT_CHECK_CANDIDATE } from '../modules/sbwt.nf'
 include { THEMISTO2_BUILD as THEMISTO2_BUILD_SPECIES; THEMISTO2_STATS as THEMISTO2_STATS_SPECIES; THEMISTO2_EXPORT as THEMISTO2_EXPORT_SPECIES } from '../modules/themisto2.nf'
 include { THEMISTO2_BUILD as THEMISTO2_BUILD_CANDIDATE; THEMISTO2_STATS as THEMISTO2_STATS_CANDIDATE } from '../modules/themisto2.nf'
@@ -14,9 +12,10 @@ workflow BUILD_COLOR_INDEX {
     take:
     // One pre-paired item per species: [ meta, metadata, assembly_input ]
     //   meta.ID            -- species name; the output folder and the join key
-    //                         between species_index and lineage_index
-    //   meta.target_groups -- comma-separated lineage labels for this species
-    //                         (empty/absent = species-wide only)
+    //                         between species_index and candidate_index
+    //   meta.target_groups -- comma-separated lineage labels for this species to run
+    //                         step 07 lineage-specificity filtering for
+    //                         (empty/absent = species-wide index only)
     // The caller pairs metadata+assembly and sets per-species target_groups (see
     // lsmd subworkflows/manifest_parse.nf) -- replaces the old combine() cross-
     // multiply and the single global params.target_groups.
@@ -60,46 +59,15 @@ workflow BUILD_COLOR_INDEX {
     // Step 06 - export
     THEMISTO2_EXPORT_SPECIES(THEMISTO2_STATS_SPECIES.out.index)
 
-    // ============ Index B (per-lineage) -- only when --target_groups is set ============
-    // Same steps 03-06, run as a separate aliased pipeline rather than merging into A's channels.
-
-    // Fan COLOR_MAPPING's per-lineage outputs into one item per lineage, tagged
-    // meta = [ID: <group>, species: <species run ID>]. The .species key is how
-    // SET_DIFF_CALCULATIONS joins lineage_index against species_index. The glob emits
-    // a List when >1 group matched, a bare Path when exactly 1 -- handle both.
-    def fan_out_target_group = { meta, files ->
-        def file_list = files instanceof List ? files : [files]
-        file_list.collect { f -> [[ID: f.getParent().getName(), species: meta.ID], f] }
-    }
-
-    COLOR_MAPPING.out.target_group_file_colors
-    | flatMap(fan_out_target_group)
-    | set { lineage_file_colors }
-
-    GGCAT_GROUP(lineage_file_colors)
-
-    SBWT_BUILD_GROUP(GGCAT_GROUP.out.unitigs)
-
-    SBWT_BUILD_GROUP.out.index
-    | map { meta, sbwt, lcs -> [meta, sbwt] }
-    | set { lineage_sbwt_only }
-
-    SBWT_CHECK_GROUP(lineage_sbwt_only)
-
-    SBWT_CHECK_GROUP.out.index
-    | join(SBWT_BUILD_GROUP.out.index.map { meta, sbwt, lcs -> [meta, lcs] })
-    | set { lineage_checked_index } // tuple(meta, sbwt, lcs), meta.species set -- Index B
-
     // ============ Step 07 - lineage-specificity candidate filtering ============
-    // lineage_specificity_filter.py runs ONCE per species over the SPECIES-wide export
-    // (not Index B's lineage-scoped export): keeps unitigs that are lineage-core
-    // (within_frac) and, when --specificity_max_outside is set, lineage-specific (max
-    // presence across any single OTHER lineage). Emits one candidate FASTA per lineage
-    // in meta.target_groups.
+    // lineage_specificity_filter.py runs ONCE per species over the SPECIES-wide export:
+    // keeps unitigs that are lineage-core (within_frac) and, when
+    // --specificity_max_outside is set, lineage-specific (max presence across any single
+    // OTHER lineage). Emits one candidate FASTA per lineage in meta.target_groups.
     //
     // Gated on meta.target_groups: the species export is always non-empty, so a species
     // with no requested lineages must be filtered out here rather than relying on an
-    // empty upstream channel (as the Index B branch above does via its optional glob).
+    // empty upstream channel.
     THEMISTO2_EXPORT_SPECIES.out.unitigs
     | join(THEMISTO2_EXPORT_SPECIES.out.color_sets)
     | join(THEMISTO2_EXPORT_SPECIES.out.metadata)
@@ -109,9 +77,9 @@ workflow BUILD_COLOR_INDEX {
 
     LINEAGE_SPECIFICITY_FILTER(specificity_filter_input)
 
-    // Fan the per-lineage outputs out the same way fan_out_target_group does above
-    // (meta = [ID: lineage, species: species run ID], needed for the SET_DIFF join) --
-    // here the lineage ID comes from the filename, not a colour-file subdirectory.
+    // One task emits one candidate FASTA per requested lineage. Fan them into one
+    // item each, meta = [ID: lineage, species: species run ID] (meta.species is the
+    // SET_DIFF join key) -- the lineage ID comes from the filename.
     LINEAGE_SPECIFICITY_FILTER.out.unitigs
     | flatMap { meta, files ->
         def file_list = files instanceof List ? files : [files]
@@ -161,6 +129,5 @@ workflow BUILD_COLOR_INDEX {
     // Public contract = only the SBWT indexes set_diff_calculations.nf needs. The species
     // Themisto2 export still runs above -- LINEAGE_SPECIFICITY_FILTER (step 07) reads it.
     sbwt_index       = checked_index           // tuple(meta, sbwt, lcs) -- species-wide (A)
-    lineage_index    = lineage_checked_index   // tuple(meta, sbwt, lcs), meta.species set -- B
     candidate_index  = candidate_checked_index // tuple(meta, sbwt, lcs), meta.species set -- E
 }
