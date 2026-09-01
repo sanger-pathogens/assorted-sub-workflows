@@ -86,21 +86,22 @@ process THEMISTO2_EXPORT {
     tuple val(meta), path(index_thm2)
 
     output:
-    tuple val(meta), path("export.unitigs.fa"),     emit: unitigs
-    tuple val(meta), path("export.color_sets.txt*"), emit: color_sets
-    tuple val(meta), path("export.metadata.txt"),   emit: metadata
+    tuple val(meta), path("export.unitigs.fa"),    emit: unitigs
+    tuple val(meta), path("export.color_sets.txt"), emit: color_sets
+    tuple val(meta), path("export.metadata.txt"),  emit: metadata
 
     script:
-    // gzip is a separate, deliberately-off-by-default step, not a themisto2 export
-    // flag -- single-threaded compression was slow enough at s_pneumoniae scale
-    // (~2.3h projected) that the project chose to just leave export uncompressed.
-    def gzip_cmd = params.gzip_export ? "gzip -f export.color_sets.txt" : ""
+    // Export is left uncompressed: single-threaded gzip of color_sets.txt was
+    // ~2.3h projected at s_pneumoniae scale, disk has never been the constraint,
+    // and the downstream scripts read it directly. (core_catchall_filter.py /
+    // lineage_specificity_score.py still transparently accept a .gz if a user
+    // supplies a pre-compressed export from elsewhere.)
+    //
     // -o is a filename prefix, not a directory -- themisto2 appends its own
     // dot-leading suffixes (.unitigs.fa, .color_sets.txt, .metadata.txt) directly
     // onto it. "-o ." previously produced "..unitigs.fa" etc (prefix "." + suffix
     // ".unitigs.fa"), not the "export.*" names declared in `output:` above.
     """
     themisto2 export -i ${index_thm2} -o export -t ${task.cpus}
-    ${gzip_cmd}
     """
 }
