@@ -28,6 +28,14 @@
             "keep_unbinned":{
                 "default": "false",
                 "help_text": "Keep unbinned contigs."
+            },
+            "semibin2_environment":{
+                "default": "human_gut",
+                "help_text": "Pretrained habitat model for SemiBin2's single_easy_bin --environment (skips self-supervised training)."
+            },
+            "metacat_wheel_url":{
+                "default": "/data/pam/team162/shared_scratch/software_dbs/metacat_wheel/metacat-1.0.6-py3-none-any.whl",
+                "help_text": "Path (or URL) to the MetaCAT pip wheel to install at runtime (no bioconda/biocontainers package exists yet). Defaults to a pre-downloaded local copy so the task doesn't depend on outbound network access."
             }
         }
     }
