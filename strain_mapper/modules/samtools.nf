@@ -57,13 +57,13 @@ process INDEX_REF {
     container 'quay.io/biocontainers/samtools:1.17--hd87286a_2'
 
     input:
-    tuple path(reference), path(preindex)
+    path(reference)
 
     output:
     tuple path(reference), path("${faidx}"),  emit: ref_index
 
     script:
-    faidx = preindex == null ? "${reference}.fai" : preindex
+    faidx = "${reference}.fai"
     """
     samtools faidx "${reference}" > "${faidx}"
     """
