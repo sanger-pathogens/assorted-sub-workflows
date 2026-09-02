@@ -46,20 +46,18 @@ workflow INDEX_REF {
 
     // SAMTOOLS INDEX REF FASTA FOR DOWNSTREAM PROCESSES
     references
-    .map { refe -> 
-        faidx = Path("${refe}.fai")
-        if (faidx.isFile()) {
-            [reference, faidx]
-        } else {
-            [reference, null]
-        }
+    .branch{ refe ->
+            has_faidx: Path("${refe}.fai").isFile()
+            needs_faidx:  true
     }
+    
+    references.has_faidx
+    .map { refe -> [ refe, Path("${refe}.fai") ] }
     | set { ch_ref_preindex }
 
-    } else {
-        SAMTOOLS_INDEX_REF(ch_ref_preindex)
-        | set { ch_ref_index }
-    }
+    SAMTOOLS_INDEX_REF(references.needs_faidx)
+    .mix(ch_ref_preindex)
+    | set { ch_ref_index }
 
 
     emmit:
