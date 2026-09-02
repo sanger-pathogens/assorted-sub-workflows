@@ -3,9 +3,10 @@
 //
 // MODULES
 //
-include { BOWTIE2; BOWTIE2_INDEX } from './modules/bowtie2'
-include { BWA; BWA_INDEX } from './modules/bwa'
-include { CONVERT_TO_BAM; SAMTOOLS_SORT; INDEX_REF; INDEX_BAM as INDEX_SORTED_BAM; INDEX_BAM as INDEX_DEDUP_BAM; SAMTOOLS_STATS } from './modules/samtools'
+include { BOWTIE2 } from './modules/bowtie2'
+include { INDEX_REF } from './subworkflows/index_ref.nf'
+include { BWA } from './modules/bwa'
+include { CONVERT_TO_BAM; SAMTOOLS_SORT; INDEX_BAM as INDEX_SORTED_BAM; INDEX_BAM as INDEX_DEDUP_BAM; SAMTOOLS_STATS } from './modules/samtools'
 include { BCFTOOLS_CALL; BCFTOOLS_MPILEUP; BCFTOOLS_FILTERING; BCFTOOLS_EXTRACT; PUBLISH_VCF } from './modules/bcftools'
 include { PICARD_MARKDUP } from './modules/picard'
 include { CURATE_CONSENSUS } from './modules/curate'
@@ -20,74 +21,29 @@ include { BAM_COVERAGE } from './modules/deeptools'
 workflow STRAIN_MAPPER {
 
     take:
-    ch_reads        // tuple( meta, read_1, read_2 )
-    reference       // file: given reference
+    ch_reads_with_ref        // tuple( meta, read_1, read_2, reference )
+          // reference file paths
 
     main:
 
-    //
-    //BOWTIE2 WORKFLOW
-    //
+    ch_reads_with_ref
+    .map(meta, read_1, read_2, reference -> reference)
+    .unique()
+    .set(references)
 
+    INDEX_REF(reference)
+
+    // MAPPING
     if (params.mapper == "bowtie2") {
-        //BOWTIE2 INDEX
-        bt2_index_files = file("${reference}.bt2")
-        if (bt2_index_files.isFile()) {
-            Channel.fromPath(bt2_index_files)
-            | collect
-            | set { ch_bt2_index }
-
-        } else {
-            BOWTIE2_INDEX( reference )
-            | set { ch_bt2_index }
-        }
-
-        //
-        // MAPPING: Bowtie2
-        //
-        BOWTIE2 ( ch_reads, ch_bt2_index )
+        BOWTIE2 ( ch_reads, INDEX_REF.out.ch_bt2_index )
         | set { ch_mapped }
 
     } else if (params.mapper == "bwa") {
-        //
-        //BWA WORKFLOW
-        //
-
-        // BWA INDEX
-        bwa_index_files = file("${reference}.amb")
-        if (bwa_index_files.isFile()) {
-            index_files = Channel.fromPath("${reference}{.amb,.ann,.bwt,.pac,.sa}")
-
-            index_files
-            | collect
-            | map { collected_indexes -> [reference, collected_indexes]}
-            | set { ch_bwa_index }
-
-        } else {
-            BWA_INDEX(reference)
-            | set { ch_bwa_index }
-        }
-
-        //
-        // MAPPING: Bwa
-        //
-        BWA( ch_reads, ch_bwa_index )
+        BWA( ch_reads, INDEX_REF.out.ch_bwa_index )
         | set { ch_mapped }
 
     } else {
         error "supplied mapper: ${params.mapper} is not currently supported"
-    }
-
-
-    // INDEX REF FASTA FOR DOWNSTREAM PROCESSES
-    faidx_file = file("${reference}.fai")
-    if (faidx_file.isFile()) {
-        Channel.of( [reference, faidx_file] )
-        | set { ch_ref_index }
-
-    } else {
-        INDEX_REF(reference)
-        | set { ch_ref_index }
     }
 
     //
