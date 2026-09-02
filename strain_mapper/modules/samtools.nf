@@ -64,7 +64,7 @@ process INDEX_REF {
     tuple val(ref_key), path(reference), path("${faidx}"),  emit: ref_index
 
     script:
-    faidx = "${reference}.fai"
+    faidx = preindex == null ? "${reference}.fai" : preindex
     """
     samtools faidx "${reference}" > "${faidx}"
     """
