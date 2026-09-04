@@ -1,12 +1,6 @@
 { 
     "pipeline": "Preprocessing (sub-workflow)",
     "params": {
-        "Filter existing outputs options": {
-            "raw_reads_prefix": {
-                "default": "raw_",
-                "help_text": "Prefix used when constructing the preexisting output folder name; used only when fastq reads preprocessing is applied."
-            }
-        },
         "General pre-processing options":{
             "publish_clean_reads": {
                 "default": "true",
@@ -19,6 +13,10 @@
             "publish_trf_reads": {
                 "default": "false",
                 "help_text": "Enable publishing of intermediate reads from trf process during pre-processing. Read sets will be uncompressed fastq files."
+            },
+            "preprocessing_outdir": {
+                "default": "preprocessed_fastqs",
+                "help_text": "Output directory for preprocessed (trimmed and filtered) reads."
             }
         },
         "Trimmomatic Options": {

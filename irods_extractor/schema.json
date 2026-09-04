@@ -16,13 +16,9 @@
                 "default": "false",
                 "help_text": "Delete intermediate CRAM files downloaded from IRODS in work/ folder"
             },
-            "preexisting_fastq_tag": {
-                "default": "raw_fastq",
-                "help_text": "If the expected output fastq files exist in the folder named like this under the result folder for the sample e.g. in results/12345_1#67/raw_fastq/12345_1#67_1.fastq.gz,\n            then skip download and any further processing for this sample."
-            },
-            "split_sep_for_ID_from_fastq":{
-                "default": "_1.fastq",
-                "help_text": "Separator to recognise sample ID from preexisting file."
+            "raw_reads_prefix": {
+                "default": "raw_",
+                "help_text": "Prefix to the output folder name for raw downloaded reads, as opposed to the preprocessed reads."
             },
             "lane_plex_sep":{
                 "default": "#",

@@ -4,7 +4,7 @@ process COMPRESS_READS {
     label 'cpu_1'
     label 'time_queue_from_normal_slow2'
 
-    publishDir path: { if ("${params.save_method}" == "nested") "${params.outdir}/${meta.ID}/preprocessing/" else "${params.outdir}/preprocessing/" }, mode: "copy", enabled: params.publish_clean_reads
+    publishDir path: { if ("${params.save_method}" == "nested") "${params.outdir}/${meta.ID}/${params.preexisting_output_dir}/" else "${params.outdir}/${params.preexisting_output_dir}/" }, mode: "copy", enabled: params.publish_clean_reads
 
     input:
     tuple val(meta), path(read_1), path(read_2)
