@@ -14,7 +14,7 @@
                 "default": "false",
                 "help_text": "Enable publishing of intermediate reads from trf process during pre-processing. Read sets will be uncompressed fastq files."
             },
-            "preprocessing_outdir": {
+            "preexisting_output_dir": {
                 "default": "preprocessed_fastqs",
                 "help_text": "Output directory for preprocessed (trimmed and filtered) reads."
             }

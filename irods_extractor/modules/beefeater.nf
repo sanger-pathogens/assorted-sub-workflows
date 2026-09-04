@@ -56,7 +56,7 @@ process BEEFEATER {
     def illumina_publish_output = "--illumina_publish_output ${params.preexisting_output_dir}"
     def illumina_id_suffix = "--illumina_id_suffix ${params.existing_output_id_suffix}"
     def illumina_output_extension = "--illumina_output_extension ${params.existing_output_extension}"
-    def illumina_publish_structure = ("${params.save_method}" == "nested") ? "--illumina_publish_structure nested" : "--illumina_publish_structure flat"
+    def illumina_publish_structure = "--illumina_publish_structure ${params.save_method}"
     prevent_redownload_opts = params.prevent_redownloads ? "${illumina_read_output_directory} ${illumina_publish_output} ${illumina_id_suffix} ${illumina_output_extension} ${illumina_publish_structure}" : ""
 
     // Options required for the download of ONT reads
