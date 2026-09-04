@@ -11,10 +11,18 @@ workflow QC {
     reads_ch // meta, read_1, read_2
 
     main:
+    reads_ch.branch{ meta, fwd, rev ->
+    illumina_to_unpack: meta.Platform == "ILLUMINA"
 
-    if (params.run_qc && params.read_type.toLowerCase() == "illumina") {
+    ONT: meta.Platform == "ONT"
 
-        reads_ch
+    other: true
+    }
+    | set { reads_ch }
+
+    if (params.run_qc) {
+
+        reads_ch.illumina_to_unpack
         | (FASTQC & TAXO_PROFILE)
 
         fastqc_pass_criteria = file(params.fastqc_pass_criteria, checkIfExists: true)

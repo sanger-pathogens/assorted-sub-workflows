@@ -1,6 +1,5 @@
 include { IRODS_MANIFEST_PARSE     } from './subworkflows/irods_manifest_parse.nf'
 include { INPUT_CHECK              } from './subworkflows/input_check.nf'
-include { IRODS_CLI; COMBINE_IRODS } from './subworkflows/combined_input.nf'
 include { ENA_DOWNLOAD             } from './subworkflows/ena_input.nf'
 include { IRODS_EXTRACTOR          } from '../irods_extractor/subworkflows/irods.nf'
 include { MANIFEST_FROM_DIR        } from './subworkflows/manifest_from_dir.nf'
@@ -32,8 +31,7 @@ workflow MIXED_INPUT {
     }
 
     if ('IRODS' in active_workflows) {
-        COMBINE_IRODS
-        | IRODS_EXTRACTOR
+        IRODS_EXTRACTOR
         | set { reads_from_irods_ch }
     } else {
         Channel.of("none")

@@ -18,9 +18,18 @@ workflow PREPROCESSING {
     reads_ch
 
     main:
-    
-    if (params.preprocessing && params.read_type.toLowerCase() == "illumina") {
-        DECOMPRESS_READS(reads_ch)
+    reads_ch.branch{ meta, fwd, rev ->
+        illumina_to_unpack: meta.Platform == "ILLUMINA"
+
+        ONT: meta.Platform == "ONT"
+
+        other: true
+    }
+    | set { reads_ch }
+
+    // Illumina preprocessing subworkflow, passing only Illumina reads into the preprocessing steps
+    if (params.preprocessing) {
+        DECOMPRESS_READS(reads_ch.illumina_to_unpack)
         | set{ decompressed_reads_ch }
 
         if (params.run_trimmomatic){
@@ -64,7 +73,7 @@ workflow PREPROCESSING {
         // for when turning off preprocessing or for non-illumina data, 
         // just pass through the reads without preprocessing and empty channels for stats
         // so to streamline downstream workflow compatibility
-        preprocessed_reads_ch = reads_ch
+        preprocessed_reads_ch = reads_ch.illumina_to_unpack
         collated_trimming_stats_ch = Channel.empty()
         collated_host_reads_stats_ch = Channel.empty()
     }

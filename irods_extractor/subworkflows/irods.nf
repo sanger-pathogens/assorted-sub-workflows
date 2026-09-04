@@ -1,41 +1,17 @@
-include { COLLATE_FASTQ; COMBINE_FASTQ  } from '../modules/samtools.nf'
-include { BATON                         } from '../modules/baton.nf'
-include { JSON_PREP; JSON_PARSE         } from '../modules/jq.nf'
+include { BEEFEATER                     } from '../modules/beefeater.nf'
+include { COLLATE_FASTQ                 } from '../modules/samtools.nf'
 include { METADATA as METADATA_QUERIED  } from '../modules/metadata_save.nf'
-include { CRAM_EXTRACT                  } from './extraction_methods/illumina_extract.nf'
-
-include { ILLUMINA_PARSE                } from './extraction_methods/illumina_extract.nf'
-include { ONT_PARSE                     } from './extraction_methods/ONT_extract.nf'
+include { PUBLISH_FASTQ                 
+          PUBLISH_UNBASECALLED          } from '../modules/publish.nf'
 
 workflow IRODS_QUERY {
-        take:
-        input_irods_ch // map
-
         main:
-        JSON_PREP(input_irods_ch)
-        | BATON
-        | JSON_PARSE
-
-        switch (params.read_type.toLowerCase()) {
-            case "illumina":
-                ILLUMINA_PARSE(JSON_PARSE.out.json_file)
-                | set{ meta_file_ch }
-
-                break
-
-            case "ont":
-                ONT_PARSE(JSON_PARSE.out.json_file)
-                | set{ meta_file_ch }
-
-                break
-
-            default:
-                log.error("input --read_type: ${params.read_type} was not one of Illumina|ont")
-        }
-        
+        BEEFEATER()
+        | splitJson() //split that sample row into metadata
+        | set { meta_file_ch }
 
         if (params.save_metadata) {
-            meta_file_ch.map{metadata_map, path -> metadata_map}
+            meta_file_ch
             | collectFile() { map -> [ "lane_metadata.txt", map.collect{it}.join(', ') + '\n' ] }
             | set{ metadata_only }
 
@@ -52,14 +28,51 @@ workflow IRODS_EXTRACTOR {
     input_irods_ch // map
 
     main:
-    //todo remove or make new method for ONT
-    if (params.read_type.toLowerCase() != "illumina") {
-        log.error("Only Illumina reads are supported in this pipeline")
-    }
-    //expects short reads currently.
-    IRODS_QUERY(input_irods_ch)
-    | CRAM_EXTRACT
+    
+    input_irods_ch.branch{ meta_map ->
+            illumina_to_unpack: meta_map.Platform == "ILLUMINA"
+
+            ONT: meta_map.Platform == "ONT"
+
+            other: true
+        }
+        | set { downloaded_objects }
+
+        // Extract the Illumina fastqs from the CRAMs and publish them to the output directory
+        CRAM_EXTRACT(downloaded_objects.illumina_to_unpack)
+
+        // Establish the read type and branch the channel
+        downloaded_objects.ONT.branch{ meta_map ->
+            ont_format_fastq: meta_map.ont_format == "fastq"
+
+            ont_format_unbasecalled: meta_map.ont_format == "pod5" || meta_map.ont_format == "fast5"
+
+            other: true
+        }
+        | set { downloaded_ont_objects }
+
+        // Publish the reads and/or squiggles to the output directory
+        PUBLISH_FASTQ(downloaded_ont_objects.ont_format_fastq)
+        PUBLISH_UNBASECALLED(downloaded_ont_objects.ont_format_unbasecalled)
 
     emit:
     reads_ch = CRAM_EXTRACT.out.reads_ch // tuple val(meta), path(forward_fastq), path(reverse_fastq)
+}
+
+workflow CRAM_EXTRACT {
+
+    take:
+    meta_cram_ch
+
+    main:
+    COLLATE_FASTQ(meta_cram_ch)
+    | set { reads_ch }
+
+    if (params.cleanup_intermediate_files_irods_extractor) {
+        COLLATE_FASTQ.out.remove_channel.flatten()
+                .filter(Path)
+                .map { it.delete() }
+    }
+
+    emit: reads_ch // tuple val(meta), path(forward_fastq), path(reverse_fastq
 }

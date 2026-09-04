@@ -58,10 +58,10 @@ def validate_parameters() {
     def manifest_from_dir_exists = params.manifest_from_dir != null
     
     //and CLI
-    def has_studyid = params.studyid != -1
-    def has_runid = params.runid != -1
-    def has_laneid = params.laneid != -1
-    def has_plexid = params.plexid != -1
+    def has_studyid = params.studyid
+    def has_runid = params.runid
+    def has_laneid = params.laneid
+    def has_plexid = params.plexid
 
     // anything provided?
     def input_specified = manifest_ena_exists ||
@@ -147,6 +147,17 @@ def validate_parameters() {
         }
         if (has_plexid && !validate_integer(params.plexid)) {
             throw new Exception("Invalid plexid provided: ${params.plexid}")
+            errors += 1
+        }
+
+        if ((has_laneid || has_plexid) && !(has_studyid || has_runid)) {
+            throw new Exception(
+                "Cannot submit an iRODS query where neither studyid nor runid are specified, " +
+                "as this query would catch too many file objects.\n" +
+                "The requested input as specified through the CLI options " +
+                "'--studyid ${params.studyid}, --runid ${params.runid}, " +
+                "--laneid ${params.laneid}, --plexid ${params.plexid}, "
+            )
             errors += 1
         }
         
