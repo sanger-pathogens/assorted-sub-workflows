@@ -3,7 +3,6 @@
 //
 // MODULES
 //
-<<<<<<< HEAD
 include { BOWTIE2          } from './modules/bowtie2'
 include { INDEX_REF        } from './subworkflows/index_ref.nf'
 include { BWA              } from './modules/bwa'
@@ -18,14 +17,6 @@ include { BCFTOOLS_CALL;
           BCFTOOLS_EXTRACT; 
           PUBLISH_VCF      } from './modules/bcftools'
 include { PICARD_MARKDUP   } from './modules/picard'
-=======
-include { BOWTIE2 } from './modules/bowtie2'
-include { INDEX_REF } from './subworkflows/index_ref.nf'
-include { BWA } from './modules/bwa'
-include { CONVERT_TO_BAM; SAMTOOLS_SORT; INDEX_BAM as INDEX_SORTED_BAM; INDEX_BAM as INDEX_DEDUP_BAM; SAMTOOLS_STATS } from './modules/samtools'
-include { BCFTOOLS_CALL; BCFTOOLS_MPILEUP; BCFTOOLS_FILTERING; BCFTOOLS_EXTRACT; PUBLISH_VCF } from './modules/bcftools'
-include { PICARD_MARKDUP } from './modules/picard'
->>>>>>> f3e9675 (initial changes to input sample-matched refs)
 include { CURATE_CONSENSUS } from './modules/curate'
 include { BAM_COVERAGE     } from './modules/deeptools'
 
@@ -61,6 +52,10 @@ workflow STRAIN_MAPPER {
     ch_reads_with_ref
     .map{ meta, read_1, read_2, reference -> [meta, reference.toString()] }
     .set { ch_meta_ref_key }
+
+    ch_reads_with_ref
+    .map(meta, read_1, read_2, reference -> reference, meta, read_1, read_2)
+    .set { ch_ref_with_reads }
 
     // MAPPING
     if (params.mapper == "bowtie2") {
