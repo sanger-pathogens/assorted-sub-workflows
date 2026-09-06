@@ -7,8 +7,7 @@ process BOWTIE2 {
     container 'quay.io/biocontainers/bowtie2:2.5.1--py310h8d7afc0_0'
 
     input:
-    tuple val(meta), path(reads_1), path(reads_2)
-    path(bt2_index_files)
+    tuple val(meta), path(reads_1), path(reads_2), path(reference), path(bt2_index_files)
 
     output:
     tuple val(meta), path("${mapped_reads}"),  emit: mapped_reads
@@ -39,7 +38,7 @@ process BOWTIE2_INDEX {
     path(reference)
 
     output:
-    path("${reference.baseName}*.bt2"),  emit: bt2_index
+    tuple path(reference), path("${reference.baseName}*.bt2"),  emit: bt2_index
 
     script:
     ref_basename = "${reference.baseName}"

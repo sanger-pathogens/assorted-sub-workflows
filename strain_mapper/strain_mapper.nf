@@ -33,13 +33,27 @@ workflow STRAIN_MAPPER {
 
     INDEX_REF(reference)
 
+    ch_reads_with_ref
+    .map(meta, read_1, read_2, reference -> reference, meta, read_1, read_2)
+    .set { ch_ref_with_reads }
+
     // MAPPING
     if (params.mapper == "bowtie2") {
-        BOWTIE2 ( ch_reads, INDEX_REF.out.ch_bt2_index )
+        ch_ref_with_reads
+        .combine(INDEX_REF.out.ch_bt2_index, by: 0)
+        .map { reference, meta, read_1, read_2, bt2_index_files -> [meta, read_1, read_2, reference, bt2_index_files] }
+        .set { ch_reads_with_indexed_ref }
+
+        BOWTIE2 ( ch_reads_with_indexed_ref )
         | set { ch_mapped }
 
     } else if (params.mapper == "bwa") {
-        BWA( ch_reads, INDEX_REF.out.ch_bwa_index )
+        ch_ref_with_reads
+        .combine(INDEX_REF.out.ch_bwa_index, by: 0)
+        .map { reference, meta, read_1, read_2, bwa_index_files -> [meta, read_1, read_2, reference, bwa_index_files] }
+        .set { ch_reads_with_indexed_ref }
+
+        BWA( ch_reads_with_indexed_ref )
         | set { ch_mapped }
 
     } else {
@@ -118,7 +132,7 @@ workflow STRAIN_MAPPER {
         | join(consensus_finished)
         | flatten
         | filter(Path)
-        | map { it.delete() }
+        | map { it.safeDelete() }
 
         if (!params.skip_read_deduplication) {
             PICARD_MARKDUP.out.dedup_reads
@@ -127,7 +141,7 @@ workflow STRAIN_MAPPER {
             | join(consensus_finished)
             | flatten
             | filter(Path)
-            | map { it.delete() }
+            | map { it.safeDelete() }
         }
     }
 
