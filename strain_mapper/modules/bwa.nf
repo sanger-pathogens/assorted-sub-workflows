@@ -7,8 +7,7 @@ process BWA {
     container 'quay.io/biocontainers/bwa:0.7.17--he4a0461_11'
 
     input:
-    tuple val(meta), path(reads_1), path(reads_2)
-    tuple path(reference), path(bwa_index_files)
+    tuple val(meta), path(reads_1), path(reads_2), path(reference), path(bwa_index_files)
 
     output:
     tuple val(meta), path("${meta.ID}.sam"),  emit: mapped_reads
