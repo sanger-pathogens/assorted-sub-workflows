@@ -29,12 +29,12 @@ workflow STRAIN_MAPPER {
     ch_reads_with_ref
     .map{ meta, read_1, read_2, reference -> reference }
     .unique()
-    .set(references)
+    .set{ references }
 
     INDEX_REF(references)
 
     ch_reads_with_ref
-    .map{ meta, read_1, read_2, reference -> reference, meta, read_1, read_2 }
+    .map{ meta, read_1, read_2, reference -> [reference, meta, read_1, read_2] }
     .set { ch_ref_with_reads }
 
     // MAPPING
@@ -113,7 +113,7 @@ workflow STRAIN_MAPPER {
     PUBLISH_VCF( ch_vcf_final )
     
     ch_vcf_final
-    | combine(ch_ref_index)
+    | combine(INDEX_REF.out.ch_ref_index)
     | set { ch_vcf_and_ref }
 
     CURATE_CONSENSUS( ch_vcf_and_ref )
