@@ -57,10 +57,11 @@ process INDEX_REF {
     container 'quay.io/biocontainers/samtools:1.17--hd87286a_2'
 
     input:
-    path(reference)
+    // see BOWTIE2_INDEX for why ref_key is carried as a val
+    tuple val(ref_key), path(reference)
 
     output:
-    tuple path(reference), path("${faidx}"),  emit: ref_index
+    tuple val(ref_key), path(reference), path("${faidx}"),  emit: ref_index
 
     script:
     faidx = "${reference}.fai"
