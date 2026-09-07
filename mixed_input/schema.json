@@ -43,6 +43,18 @@
             "manifest_ena": {
                 "default": "false",
                 "help_text": "Path to a manifest/file of ENA accessions (run, sample or study). Please also set the --accession_type to the appropriate accession type."
+            },
+            "manifest_from_dir": {
+                "default": "false",
+                "help_text": ""
+            },
+            "fastq_validation": {
+                "default": "relaxed",
+                "help_text": "If using --manifest_from_dir, set fastq validation to strict or relaxed. Strict mode validates each file is in standard FASTQ format, whereas relaxed only checks that the file has a valid extension. "
+            },
+            "max_depth": {
+                "default": "0",
+                "help_text": "If using --manifest_from_dir, set the max depth to recursively search for FASTQ files. 0 means only the top directory will be searched, 1 will include immediate subdirectories, etc."
             }
         },
         "Aliased options": {
