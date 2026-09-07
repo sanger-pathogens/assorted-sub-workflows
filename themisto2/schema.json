@@ -1,7 +1,7 @@
 {
   "pipeline": "themisto2",
   "params": {
-    "Input options preprocessed with color_mapping.nf": {
+    "Color mapping options": {
       "assembly_input": {
         "default": "",
         "help_text": "A directory of assembly FASTA files, or a .txt file listing one assembly path per line. Which kind it is gets detected automatically."
