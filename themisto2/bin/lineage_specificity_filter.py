@@ -78,7 +78,16 @@ def parse_args():
     p.add_argument("--export-metadata", type=Path, default=None, help="Species-wide export.metadata.txt (num_colors)")
     p.add_argument("--n-colors", type=int, default=None, help="Species genome count (alternative to --export-metadata)")
     p.add_argument(
-        "--lineages", required=True, nargs="+", help="Lineage label(s) to filter/score, e.g. --lineages 7PET"
+        "--lineages",
+        nargs="*",
+        default=[],
+        help="Lineage label(s) to filter/score, e.g. --lineages 7PET. Mutually exclusive with --all-lineages.",
+    )
+    p.add_argument(
+        "--all-lineages",
+        action="store_true",
+        help="Filter/score every lineage in --label-mapping that has >= --min-genome-count genomes "
+        "(excluding 'unclassified'). Use when the caller requests no explicit --lineages.",
     )
     p.add_argument("--output-dir", required=True, type=Path)
     p.add_argument(
@@ -333,6 +342,8 @@ def main():
         sys.exit(f"--min-genome-count must be >= 0, got {args.min_genome_count}")
     if args.max_outside is not None and not (0.0 <= args.max_outside <= 1.0):
         sys.exit(f"--max-outside must be between 0.0 and 1.0, got {args.max_outside}")
+    if bool(args.lineages) == bool(args.all_lineages):
+        sys.exit("give exactly one of --lineages or --all-lineages")
 
     args.output_dir.mkdir(parents=True, exist_ok=True)
     stats_dir = args.stats_output_dir or args.output_dir
@@ -340,13 +351,30 @@ def main():
 
     print(f"Loading lineage map from {args.label_mapping} ...", file=sys.stderr)
     names, lof, sizes = load_colour_lineage(args.label_mapping, n_colors)
-    missing = [lid for lid in args.lineages if lid not in names]
-    if missing:
+
+    if args.all_lineages:
+        targets = sorted(n for i, n in enumerate(names) if n != "unclassified" and sizes[i] >= args.min_genome_count)
+        too_small = sorted(n for i, n in enumerate(names) if n != "unclassified" and sizes[i] < args.min_genome_count)
+        if too_small:
+            print(
+                f"--all-lineages: skipping {len(too_small)} lineage(s) below --min-genome-count "
+                f"({args.min_genome_count}): {', '.join(too_small)}",
+                file=sys.stderr,
+            )
+        if not targets:
+            print(
+                f"--all-lineages: no lineage in label_mapping.tsv has >= {args.min_genome_count} genomes "
+                "-- nothing to do.",
+                file=sys.stderr,
+            )
+            return
+    else:
+        missing = [lid for lid in args.lineages if lid not in names]
         for lid in missing:
             print(f"WARNING: lineage '{lid}' not in label_mapping.tsv -- skipping", file=sys.stderr)
-    targets = [lid for lid in args.lineages if lid in names]
-    if not targets:
-        sys.exit("none of the requested --lineages are in label_mapping.tsv -- nothing to do")
+        targets = [lid for lid in args.lineages if lid in names]
+        if not targets:
+            sys.exit("none of the requested --lineages are in label_mapping.tsv -- nothing to do")
 
     print(
         f"Streaming {args.color_sets} across {args.threads} worker(s), scoring {len(targets)} lineage(s) ...",

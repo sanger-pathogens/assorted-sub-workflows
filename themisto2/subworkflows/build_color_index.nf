@@ -11,15 +11,6 @@ include { CHECKPOINT_COUNT                                  } from '../modules/c
 
 workflow BUILD_COLOR_INDEX {
     take:
-    // One pre-paired item per species: [ meta, metadata, assembly_input ]
-    //   meta.ID            -- species name; the output folder and the join key
-    //                         between species_index and candidate_index
-    //   meta.target_groups -- comma-separated lineage labels for this species to run
-    //                         step 07 lineage-specificity filtering for
-    //                         (empty/absent = species-wide index only)
-    // The caller pairs metadata+assembly and sets per-species target_groups (see
-    // lsmd subworkflows/manifest_parse.nf) -- replaces the old combine() cross-
-    // multiply and the single global params.target_groups.
     samples_ch
 
     main:
@@ -27,15 +18,15 @@ workflow BUILD_COLOR_INDEX {
 
     color_mapping_input = samples_ch // [meta, metadata, assembly_input]
 
-    // Step 02 - metadata + assemblies -> Themisto colour-file format
+    // Metadata + assemblies -> Themisto colour-file format
     COLOR_MAPPING(color_mapping_input)
 
-    // ============ Index A (species-wide) -- always built ============
+    // ============ Species-wide index -- always built ============
 
-    // Step 03 - unitigs from the colour file
+    // Unitigs from the colour file
     GGCAT_SPECIES(COLOR_MAPPING.out.file_colors)
 
-    // Step 04 - build SBWT, then verify (SBWT_CHECK split out: much lighter than the
+    // Build SBWT, then verify (SBWT_CHECK split out: much lighter than the
     // build; generic, so also reused downstream). Check the .sbwt alone, re-pair .lcs after.
     SBWT_BUILD_SPECIES(GGCAT_SPECIES.out.unitigs)
 
@@ -49,7 +40,7 @@ workflow BUILD_COLOR_INDEX {
     | join(SBWT_BUILD_SPECIES.out.index.map { meta, sbwt, lcs -> [meta, lcs] })
     | set { checked_index } // tuple(meta, sbwt, lcs)
 
-    // Step 05 - Themisto2 index (colour file + verified SBWT index)
+    // Themisto2 index (colour file + verified SBWT index)
     COLOR_MAPPING.out.file_colors
     | join(checked_index)
     | set { themisto_build_input }
@@ -57,23 +48,23 @@ workflow BUILD_COLOR_INDEX {
     THEMISTO2_BUILD_SPECIES(themisto_build_input)
     THEMISTO2_STATS_SPECIES(THEMISTO2_BUILD_SPECIES.out.index)
 
-    // Step 06 - export
+    // Export
     THEMISTO2_EXPORT_SPECIES(THEMISTO2_STATS_SPECIES.out.index)
 
-    // ============ Step 07 - lineage-specificity candidate filtering ============
+    // ============ Lineage-specificity candidate filtering ============
     // lineage_specificity_filter.py runs ONCE per species over the SPECIES-wide export:
     // keeps unitigs that are lineage-core (within_frac) and, when
     // --specificity_max_outside is set, lineage-specific (max presence across any single
-    // OTHER lineage). Emits one candidate FASTA per lineage in meta.target_groups.
+    // OTHER lineage). Emits one candidate FASTA per targeted lineage.
     //
-    // Gated on meta.target_groups: the species export is always non-empty, so a species
-    // with no requested lineages must be filtered out here rather than relying on an
-    // empty upstream channel.
+    // Which lineages are targeted comes from meta.target_groups: a non-empty value
+    // targets exactly those lineages; blank/absent targets every lineage with
+    // >= candidate_min_genome_count genomes (excluding 'unclassified'). Runs for every
+    // species -- a species with no usable lineage just emits nothing (outputs optional).
     THEMISTO2_EXPORT_SPECIES.out.unitigs
     | join(THEMISTO2_EXPORT_SPECIES.out.color_sets)
     | join(THEMISTO2_EXPORT_SPECIES.out.metadata)
     | join(COLOR_MAPPING.out.label_mapping)
-    | filter { meta, unitigs, color_sets, export_metadata, label_mapping -> meta.target_groups }
     | set { specificity_filter_input } // tuple(meta, unitigs, color_sets, export_metadata, label_mapping) -- species-wide
 
     LINEAGE_SPECIFICITY_FILTER(specificity_filter_input)
@@ -118,7 +109,7 @@ workflow BUILD_COLOR_INDEX {
 
     SBWT_CHECK_CANDIDATE.out.index
     | join(SBWT_BUILD_CANDIDATE.out.index.map { meta, sbwt, lcs -> [meta, lcs] })
-    | set { candidate_checked_index } // tuple(meta, sbwt, lcs), meta.species set -- E
+    | set { candidate_checked_index } // tuple(meta, sbwt, lcs), meta.species set -- candidate index
 
     // QC gate only -- confirms the rebuild is structurally sound. No export: the
     // candidate index only feeds sbwt difference, which never reads exported unitigs.
