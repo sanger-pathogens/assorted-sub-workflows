@@ -6,7 +6,7 @@ process COLOR_MAPPING {
 
     container 'quay.io/sangerpathogens/pandas:2.2.1'
 
-    publishDir mode: 'copy', path: "${params.outdir}/colour_mapping/${meta.ID}/"
+    publishDir mode: 'copy', path: "${params.outdir}/color_mapping/"
 
     input:
     tuple val(meta), path(metadata), path(assembly_input)
@@ -16,9 +16,9 @@ process COLOR_MAPPING {
     // Index B is gone (PAT-3570) and step 07 filtering reads the species-wide export,
     // so meta.target_groups no longer reaches this step -- it selects lineages in
     // LINEAGE_SPECIFICITY_FILTER instead.
-    tuple val(meta), path("index_species/species_file_colors_input.txt"), emit: file_colors
-    tuple val(meta), path("index_species/species_label_mapping.tsv"),     emit: label_mapping
-    tuple val(meta), path("index_species/species_stats.json"),            emit: stats
+    tuple val(meta), path("${meta.ID}_file_colors_input.txt"), emit: file_colors
+    tuple val(meta), path("${meta.ID}_label_mapping.tsv"),     emit: label_mapping
+    tuple val(meta), path("${meta.ID}_stats.json"),            emit: stats
 
     script:
     def assembly_arg = assembly_input.isDirectory() \
@@ -27,6 +27,7 @@ process COLOR_MAPPING {
     """
     ${moduleDir}/../bin/color_mapping.py \\
         --metadata ${metadata} \\
+        --species-name ${meta.ID} \\
         --sample-col ${params.sample_col} \\
         --group-label ${params.group_label} \\
         ${assembly_arg} \\
