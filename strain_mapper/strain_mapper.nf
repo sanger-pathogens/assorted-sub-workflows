@@ -27,14 +27,14 @@ workflow STRAIN_MAPPER {
     main:
 
     ch_reads_with_ref
-    .map(meta, read_1, read_2, reference -> reference)
+    .map{ meta, read_1, read_2, reference -> reference }
     .unique()
     .set(references)
 
-    INDEX_REF(reference)
+    INDEX_REF(references)
 
     ch_reads_with_ref
-    .map(meta, read_1, read_2, reference -> reference, meta, read_1, read_2)
+    .map{ meta, read_1, read_2, reference -> reference, meta, read_1, read_2 }
     .set { ch_ref_with_reads }
 
     // MAPPING
@@ -95,9 +95,8 @@ workflow STRAIN_MAPPER {
         stats_finished = Channel.value("SAMTOOLS_STATS not run")
     }
 
-
     bam_index
-    | combine(ch_ref_index)
+    | combine(INDEX_REF.out.ch_ref_index)
     | BCFTOOLS_MPILEUP
     | BCFTOOLS_CALL
     | set { ch_vcf_allpos }
