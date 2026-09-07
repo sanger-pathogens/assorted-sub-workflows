@@ -92,7 +92,11 @@ workflow STRAIN_MAPPER {
         BAM_COVERAGE.out.finished_ch
         | set { coverage_finished }
     } else {
-        coverage_finished = Channel.value("BAM_COVERAGE not run")
+        // keyed placeholder: the cleanup joins below match on meta, so a bare
+        // value channel here would silently drop every sample
+        bam_index
+        .map { meta, bam, bai -> [meta, "BAM_COVERAGE not run"] }
+        .set { coverage_finished }
     }
 
     if (params.samtools_stats){
@@ -100,7 +104,9 @@ workflow STRAIN_MAPPER {
         SAMTOOLS_STATS.out.finished_ch
         | set { stats_finished }
     } else {
-        stats_finished = Channel.value("SAMTOOLS_STATS not run")
+        bam_index
+        .map { meta, bam, bai -> [meta, "SAMTOOLS_STATS not run"] }
+        .set { stats_finished }
     }
 
     bam_index                                                   // [meta, bam, bai]
