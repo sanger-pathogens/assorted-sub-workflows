@@ -13,8 +13,8 @@ process GGCAT {
     container "quay.io/biocontainers/ggcat:2.2.0--hf1b6044_0"
 
     // meta.stage disambiguates the candidate rebuild (GGCAT_CANDIDATE) from the
-    // species-wide GGCAT_SPECIES output when they share a publishDir root.
-    publishDir mode: 'copy', path: "${params.outdir}/ggcat/${meta.stage ? "${meta.stage}/" : ''}${meta.ID}/", enabled: params.publish_intermediate
+    // species-wide GGCAT_SPECIES output ('ggcat/candidate_<lineage>/' vs 'ggcat/<species>/').
+    publishDir mode: 'copy', path: "${params.outdir}/ggcat/${meta.stage ? "${meta.stage}_" : ''}${meta.ID}/", enabled: params.publish_intermediate
 
     input:
     tuple val(meta), path(file_colors_input)

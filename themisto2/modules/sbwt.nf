@@ -16,8 +16,7 @@ process SBWT_BUILD {
 
     container "/data/pam/installs/packages/sbwt-rs-cli/bug_fix_setdiff_commit_f93d92_2026.08.04.13.38.59/sbwt-rs-cli-0.4.2-f93d92c/image/sbwt-rs-cli_bug_fix_setdiff_commit_f93d92_2026.08.04.13.38.59.sif"
 
-    // meta.stage disambiguates the candidate rebuild from that lineage's own build.
-    publishDir mode: 'copy', path: "${params.outdir}/sbwt/${meta.stage ? "${meta.stage}/" : ''}${meta.ID}/", enabled: params.publish_intermediate
+    publishDir mode: 'copy', path: "${params.outdir}/sbwt/${meta.stage ? "${meta.stage}_" : ''}${meta.ID}/", enabled: params.publish_intermediate
 
     input:
     tuple val(meta), path(unitigs_fna)
@@ -54,16 +53,13 @@ process SBWT_CHECK {
 
     container "/data/pam/installs/packages/sbwt-rs-cli/bug_fix_setdiff_commit_f93d92_2026.08.04.13.38.59/sbwt-rs-cli-0.4.2-f93d92c/image/sbwt-rs-cli_bug_fix_setdiff_commit_f93d92_2026.08.04.13.38.59.sif"
 
-    // MARKERS (G) is the deliverable -- own top-level folder; other outputs share sbwt/.
     publishDir mode: 'copy', path: {
         meta.ID.startsWith('markers_')
-            ? "${params.outdir}/candidate_markers/${meta.ID}/"
-            : "${params.outdir}/sbwt/${meta.stage ? "${meta.stage}/" : ''}${meta.ID}/"
+            ? "${params.outdir}/${meta.ID}/"
+            : "${params.outdir}/sbwt/${meta.stage ? "${meta.stage}_" : ''}${meta.ID}/"
     }
 
     input:
-    // Generic: sbwt check only takes -i, so this is reused (aliased) after both
-    // SBWT_BUILD and SBWT_DIFFERENCE; callers re-pair the .lcs afterward if needed.
     tuple val(meta), path(sbwt_index)
 
     output:
@@ -78,14 +74,12 @@ process SBWT_CHECK {
 process SBWT_DIFFERENCE {
     tag "${meta.ID}"
     label 'cpu_16'
-    // Sized for XLIN_BG/LIN_CAND; MARKERS/BG_EXCL override in setdiff_filter.config.
     label 'mem_8'
     label 'time_queue_from_normal'
 
     container "/data/pam/installs/packages/sbwt-rs-cli/bug_fix_setdiff_commit_f93d92_2026.08.04.13.38.59/sbwt-rs-cli-0.4.2-f93d92c/image/sbwt-rs-cli_bug_fix_setdiff_commit_f93d92_2026.08.04.13.38.59.sif"
 
     input:
-    // stageAs: both inputs are named unitigs-k<k>.sbwt, so they collide without it.
     tuple val(meta), path(sbwt_a, stageAs: 'a.sbwt'), path(sbwt_b, stageAs: 'b.sbwt') // a - b
 
     output:
@@ -107,12 +101,9 @@ process SBWT_DUMP_UNITIGS {
 
     container "/data/pam/installs/packages/sbwt-rs-cli/bug_fix_setdiff_commit_f93d92_2026.08.04.13.38.59/sbwt-rs-cli-0.4.2-f93d92c/image/sbwt-rs-cli_bug_fix_setdiff_commit_f93d92_2026.08.04.13.38.59.sif"
 
-    // Only called on G (markers) -- see main.nf.
-    publishDir mode: 'copy', path: "${params.outdir}/candidate_markers/${meta.ID}/"
+    publishDir mode: 'copy', path: "${params.outdir}/${meta.ID}/"
 
     input:
-    // Works on any SBWT index; reconstructs unitigs from the structure alone
-    // (no --file-colors, so the result is uncoloured -- unlike themisto2 build).
     tuple val(meta), path(sbwt_index)
 
     output:
