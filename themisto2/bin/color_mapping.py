@@ -3,9 +3,8 @@
 Generic color mapping script for Themisto2 --file-colors input.
 
 Reads metadata CSV, sorts by group label column, matches samples to
-assemblies, and prepares index input files organized in subdirectories:
-  - index_species/ : whole-species index files
-  - index_target_group/<group>/ : per-group indexes (if --target-groups provided)
+assemblies, and writes the species-wide index input files under
+index_species/ (file_colors_input.txt, label_mapping.tsv, stats.json).
 
 The metadata layout is not fixed: any CSV/TSV works as long as it has one
 row per genome, a sample-identifier column (--sample-col) and a grouping
@@ -35,16 +34,7 @@ def parse_args():
     parser.add_argument(
         "--group-label",
         required=True,
-        help="Column name to sort samples by (lexicographically), write to "
-             "label_mapping.tsv, and match against --target-groups.",
-    )
-    parser.add_argument(
-        "--target-groups",
-        default="",
-        help=(
-            "Comma-separated label(s) to build separate lineage-scoped indexes for, "
-            "e.g. GPSC1,GPSC2. Leave empty for species-wide only."
-        ),
+        help="Column name to sort samples by (lexicographically) and write to label_mapping.tsv.",
     )
     asm = parser.add_mutually_exclusive_group(required=True)
     asm.add_argument("--assembly-dir", help="Directory containing assembly FASTA files.")
@@ -94,73 +84,48 @@ def match_assemblies(metadata, assembly_input, assembly_suffix, sample_col, grou
 def write_index_files(
     metadata: pd.DataFrame,
     output_dir: Path,
-    index_type: str,
-    group_name: str | None,
     group_label: str,
     sample_col: str,
-    nan_label: int | None = None,
-    no_assembly: int | None = None,
-    on_disk_no_metadata: int | None = None,
+    nan_label: int,
+    no_assembly: int,
+    on_disk_no_metadata: int,
 ) -> None:
-    """Write file_colors_input.txt, label_mapping.tsv and stats.json to the appropriate subdirectory.
+    """Write index_species/{species_file_colors_input.txt, species_label_mapping.tsv, species_stats.json}.
 
     Args:
-        metadata: Rows for this index only (already filtered/sorted), with a
-            ``file_path`` column plus ``sample_col`` and ``group_label``.
-        output_dir: Root output dir; files go under ``index_species/`` or
-            ``index_target_group/<group_name>/``.
-        index_type: ``"species"`` for the whole-species index, anything else
-            for a per-group index.
-        group_name: Target-group label for a per-group index; ``None`` for the
-            species index.
-        group_label: Metadata column used for grouping/labelling.
+        metadata: All kept rows (already filtered/sorted), with a ``file_path``
+            column plus ``sample_col`` and ``group_label``.
+        output_dir: Root output dir; files go under ``index_species/``.
+        group_label: Metadata column used for labelling (label_mapping.tsv's ``label``).
         sample_col: Metadata column holding sample identifiers.
-        nan_label: Count of samples dropped for a missing group label. Only
-            meaningful species-wide; pass ``None`` for a per-group index so it
-            is omitted from stats.json (not attributable to one group).
+        nan_label: Count of samples dropped for a missing group label.
         no_assembly: Count of samples dropped for having no assembly on disk.
         on_disk_no_metadata: Count of assemblies on disk with no metadata row.
-            Species-wide only; ``None`` for a per-group index.
     """
-    if index_type == "species":
-        index_dir = output_dir / "index_species"
-        tag = "species"
-    else:
-        if not group_name or group_name in (".", "..") or "/" in group_name or "\\" in group_name:
-            sys.exit(f"Error: invalid --target-groups entry {group_name!r} -- must not contain path separators.")
-        index_dir = output_dir / "index_target_group" / group_name
-        tag = group_name
-
+    index_dir = output_dir / "index_species"
     index_dir.mkdir(parents=True, exist_ok=True)
 
-    metadata["file_path"].to_csv(index_dir / f"{tag}_file_colors_input.txt", index=False, header=False)
+    metadata["file_path"].to_csv(index_dir / "species_file_colors_input.txt", index=False, header=False)
 
     label_mapping = (
         metadata[[sample_col, group_label]]
         .drop_duplicates()
         .rename(columns={sample_col: "Sample_ID", group_label: "label"})
     )
-    label_mapping.to_csv(index_dir / f"{tag}_label_mapping.tsv", index=False, sep="\t")
+    label_mapping.to_csv(index_dir / "species_label_mapping.tsv", index=False, sep="\t")
 
     stats = {
-        "index_type": index_type,
-        "target_group": group_name or "species_wide",
+        "index_type": "species",
         "metadata_column": group_label,
+        "samples_dropped_missing_label": int(nan_label),
+        "samples_dropped_missing_assembly": int(no_assembly),
+        "assemblies_excluded_missing_metadata": int(on_disk_no_metadata),
+        "total_assemblies_written": int(len(metadata)),
     }
-    # nan_label/on_disk_no_metadata: None for target-group indexes -- not attributable to one group
-    if nan_label is not None:
-        stats["samples_dropped_missing_label"] = int(nan_label)
-    if no_assembly is not None:
-        stats["samples_dropped_missing_assembly"] = int(no_assembly)
-    if on_disk_no_metadata is not None:
-        stats["assemblies_excluded_missing_metadata"] = int(on_disk_no_metadata)
-    stats["total_assemblies_written"] = int(len(metadata))
-
-    stats_path = index_dir / f"{tag}_stats.json"
-    with open(stats_path, "w") as f:
+    with open(index_dir / "species_stats.json", "w") as f:
         json.dump(stats, f, indent=2)
 
-    print(f"Wrote {index_type}: {len(metadata)} assemblies", file=sys.stderr)
+    print(f"Wrote species index: {len(metadata)} assemblies", file=sys.stderr)
 
 
 def main():
@@ -191,41 +156,15 @@ def main():
     no_assembly_count = sum(no_assembly_by_group.values())
     on_disk_no_metadata_count = len(on_disk_no_metadata)
 
-    # Always write species-wide index
     write_index_files(
         metadata,
         output_dir,
-        "species",
-        None,
         args.group_label,
         args.sample_col,
         nan_label,
         no_assembly_count,
         on_disk_no_metadata_count,
     )
-
-    # If target-groups provided, validate and write separate index per group
-    target_groups = [g.strip() for g in args.target_groups.split(",") if g.strip()]
-    if target_groups:
-        found_groups = set(metadata[args.group_label].astype(str).unique())
-        missing = set(target_groups) - found_groups
-        if missing:
-            print(f"Warning: target groups not found in metadata: {missing}", file=sys.stderr)
-
-        for group in target_groups:
-            group_metadata = metadata[metadata[args.group_label].astype(str) == group]
-            if len(group_metadata) == 0:
-                continue
-            # this group's own no_assembly count (nan_label/on_disk_no_metadata don't apply per group)
-            write_index_files(
-                group_metadata,
-                output_dir,
-                "target_group",
-                group,
-                args.group_label,
-                args.sample_col,
-                no_assembly=no_assembly_by_group.get(group, 0),
-            )
 
 
 if __name__ == "__main__":
