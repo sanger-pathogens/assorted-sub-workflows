@@ -25,7 +25,7 @@ process CHECKPOINT_COUNT {
 
     container "quay.io/sangerpathogens/themisto2:0.0.1"
 
-    publishDir mode: 'copy', path: "${params.outdir}/checkpoints/rows/"
+    publishDir mode: 'copy', path: "${params.outdir}/checkpoints/rows/", enabled: params.publish_intermediate
 
     input:
     // kind = 'colorfile' (one line per genome) | 'fasta' | 'themisto' (.thm2)
@@ -78,7 +78,7 @@ process CHECKPOINT_COUNT_SBWT {
     // Same bug-fixed local .sif as the rest of the SBWT_* processes (see sbwt.nf).
     container "/data/pam/installs/packages/sbwt-rs-cli/bug_fix_setdiff_commit_f93d92_2026.08.04.13.38.59/sbwt-rs-cli-0.4.2-f93d92c/image/sbwt-rs-cli_bug_fix_setdiff_commit_f93d92_2026.08.04.13.38.59.sif"
 
-    publishDir mode: 'copy', path: "${params.outdir}/checkpoints/rows/"
+    publishDir mode: 'copy', path: "${params.outdir}/checkpoints/rows/", enabled: params.publish_intermediate
 
     input:
     tuple val(meta), val(stage), path(sbwt_index)

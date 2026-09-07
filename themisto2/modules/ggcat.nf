@@ -14,7 +14,7 @@ process GGCAT {
 
     // meta.stage disambiguates the candidate rebuild from the lineage's own GGCAT_GROUP
     // output -- both deliberately share meta.ID (needed for the SET_DIFF join).
-    publishDir mode: 'copy', path: "${params.outdir}/ggcat/${meta.stage ? "${meta.stage}/" : ''}${meta.ID}/"
+    publishDir mode: 'copy', path: "${params.outdir}/ggcat/${meta.stage ? "${meta.stage}/" : ''}${meta.ID}/", enabled: params.publish_intermediate
 
     input:
     tuple val(meta), path(file_colors_input)
