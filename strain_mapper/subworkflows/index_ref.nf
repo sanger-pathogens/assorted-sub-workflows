@@ -29,7 +29,7 @@ workflow INDEX_REF {
     } else if (params.mapper == "bwa") {
 
         // BWA INDEX
-        bwa_index_files = Path("${reference}.amb")
+        bwa_index_files = file("${reference}.amb")
         if (bwa_index_files.isFile()) {
             index_files = Channel.fromPath("${reference}{.amb,.ann,.bwt,.pac,.sa}")
 
@@ -43,22 +43,23 @@ workflow INDEX_REF {
             | set { ch_bwa_index }
         }
         ch_bt2_index = Channel.empty()
+    }
 
     // SAMTOOLS INDEX REF FASTA FOR DOWNSTREAM PROCESSES
-    references
+    reference
     .branch{ refe ->
-            has_faidx: Path("${refe}.fai").isFile()
+            has_faidx: file("${refe}.fai").isFile()
             needs_faidx:  true
     }
+    .set { ch_ref }
     
-    references.has_faidx
-    .map { refe -> [ refe, Path("${refe}.fai") ] }
+    ch_ref.has_faidx
+    .map { refe -> [ refe, file("${refe}.fai") ] }
     | set { ch_ref_preindex }
 
-    SAMTOOLS_INDEX_REF(references.needs_faidx)
+    SAMTOOLS_INDEX_REF(ch_ref.needs_faidx)
     .mix(ch_ref_preindex)
     | set { ch_ref_index }
-
 
     emmit:
     ch_bt2_index
