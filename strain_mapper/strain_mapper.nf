@@ -151,7 +151,7 @@ workflow STRAIN_MAPPER {
         | join(consensus_finished)
         | flatten
         | filter(Path)
-        | map { it.safeDelete() }
+        | map { file -> NextflowTool.safeDelete(file, workflow.workDir, log) }
 
         if (!params.skip_read_deduplication) {
             PICARD_MARKDUP.out.dedup_reads
@@ -160,7 +160,7 @@ workflow STRAIN_MAPPER {
             | join(consensus_finished)
             | flatten
             | filter(Path)
-            | map { it.safeDelete() }
+            | map { file -> NextflowTool.safeDelete(file, workflow.workDir, log) }
         }
     }
 
