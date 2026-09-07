@@ -54,7 +54,7 @@ workflow STRAIN_MAPPER {
     .set { ch_meta_ref_key }
 
     ch_reads_with_ref
-    .map{ meta, read_1, read_2, reference -> reference, meta, read_1, read_2 }
+    .map{ meta, read_1, read_2, reference -> [reference, meta, read_1, read_2] }
     .set { ch_ref_with_reads }
 
     // MAPPING
