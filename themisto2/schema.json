@@ -1,0 +1,58 @@
+{
+  "pipeline": "themisto2",
+  "params": {
+    "Colour mapping (color_mapping.nf) - run-wide options": {
+      "assembly_suffix": {
+        "default": ".contigs.fasta",
+        "help_text": "Suffix appended to each sample_col value to form the assembly filename. Only used when a species' assembly path is a directory."
+      },
+      "sample_col": {
+        "default": "Sample_ID",
+        "help_text": "Column name in the metadata containing sample identifiers, matched against assembly filenames."
+      },
+      "group_label": {
+        "default": "",
+        "help_text": "Column name in the metadata file used to group genome assemblies into colour sets. The per-species metadata file, assembly path and target_groups come in on BUILD_COLOR_INDEX's samples channel, not as params."
+      }
+    },
+    "Step07 - Lineage-specificity candidate filtering (lineage_specificity_filter.py)": {
+      "candidate_min_freq": {
+        "default": "core",
+        "help_text": "Within-lineage presence-fraction cutoff a unitig must clear: 'core' (>=0.95), 'relaxed' (>=0.5), 'catchall' (>0.0), or a literal fraction e.g. '0.8'."
+      },
+      "candidate_min_genome_count": {
+        "default": "5",
+        "help_text": "Absolute lineage-genome-count floor, on top of candidate_min_freq. Also the size below which a sister lineage is ignored when computing specificity_max_outside."
+      },
+      "specificity_max_outside": {
+        "default": "0.05",
+        "help_text": "Ceiling on the MAX presence fraction across any single other lineage (not a pooled average across all of them -- that hides a unitig concentrated in one sister lineage). null = not applied, i.e. core-only. 0.05 (the PAT-3570 default) also requires lineage-specificity."
+      }
+    },
+    "Step08 - Set-difference calculations (setdiff_filter.nf)": {
+      "bg_index": {
+        "default": "/data/pam/team230/sm71/scratch/gps_project/04_sbwt_kmer_index/ATB/ATB_all.sbwt",
+        "help_text": "Pre-built background SBWT index (ATB) that bg_excl (C)/markers (G) are diffed against when --bg_excl_index isn't set. Must be built at the same --color_index_kmer_size as the rest of this pipeline's indexes."
+      },
+      "bg_excl_index": {
+        "default": "",
+        "help_text": "Path to an already-built bg_excl (step08 'C', background - species_index) SBWT index to reuse directly, skipping the hugemem-scale --bg_index diff. Leave empty to compute bg_excl from --bg_index instead."
+      }
+    },
+    "Shared across GGCAT / SBWT / Themisto2 builds": {
+      "temp_dir": {
+        "default": null,
+        "help_text": "Shared scratch root for GGCAT/SBWT (and future set_diff_calculations.nf) temp/working dirs. Optional -- falls back to a task-local work directory per tool, which is fine at species scale. Only set this to a Lustre scratch path with confirmed free space if running at full background-DB scale (ATB/GTDB), which needs terabytes free. Each tool writes under '<temp_dir>/<tool>/' -- assumes only one build runs against a given temp_dir at a time."
+      },
+      "color_index_kmer_size": {
+        "default": "31",
+        "help_text": "k-mer size used consistently across the GGCAT, SBWT and Themisto2 builds in this subworkflow. Must match the k-mer size of any existing index (e.g. background SBWT/ATB/GTDB) this output will later be compared or set-differenced against."
+      },
+      "publish_intermediate": {
+        "default": "false",
+        "help_text": "Publish the per-stage intermediates (GGCAT unitigs, SBWT indexes, checkpoint count rows). false = keep only the final outputs; flip on to inspect a run."
+      }
+    }
+  }
+}
+
