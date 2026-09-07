@@ -31,10 +31,11 @@ process BWA_INDEX {
     container 'quay.io/biocontainers/bwa:0.7.17--he4a0461_11'
 
     input:
-    path(reference)
+    // see BOWTIE2_INDEX for why ref_key is carried as a val
+    tuple val(ref_key), path(reference)
 
     output:
-    tuple path(reference), path("${reference}.*"),  emit: bwa_index
+    tuple val(ref_key), path(reference), path("${reference}.*"),  emit: bwa_index
 
     script:
     """

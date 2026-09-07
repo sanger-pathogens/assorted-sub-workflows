@@ -33,15 +33,23 @@ workflow STRAIN_MAPPER {
 
     INDEX_REF(references)
 
+    // INDEX_REF keys its outputs on the original reference path as a string, because the
+    // reference it emits alongside them is a work directory path. Key the reads the same
+    // way so both sides of the combine below agree.
     ch_reads_with_ref
-    .map{ meta, read_1, read_2, reference -> [reference, meta, read_1, read_2] }
+    .map{ meta, read_1, read_2, reference -> [reference.toString(), meta, read_1, read_2] }
     .set { ch_ref_with_reads }
+
+    // lookup used to re-attach the reference after mapping, where only meta survives
+    ch_reads_with_ref
+    .map{ meta, read_1, read_2, reference -> [meta, reference.toString()] }
+    .set { ch_meta_ref_key }
 
     // MAPPING
     if (params.mapper == "bowtie2") {
         ch_ref_with_reads
         .combine(INDEX_REF.out.ch_bt2_index, by: 0)
-        .map { reference, meta, read_1, read_2, bt2_index_files -> [meta, read_1, read_2, reference, bt2_index_files] }
+        .map { ref_key, meta, read_1, read_2, reference, bt2_index_files -> [meta, read_1, read_2, reference, bt2_index_files] }
         .set { ch_reads_with_indexed_ref }
 
         BOWTIE2 ( ch_reads_with_indexed_ref )
@@ -50,7 +58,7 @@ workflow STRAIN_MAPPER {
     } else if (params.mapper == "bwa") {
         ch_ref_with_reads
         .combine(INDEX_REF.out.ch_bwa_index, by: 0)
-        .map { reference, meta, read_1, read_2, bwa_index_files -> [meta, read_1, read_2, reference, bwa_index_files] }
+        .map { ref_key, meta, read_1, read_2, reference, bwa_index_files -> [meta, read_1, read_2, reference, bwa_index_files] }
         .set { ch_reads_with_indexed_ref }
 
         BWA( ch_reads_with_indexed_ref )
@@ -95,8 +103,11 @@ workflow STRAIN_MAPPER {
         stats_finished = Channel.value("SAMTOOLS_STATS not run")
     }
 
-    bam_index
-    | combine(INDEX_REF.out.ch_ref_index)
+    bam_index                                                   // [meta, bam, bai]
+    .join(ch_meta_ref_key)                                      // [meta, bam, bai, ref_key]
+    .map { meta, bam, bai, ref_key -> [ref_key, meta, bam, bai] }
+    .combine(INDEX_REF.out.ch_ref_index, by: 0)                 // [ref_key, meta, bam, bai, reference, faidx]
+    .map { ref_key, meta, bam, bai, reference, faidx -> [meta, bam, bai, reference, faidx] }
     | BCFTOOLS_MPILEUP
     | BCFTOOLS_CALL
     | set { ch_vcf_allpos }
@@ -112,9 +123,12 @@ workflow STRAIN_MAPPER {
 
     PUBLISH_VCF( ch_vcf_final )
     
-    ch_vcf_final
-    | combine(INDEX_REF.out.ch_ref_index)
-    | set { ch_vcf_and_ref }
+    ch_vcf_final                                                // [meta, vcf]
+    .join(ch_meta_ref_key)                                      // [meta, vcf, ref_key]
+    .map { meta, vcf, ref_key -> [ref_key, meta, vcf] }
+    .combine(INDEX_REF.out.ch_ref_index, by: 0)                 // [ref_key, meta, vcf, reference, faidx]
+    .map { ref_key, meta, vcf, reference, faidx -> [meta, vcf, reference, faidx] }
+    .set { ch_vcf_and_ref }
 
     CURATE_CONSENSUS( ch_vcf_and_ref )
     CURATE_CONSENSUS.out.finished_ch
