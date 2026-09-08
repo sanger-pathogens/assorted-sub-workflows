@@ -1,7 +1,7 @@
 process MINIBWA_INDEX {
     tag "${meta.ID}"
     label 'cpu_1'
-    label 'mem_250M'
+    label 'mem_2'
     label 'time_12'
 
     container 'quay.io/biocontainers/minibwa:0.6--hab16a5f_0'
@@ -21,7 +21,7 @@ process MINIBWA_INDEX {
 process MINIBWA {
     tag "${meta.ID}"
     label 'cpu_1'
-    label 'mem_1'
+    label 'mem_2'
     label 'time_12'
 
     container 'quay.io/biocontainers/minibwa:0.6--hab16a5f_0'
