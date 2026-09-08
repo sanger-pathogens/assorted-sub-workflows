@@ -77,8 +77,17 @@ workflow METAWRAP_REASSEMBLY {
 	| set { split_reads }
 
 	to_reassemble_bins
-	| map { meta, directory_path ->
-		def file_list = filesFromDir(directory_path)
+	| map { meta, bins ->
+		// Accept BOTH shapes. The fork's Binette refinement emits
+		// `path("final_bins/*")`, i.e. a LIST of individual .fa files, whereas the
+		// original metaWRAP refinement emitted a single directory Path. filesFromDir()
+		// only handles the latter, so with Binette upstream this crashed before
+		// submitting any task:
+		//   ERROR ~ Invalid method invocation `filesFromDir` with arguments: [...] (java.util.ArrayList)
+		// Since skip_reassembly defaults to FALSE, that made the fork's default
+		// configuration unrunnable. Handle a list directly and fall back to the
+		// directory walk so both refinement backends work.
+		def file_list = (bins instanceof List) ? bins : filesFromDir(bins)
 		[meta, file_list]
 	}
 	| transpose
