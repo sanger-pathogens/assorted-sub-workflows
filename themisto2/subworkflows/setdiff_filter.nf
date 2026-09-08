@@ -1,16 +1,17 @@
 // SBWT_DIFFERENCE/SBWT_CHECK are generic (diff two SBWT indexes, verify the
-// result) -- aliased once per step08 stage. See 08_set_difference_filtering.md
-// and the README glossary for the full methodology.
+// result) -- aliased once per set-difference stage. See the stage table in the
+// README for the full methodology.
 //
-//   stage    step08  formula
-//   bg_excl  C       background - species_index (A)
-//   markers  G       candidate_index (E) - bg_excl
+//   stage    formula
+//   bg_excl  background - species_index
+//   markers  candidate_index - bg_excl
 //
-// The old cross-lineage set-diffs (xlin_bg D = A - lineage_index B; lin_cand F =
-// E - xlin_bg) were removed in PAT-3570: sbwt difference is colour-blind, so
-// E - (A - B) == E exactly whenever E's k-mers are lineage-core (they always are).
-// Cross-lineage specificity is now a differential-frequency filter at step 07
-// (lineage_specificity_filter.py), upstream of the candidate index E.
+// The old cross-lineage set-diffs (xlin_bg = species_index - lineage_index;
+// lin_cand = candidate_index - xlin_bg) were removed in PAT-3570: sbwt difference
+// is colour-blind, so subtracting a lineage index from the species index never
+// removes a k-mer a lineage shares with a sister lineage. Cross-lineage
+// specificity is now a differential-frequency filter (lineage_specificity_filter.py),
+// upstream of the candidate index.
 include { SBWT_DIFFERENCE as SBWT_DIFFERENCE_BG_EXCL; SBWT_CHECK as SBWT_CHECK_BG_EXCL } from '../modules/sbwt.nf'
 include { SBWT_DIFFERENCE as SBWT_DIFFERENCE_MARKERS; SBWT_CHECK as SBWT_CHECK_MARKERS } from '../modules/sbwt.nf'
 // Verifies a user-supplied --bg_excl_index loads before it's used below.
@@ -19,15 +20,15 @@ include { CHECKPOINT_COUNT_SBWT } from '../modules/checkpoint_count.nf'
 
 workflow SET_DIFF_CALCULATIONS {
     take:
-    // bg_excl (C) isn't a take: input -- built below from params.bg_excl_index/bg_index.
-    /// tuple(meta, sbwt, lcs) -- A: species/group-wide index. meta.ID = species id.
+    // bg_excl isn't a take: input -- built below from params.bg_excl_index/bg_index.
+    /// tuple(meta, sbwt, lcs) -- species/group-wide index. meta.ID = species id.
     species_index_ch
-    /// tuple(meta, sbwt, lcs) -- E: per-lineage candidate index. meta.ID = lineage id,
+    /// tuple(meta, sbwt, lcs) -- per-lineage candidate index. meta.ID = lineage id,
     /// meta.species = parent species id.
     candidate_index_ch
 
     main:
-    // bg_excl (C) = background - species. --bg_excl_index reuses a pre-built one and
+    // bg_excl = background - species. --bg_excl_index reuses a pre-built one and
     // skips the hugemem --bg_index diff. Both branches -> bg_excl_checked, one per species.
     if (params.bg_excl_index) {
         // Tag with the file basename so output names show which background was used.
@@ -58,7 +59,7 @@ workflow SET_DIFF_CALCULATIONS {
         SBWT_CHECK_BG_EXCL.out.index | set { bg_excl_checked }
     }
 
-    // markers (G) = candidate index (E) - bg_excl (C), joined on the parent species
+    // markers = candidate index - bg_excl, joined on the parent species
     bg_excl_checked
     | map { meta, sbwt -> [meta.species, sbwt] }
     | set { bg_excl_by_species }
@@ -76,18 +77,18 @@ workflow SET_DIFF_CALCULATIONS {
 
     // ============ Checkpoint counts ============
     // Distinct k-mers surviving each set-diff stage (see build_color_index.nf).
-    // Side-channel only. stage keys continue the funnel order after A/E.
+    // Side-channel only. `order` keys continue after the build stages (which end at 60).
     Channel.empty()
-    | mix( bg_excl_checked.map               { meta, sbwt -> [meta, 'C_bg_excl_08_diff', sbwt] } )
-    | mix( SBWT_CHECK_MARKERS.out.index.map  { meta, sbwt -> [meta, 'G_markers_08_diff', sbwt] } )
+    | mix( bg_excl_checked.map               { meta, sbwt -> [meta, 70, 'bg_excl_diff', sbwt] } )
+    | mix( SBWT_CHECK_MARKERS.out.index.map  { meta, sbwt -> [meta, 80, 'markers_diff', sbwt] } )
     | set { checkpoint_inputs }
 
     CHECKPOINT_COUNT_SBWT(checkpoint_inputs)
 
     emit:
-    bg_excl  = bg_excl_checked                // C -- background_exclusion
-    markers  = SBWT_CHECK_MARKERS.out.index   // G -- final_candidate_markers
+    bg_excl  = bg_excl_checked                // background_exclusion
+    markers  = SBWT_CHECK_MARKERS.out.index   // final_candidate_markers
     checkpoints = CHECKPOINT_COUNT_SBWT.out.row // tuple(meta, row_tsv) -- per-stage count rows
 }
 
-// TODO: G_gtdb (markers - a GTDB-based bg_excl) -- add once GTDB is built.
+// TODO: a GTDB-based markers stage (markers - a GTDB-based bg_excl) -- add once GTDB is built.

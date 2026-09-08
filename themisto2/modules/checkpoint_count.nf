@@ -1,35 +1,22 @@
-// Pipeline checkpoint counters -- pass-through "tees" that report how much
-// sequence / how many distinct k-mers survive each key stage, so a run's own
-// numbers can be eyeballed as a funnel (species A -> lineage B -> candidates E
-// -> set-diff D/F/G). Tapped off existing .out channels and never joined back
-// in, so they add no dependency to the main DAG.
-//
-// Every process writes ONE two-line TSV ('<header>\n<row>') with a shared
-// column set; the caller collectFile()s them (keepHeader) into a single
-// pipeline_counts.tsv. Missing metrics are left blank.
-//
-//   stage    id  species  n_kmers  n_colors  n_unitigs  n_seqs  sum_bp
-//
-// Headline metric is n_kmers (distinct k-mers) -- summed unitig bp double-counts
-// the k-1 overlap each unitig shares with its neighbours, so sum_bp is only a
-// rough size and is blank for index-based stages.
+
 
 process CHECKPOINT_COUNT {
     tag "${stage}:${meta.ID}"
     label 'cpu_4'
-    label 'mem_2'
-    label 'time_30m'
+    label 'mem_4'
+    label 'time_queue_from_normal'
 
     // Diagnostic side-channel: a broken counter must never fail a real run.
     errorStrategy 'ignore'
 
     container "quay.io/sangerpathogens/themisto2:0.0.1"
 
-    publishDir mode: 'copy', path: "${params.outdir}/checkpoints/rows/", enabled: params.publish_intermediate
+    publishDir mode: 'copy', path: "${params.outdir}/checkpoints/", enabled: params.publish_intermediate
 
     input:
-    // kind = 'colorfile' (one line per genome) | 'fasta' | 'themisto' (.thm2)
-    tuple val(meta), val(stage), val(kind), path(target)
+    // order = ascending sort key (see file header); kind = 'colorfile' (one line
+    // per genome) | 'fasta' | 'themisto' (.thm2)
+    tuple val(meta), val(order), val(stage), val(kind), path(target)
 
     output:
     tuple val(meta), path(row_tsv), emit: row
@@ -37,6 +24,7 @@ process CHECKPOINT_COUNT {
     script:
     row_tsv = "${stage}.${meta.ID}.checkpoint.tsv"
     def species = meta.species ?: meta.ID
+    def order_key = String.format('%03d', order as int)
     """
     n_kmers=""; n_colors=""; n_unitigs=""; n_seqs=""; sum_bp=""
 
@@ -59,9 +47,9 @@ process CHECKPOINT_COUNT {
         ;;
     esac
 
-    printf 'stage\\tid\\tspecies\\tn_kmers\\tn_colors\\tn_unitigs\\tn_seqs\\tsum_bp\\n' > "${row_tsv}"
-    printf '%s\\t%s\\t%s\\t%s\\t%s\\t%s\\t%s\\t%s\\n' \\
-        "${stage}" "${meta.ID}" "${species}" \\
+    printf 'order\\tstage\\tid\\tspecies\\tn_kmers\\tn_colors\\tn_unitigs\\tn_seqs\\tsum_bp\\n' > "${row_tsv}"
+    printf '%s\\t%s\\t%s\\t%s\\t%s\\t%s\\t%s\\t%s\\t%s\\n' \\
+        "${order_key}" "${stage}" "${meta.ID}" "${species}" \\
         "\${n_kmers}" "\${n_colors}" "\${n_unitigs}" "\${n_seqs}" "\${sum_bp}" >> "${row_tsv}"
     """
 }
@@ -81,7 +69,7 @@ process CHECKPOINT_COUNT_SBWT {
     publishDir mode: 'copy', path: "${params.outdir}/checkpoints/rows/", enabled: params.publish_intermediate
 
     input:
-    tuple val(meta), val(stage), path(sbwt_index)
+    tuple val(meta), val(order), val(stage), path(sbwt_index)
 
     output:
     tuple val(meta), path(row_tsv), emit: row
@@ -89,6 +77,7 @@ process CHECKPOINT_COUNT_SBWT {
     script:
     row_tsv = "${stage}.${meta.ID}.checkpoint.tsv"
     def species = meta.species ?: meta.ID
+    def order_key = String.format('%03d', order as int)
     // 'sbwt check' prints e.g. "Index loaded: 7610122 sets, 7578682 k-mers, k=31"
     // to stderr; parse the k-mer count from there.
     """
@@ -97,9 +86,9 @@ process CHECKPOINT_COUNT_SBWT {
     sbwt check -i "${sbwt_index}" -t ${task.cpus} > check.log 2>&1 || true
     n_kmers=\$(grep -oE '[0-9]+ k-mers' check.log | grep -oE '[0-9]+' | head -1 || true)
 
-    printf 'stage\\tid\\tspecies\\tn_kmers\\tn_colors\\tn_unitigs\\tn_seqs\\tsum_bp\\n' > "${row_tsv}"
-    printf '%s\\t%s\\t%s\\t%s\\t%s\\t%s\\t%s\\t%s\\n' \\
-        "${stage}" "${meta.ID}" "${species}" \\
+    printf 'order\\tstage\\tid\\tspecies\\tn_kmers\\tn_colors\\tn_unitigs\\tn_seqs\\tsum_bp\\n' > "${row_tsv}"
+    printf '%s\\t%s\\t%s\\t%s\\t%s\\t%s\\t%s\\t%s\\t%s\\n' \\
+        "${order_key}" "${stage}" "${meta.ID}" "${species}" \\
         "\${n_kmers}" "\${n_colors}" "\${n_unitigs}" "\${n_seqs}" "\${sum_bp}" >> "${row_tsv}"
     """
 }
