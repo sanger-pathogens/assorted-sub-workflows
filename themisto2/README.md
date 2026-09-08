@@ -38,7 +38,7 @@ All software dependencies are containerised (GGCAT, SBWT, Themisto2, and a `pand
 
 ## `SET_DIFF_CALCULATIONS` (`setdiff_filter.nf`)
 
-Computes the index-native set differences that turn each candidate index into a final marker set. Earlier drafts carried a bare letter (`A`-`G`) for each stage through the code; that's been dropped in favour of descriptive stage/variable names, though some `setdiff_filter.nf` comments and checkpoint keys still use the letters. The `xlin_bg` and `lin_cand` cross-lineage set-diffs were removed in PAT-3570 -- `sbwt difference` is colour-blind, so subtracting a lineage index from the species index never removes a k-mer a lineage shares with a sister lineage. Cross-lineage specificity is now the differential-frequency filter in `BUILD_COLOR_INDEX`. Current stages:
+Computes the index-native set differences that turn each candidate index into a final marker set. Earlier drafts carried a bare letter (`A`-`G`) for each stage through the code; that's been dropped in favour of descriptive stage/variable names. The `xlin_bg` and `lin_cand` cross-lineage set-diffs were removed in PAT-3570 -- `sbwt difference` is colour-blind, so subtracting a lineage index from the species index never removes a k-mer a lineage shares with a sister lineage. Cross-lineage specificity is now the differential-frequency filter in `BUILD_COLOR_INDEX`. Current stages:
 
 | stage name (code) | formula | produced by | process aliases | emit name |
 | --- | --- | --- | --- | --- |
