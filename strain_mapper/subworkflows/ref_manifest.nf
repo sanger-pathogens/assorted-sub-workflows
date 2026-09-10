@@ -4,7 +4,7 @@
 //
 workflow REF_MANIFEST_PARSE {
     take:
-    samplesheet // file: /path/to/samplesheet.csv
+    samplesheet // file: /path/to/samplesheet.csv -> [ID, Reference]
 
     main:
     Channel
