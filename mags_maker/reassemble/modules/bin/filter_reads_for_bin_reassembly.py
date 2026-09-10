@@ -57,6 +57,8 @@ def main():
     # files to store output file handles for each bin and mismatch category (strict/permissive)
     files = {}
     opened_bins = {}
+    F_line = None
+    R_line = None
 
     if args.mapped_reads.endswith(".bam"):
         input_stream = AlignmentFile(args.mapped_reads, "rb")
@@ -73,13 +75,30 @@ def main():
     for read in sam_iter:
         line = read.to_string()
         cut = line.strip().split("\t")
-        binary_flag = bin(int(cut[1]))
+        flag = int(cut[1])
 
-        if binary_flag[-7] == "1":
+        # Bitwise tests, not string slicing on bin(flag). bin() produces a
+        # variable-length string ('0b0' for flag 0, '0b10000' for flag 16), so
+        # binary_flag[-7] / [-8] raise IndexError for any flag < 64 - i.e. for
+        # every unpaired or unmapped-single record (flags 0, 4, 16, 20, ...).
+        # That killed SPLIT_READS with exit 1 and an empty stderr on
+        # SRR25448172 and SRR25448496 (see FINDINGS F21). 0x40 = first in pair,
+        # 0x80 = second in pair; equivalent to the old slices for valid paired
+        # flags, but total.
+        if flag & 0x40:
             F_line = line
             continue
-        elif binary_flag[-8] == "1":
+        elif flag & 0x80:
             R_line = line
+        else:
+            # Neither first nor second in pair: an unpaired record. The old code
+            # crashed here; skip it, there is no pair to reassemble from.
+            continue
+
+        if F_line is None:
+            # Second-in-pair with no preceding first-in-pair (truncated or
+            # re-sorted input). Previously a NameError.
+            continue
 
         # Start processing read pair
         F_cut = F_line.strip().split("\t")
@@ -127,13 +146,12 @@ def main():
                 cumulative_mismatches += int(field.split(":")[-1])
                 break
 
-        F_binary_flag = bin(int(F_cut[1]))
-        R_binary_flag = bin(int(R_cut[1]))
-
-        if F_binary_flag[-5] == '1':
+        # 0x10 = read reverse strand. Same rationale as above: bin()[-5] raises
+        # IndexError for flag 0 and is wrong for any flag < 16.
+        if int(F_cut[1]) & 0x10:
             F_cut[9] = rev_comp(F_cut[9])
             F_cut[10] = F_cut[10][::-1]
-        if R_binary_flag[-5] == '1':
+        if int(R_cut[1]) & 0x10:
             R_cut[9] = rev_comp(R_cut[9])
             R_cut[10] = R_cut[10][::-1]
 
