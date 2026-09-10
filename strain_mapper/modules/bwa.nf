@@ -16,7 +16,7 @@ process BWA {
     mapped_reads = "${meta.ID}.sam"
     // -v 1 for only errors -M for picard compatibility -a output all alignements
     """
-    bwa mem -v 1 -M -a -t ${task.cpus}  ${reference} ${reads_1} ${reads_2} > ${meta.ID}.sam
+    bwa mem -v 1 -M -a -t ${task.cpus}  ${reference} ${reads_1} ${reads_2} > ${mapped_reads}
     """
 }
 
