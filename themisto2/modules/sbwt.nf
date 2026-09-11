@@ -2,6 +2,10 @@
 // sbwt-rs-cli 0.4.2-f93d92c (set-diff corruption fix, 2026-08-04) was never
 // published to a registry. Do not swap back to 0.4.2-7c5fcc0 -- still corrupts.
 // See [[sbwt_setdiff_bugfix_module]]. Tracked for a public image: PAT-3572.
+//
+// SBWT_DIFFERENCE is gone (marker_filtering.nf's ATB cross-species check replaced the
+// bg_excl/markers sbwt set-diff this was built for) -- but SBWT_BUILD/SBWT_CHECK/
+// SBWT_DUMP_UNITIGS still use the same fixed binary, so the container stays.
 
 process SBWT_BUILD {
     tag "${meta.ID}"
@@ -53,11 +57,7 @@ process SBWT_CHECK {
 
     container "/data/pam/installs/packages/sbwt-rs-cli/bug_fix_setdiff_commit_f93d92_2026.08.04.13.38.59/sbwt-rs-cli-0.4.2-f93d92c/image/sbwt-rs-cli_bug_fix_setdiff_commit_f93d92_2026.08.04.13.38.59.sif"
 
-    publishDir mode: 'copy', path: {
-        meta.ID.startsWith('markers_')
-            ? "${params.outdir}/${meta.ID}/"
-            : "${params.outdir}/sbwt/${meta.stage ? "${meta.stage}_" : ''}${meta.ID}/"
-    }
+    publishDir mode: 'copy', path: "${params.outdir}/sbwt/${meta.stage ? "${meta.stage}_" : ''}${meta.ID}/"
 
     input:
     tuple val(meta), path(sbwt_index)
@@ -68,28 +68,6 @@ process SBWT_CHECK {
     script:
     """
     sbwt check -i ${sbwt_index} -t ${task.cpus}
-    """
-}
-
-process SBWT_DIFFERENCE {
-    tag "${meta.ID}"
-    label 'cpu_16'
-    label 'mem_8'
-    label 'time_queue_from_normal'
-
-    container "/data/pam/installs/packages/sbwt-rs-cli/bug_fix_setdiff_commit_f93d92_2026.08.04.13.38.59/sbwt-rs-cli-0.4.2-f93d92c/image/sbwt-rs-cli_bug_fix_setdiff_commit_f93d92_2026.08.04.13.38.59.sif"
-
-    input:
-    tuple val(meta), path(sbwt_a, stageAs: 'a.sbwt'), path(sbwt_b, stageAs: 'b.sbwt') // a - b
-
-    output:
-    tuple val(meta), path(diff_index), emit: index
-
-    script:
-    diff_index = "${meta.ID}.sbwt"
-    def low_ram_flag = params.sbwt_diff_low_ram ? "--low-ram" : "" // peak-RAM only, not a correctness fix
-    """
-    sbwt difference a.sbwt b.sbwt -o ${diff_index} -t ${task.cpus} -v ${low_ram_flag}
     """
 }
 

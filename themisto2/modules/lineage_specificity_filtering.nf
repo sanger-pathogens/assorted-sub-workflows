@@ -11,7 +11,9 @@ process LINEAGE_SPECIFICITY_FILTER {
                saveAs: { fn -> "${meta.ID}_${fn}" }
 
     input:
-    tuple val(meta), path(unitigs), path(color_sets), path(export_metadata), path(label_mapping)
+    // target_groups is a plain val, NOT part of meta -- so an edit to it re-runs
+    // this process (correct) without touching the species index upstream.
+    tuple val(meta), path(unitigs), path(color_sets), path(export_metadata), path(label_mapping), val(target_groups)
 
     output:
     tuple val(meta), path("*_candidate_unitigs.fasta"), emit: unitigs,      optional: true
@@ -19,7 +21,7 @@ process LINEAGE_SPECIFICITY_FILTER {
     tuple val(meta), path("*_specificity.tsv"),         emit: specificity,  optional: true
 
     script:
-    def tg = (meta.target_groups ?: '').trim()
+    def tg = (target_groups ?: '').trim()
     def lineages_arg = tg ? "--lineages ${tg.tokenize(',').join(' ')}" : "--all-lineages"
     def outside_arg = params.specificity_max_outside != null ? "--max-outside ${params.specificity_max_outside}" : ""
     """

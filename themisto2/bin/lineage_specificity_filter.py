@@ -10,8 +10,12 @@ scoring). Both are folded in here.
 
 Runs on the SPECIES-wide export -- export.unitigs.fa / export.color_sets.txt plus
 the species label_mapping.tsv (row order == colour ID order at build time) -- in
-ONE streaming pass over color_sets.txt that scores every lineage present, however
-many --lineages are actually requested.
+ONE streaming pass over color_sets.txt. That pass scores every lineage that can
+affect a result: the requested --lineages plus every lineage large enough to
+count as a sister in the outside max (>= --min-lineage-size). Singleton /
+sub-threshold lineages are dropped from the presence matrix -- at species scale
+(hundreds of one-genome clusters) that is the difference between a
+(n_color_sets x ~150) matrix and (n_color_sets x every_label).
 
 For each unitig / requested lineage:
   within_frac = (that lineage's genomes carrying the unitig) / (its genome count)
@@ -132,13 +136,27 @@ def parse_args():
 # Loading
 
 
-def load_n_colors(export_metadata_path) -> int:
+def _metadata_int(export_metadata_path, key):
     with open(export_metadata_path) as fh:
         for line in fh:
-            key, _, value = line.strip().partition("=")
-            if key == "num_colors":
+            k, _, value = line.strip().partition("=")
+            if k == key:
                 return int(value)
-    raise ValueError(f"{export_metadata_path} has no 'num_colors=' line")
+    return None
+
+
+def load_n_colors(export_metadata_path) -> int:
+    n = _metadata_int(export_metadata_path, "num_colors")
+    if n is None:
+        raise ValueError(f"{export_metadata_path} has no 'num_colors=' line")
+    return n
+
+
+def load_n_color_sets(export_metadata_path):
+    """num_color_sets from export.metadata.txt (None if absent). Lets
+    compute_presence_parallel pre-size `dense` instead of holding every chunk's
+    counts until it can infer the row count."""
+    return _metadata_int(export_metadata_path, "num_color_sets")
 
 
 def load_colour_lineage(label_mapping_path, n_colors):
@@ -188,29 +206,49 @@ def _score_chunk(bounds):
                 continue
             csids.append(int(parts[0].split(b"=")[1]))
             cids = np.array(parts[2:], dtype=np.int64)  # numpy C parser, not a Python int() comprehension
-            counts.append(np.bincount(_LOF[cids][_LOF[cids] >= 0], minlength=_NL).astype(np.int64))
-    return np.array(csids, dtype=np.int64), (np.vstack(counts) if counts else np.zeros((0, _NL), dtype=np.int64))
+            # int32: a per-lineage count is bounded by that lineage's genome count
+            # (<< 2**31). Halves the count matrix vs int64 -- the dominant cost of
+            # this step at --all-lineages scale (n_color_sets x hundreds).
+            counts.append(np.bincount(_LOF[cids][_LOF[cids] >= 0], minlength=_NL).astype(np.int32))
+    return np.array(csids, dtype=np.int64), (np.vstack(counts) if counts else np.zeros((0, _NL), dtype=np.int32))
 
 
-def compute_presence_parallel(color_sets_path, n_lineages, lof, threads):
-    """Returns dense (n_color_sets, n_lineages) int array: how many of each
-    lineage's genomes are in each colour set."""
+def compute_presence_parallel(color_sets_path, n_lineages, lof, threads, n_color_sets=None):
+    """Returns dense (n_color_sets, n_lineages) int32 array: how many of each
+    lineage's genomes are in each colour set.
+
+    `n_lineages` is the RELEVANT lineage count (non-singletons + targets, see
+    main), not every label -- that is the first memory lever. The second: when
+    `n_color_sets` is known (export.metadata.txt) `dense` is allocated up front
+    and each worker chunk is scattered straight in, so peak is one `dense` plus a
+    single chunk in flight, not `dense` plus the list of every chunk's counts."""
     size = color_sets_path.stat().st_size
     n_chunks = max(threads * 3, 1)
     step = size // n_chunks
     bounds = [(i * step, size if i == n_chunks - 1 else (i + 1) * step) for i in range(n_chunks)]
 
-    all_csid, all_counts = [], []
+    dense = np.zeros((n_color_sets, n_lineages), dtype=np.int32) if n_color_sets else None
+    pending = []  # fallback path only (no metadata): (csid, counts) per chunk
     with ProcessPoolExecutor(
         max_workers=threads, initializer=_init_worker, initargs=(str(color_sets_path), lof, n_lineages)
     ) as ex:
         for csid, cnt in ex.map(_score_chunk, bounds):
-            all_csid.append(csid)
-            all_counts.append(cnt)
-    csid = np.concatenate(all_csid) if all_csid else np.zeros(0, dtype=np.int64)
-    max_id = int(csid.max()) if len(csid) else -1
-    dense = np.zeros((max_id + 1, n_lineages), dtype=np.int64)
-    dense[csid] = np.vstack(all_counts) if all_counts else np.zeros((0, n_lineages), dtype=np.int64)
+            if not len(csid):
+                continue
+            if dense is None:
+                pending.append((csid, cnt))
+                continue
+            hi = int(csid.max()) + 1
+            if hi > dense.shape[0]:  # metadata under-counted -- grow once
+                dense = np.vstack([dense, np.zeros((hi - dense.shape[0], n_lineages), dtype=np.int32)])
+            dense[csid] = cnt
+    if dense is not None:
+        return dense
+    max_id = max((int(c.max()) for c, _ in pending), default=-1)
+    dense = np.zeros((max_id + 1, n_lineages), dtype=np.int32)
+    while pending:
+        c, cnt = pending.pop()
+        dense[c] = cnt
     return dense
 
 
@@ -230,18 +268,42 @@ def resolve_min_freq(raw: str):
     return f"freq{raw}".replace(".", "p"), freq
 
 
+# Columns of `dense` turned into a float fraction array at once when taking the
+# outside max. Bounds the transient at (n_color_sets x OUTSIDE_LINEAGE_BATCH)
+# float32 regardless of how many sister lineages the species has.
+OUTSIDE_LINEAGE_BATCH = 64
+
+
 def lineage_view(dense, names, sizes, target_idx, min_lineage_size):
     """within_frac, within_count, max_outside_frac, max_outside_lineage_idx --
-    all dense arrays indexed by color_set_id, for one target lineage."""
+    all 1-D arrays indexed by color_set_id, for one target lineage.
+
+    The outside max is accumulated a column-batch at a time: the full
+    (n_color_sets x n_lineages) float copy this used to materialise -- once per
+    target -- was the species-scale OOM."""
+    n_cs, n_l = dense.shape
     within_count = dense[:, target_idx]
     with np.errstate(divide="ignore", invalid="ignore"):
-        within_frac = np.nan_to_num(within_count / sizes[target_idx]) if sizes[target_idx] else np.zeros(len(dense))
-        fr = np.nan_to_num(dense / np.where(sizes > 0, sizes, 1))
-    fr = fr.copy()
-    fr[:, target_idx] = 0.0
-    fr[:, sizes < min_lineage_size] = 0.0
-    max_outside = fr.max(axis=1)
-    max_outside_lineage = fr.argmax(axis=1)
+        within_frac = np.nan_to_num(within_count / sizes[target_idx]) if sizes[target_idx] else np.zeros(n_cs)
+        inv_size = np.where(sizes > 0, 1.0 / np.where(sizes > 0, sizes, 1), 0.0).astype(np.float32)
+
+    sister = sizes >= min_lineage_size
+    sister[target_idx] = False  # a lineage is never its own sister
+
+    max_outside = np.zeros(n_cs, dtype=np.float32)
+    max_outside_lineage = np.zeros(n_cs, dtype=np.int64)
+    for s in range(0, n_l, OUTSIDE_LINEAGE_BATCH):
+        cols = np.arange(s, min(s + OUTSIDE_LINEAGE_BATCH, n_l))
+        cols = cols[sister[cols]]
+        if not len(cols):
+            continue
+        fr = dense[:, cols].astype(np.float32)
+        fr *= inv_size[cols]  # (n_cs, k), broadcast over color sets
+        b_max = fr.max(axis=1)
+        b_arg = fr.argmax(axis=1)
+        upd = b_max > max_outside
+        max_outside[upd] = b_max[upd]
+        max_outside_lineage[upd] = cols[b_arg[upd]]
     return within_frac, within_count, max_outside, max_outside_lineage
 
 
@@ -333,6 +395,7 @@ def main():
     if args.export_metadata is None and args.n_colors is None:
         sys.exit("give --export-metadata or --n-colors")
     n_colors = args.n_colors if args.n_colors is not None else load_n_colors(args.export_metadata)
+    n_color_sets = load_n_color_sets(args.export_metadata) if args.export_metadata is not None else None
 
     try:
         min_freq_label, min_freq = resolve_min_freq(args.min_freq)
@@ -376,11 +439,37 @@ def main():
         if not targets:
             sys.exit("none of the requested --lineages are in label_mapping.tsv -- nothing to do")
 
+    # --- restrict the presence matrix to lineages that can actually matter ------
+    # A column of `dense` is only ever read as (a) a requested target's own
+    # within-count or (b) a sister lineage in the outside max -- and (b) already
+    # ignores anything below --min-lineage-size. So keep only {size >=
+    # min_lineage_size} plus the requested targets and remap colour->lineage
+    # accordingly. For a species with hundreds of singleton lineages this is a
+    # (n_color_sets x ~150) matrix instead of (n_color_sets x every_label).
+    target_idx = [names.index(lid) for lid in targets]
+    relevant = sizes >= args.min_lineage_size
+    relevant[target_idx] = True
+    keep_cols = np.flatnonzero(relevant)
+    if len(keep_cols) < len(names):
+        remap = np.full(len(names), -1, dtype=np.int64)
+        remap[keep_cols] = np.arange(len(keep_cols))
+        good = lof >= 0
+        lof_r = np.full_like(lof, -1)
+        lof_r[good] = remap[lof[good]]
+        print(
+            f"  presence matrix: {len(keep_cols)} relevant lineage(s) of {len(names)} "
+            f"(dropped {len(names) - len(keep_cols)} below --min-lineage-size {args.min_lineage_size})",
+            file=sys.stderr,
+        )
+        names = [names[i] for i in keep_cols]
+        sizes = sizes[keep_cols]
+        lof = lof_r
+
     print(
         f"Streaming {args.color_sets} across {args.threads} worker(s), scoring {len(targets)} lineage(s) ...",
         file=sys.stderr,
     )
-    dense = compute_presence_parallel(args.color_sets, len(names), lof, args.threads)
+    dense = compute_presence_parallel(args.color_sets, len(names), lof, args.threads, n_color_sets=n_color_sets)
 
     for lid in targets:
         t = names.index(lid)

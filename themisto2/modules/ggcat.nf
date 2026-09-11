@@ -1,8 +1,14 @@
 process GGCAT {
     tag "${meta.ID}"
     label 'cpu_32'
-    label "mem_8"
     label 'time_queue_from_normal'
+
+    // Set directly here, not via a config withName override: GGCAT_SPECIES scales with
+    // genome count (measured ~17 GB at ~42k S. pneumoniae genomes; 24 GB baseline leaves
+    // headroom), GGCAT_CANDIDATE's input is a handful of candidate marker unitigs --
+    // tiny regardless of species size. meta.stage distinguishes the two aliases (unset for
+    // species-wide, 'candidate' for the rebuild -- see build_color_index.nf/marker_filtering.nf).
+    memory = { meta.stage == 'candidate' ? (8.GB * task.attempt) : (24.GB * task.attempt) }
 
     // request /tmp only if /tmp is actually the temp dir (assumes TMPDIR unset)
     if (!params.temp_dir || params.temp_dir.startsWith("/tmp")) {
@@ -38,6 +44,7 @@ process GGCAT {
         -t ${temp_dir} \\
         -j ${task.cpus} \\
         -m ${mem_gb} \\
-        -p
+        -p \\
+        -e
     """
 }
