@@ -9,7 +9,7 @@
 //   3. ATB CROSS-SPECIES check -- replaces the old bg_excl/markers sbwt set-diff (PAT-3570:
 //      sbwt difference is colour-blind and doesn't scale at species-index level). Dumps the
 //      candidate index to FASTA, pseudoaligns it against ATB-species.thm2
-//      (atb_pseudoalign.nf), then filter_atb_markers.py scores each candidate marker's
+//      (THEMISTO2_ATB_PSEUDOALIGN, modules/themisto2.nf), then filter_atb_markers.py scores each candidate marker's
 //      hit_frac against every ATB species colour and keeps only markers that are solidly
 //      within the target species (>=atb_min_within) and essentially absent from every
 //      other one (<=atb_max_outside). See filter_atb_markers.nf / bin/filter_atb_markers.py.
@@ -21,8 +21,7 @@
 include { LINEAGE_SPECIFICITY_FILTER; CANDIDATE_COLOR_LIST } from '../modules/lineage_specificity_filtering.nf'
 include { GGCAT as GGCAT_CANDIDATE                         } from '../modules/ggcat.nf'
 include { SBWT_BUILD as SBWT_BUILD_CANDIDATE; SBWT_CHECK as SBWT_CHECK_CANDIDATE; SBWT_DUMP_UNITIGS } from '../modules/sbwt.nf'
-include { THEMISTO2_BUILD as THEMISTO2_BUILD_CANDIDATE; THEMISTO2_STATS as THEMISTO2_STATS_CANDIDATE } from '../modules/themisto2.nf'
-include { THEMISTO2_ATB_PSEUDOALIGN                        } from '../modules/atb_pseudoalign.nf'
+include { THEMISTO2_BUILD as THEMISTO2_BUILD_CANDIDATE; THEMISTO2_STATS as THEMISTO2_STATS_CANDIDATE; THEMISTO2_ATB_PSEUDOALIGN } from '../modules/themisto2.nf'
 include { FILTER_ATB_MARKERS                               } from '../modules/filter_atb_markers.nf'
 include { CHECKPOINT_COUNT                                 } from '../modules/checkpoint_count.nf'
 

@@ -1,12 +1,3 @@
-// All SBWT_* processes use a local .sif, not a registry pull: the bug-fixed
-// sbwt-rs-cli 0.4.2-f93d92c (set-diff corruption fix, 2026-08-04) was never
-// published to a registry. Do not swap back to 0.4.2-7c5fcc0 -- still corrupts.
-// See [[sbwt_setdiff_bugfix_module]]. Tracked for a public image: PAT-3572.
-//
-// SBWT_DIFFERENCE is gone (marker_filtering.nf's ATB cross-species check replaced the
-// bg_excl/markers sbwt set-diff this was built for) -- but SBWT_BUILD/SBWT_CHECK/
-// SBWT_DUMP_UNITIGS still use the same fixed binary, so the container stays.
-
 process SBWT_BUILD {
     tag "${meta.ID}"
     label 'cpu_32'
@@ -32,9 +23,7 @@ process SBWT_BUILD {
     sbwt_index   = "unitigs-k${params.color_index_kmer_size}.sbwt"
     lcs_index    = "unitigs-k${params.color_index_kmer_size}.lcs"
     def temp_dir = params.temp_dir ? "${params.temp_dir}/sbwt/${meta.ID}" : "sbwt_temp"
-    // Cap -m at 95% of the allocation -- LSF kills a job that hits its exact limit.
     def mem_gb = Math.floor(task.memory.toGiga() * 0.95) as int
-    // -l is required for the .lcs output declared above (else "Missing output file(s)").
     """
     mkdir -p ${temp_dir}
     sbwt build \\

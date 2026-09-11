@@ -1,18 +1,15 @@
 process LINEAGE_SPECIFICITY_FILTER {
     tag "${meta.ID}"
     label 'cpu_4'
-    label 'mem_8'
+    label 'mem_16'
     label 'time_queue_from_normal'
 
     container 'quay.io/sangerpathogens/pandas:2.2.1'
 
-    // Runs once per SPECIES (meta.ID), not per lineage -- one streaming pass over
     publishDir mode: 'copy', path: "${params.outdir}/candidate_marker_filtering/",
                saveAs: { fn -> "${meta.ID}_${fn}" }
 
     input:
-    // target_groups is a plain val, NOT part of meta -- so an edit to it re-runs
-    // this process (correct) without touching the species index upstream.
     tuple val(meta), path(unitigs), path(color_sets), path(export_metadata), path(label_mapping), val(target_groups)
 
     output:
