@@ -1,7 +1,7 @@
 process METADATA {
     label 'cpu_1'
     label 'mem_1'
-    label 'time_30m'
+    label 'time_12'
     
     conda 'anaconda::pandas=2.2.1'
     container 'quay.io/sangerpathogens/pandas:2.2.1'

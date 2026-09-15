@@ -1,6 +1,16 @@
 { 
     "pipeline": "Irods extractor (sub-workflow)",
     "params": {
+        "Irods query options": {
+            "read_type": {
+                "default": "Illumina",
+                "help_text": "Platform the data you wish to receive was sequenced on Illumina|ont"
+            },
+            "ont_get_read_type": {
+                "default": "reads",
+                "help_text": "[ONT reads only] Retrieves the read files based on the selected option [reads|unbasecalled].\n            If 'reads' is selected, Beefeater will select the reads files according to this priority rule: 'fastq' > 'pass fastq' > 'pass bam' > 'unbasecalled' (\"squiggles\", in either pod5 or fast5 format)."
+            }
+        },
         "Irods extractor processing options": {
             "cleanup_intermediate_files_irods_extractor": {
                 "default": "false",
@@ -16,7 +26,7 @@
             },
             "lane_plex_sep":{
                 "default": "#",
-                "help_text": "Separator to build sample ID from runid, laneid and plexid. Defaults to '#', which is the iRODS-native syntax."
+                "help_text": "Separator to build the sample ID (a.k.a. \"NPG run id\", \"lane id\" [inaccurate but long-established PaM slang], \"lanelet id\") from runid, laneid and plexid values. Defaults to '#', which is the iRODS-native syntax, e.g. 12345_2#67."
             },
             "save_method":{
                 "default": "nested",
@@ -34,9 +44,13 @@
                 "default": "false",
                 "help_text": "If the data is very large instead start from the week queue with more memory (10GB)"
             },
-            "read_type": {
-                "default": "Illumina",
-                "help_text": "Platform the data you wish to receive was sequenced on Illumina|ont"
+            "prevent_redownloads": {
+                "default": true,
+                "help_text": "Don't re-download fastq files that have been downloaded to the given outdir. [true, false]."
+            },
+            "prevent_redownloads_choice": {
+                "default": "preprocessed",
+                "help_text": "The choice to re-download or not is based on whether raw or preprocessed reads are present. [raw, preprocessed]."
             },
             "save_metadata": {
                 "default": true,
