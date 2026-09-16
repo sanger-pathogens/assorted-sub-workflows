@@ -16,9 +16,13 @@
                 "default": "false",
                 "help_text": "Delete intermediate CRAM files downloaded from IRODS in work/ folder"
             },
-            "raw_reads_prefix": {
-                "default": "raw_",
-                "help_text": "Prefix to the output folder name for raw downloaded reads, as opposed to the preprocessed reads."
+            "raw_reads_suffix": {
+                "default": "_raw",
+                "help_text": "Suffix to the output fastq file basename for raw downloaded reads, as opposed to the preprocessed reads."
+            },
+            "raw_reads_output_dir": {
+                "default": "raw_fastqs",
+                "help_text": "Output directory for raw downloaded reads, as opposed to the preprocessed reads."
             },
             "lane_plex_sep":{
                 "default": "#",

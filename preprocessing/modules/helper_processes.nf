@@ -10,14 +10,15 @@ process COMPRESS_READS {
     tuple val(meta), path(read_1), path(read_2)
 
     output:
-    tuple val(meta), path("${meta.ID}_preprocessed_1.fastq.gz"), path("${meta.ID}_preprocessed_2.fastq.gz"), emit: compressed_reads_ch
+    tuple val(meta), path("${preproc_read_stem}_1.fastq.gz"), path("${preproc_read_stem}_2.fastq.gz"), emit: compressed_reads_ch
 
     script:
+    preproc_read_stem = "${meta.ID}${params.preproc_read_suffix}"
     """
     gzip -c ${read_1} > ${read_1}.tmp.gz
     gzip -c ${read_2} > ${read_2}.tmp.gz
-    mv ${read_1}.tmp.gz ${meta.ID}_preprocessed_1.fastq.gz
-    mv ${read_2}.tmp.gz ${meta.ID}_preprocessed_2.fastq.gz
+    mv ${read_1}.tmp.gz ${preproc_read_stem}_1.fastq.gz
+    mv ${read_2}.tmp.gz ${preproc_read_stem}_2.fastq.gz
     """
 }
 
