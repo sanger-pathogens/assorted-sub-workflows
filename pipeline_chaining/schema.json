@@ -8,7 +8,7 @@
         "help_text": "If true, skip downloading inputs that already have corresponding outputs in the output directory. Requires output naming parameters to be set."
       },
 
-      "preexisting_output_tag": {
+      "preexisting_output_dir": {
         "type": "string",
         "default": "",
         "group": "Filter existing outputs options",
