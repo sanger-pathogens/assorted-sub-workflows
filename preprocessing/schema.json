@@ -10,7 +10,6 @@
                 "default": "false",
                 "help_text": "Enable publishing of intermediate reads from trimmomatic process during pre-processing. Read sets will be uncompressed fastq files."
             },
-            },
             "preexisting_output_dir": {
                 "default": "preprocessed_fastqs",
                 "help_text": "Output directory for preprocessed (trimmed and filtered) reads."
@@ -41,7 +40,6 @@
                 "default": "ILLUMINACLIP:${params.adapter_fasta}:2:10:7:1 CROP:151 SLIDINGWINDOW:${params.trim_window_size}:${params.trim_baseq} MINLEN:${params.trim_min_length}",
                 "help_text": "Trimmomatic command line options"
             }
-        },
         },
         "Bmtagger Options": {
             "run_bmtagger": {
