@@ -10,9 +10,6 @@
                 "default": "false",
                 "help_text": "Enable publishing of intermediate reads from trimmomatic process during pre-processing. Read sets will be uncompressed fastq files."
             },
-            "publish_trf_reads": {
-                "default": "false",
-                "help_text": "Enable publishing of intermediate reads from trf process during pre-processing. Read sets will be uncompressed fastq files."
             },
             "preexisting_output_dir": {
                 "default": "preprocessed_fastqs",
@@ -45,15 +42,6 @@
                 "help_text": "Trimmomatic command line options"
             }
         },
-        "Tandem Repeat Finder (TRF) Options": {
-            "run_trf": {
-                "default": "false",
-                "help_text": "Run TRF for finding and removing tandem repeat from short reads"
-            },
-            "trf_cli_options": {
-                "default": "2 7 7 80 10 50 500 -h -ngs",
-                "help_text": "TRF command line options"
-            }
         },
         "Bmtagger Options": {
             "run_bmtagger": {
