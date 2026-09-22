@@ -16,13 +16,13 @@
                 "default": "false",
                 "help_text": "Delete intermediate CRAM files downloaded from IRODS in work/ folder"
             },
-            "preexisting_fastq_tag": {
-                "default": "raw_fastq",
-                "help_text": "If the expected output fastq files exist in the folder named like this under the result folder for the sample e.g. in results/12345_1#67/raw_fastq/12345_1#67_1.fastq.gz,\n            then skip download and any further processing for this sample."
+            "raw_reads_suffix": {
+                "default": "_raw",
+                "help_text": "Suffix to the output fastq file basename for raw downloaded reads, as opposed to the preprocessed reads."
             },
-            "split_sep_for_ID_from_fastq":{
-                "default": "_1.fastq",
-                "help_text": "Separator to recognise sample ID from preexisting file."
+            "raw_reads_output_dir": {
+                "default": "raw_fastqs",
+                "help_text": "Output directory for raw downloaded reads, as opposed to the preprocessed reads."
             },
             "lane_plex_sep":{
                 "default": "#",
@@ -43,14 +43,6 @@
             "large_data": {
                 "default": "false",
                 "help_text": "If the data is very large instead start from the week queue with more memory (10GB)"
-            },
-            "prevent_redownloads": {
-                "default": true,
-                "help_text": "Don't re-download fastq files that have been downloaded to the given outdir. [true, false]."
-            },
-            "prevent_redownloads_choice": {
-                "default": "preprocessed",
-                "help_text": "The choice to re-download or not is based on whether raw or preprocessed reads are present. [raw, preprocessed]."
             },
             "save_metadata": {
                 "default": true,

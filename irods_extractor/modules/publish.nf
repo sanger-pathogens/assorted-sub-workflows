@@ -4,7 +4,7 @@ process PUBLISH_FASTQ {
     label 'mem_1'
     label 'time_12'
 
-    publishDir path: { if ("${params.save_method}" == "nested") "${params.outdir}/${meta.ID}/${params.raw_reads_prefix}fastqs/" else "${params.outdir}/${params.raw_reads_prefix}fastqs/" }, enabled: params.save_fastqs, mode: 'copy', overwrite: true, pattern: "${final_name}"
+    publishDir path: { if ("${params.save_method}" == "nested") "${params.outdir}/${meta.ID}/${params.raw_reads_output_dir}/" else "${params.outdir}/${params.raw_reads_output_dir}/" }, enabled: params.save_fastqs, mode: 'copy', overwrite: true, pattern: "${final_name}"
 
     input:
     val(meta)
@@ -27,7 +27,7 @@ process PUBLISH_UNBASECALLED {
     label 'time_12'
 
     // Only nested publishing for unbasecalled squiggles
-    publishDir path: "${params.outdir}/${params.raw_reads_prefix}unbasecalled/${meta.ID}/", mode: 'copy', overwrite: true
+    publishDir path: "${params.outdir}/raw_unbasecalled/${meta.ID}/", mode: 'copy', overwrite: true
 
     input:
     val(meta)
