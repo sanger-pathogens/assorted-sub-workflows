@@ -91,7 +91,7 @@ process THEMISTO2_ATB_PSEUDOALIGN {
 
     container "quay.io/sangerpathogens/themisto2:0.0.1"
 
-    publishDir mode: 'copy', path: "${params.outdir}/atb_cross_species/${meta.ID}/", enabled: params.publish_intermediate
+    publishDir mode: 'copy', path: "${params.outdir}/atb_cross_species/${meta.ID}/"
 
     input:
     tuple val(meta), path(candidate_fasta)

@@ -1,13 +1,13 @@
 # themisto2
 
-Nextflow DSL2 sub-workflow library (no `main.nf` of its own) providing `BUILD_COLOR_INDEX` and `SET_DIFF_CALCULATIONS`, included by parent pipelines such as [lsmd](../../README.md). See that repo's README for the full pipeline documentation -- pipeline steps, parameters, outputs and the `stats.json` field reference.
+Nextflow DSL2 sub-workflow library (no `main.nf` of its own) providing `BUILD_COLOR_INDEX` and `MARKER_FILTERING`, included by parent pipelines such as [lsmd](../../README.md). See that repo's README for the full pipeline documentation -- pipeline steps, parameters, outputs and the `stats.json` field reference.
 
 ## `BUILD_COLOR_INDEX`
 
 ### Inputs
 
 - `samples_ch`: one item per species -- `tuple(meta, metadata, assembly_input)`:
-  - `meta.ID` -- species name (output-file prefix / folder name, and the join key between `species_index` and `candidate_index`)
+  - `meta.ID` -- species name (output-file prefix / folder name); `MARKER_FILTERING` sets `meta.species` to this value on every per-lineage item it produces, as the join key back to the species-wide outputs
   - `meta.target_groups` -- comma-separated lineage labels to run lineage-specificity filtering for. Empty/absent = every lineage in the metadata with `>= candidate_min_genome_count` genomes (excluding `unclassified`)
   - `metadata` -- that species' metadata table (`.tsv`/`.csv`)
   - `assembly_input` -- a directory of assembly FASTAs, or a `.txt` file listing one assembly path per line (auto-detected)
@@ -16,12 +16,9 @@ The parent pipeline builds this channel. In lsmd that's [`subworkflows/manifest_
 
 ### Emitted channels
 
-`BUILD_COLOR_INDEX`'s public contract is narrower than what it computes internally -- only the SBWT indexes `setdiff_filter.nf` actually needs are exposed:
-
 - `sbwt_index`: `tuple(meta, sbwt, lcs)` -- species-wide index.
-- `candidate_index`: `tuple(meta, sbwt, lcs)`, `meta.species` set -- one item per targeted lineage that survived lineage-specificity filtering.
-
-The species-wide Themisto2 build/export and `COLOR_MAPPING`'s species `label_mapping`/`stats` still run internally -- [lineage_specificity_filter.py](./bin/lineage_specificity_filter.py) reads them -- they're just not part of the emitted contract.
+- `species_export`: `tuple(meta, unitigs, color_sets, export_metadata, label_mapping)` -- species-wide Themisto2 export; feeds `MARKER_FILTERING`'s `LINEAGE_SPECIFICITY_FILTER` input.
+- `checkpoints`: `tuple(meta, row_tsv)` -- per-stage count rows (see "Checkpoint counts" below).
 
 ### Lineage-specificity candidate filtering
 
@@ -32,21 +29,57 @@ For each targeted lineage (`meta.target_groups`, or -- when that's blank -- ever
 
 Survivors are rebuilt into the candidate index (GGCAT -> SBWT -> Themisto2 build/stats). This replaces the inert `xlin_bg`/`lin_cand` set-diffs (PAT-3570): `sbwt difference` is colour-blind, so a plain set difference can never remove a k-mer a lineage shares with a sister lineage.
 
-### Dependencies
+## `MARKER_FILTERING`
 
-All software dependencies are containerised (GGCAT, SBWT, Themisto2, and a `pandas` container for [color_mapping.py](./bin/color_mapping.py)).
+Everything downstream of the species-wide index build: rebuilds each targeted lineage's candidate markers into their own index, then checks them against ATB for cross-species specificity.
 
-## `SET_DIFF_CALCULATIONS` (`setdiff_filter.nf`)
+### Inputs
 
-Computes the index-native set differences that turn each candidate index into a final marker set. Earlier drafts carried a bare letter (`A`-`G`) for each stage through the code; that's been dropped in favour of descriptive stage/variable names. The `xlin_bg` and `lin_cand` cross-lineage set-diffs were removed in PAT-3570 -- `sbwt difference` is colour-blind, so subtracting a lineage index from the species index never removes a k-mer a lineage shares with a sister lineage. Cross-lineage specificity is now the differential-frequency filter in `BUILD_COLOR_INDEX`. Current stages:
+- `species_export_ch`: `tuple(meta, unitigs, color_sets, export_metadata, label_mapping)` -- `BUILD_COLOR_INDEX.out.species_export`. `meta.ID` = species id.
+- `target_groups_ch`: `tuple(meta, target_groups_string)` -- from the including pipeline's manifest parsing (in lsmd, `MANIFEST_PARSE.out.target_groups`), same slim `[ID: species]` meta as `species_export_ch`, joined in here.
+- `atb_target_species_ch`: `tuple(meta, atb_target_species_string)` -- from the including pipeline's manifest parsing (`MANIFEST_PARSE.out.atb_target_species`). A blank string means that species is skipped for the ATB cross-species check (see below).
 
-| stage name (code) | formula | produced by | process aliases | emit name |
-| --- | --- | --- | --- | --- |
-| `species_index` | — (built, not diffed) | `BUILD_COLOR_INDEX` (species-wide) | `SBWT_BUILD_SPECIES`, `SBWT_CHECK_SPECIES` | `BUILD_COLOR_INDEX.out.sbwt_index` |
-| `bg_excl` | background − `species_index` | `SET_DIFF_CALCULATIONS` | `SBWT_DIFFERENCE_BG_EXCL`, `SBWT_CHECK_BG_EXCL` | `.out.bg_excl` |
-| `candidate_index` | — (built, not diffed) | `BUILD_COLOR_INDEX` ([lineage_specificity_filter.py](./bin/lineage_specificity_filter.py) + GGCAT/SBWT/Themisto2-build-stats rebuild, per lineage) | `SBWT_BUILD_CANDIDATE`, `SBWT_CHECK_CANDIDATE` | `BUILD_COLOR_INDEX.out.candidate_index` |
-| `markers` | `candidate_index` − `bg_excl` | `SET_DIFF_CALCULATIONS` | `SBWT_DIFFERENCE_MARKERS`, `SBWT_CHECK_MARKERS` | `.out.markers` |
+### Emitted channels
 
-`BUILD_COLOR_INDEX.out.sbwt_index`/`.out.candidate_index` feed `SET_DIFF_CALCULATIONS`'s `species_index_ch`/`candidate_index_ch` in the including pipeline's own `main.nf`.
+- `markers`: `tuple(meta, fasta)` -- final candidate markers, `meta.ID` = lineage, `meta.species` set. ATB-checked (`PASS`) for species with an `atb_target_species` mapping, or the raw rebuilt candidate FASTA (unverified, already logged with a warning) for species without one.
+- `checkpoints`: `tuple(meta, row_tsv)` -- per-stage count rows (see "Checkpoint counts" below).
 
-Every diff (`bg_excl`, `markers`) is immediately followed by an `sbwt check` on its output — `sbwt difference` has a confirmed history of silently producing a structurally-corrupt index that LSF still reports as "successfully completed" (see the `setdiff_filter.nf` module header), so never trust a diff's exit code alone.
+### Candidate index rebuild
+
+`LINEAGE_SPECIFICITY_FILTER`'s output (one candidate FASTA per targeted lineage) is wrapped into a colour-list (`CANDIDATE_COLOR_LIST`) and rebuilt end to end: GGCAT -> SBWT build/check -> Themisto2 build/stats. This is a QC gate only -- no export needed, since the ATB check below reads unitigs straight off `SBWT_DUMP_UNITIGS`, not a Themisto2 export. A lineage whose candidate FASTA comes back empty (nothing cleared the lineage-specificity thresholds) skips the rebuild entirely, with a `log.warn`, rather than failing the run.
+
+### ATB cross-species check
+
+Replaces the old `bg_excl`/`markers` `sbwt difference` set-diff (PAT-3570: `sbwt difference` is colour-blind and doesn't scale at species-index level). The rebuilt candidate index is dumped to FASTA (`SBWT_DUMP_UNITIGS`) and pseudoaligned against `ATB-species.thm2` (`THEMISTO2_ATB_PSEUDOALIGN`); [atb_cross_species_filter.py](./bin/atb_cross_species_filter.py) (`FILTER_ATB_MARKERS`) then scores each candidate marker's hit fraction against every ATB species colour and keeps only markers that are solidly within the target species (`>= atb_min_within`, default `0.95`) and essentially absent from every other one (`<= atb_max_outside`, default reuses `specificity_max_outside` rather than a separately-tuned number). ATB's `unknown` colour (its catch-all bucket for unassigned/low-confidence genomes) is excluded from the max-outside check entirely (`atb_exclude_species`).
+
+A species with no `atb_target_species` set in the manifest (e.g. not present in ATB at all) skips this check: its rebuilt candidate markers pass straight through **unchecked**, with a loud `log.warn`, rather than being silently dropped or failing the whole run. Every other species goes through the full check.
+
+Besides the final `PASS` markers, `FILTER_ATB_MARKERS` also writes `FLAG` (off-target leakage, kept for inspection, not forwarded), `ABSENT` (target species never hit at all), a per-marker `validation.tsv`, and a `summary.txt` -- all published under `atb_cross_species/<lineage>/`.
+
+## Dependencies
+
+All software dependencies are containerised (GGCAT, SBWT, Themisto2, and a `pandas` container for [color_mapping.py](./bin/color_mapping.py) and [atb_cross_species_filter.py](./bin/atb_cross_species_filter.py)).
+
+## GGCAT `-e` (unitig links)
+
+`GGCAT_CANDIDATE` passes `-e`/`--generate-maximal-unitigs-links` (GGCAT annotates each unitig with its BCALM2-format connectivity links); `GGCAT_SPECIES` does not. This only changes what's written into the FASTA headers (link annotations), not the unitig set GGCAT computes or anything downstream in SBWT/Themisto2 -- confirmed against `ggcat build --help`, which lists it under "Output mode" separately from the actual unitig-generation-mode flags (`--simplitigs`/`--eulertigs`/`--greedy-matchtigs`).
+
+It's candidate-only because it was measured to cost +58% output file size (504MB vs 319MB) on the ~5M-unitig V. cholerae species-wide build, for link data nothing at that scale currently consumes. It's kept on for the candidate rebuild (hundreds-thousands of unitigs, effectively free there) in case a future stitching tool needs it for species whose candidate markers don't self-overlap as cleanly as 7PET's did (PAT-3592).
+
+## Checkpoint counts (`pipeline_counts.tsv`)
+
+Both `BUILD_COLOR_INDEX` and `MARKER_FILTERING` tap a fixed set of key stages (colour file, GGCAT unitigs, Themisto2 index, exported/dumped FASTA, final markers) through `CHECKPOINT_FASTA`/`CHECKPOINT_THEMISTO` (`modules/checkpoint.nf`, split by input type) as a side channel -- never joined back into the workflow, just counted. Rows from every stage across both subworkflows are combined by the including pipeline's `main.nf` (`collectFile`) into one `pipeline_counts.tsv`, ordered by an `order` key (`BUILD_COLOR_INDEX` uses 10-40, `MARKER_FILTERING` continues from 50).
+
+Columns, by input `kind`:
+
+| kind | columns populated |
+| --- | --- |
+| `colorfile` | `n_seqs` (line count) |
+| `fasta` | `n_seqs`, `sum_bp`, `min_len`, `median_len`, `max_len` (via `seqkit stats -a`), `n_revcomp_dupes` (via `seqkit rmdup -s`) |
+| `themisto` | `n_kmers`, `n_colors`, `n_unitigs` (via `themisto2 stats`) |
+
+**Number of reverse-complement duplicates** (`n_revcomp_dupes`) counts FASTA records that are reverse-complement duplicates of another record already in the same file -- i.e. two records that are the same underlying DNA fragment, just written from opposite strands (`ACGT` vs. its reverse complement `ACGT`->`CGTA`->complemented). A byte-for-byte comparison won't catch these; `seqkit rmdup -s` canonicalises each sequence against its reverse complement before deduping, and compares both strands by default. The rest of this section refers to it by its column name, `n_revcomp_dupes`.
+
+This column exists because `SBWT_DUMP_UNITIGS` (`marker_filtering.nf`, stage `candidate_dumped_fasta`, order 80) reports both strands of every unitig as separate records, so its `n_revcomp_dupes` is expected to be ~100% of `n_seqs` -- this is normal, not a bug. The preceding checkpoint, `candidate_ggcat_unitigs` (order 60, GGCAT's own output before the SBWT round-trip), is expected to show 0 revcomp dupes. Having both stages in `pipeline_counts.tsv` makes that divergence visible on every run without a manual check (found while investigating PAT-3592).
+
+The `seqkit rmdup` dedup check runs unguarded on every `fasta`-kind checkpoint, including species-wide FASTAs (millions of records) -- by design, not oversight. It replaced an older hand-rolled awk canonicalisation that needed a `REVCOMP_CHECK_MAX` size cap because it was too slow to run unguarded at species-wide scale; `seqkit rmdup` doesn't need that cap, benchmarked at ~17s for ~5M records under the fixed `mem_4` label (PAT-3592).

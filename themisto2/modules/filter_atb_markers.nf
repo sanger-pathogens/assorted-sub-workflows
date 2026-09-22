@@ -24,7 +24,7 @@ process FILTER_ATB_MARKERS {
     script:
     prefix = "${meta.ID}_atb_check"
     """
-    ${moduleDir}/../bin/filter_atb_markers.py \\
+    ${moduleDir}/../bin/atb_cross_species_filter.py \\
         --jsonl ${jsonl} \\
         --fasta ${candidate_fasta} \\
         --color-names ${color_names} \\

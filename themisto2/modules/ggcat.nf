@@ -23,6 +23,7 @@ process GGCAT {
     def temp_dir = params.temp_dir ? "${params.temp_dir}/ggcat/${meta.ID}" : "ggcat_temp"
     unitigs_fna = "unitigs-k${params.color_index_kmer_size}.fna"
     def mem_gb = Math.floor(task.memory.toGiga() * 0.95) as int
+    def links_flag = meta.stage == 'candidate' ? '-e' : ''
     """
     mkdir -p ${temp_dir}
     ggcat build \\
@@ -34,6 +35,6 @@ process GGCAT {
         -j ${task.cpus} \\
         -m ${mem_gb} \\
         -p \\
-        -e
+        ${links_flag}
     """
 }
