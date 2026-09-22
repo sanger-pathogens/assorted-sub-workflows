@@ -13,7 +13,7 @@ def validateNonEmptyString(String name, def val) {
 }
 
 def validateSkipDownloadedParams() {
-    validateNonEmptyString('preexisting_output_tag', params.preexisting_output_tag)
+    validateNonEmptyString('preexisting_output_dir', params.preexisting_output_dir)
     validateNonEmptyString('existing_output_extension', params.existing_output_extension)
     validateNonEmptyString('existing_output_id_suffix', params.existing_output_id_suffix)
 }
@@ -27,10 +27,10 @@ workflow FILTER_EXISTING_OUTPUTS {
     validateSkipDownloadedParams()
 
     if (params.save_method == "nested") {
-        Channel.fromPath("${params.outdir}/*/${params.preexisting_output_tag}/*${params.existing_output_id_suffix}${params.existing_output_extension}")
+        Channel.fromPath("${params.outdir}/*/${params.preexisting_output_dir}/*${params.existing_output_id_suffix}${params.existing_output_extension}")
             .set{ preexisting_output_path_ch }
     } else {
-        Channel.fromPath("${params.outdir}/${params.preexisting_output_tag}/*${params.existing_output_id_suffix}${params.existing_output_extension}")
+        Channel.fromPath("${params.outdir}/${params.preexisting_output_dir}/*${params.existing_output_id_suffix}${params.existing_output_extension}")
             .set{ preexisting_output_path_ch }
     }
 
