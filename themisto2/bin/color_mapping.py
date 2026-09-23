@@ -13,11 +13,22 @@ Every cell is read as text, so labels keep exactly the text in the file ("3"
 never becomes "3.0"). Headers and the sample/label columns are stripped of
 surrounding whitespace. A label that is empty or matches a missing value
 (--label-missing, case-insensitive) becomes "unclassified".
+
+Each label then goes through these rules, in order; the first that applies wins:
+
+  1. --label-map    exact match on the raw label -> that map's group (final).
+  2. missing        empty, or in --label-missing -> "unclassified".
+  3. --label-multi  labels containing ";" (e.g. GPS merge history "1215;5"):
+                    keep (as written) | smallest (lowest whole number, "5") |
+                    unclassified.
+
+Every change is listed in stats.json (label_changes) and summarised on stderr.
 """
 
 from __future__ import annotations
 
 import argparse
+import csv
 import json
 import os
 import re
@@ -27,6 +38,8 @@ from pathlib import Path
 import pandas as pd
 
 UNCLASSIFIED = "unclassified"
+MULTI_SEP = ";"
+MULTI_POLICIES = ("keep", "smallest", "unclassified")
 
 # Group-label values treated as missing (-> UNCLASSIFIED), matched case-insensitively
 # after stripping whitespace. --label-missing replaces this list; an empty label is
@@ -92,6 +105,19 @@ def parse_args():
         + ", ".join(repr(v) for v in DEFAULT_MISSING)
         + ". An empty label is always missing.",
     )
+    p.add_argument(
+        "--label-map",
+        default=None,
+        help="TSV with columns raw_label and group. An exact match on the raw label sets the final "
+        "group, and no other rule touches it. Use group 'unclassified' to send a label to background.",
+    )
+    p.add_argument(
+        "--label-multi",
+        choices=MULTI_POLICIES,
+        default="keep",
+        help="What to do with labels containing ';': keep them as written (default), resolve to the "
+        "smallest whole number ('1215;5' -> '5'), or send them to unclassified.",
+    )
     p.add_argument("--output_dir", required=True, help="Directory to write the output files into.")
     return p.parse_args()
 
@@ -101,6 +127,53 @@ def parse_missing(raw: str | None) -> tuple[list[str], str]:
     if raw is None:
         return list(DEFAULT_MISSING), "built-in list"
     return [v.strip() for v in raw.split("|") if v.strip()], "--label-missing"
+
+
+def load_label_map(path: str, missing_set: set[str]) -> dict[str, str]:
+    """raw_label -> group from a two-column TSV; exits listing every problem found."""
+    label_map: dict[str, str] = {}
+    errors: list[str] = []
+    with open(path, newline="") as fh:
+        reader = csv.DictReader(fh, delimiter="\t")
+        reader.fieldnames = [(f or "").strip() for f in (reader.fieldnames or [])]
+        if not {"raw_label", "group"} <= set(reader.fieldnames):
+            sys.exit(f"Error: --label-map {path} needs columns 'raw_label' and 'group' (got {reader.fieldnames})")
+        for line_no, row in enumerate(reader, start=2):
+            raw, group = (row["raw_label"] or "").strip(), (row["group"] or "").strip()
+            if not raw or not group:
+                errors.append(f"line {line_no}: blank raw_label or group")
+            elif group.casefold() in missing_set:
+                errors.append(
+                    f"line {line_no}: group '{group}' is a missing value -- use '{UNCLASSIFIED}' to send "
+                    f"'{raw}' to background"
+                )
+            elif raw in label_map:
+                errors.append(f"line {line_no}: raw_label '{raw}' is listed more than once")
+            else:
+                label_map[raw] = group
+    if errors:
+        sys.exit(f"Error: invalid --label-map {path}:\n  " + "\n  ".join(errors))
+    return label_map
+
+
+def resolve_label(raw: str, label_map: dict, missing_set: set[str], multi: str) -> tuple[str, str | None]:
+    """(final label, rule that changed it: 'label_map' | 'label_missing' | 'label_multi' | None).
+
+    Raises ValueError for label_multi=smallest on a label whose parts aren't all
+    whole numbers -- never guess.
+    """
+    if raw in label_map:
+        return label_map[raw], "label_map"
+    if raw == "" or raw.casefold() in missing_set:
+        return UNCLASSIFIED, "label_missing"
+    if MULTI_SEP in raw and multi != "keep":
+        if multi == "unclassified":
+            return UNCLASSIFIED, "label_multi"
+        parts = [p.strip() for p in raw.split(MULTI_SEP)]
+        if not all(p.isascii() and p.isdigit() for p in parts):
+            raise ValueError(raw)
+        return str(min(int(p) for p in parts)), "label_multi"
+    return raw, None
 
 
 def load_assemblies(assembly_input: str) -> tuple[dict, list[str]]:
@@ -172,9 +245,27 @@ def main():
         metadata = metadata.drop_duplicates(subset=sample_col)
         print(f"warning: ignored {duplicates} row(s) with a duplicate {sample_col}", file=sys.stderr)
 
-    # Genomes with no group label aren't dropped -- relabel and keep them.
-    blank_label = metadata[group_label].eq("") | metadata[group_label].str.casefold().isin(missing_set)
-    metadata.loc[blank_label, group_label] = UNCLASSIFIED
+    label_map = load_label_map(args.label_map, missing_set) if args.label_map else {}
+
+    # Resolve each distinct raw label once. Genomes whose label is missing aren't
+    # dropped -- they're relabelled unclassified and kept.
+    resolved, bad_multi = {}, []
+    for raw in metadata[group_label].unique():
+        try:
+            resolved[raw] = resolve_label(raw, label_map, missing_set, args.label_multi)
+        except ValueError:
+            bad_multi.append(raw)
+    if bad_multi:
+        sys.exit(
+            f"Error: --label-multi smallest needs every '{MULTI_SEP}'-separated part to be a whole number; "
+            f"these labels aren't: {', '.join(repr(b) for b in sorted(bad_multi))}. "
+            "Fix them in the metadata or list them in --label-map."
+        )
+    metadata["_raw_label"] = metadata[group_label]
+    metadata["_rule"] = metadata["_raw_label"].map(lambda r: resolved[r][1])
+    metadata[group_label] = metadata["_raw_label"].map(lambda r: resolved[r][0])
+    blank_label = metadata[group_label].eq(UNCLASSIFIED) & metadata["_rule"].notna()
+    label_map_unmatched = sorted(set(label_map) - set(resolved))
 
     # Match each metadata row to an assembly by normalised filename.
     assemblies, dead_paths = load_assemblies(args.assembly_dir or args.assembly_paths)
@@ -226,6 +317,13 @@ def main():
         str(label): int(n)
         for label, n in written[group_label].value_counts().sort_index().items()
     }
+    rewritten = kept[kept[group_label] != kept["_raw_label"]]
+    label_changes = [
+        {"raw_label": raw, "new_label": final, "changed_by": rule, "genomes": int(n)}
+        for (raw, final, rule), n in rewritten.groupby(["_raw_label", group_label, "_rule"]).size().items()
+    ]
+    label_changes.sort(key=lambda r: (-r["genomes"], r["raw_label"]))
+
     stats = {
         "species": prefix,
         "group_label_column": group_label,
@@ -236,11 +334,19 @@ def main():
         "relabelled_unclassified": n_relabelled,
         "assemblies_without_metadata_row": len(orphan_paths),
         "assemblies_per_group": per_group,
-        "label_settings": {"label_missing": missing_values, "label_missing_source": missing_source},
+        "label_settings": {
+            "label_missing": missing_values,
+            "label_missing_source": missing_source,
+            "label_multi": args.label_multi,
+            "label_map": args.label_map,
+        },
+        "label_changes": label_changes,
+        "label_map_unmatched": label_map_unmatched,
         "note": (
             "Genome counts first, then how group labels were cleaned. 'unclassified' genomes are "
-            "metadata rows whose label was blank or a missing value, plus assembly files with no "
-            "metadata row. They stay in the index as one group. "
+            "metadata rows whose label was blank or a missing value (or was sent there by a label "
+            "rule), plus assembly files with no metadata row. "
+            "They stay in the index as one group. "
             "assemblies_dropped_fasta_not_found are metadata rows whose assembly FASTA wasn't found."
         ),
     }
@@ -253,8 +359,26 @@ def main():
     if orphan_paths:
         summary += f"; {len(orphan_paths)} had no metadata row -> {UNCLASSIFIED}"
     if n_relabelled:
-        summary += f"; {n_relabelled} blank label -> {UNCLASSIFIED}"
+        summary += f"; {n_relabelled} missing or rewritten label -> {UNCLASSIFIED}"
     print(summary, file=sys.stderr)
+    if label_changes:
+        print(
+            f"{prefix}: {len(label_changes)} label(s) changed (see label_changes in stats.json):",
+            file=sys.stderr,
+        )
+        for r in label_changes[:20]:
+            print(
+                f"  '{r['raw_label']}' -> '{r['new_label']}' (changed by {r['changed_by']}, {r['genomes']} genomes)",
+                file=sys.stderr,
+            )
+        if len(label_changes) > 20:
+            print(f"  ... and {len(label_changes) - 20} more", file=sys.stderr)
+    if label_map_unmatched:
+        print(
+            f"warning: {len(label_map_unmatched)} --label-map raw_label(s) match no metadata label: "
+            + ", ".join(repr(u) for u in label_map_unmatched[:10]),
+            file=sys.stderr,
+        )
 
 
 if __name__ == "__main__":
