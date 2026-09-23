@@ -6,13 +6,31 @@ Nextflow DSL2 sub-workflow library (no `main.nf` of its own) providing `BUILD_CO
 
 ### Inputs
 
-- `samples_ch`: one item per species -- `tuple(meta, metadata, assembly_input)`:
+- `samples_ch`: one item per species -- `tuple(meta, metadata, assembly_input, label_missing, label_multi, label_map, unclassified_genomes)`:
   - `meta.ID` -- species name (output-file prefix / folder name); `MARKER_FILTERING` sets `meta.species` to this value on every per-lineage item it produces, as the join key back to the species-wide outputs
   - `meta.target_groups` -- comma-separated lineage labels to run lineage-specificity filtering for. Empty/absent = every lineage in the metadata with `>= candidate_min_genome_count` genomes (excluding `unclassified`)
   - `metadata` -- that species' metadata table (`.tsv`/`.csv`)
   - `assembly_input` -- a directory of assembly FASTAs, or a `.txt` file listing one assembly path per line (auto-detected)
+  - `label_missing`, `label_multi`, `label_map`, `unclassified_genomes` -- how group labels are cleaned before colouring; see "Group-label cleaning" below. For the defaults pass `''`, `'keep'`, [`assets/NO_LABEL_MAP`](./assets/NO_LABEL_MAP) (staged, never passed to the script) and `'keep'`.
 
-The parent pipeline builds this channel. In lsmd that's [`subworkflows/manifest_parse.nf`](../../subworkflows/manifest_parse.nf), one item per row of the required `--manifest` TSV (columns `species` / `metadata` / `assemblies` / `target_groups`). `--group_label`, `--sample_col` and `--assembly_suffix` stay run-wide params.
+The parent pipeline builds this channel. In lsmd that's [`subworkflows/manifest_parse.nf`](../../subworkflows/manifest_parse.nf), one item per row of the required `--manifest` TSV (columns `species` / `metadata` / `assemblies` / `target_groups`, plus the optional label-cleaning columns). `--group_label`, `--sample_col` and `--assembly_suffix` stay run-wide params.
+
+### Group-label cleaning
+
+[color_mapping.py](./bin/color_mapping.py) reads the metadata as text (so `3` never becomes `3.0`), strips whitespace from headers and the sample and label columns, then applies these rules to each label. The first rule that applies wins:
+
+1. **`label_map`**: a TSV with columns `raw_label` and `group`. An exact match on the raw label sets the final group, and nothing else touches it. Use group `unclassified` to send a label to background. Map rows with a blank value, a repeated `raw_label`, or a `group` that is itself a missing value stop the run.
+2. **Missing values**: an empty label, or one matching `label_missing` (`|`-separated, case-insensitive), becomes `unclassified`. Blank `label_missing` uses the default list: `NA`, `N/A`, `#N/A`, `NaN`, `null`, `none`, `unknown`, `missing`, `-`, `?`, `.`, `not applicable`, `not available`, `not collected`, `not provided`. Setting it replaces that list.
+3. **`label_multi`**, for labels containing `;`: `keep` (as written, the default), `smallest` (the lowest whole number, e.g. GPS merge history `1215;5` → `5`; stops the run if any part isn't a whole number), or `unclassified`.
+
+`unclassified_genomes` then decides what happens to every genome whose final label is `unclassified`, including assemblies with no metadata row:
+
+- `keep` (default): they stay in the index as one group. They're never a target, but they still count as an outside group in lineage-specificity filtering.
+- `drop`: they're left out of the index, so markers are not checked against them. They're listed in `<species>_dropped_unclassified.tsv` (`Sample_ID`, `raw_label`, `reason`: `label_missing` / `label_map` / `label_multi` / `labelled_unclassified` for a label that literally reads `unclassified` / `no_metadata_row`). The run stops if nothing would be left.
+
+`<species>_stats.json` records the settings used (`label_settings`), every changed label with its new label, genome count and the rule that changed it (`label_changes`), map entries that matched nothing (`label_map_unmatched`) and `assemblies_dropped_unclassified`.
+
+All four options are `COLOR_MAPPING` inputs, so changing one rebuilds that species' index.
 
 ### Emitted channels
 
