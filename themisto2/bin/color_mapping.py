@@ -8,6 +8,11 @@ three files prefixed with the species name (--species-name):
   <species>_file_colors_input.txt  assembly paths, one per line, grouped by label
   <species>_label_mapping.tsv      Sample_ID -> label, in index (colour-ID) order
   <species>_stats.json             summary counts, incl. assemblies per group
+
+Every cell is read as text, so labels keep exactly the text in the file ("3"
+never becomes "3.0"). Headers and the sample/label columns are stripped of
+surrounding whitespace. A label that is empty or matches a missing value
+(--label-missing, case-insensitive) becomes "unclassified".
 """
 
 from __future__ import annotations
@@ -22,6 +27,27 @@ from pathlib import Path
 import pandas as pd
 
 UNCLASSIFIED = "unclassified"
+
+# Group-label values treated as missing (-> UNCLASSIFIED), matched case-insensitively
+# after stripping whitespace. --label-missing replaces this list; an empty label is
+# always missing.
+DEFAULT_MISSING = (
+    "NA",
+    "N/A",
+    "#N/A",
+    "NaN",
+    "null",
+    "none",
+    "unknown",
+    "missing",
+    "-",
+    "?",
+    ".",
+    "not applicable",
+    "not available",
+    "not collected",
+    "not provided",
+)
 
 # Sanitisation applied when the assembly FASTA files were written to disk.
 _UNSAFE = re.compile(r"[^A-Za-z0-9._-]")
@@ -58,8 +84,23 @@ def parse_args():
         default=".contigs.fasta",
         help="Suffix appended to Sample_ID to form the assembly filename (default: .contigs.fasta).",
     )
+    p.add_argument(
+        "--label-missing",
+        default=None,
+        help="'|'-separated group-label values to treat as missing (-> unclassified), matched "
+        "case-insensitively, e.g. 'NA|unknown|not applicable'. Replaces the default list: "
+        + ", ".join(repr(v) for v in DEFAULT_MISSING)
+        + ". An empty label is always missing.",
+    )
     p.add_argument("--output_dir", required=True, help="Directory to write the output files into.")
     return p.parse_args()
+
+
+def parse_missing(raw: str | None) -> tuple[list[str], str]:
+    """(missing values, 'built-in list' | '--label-missing') from --label-missing."""
+    if raw is None:
+        return list(DEFAULT_MISSING), "built-in list"
+    return [v.strip() for v in raw.split("|") if v.strip()], "--label-missing"
 
 
 def load_assemblies(assembly_input: str) -> tuple[dict, list[str]]:
@@ -112,21 +153,28 @@ def main():
     args = parse_args()
     prefix = args.species_name
 
-    metadata = pd.read_csv(args.metadata, low_memory=False)
+    sample_col, group_label = args.sample_col.strip(), args.group_label.strip()
+    missing_values, missing_source = parse_missing(args.label_missing)
+    missing_set = {v.casefold() for v in missing_values}
 
-    missing = [c for c in (args.sample_col, args.group_label) if c not in metadata.columns]
+    # All text, no pandas NA guessing: labels are exactly what's in the file.
+    metadata = pd.read_csv(args.metadata, dtype=str, keep_default_na=False)
+    metadata.columns = [str(c).strip() for c in metadata.columns]
+
+    missing = [c for c in (sample_col, group_label) if c not in metadata.columns]
     if missing:
         sys.exit(f"Error: column(s) not found in metadata: {', '.join(missing)}")
 
-    metadata[args.sample_col] = metadata[args.sample_col].astype(str)
-    duplicates = int(metadata[args.sample_col].duplicated().sum())
+    metadata[sample_col] = metadata[sample_col].str.strip()
+    metadata[group_label] = metadata[group_label].str.strip()
+    duplicates = int(metadata[sample_col].duplicated().sum())
     if duplicates:
-        metadata = metadata.drop_duplicates(subset=args.sample_col)
-        print(f"warning: ignored {duplicates} row(s) with a duplicate {args.sample_col}", file=sys.stderr)
+        metadata = metadata.drop_duplicates(subset=sample_col)
+        print(f"warning: ignored {duplicates} row(s) with a duplicate {sample_col}", file=sys.stderr)
 
     # Genomes with no group label aren't dropped -- relabel and keep them.
-    blank_label = metadata[args.group_label].isna()
-    metadata[args.group_label] = metadata[args.group_label].fillna(UNCLASSIFIED).astype(str)
+    blank_label = metadata[group_label].eq("") | metadata[group_label].str.casefold().isin(missing_set)
+    metadata.loc[blank_label, group_label] = UNCLASSIFIED
 
     # Match each metadata row to an assembly by normalised filename.
     assemblies, dead_paths = load_assemblies(args.assembly_dir or args.assembly_paths)
@@ -137,7 +185,7 @@ def main():
             file=sys.stderr,
         )
     by_safe_name = index_by_safe_name(assemblies)
-    metadata["_want"] = (metadata[args.sample_col] + args.assembly_suffix).map(fs_safe)
+    metadata["_want"] = (metadata[sample_col] + args.assembly_suffix).map(fs_safe)
     matched = metadata["_want"].isin(by_safe_name)
 
     kept = metadata[matched].copy()
@@ -150,18 +198,18 @@ def main():
     orphan_paths = sorted(p for safe, p in by_safe_name.items() if safe not in claimed)
     orphan_rows = pd.DataFrame(
         {
-            args.sample_col: [strip_suffix(Path(p).name, args.assembly_suffix) for p in orphan_paths],
-            args.group_label: UNCLASSIFIED,
+            sample_col: [strip_suffix(Path(p).name, args.assembly_suffix) for p in orphan_paths],
+            group_label: UNCLASSIFIED,
             "file_path": orphan_paths,
         }
     )
 
     written = pd.concat(
-        [kept[[args.sample_col, args.group_label, "file_path"]], orphan_rows], ignore_index=True
+        [kept[[sample_col, group_label, "file_path"]], orphan_rows], ignore_index=True
     )
     # sort by label, then sample ID within each label -- fixes colour-ID order
     written = written.sort_values(
-        [args.group_label, args.sample_col], key=lambda c: c.astype(str)
+        [group_label, sample_col], key=lambda c: c.astype(str)
     )
 
     out = Path(args.output_dir)
@@ -169,18 +217,18 @@ def main():
 
     written["file_path"].to_csv(out / f"{prefix}_file_colors_input.txt", index=False, header=False)
     (
-        written[[args.sample_col, args.group_label]]
-        .rename(columns={args.sample_col: "Sample_ID", args.group_label: "label"})
+        written[[sample_col, group_label]]
+        .rename(columns={sample_col: "Sample_ID", group_label: "label"})
         .to_csv(out / f"{prefix}_label_mapping.tsv", index=False, sep="\t")
     )
 
     per_group = {
         str(label): int(n)
-        for label, n in written[args.group_label].value_counts().sort_index().items()
+        for label, n in written[group_label].value_counts().sort_index().items()
     }
     stats = {
         "species": prefix,
-        "group_label_column": args.group_label,
+        "group_label_column": group_label,
         "assemblies_total": len(written) + n_dropped,
         "assemblies_written": len(written),
         "assemblies_dropped_fasta_not_found": n_dropped,
@@ -188,10 +236,12 @@ def main():
         "relabelled_unclassified": n_relabelled,
         "assemblies_without_metadata_row": len(orphan_paths),
         "assemblies_per_group": per_group,
+        "label_settings": {"label_missing": missing_values, "label_missing_source": missing_source},
         "note": (
-            "'unclassified' = metadata rows with a blank group label plus assembly "
-            "files with no metadata row; both are kept in the index. "
-            "assemblies_dropped_fasta_not_found are the only genomes left out."
+            "Genome counts first, then how group labels were cleaned. 'unclassified' genomes are "
+            "metadata rows whose label was blank or a missing value, plus assembly files with no "
+            "metadata row. They stay in the index as one group. "
+            "assemblies_dropped_fasta_not_found are metadata rows whose assembly FASTA wasn't found."
         ),
     }
     with open(out / f"{prefix}_stats.json", "w") as fh:
