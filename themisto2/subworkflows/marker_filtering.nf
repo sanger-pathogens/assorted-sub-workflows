@@ -10,6 +10,7 @@ workflow MARKER_FILTERING {
     species_export_ch
     target_groups_ch
     atb_target_species_ch
+    atb_exclude_species_ch
 
     main:
     atb_index_ch       = Channel.value(file(params.atb_index, checkIfExists: true))
@@ -68,36 +69,37 @@ workflow MARKER_FILTERING {
     SBWT_DUMP_UNITIGS(candidate_sbwt_for_dump)
 
     atb_target_species_ch
-    | map { meta, atb -> [meta.ID, atb] }
+    | join(atb_exclude_species_ch)
+    | map { meta, atb, excl -> [meta.ID, atb, excl] }
     | set { atb_target_species_by_species }
 
     SBWT_DUMP_UNITIGS.out.unitigs
     | map { meta, fasta -> [meta.species, meta, fasta] }
     | join(atb_target_species_by_species)
-    | map { species, meta, fasta, atb -> [meta, fasta, atb] }
+    | map { species, meta, fasta, atb, excl -> [meta, fasta, atb, excl] }
     | branch {
-        meta, fasta, atb ->
+        meta, fasta, atb, excl ->
         checked: atb?.trim()
         unchecked: true
     }
     | set { atb_branch }
 
     atb_branch.unchecked
-    | map { meta, fasta, atb ->
+    | map { meta, fasta, atb, excl ->
         log.warn("No atb_target_species set for species '${meta.species}' -- lineage '${meta.ID}' candidate markers pass through the ATB cross-species check UNVERIFIED.")
         [meta, fasta]
     }
     | set { markers_unchecked }
 
     atb_branch.checked
-    | map { meta, fasta, atb -> [meta, fasta] }
+    | map { meta, fasta, atb, excl -> [meta, fasta] }
     | set { atb_pseudoalign_input }
 
     THEMISTO2_ATB_PSEUDOALIGN(atb_pseudoalign_input, atb_index_ch)
 
     THEMISTO2_ATB_PSEUDOALIGN.out.jsonl
     | join(atb_pseudoalign_input)
-    | join(atb_branch.checked.map { meta, fasta, atb -> [meta, atb] })
+    | join(atb_branch.checked.map { meta, fasta, atb, excl -> [meta, atb, excl] })
     | set { filter_atb_input }
 
     FILTER_ATB_MARKERS(filter_atb_input, atb_color_names_ch)

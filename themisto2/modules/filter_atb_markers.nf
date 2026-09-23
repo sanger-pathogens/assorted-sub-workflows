@@ -9,7 +9,7 @@ process FILTER_ATB_MARKERS {
     publishDir mode: 'copy', path: "${params.outdir}/atb_cross_species/${meta.ID}/"
 
     input:
-    tuple val(meta), path(jsonl), path(candidate_fasta), val(atb_target_species)
+    tuple val(meta), path(jsonl), path(candidate_fasta), val(atb_target_species), val(atb_exclude_species)
     path(color_names)
 
     output:
@@ -31,7 +31,7 @@ process FILTER_ATB_MARKERS {
         --target-species ${atb_target_species} \\
         --min-within ${params.atb_min_within} \\
         --max-outside ${params.atb_max_outside} \\
-        --exclude-species ${params.atb_exclude_species.join(' ')} \\
+        --exclude-species ${atb_exclude_species} \\
         --out ${prefix}
     """
 }
