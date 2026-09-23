@@ -48,7 +48,15 @@ process FIX_MEGAHIT_CONTIG_NAMING {
 process SORT_CONTIGS {
     tag "${meta.ID}"
     label 'cpu_1'
-    label 'mem_100M'
+    // mem_100M was sized on a 0.55 GB/mate dev sample (~25 MB assembly, 44 MB
+    // peak RSS). sort_contigs.py holds the WHOLE assembly in memory twice -
+    // parse_fasta() builds a dict of every contig, then combine_fastas() builds
+    // a second of those passing the length filter - so peak is ~2x the assembly
+    // in Python strings plus per-object overhead. On a 968 MB assembly that is
+    // GBs: SRR25448209 died here with exit 130 on all three escalations
+    // (100 -> 200 -> 400 MB) and was then dropped silently by errorStrategy
+    // 'ignore'. Five samples were lost this way before it was found.
+    label 'mem_8'
     label 'time_12'
 
     publishDir mode: 'copy', path: "${params.outdir}/${meta.ID}/pre_binning", saveAs: { filename -> "${meta.ID}_unbinned_contigs.fasta" }, enabled: params.publish_unbinned_contigs
