@@ -86,8 +86,11 @@ process THEMISTO2_EXPORT {
 process THEMISTO2_ATB_PSEUDOALIGN {
     tag "${meta.ID}"
     label 'cpu_4'
-    label 'mem_350'
     label 'time_queue_from_normal'
+
+    // No nextflow-commons label goes above mem_120. Start at 350 GB and double on each
+    // retry; anything over 256 GB goes to hugemem automatically (commons' standard profile).
+    memory { 350.GB * (2 ** (task.attempt - 1)) }
 
     container "quay.io/sangerpathogens/themisto2:0.0.1"
 
