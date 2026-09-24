@@ -2,6 +2,10 @@
 
 Nextflow DSL2 sub-workflow library (no `main.nf` of its own) providing `BUILD_COLOUR_INDEX` and `MARKER_FILTERING`, included by parent pipelines such as [lsmd](../../README.md). See that repo's README for the full pipeline documentation -- pipeline steps, parameters, outputs and the `stats.json` field reference.
 
+## Outputs
+
+Every process publishes under `<outdir>/<species>/` ([`modules/publish_paths.nf`](./modules/publish_paths.nf)). Final outputs are always published: `colour_mapping/` (ordered assembly list and label mapping), `index/species_index.thm2`, `index/<group>_marker_index.thm2`, and the candidate-filtering and ATB-check results. Intermediates are published only with `publish_intermediate`: the colour-mapping QC files, and each tool's output under `index/<tool>/<step>/species/` or `.../groups/<group>/`.
+
 ## `BUILD_COLOUR_INDEX`
 
 ### Inputs

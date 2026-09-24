@@ -1,3 +1,5 @@
+include { species_outdir; index_outdir } from './publish_paths.nf'
+
 process THEMISTO2_BUILD {
     tag "${meta.ID}"
     label 'cpu_32'
@@ -11,7 +13,10 @@ process THEMISTO2_BUILD {
 
     container "quay.io/sangerpathogens/themisto2:0.0.1"
 
-    publishDir mode: 'copy', path: "${params.outdir}/themisto2/${meta.stage ? "${meta.stage}_" : ''}${meta.ID}_build/"
+    // Final output: results/<species>/index/species_index.thm2, or <group>_marker_index.thm2
+    // for a group's candidate index.
+    publishDir mode: 'copy', path: "${species_outdir(meta)}/index",
+               saveAs: { fn -> meta.species ? "${meta.ID}_marker_index.thm2" : 'species_index.thm2' }
 
     input:
     tuple val(meta), path(file_colours_input), path(sbwt_index), path(lcs_index)
@@ -67,7 +72,7 @@ process THEMISTO2_EXPORT {
 
     container "quay.io/sangerpathogens/themisto2:0.0.1"
 
-    publishDir mode: 'copy', path: "${params.outdir}/themisto2/${meta.stage ? "${meta.stage}_" : ''}${meta.ID}_export/"
+    publishDir mode: 'copy', path: "${index_outdir(meta, 'themisto2/export')}", enabled: params.publish_intermediate
 
     input:
     tuple val(meta), path(index_thm2)
@@ -94,7 +99,7 @@ process THEMISTO2_ATB_PSEUDOALIGN {
 
     container "quay.io/sangerpathogens/themisto2:0.0.1"
 
-    publishDir mode: 'copy', path: "${params.outdir}/atb_cross_species/${meta.ID}/"
+    publishDir mode: 'copy', path: "${species_outdir(meta)}/atb_cross_species/${meta.ID}"
 
     input:
     tuple val(meta), path(candidate_fasta)

@@ -1,3 +1,5 @@
+include { species_outdir; index_outdir } from './publish_paths.nf'
+
 process SBWT_BUILD {
     tag "${meta.ID}"
     label 'cpu_32'
@@ -11,7 +13,7 @@ process SBWT_BUILD {
 
     container "/data/pam/installs/packages/sbwt-rs-cli/bug_fix_setdiff_commit_f93d92_2026.08.04.13.38.59/sbwt-rs-cli-0.4.2-f93d92c/image/sbwt-rs-cli_bug_fix_setdiff_commit_f93d92_2026.08.04.13.38.59.sif"
 
-    publishDir mode: 'copy', path: "${params.outdir}/sbwt/${meta.stage ? "${meta.stage}_" : ''}${meta.ID}/", enabled: params.publish_intermediate
+    publishDir mode: 'copy', path: "${index_outdir(meta, 'sbwt/build')}", enabled: params.publish_intermediate
 
     input:
     tuple val(meta), path(unitigs_fna)
@@ -46,7 +48,7 @@ process SBWT_CHECK {
 
     container "/data/pam/installs/packages/sbwt-rs-cli/bug_fix_setdiff_commit_f93d92_2026.08.04.13.38.59/sbwt-rs-cli-0.4.2-f93d92c/image/sbwt-rs-cli_bug_fix_setdiff_commit_f93d92_2026.08.04.13.38.59.sif"
 
-    publishDir mode: 'copy', path: "${params.outdir}/sbwt/${meta.stage ? "${meta.stage}_" : ''}${meta.ID}/", enabled: params.publish_intermediate
+    // Validates the index and passes the same file on, so there's nothing to publish.
 
     input:
     tuple val(meta), path(sbwt_index)
@@ -68,7 +70,7 @@ process SBWT_DUMP_UNITIGS {
 
     container "/data/pam/installs/packages/sbwt-rs-cli/bug_fix_setdiff_commit_f93d92_2026.08.04.13.38.59/sbwt-rs-cli-0.4.2-f93d92c/image/sbwt-rs-cli_bug_fix_setdiff_commit_f93d92_2026.08.04.13.38.59.sif"
 
-    publishDir mode: 'copy', path: "${params.outdir}/${meta.ID}/", enabled: params.publish_intermediate
+    publishDir mode: 'copy', path: "${index_outdir(meta, 'sbwt/dump_unitigs')}", enabled: params.publish_intermediate
 
     input:
     tuple val(meta), path(sbwt_index)

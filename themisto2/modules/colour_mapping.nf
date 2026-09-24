@@ -1,3 +1,5 @@
+include { species_outdir } from './publish_paths.nf'
+
 process COLOUR_MAPPING {
     tag "${meta.ID}"
     label 'cpu_4'
@@ -6,7 +8,12 @@ process COLOUR_MAPPING {
 
     container 'quay.io/sangerpathogens/pandas:2.2.1'
 
-    publishDir mode: 'copy', path: "${params.outdir}/colour_mapping/"
+    // Final: the ordered assembly list and the Sample_ID -> group mapping. The QC files
+    // (stats.json, dropped_unclassified.tsv) only with --publish_intermediate.
+    publishDir mode: 'copy', path: "${species_outdir(meta)}/colour_mapping",
+               pattern: "*_{file_colours_input.txt,label_mapping.tsv}"
+    publishDir mode: 'copy', path: "${species_outdir(meta)}/colour_mapping",
+               pattern: "*_{stats.json,dropped_unclassified.tsv}", enabled: params.publish_intermediate
 
     input:
     tuple val(meta), path(metadata), path(assembly_input)

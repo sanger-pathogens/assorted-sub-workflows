@@ -1,3 +1,5 @@
+include { species_outdir } from './publish_paths.nf'
+
 process LINEAGE_SPECIFICITY_FILTER {
     tag "${meta.ID}"
     label 'cpu_4'
@@ -6,7 +8,7 @@ process LINEAGE_SPECIFICITY_FILTER {
 
     container 'quay.io/sangerpathogens/pandas:2.2.1'
 
-    publishDir mode: 'copy', path: "${params.outdir}/candidate_marker_filtering/",
+    publishDir mode: 'copy', path: "${species_outdir(meta)}/candidate_marker_filtering",
                saveAs: { fn -> "${meta.ID}_${fn}" }
 
     input:

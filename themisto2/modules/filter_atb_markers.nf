@@ -1,3 +1,5 @@
+include { species_outdir } from './publish_paths.nf'
+
 process FILTER_ATB_MARKERS {
     tag "${meta.ID}"
     label 'cpu_1'
@@ -6,7 +8,7 @@ process FILTER_ATB_MARKERS {
 
     container 'quay.io/sangerpathogens/pandas:2.2.1'
 
-    publishDir mode: 'copy', path: "${params.outdir}/atb_cross_species/${meta.ID}/"
+    publishDir mode: 'copy', path: "${species_outdir(meta)}/atb_cross_species/${meta.ID}"
 
     input:
     tuple val(meta), path(jsonl), path(candidate_fasta), val(atb_target_species), val(atb_exclude_species)

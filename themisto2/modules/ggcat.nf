@@ -1,3 +1,5 @@
+include { species_outdir; index_outdir } from './publish_paths.nf'
+
 process GGCAT {
     tag "${meta.ID}"
     label 'cpu_32'
@@ -11,7 +13,7 @@ process GGCAT {
 
     container "quay.io/biocontainers/ggcat:2.2.0--hf1b6044_0"
 
-    publishDir mode: 'copy', path: "${params.outdir}/ggcat/${meta.stage ? "${meta.stage}_" : ''}${meta.ID}/", enabled: params.publish_intermediate
+    publishDir mode: 'copy', path: "${index_outdir(meta, 'ggcat')}", enabled: params.publish_intermediate
 
     input:
     tuple val(meta), path(file_colours_input)
