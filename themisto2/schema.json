@@ -50,7 +50,7 @@
       },
       "atb_min_within": {
         "default": "0.95",
-        "help_text": "Minimum fraction of a marker's k-mers that must be found in the target species (the manifest's atb_target_species)."
+        "help_text": "Minimum fraction of a marker's k-mers that must be found in the target species (the manifest's species)."
       },
       "atb_max_outside": {
         "default": "specificity_max_outside",

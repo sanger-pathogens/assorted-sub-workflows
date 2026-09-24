@@ -86,7 +86,7 @@ workflow MARKER_FILTERING {
 
     atb_branch.unchecked
     | map { meta, fasta, atb, excl ->
-        log.warn("No atb_target_species set for species '${meta.species}' -- lineage '${meta.ID}' candidate markers pass through the ATB cross-species check UNVERIFIED.")
+        log.warn("Species '${meta.species}' isn't in ATB -- lineage '${meta.ID}' candidate markers pass through the ATB cross-species check UNVERIFIED.")
         [meta, fasta]
     }
     | set { markers_unchecked }

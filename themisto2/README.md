@@ -6,14 +6,13 @@ Nextflow DSL2 sub-workflow library (no `main.nf` of its own) providing `BUILD_CO
 
 ### Inputs
 
-- `samples_ch`: one item per species -- `tuple(meta, metadata, assembly_input, label_missing, label_multi, label_map, unclassified_genomes)`:
+- `samples_ch`: one item per species -- `tuple(meta, metadata, assembly_input)`:
   - `meta.ID` -- species name (output-file prefix / folder name); `MARKER_FILTERING` sets `meta.species` to this value on every per-lineage item it produces, as the join key back to the species-wide outputs
   - `meta.target_groups` -- comma-separated lineage labels to run lineage-specificity filtering for. Empty/absent = every lineage in the metadata with `>= candidate_min_genome_count` genomes (excluding `unclassified`)
   - `metadata` -- that species' metadata table (`.tsv`/`.csv`)
   - `assembly_input` -- a directory of assembly FASTAs, or a `.txt` file listing one assembly path per line (auto-detected)
-  - `label_missing`, `label_multi`, `label_map`, `unclassified_genomes` -- how group labels are cleaned before colouring; see "Group-label cleaning" below. For the defaults pass `''`, `'keep'`, [`assets/NO_LABEL_MAP`](./assets/NO_LABEL_MAP) (staged, never passed to the script) and `'keep'`.
 
-The parent pipeline builds this channel. In lsmd that's [`subworkflows/manifest_parse.nf`](../../subworkflows/manifest_parse.nf), one item per row of the required `--manifest` TSV (columns `species` / `metadata` / `assemblies` / `target_groups`, plus the optional label-cleaning columns). `--group_label`, `--sample_col` and `--assembly_suffix` stay run-wide params.
+The parent pipeline builds this channel. In lsmd that's [`subworkflows/manifest_parse.nf`](../../subworkflows/manifest_parse.nf), one item per row of the required `--manifest` TSV (columns `species` / `metadata` / `assemblies` / `target_groups` / `atb_exclude_species`). `--group_label`, `--sample_col` and `--assembly_suffix` stay run-wide params.
 
 ### Group-label cleaning
 
@@ -55,11 +54,11 @@ Everything downstream of the species-wide index build: rebuilds each targeted li
 
 - `species_export_ch`: `tuple(meta, unitigs, color_sets, export_metadata, label_mapping)` -- `BUILD_COLOR_INDEX.out.species_export`. `meta.ID` = species id.
 - `target_groups_ch`: `tuple(meta, target_groups_string)` -- from the including pipeline's manifest parsing (in lsmd, `MANIFEST_PARSE.out.target_groups`), same slim `[ID: species]` meta as `species_export_ch`, joined in here.
-- `atb_target_species_ch`: `tuple(meta, atb_target_species_string)` -- from the including pipeline's manifest parsing (`MANIFEST_PARSE.out.atb_target_species`). A blank string means that species is skipped for the ATB cross-species check (see below).
+- `atb_target_species_ch`: `tuple(meta, atb_target_species_string)` -- from the including pipeline's manifest parsing (`MANIFEST_PARSE.out.atb_target_species`). In lsmd this is the manifest's `species` value, or a blank string when that name isn't in `--atb_color_names`, which skips the ATB cross-species check for that species (see below).
 
 ### Emitted channels
 
-- `markers`: `tuple(meta, fasta)` -- final candidate markers, `meta.ID` = lineage, `meta.species` set. ATB-checked (`PASS`) for species with an `atb_target_species` mapping, or the raw rebuilt candidate FASTA (unverified, already logged with a warning) for species without one.
+- `markers`: `tuple(meta, fasta)` -- final candidate markers, `meta.ID` = lineage, `meta.species` set. ATB-checked (`PASS`) for species found in ATB, or the raw rebuilt candidate FASTA (unverified, already logged with a warning) for species that aren't.
 - `checkpoints`: `tuple(meta, row_tsv)` -- per-stage count rows (see "Checkpoint counts" below).
 
 ### Candidate index rebuild
@@ -68,9 +67,9 @@ Everything downstream of the species-wide index build: rebuilds each targeted li
 
 ### ATB cross-species check
 
-Replaces the old `bg_excl`/`markers` `sbwt difference` set-diff (PAT-3570: `sbwt difference` is colour-blind and doesn't scale at species-index level). The rebuilt candidate index is dumped to FASTA (`SBWT_DUMP_UNITIGS`) and pseudoaligned against `ATB-species.thm2` (`THEMISTO2_ATB_PSEUDOALIGN`); [atb_cross_species_filter.py](./bin/atb_cross_species_filter.py) (`FILTER_ATB_MARKERS`) then scores each candidate marker's hit fraction against every ATB species colour and keeps only markers that are solidly within the target species (`>= atb_min_within`, default `0.95`) and essentially absent from every other one (`<= atb_max_outside`, default reuses `specificity_max_outside` rather than a separately-tuned number). ATB's `unknown` colour (its catch-all bucket for unassigned/low-confidence genomes) is excluded from the max-outside check entirely by default; set other colours to exclude per species with the manifest's `atb_exclude_species` column (space-separated; blank = `unknown`).
+Replaces the old `bg_excl`/`markers` `sbwt difference` set-diff (PAT-3570: `sbwt difference` is colour-blind and doesn't scale at species-index level). The rebuilt candidate index is dumped to FASTA (`SBWT_DUMP_UNITIGS`) and pseudoaligned against `ATB-species.thm2` (`THEMISTO2_ATB_PSEUDOALIGN`); [atb_cross_species_filter.py](./bin/atb_cross_species_filter.py) (`FILTER_ATB_MARKERS`) then scores each candidate marker's hit fraction against every ATB species colour and keeps only markers that are solidly within the target species (`>= atb_min_within`, default `0.95`) and essentially absent from every other one (`<= atb_max_outside`, default reuses `specificity_max_outside` rather than a separately-tuned number). ATB's `unknown` colour (its catch-all bucket for unassigned/low-confidence genomes) is excluded from the max-outside check entirely by default; add other colours to exclude per species with the manifest's `atb_exclude_species` column (comma-separated; `unknown` is always excluded on top of them).
 
-A species with no `atb_target_species` set in the manifest (e.g. not present in ATB at all) skips this check: its rebuilt candidate markers pass straight through **unchecked**, with a loud `log.warn`, rather than being silently dropped or failing the whole run. Every other species goes through the full check.
+A species whose manifest `species` name isn't an ATB colour name skips this check (lsmd warns at launch, with the closest ATB names in case it's a typo): its rebuilt candidate markers pass straight through **unchecked**, with a loud `log.warn`, rather than being silently dropped or failing the whole run. Every other species goes through the full check.
 
 Besides the final `PASS` markers, `FILTER_ATB_MARKERS` also writes `FLAG` (off-target leakage, kept for inspection, not forwarded), `ABSENT` (target species never hit at all), a per-marker `validation.tsv`, and a `summary.txt` -- all published under `atb_cross_species/<lineage>/`.
 
