@@ -1,7 +1,7 @@
 process SBWT_BUILD {
     tag "${meta.ID}"
     label 'cpu_32'
-    label 'mem_8'
+    label 'mem_64'
     label 'time_queue_from_normal'
 
     if (!params.temp_dir || params.temp_dir.startsWith("/tmp")) {
