@@ -16,20 +16,14 @@ The parent pipeline builds this channel. In lsmd that's [`subworkflows/manifest_
 
 ### Group-label cleaning
 
-[color_mapping.py](./bin/color_mapping.py) reads the metadata as text (so `3` never becomes `3.0`), strips whitespace from headers and the sample and label columns, then applies these rules to each label. The first rule that applies wins:
+[color_mapping.py](./bin/color_mapping.py) reads the metadata as text (so `3` never becomes `3.0`), strips whitespace from headers and the sample and label columns, then applies these rules to each label, in order:
 
-1. **`label_map`**: a TSV with columns `raw_label` and `group`. An exact match on the raw label sets the final group, and nothing else touches it. Use group `unclassified` to send a label to background. Map rows with a blank value, a repeated `raw_label`, or a `group` that is itself a missing value stop the run.
-2. **Missing values**: an empty label, or one matching `label_missing` (`|`-separated, case-insensitive), becomes `unclassified`. Blank `label_missing` uses the default list: `NA`, `N/A`, `#N/A`, `NaN`, `null`, `none`, `unknown`, `missing`, `-`, `?`, `.`, `not applicable`, `not available`, `not collected`, `not provided`. Setting it replaces that list.
-3. **`label_multi`**, for labels containing `;`: `keep` (as written, the default), `smallest` (the lowest whole number, e.g. GPS merge history `1215;5` → `5`; stops the run if any part isn't a whole number), or `unclassified`.
+1. **Missing values**: an empty label, or one of `NA`, `N/A`, `#N/A`, `NaN`, `null`, `none`, `unknown`, `missing`, `-`, `?`, `.`, `not applicable`, `not available`, `not collected`, `not provided` (case-insensitive), becomes `unclassified`.
+2. **GPSC `;` labels**, only when `--group_label` is `GPSC` (any case). GPS merge-history labels such as `1215;5` or `GPSC1215;GPSC5` become their smallest number, keeping the label's `GPSC` prefix if it has one (`1215;5` → `5`, `GPSC3;28` → `GPSC3`). **Exception:** 235 with 9, in any order or prefix form (`235;9`, `9;235`, `GPSC235;9`, `GPSC9;235`), is kept as its own group `235_9` (`GPSC235_9` with the prefix). It's a mixture of GPSC9 and GPSC235, but current evidence doesn't say to merge the two. A `;` label with a part that isn't a whole number (e.g. `5;abc`) stops the run, listing every bad label. For any other `--group_label`, `;` labels are left as written.
 
-`unclassified_genomes` then decides what happens to every genome whose final label is `unclassified`, including assemblies with no metadata row:
+Genomes whose final label is `unclassified` are **always left out of the index**: missing values, labels that already read `unclassified` (any case), and assemblies with no metadata row. Markers are therefore never checked against them. They're listed in `<species>_dropped_unclassified.tsv` (`Sample_ID`, `raw_label`, `reason`: `missing_value` / `labelled_unclassified` / `no_metadata_row`). The run stops if nothing would be left.
 
-- `keep` (default): they stay in the index as one group. They're never a target, but they still count as an outside group in lineage-specificity filtering.
-- `drop`: they're left out of the index, so markers are not checked against them. They're listed in `<species>_dropped_unclassified.tsv` (`Sample_ID`, `raw_label`, `reason`: `label_missing` / `label_map` / `label_multi` / `labelled_unclassified` for a label that literally reads `unclassified` / `no_metadata_row`). The run stops if nothing would be left.
-
-`<species>_stats.json` records the settings used (`label_settings`), every changed label with its new label, genome count and the rule that changed it (`label_changes`), map entries that matched nothing (`label_map_unmatched`) and `assemblies_dropped_unclassified`.
-
-All four options are `COLOR_MAPPING` inputs, so changing one rebuilds that species' index.
+`<species>_stats.json` records the missing-value list (`missing_values`), every changed label with its new label, genome count and the rule that changed it (`label_changes`, `changed_by`: `missing_value` or `gpsc_multi`) and `assemblies_dropped_unclassified`.
 
 ### Emitted channels
 

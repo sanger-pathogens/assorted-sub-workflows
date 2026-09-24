@@ -11,29 +11,30 @@ three files prefixed with the species name (--species-name):
 
 Every cell is read as text, so labels keep exactly the text in the file ("3"
 never becomes "3.0"). Headers and the sample/label columns are stripped of
-surrounding whitespace. A label that is empty or matches a missing value
-(--label-missing, case-insensitive) becomes "unclassified".
+surrounding whitespace. Each label then goes through these rules, in order:
 
-Each label then goes through these rules, in order; the first that applies wins:
-
-  1. --label-map    exact match on the raw label -> that map's group (final).
-  2. missing        empty, or in --label-missing -> "unclassified".
-  3. --label-multi  labels containing ";" (e.g. GPS merge history "1215;5"):
-                    keep (as written) | smallest (lowest whole number, "5") |
-                    unclassified.
+  1. missing  empty, or one of MISSING_VALUES (case-insensitive) -> "unclassified".
+  2. GPSC     only when --group-label is GPSC (any case): a label containing ";"
+              (GPS merge history, e.g. "1215;5" or "GPSC1215;GPSC5") becomes its
+              smallest number, keeping the label's GPSC prefix if it has one
+              ("GPSC1215;5" -> "GPSC5"). The one exception is 235 with 9, in any
+              order or prefix form, which is kept as its own group "235_9"
+              ("GPSC235_9" with the prefix): it's a mixture of GPSC9 and GPSC235,
+              but current evidence doesn't say to merge them. A ";" label with a
+              part that isn't a whole number stops the run, listing every bad label.
+              For any other --group-label, ";" labels are left as written.
 
 Every change is listed in stats.json (label_changes) and summarised on stderr.
 
---unclassified drop removes every genome whose final label is "unclassified"
-(missing label, a map/multi rule sending it there, or an assembly with no
-metadata row) from the index, so markers are never checked against it. Those
-genomes are listed in <species>_dropped_unclassified.tsv.
+Genomes whose label is "unclassified" (a missing value, a label that reads
+"unclassified", or an assembly with no metadata row) are always left out of the
+index, so markers are never checked against them. They're listed, with the
+reason, in <species>_dropped_unclassified.tsv. The run stops if nothing is left.
 """
 
 from __future__ import annotations
 
 import argparse
-import csv
 import json
 import os
 import re
@@ -44,12 +45,10 @@ import pandas as pd
 
 UNCLASSIFIED = "unclassified"
 MULTI_SEP = ";"
-MULTI_POLICIES = ("keep", "smallest", "unclassified")
 
 # Group-label values treated as missing (-> UNCLASSIFIED), matched case-insensitively
-# after stripping whitespace. --label-missing replaces this list; an empty label is
-# always missing.
-DEFAULT_MISSING = (
+# after stripping whitespace. An empty label is always missing.
+MISSING_VALUES = (
     "NA",
     "N/A",
     "#N/A",
@@ -66,6 +65,13 @@ DEFAULT_MISSING = (
     "not collected",
     "not provided",
 )
+MISSING_SET = {v.casefold() for v in MISSING_VALUES}
+
+# One part of a GPSC ";" label: an optional GPSC prefix and a whole number.
+GPSC_PART = re.compile(r"(?i)(gpsc)?(\d+)")
+# GPSC235;9 is a mixture of GPSC9 and GPSC235, but there's no evidence to merge the
+# two lineages, so it's kept as its own group instead of taking the smallest number.
+GPSC_UNMERGED = {9, 235}
 
 # Sanitisation applied when the assembly FASTA files were written to disk.
 _UNSAFE = re.compile(r"[^A-Za-z0-9._-]")
@@ -102,90 +108,28 @@ def parse_args():
         default=".contigs.fasta",
         help="Suffix appended to Sample_ID to form the assembly filename (default: .contigs.fasta).",
     )
-    p.add_argument(
-        "--label-missing",
-        default=None,
-        help="'|'-separated group-label values to treat as missing (-> unclassified), matched "
-        "case-insensitively, e.g. 'NA|unknown|not applicable'. Replaces the default list: "
-        + ", ".join(repr(v) for v in DEFAULT_MISSING)
-        + ". An empty label is always missing.",
-    )
-    p.add_argument(
-        "--label-map",
-        default=None,
-        help="TSV with columns raw_label and group. An exact match on the raw label sets the final "
-        "group, and no other rule touches it. Use group 'unclassified' to send a label to background.",
-    )
-    p.add_argument(
-        "--label-multi",
-        choices=MULTI_POLICIES,
-        default="keep",
-        help="What to do with labels containing ';': keep them as written (default), resolve to the "
-        "smallest whole number ('1215;5' -> '5'), or send them to unclassified.",
-    )
-    p.add_argument(
-        "--unclassified",
-        choices=("keep", "drop"),
-        default="keep",
-        help="keep (default): unclassified genomes stay in the index as one background group. "
-        "drop: leave them out of the index and list them in <species>_dropped_unclassified.tsv.",
-    )
     p.add_argument("--output_dir", required=True, help="Directory to write the output files into.")
     return p.parse_args()
 
 
-def parse_missing(raw: str | None) -> tuple[list[str], str]:
-    """(missing values, 'built-in list' | '--label-missing') from --label-missing."""
-    if raw is None:
-        return list(DEFAULT_MISSING), "built-in list"
-    return [v.strip() for v in raw.split("|") if v.strip()], "--label-missing"
+def resolve_label(raw: str, gpsc: bool) -> tuple[str, str | None]:
+    """(final label, rule that changed it: 'missing_value' | 'gpsc_multi' | None).
 
-
-def load_label_map(path: str, missing_set: set[str]) -> dict[str, str]:
-    """raw_label -> group from a two-column TSV; exits listing every problem found."""
-    label_map: dict[str, str] = {}
-    errors: list[str] = []
-    with open(path, newline="") as fh:
-        reader = csv.DictReader(fh, delimiter="\t")
-        reader.fieldnames = [(f or "").strip() for f in (reader.fieldnames or [])]
-        if not {"raw_label", "group"} <= set(reader.fieldnames):
-            sys.exit(f"Error: --label-map {path} needs columns 'raw_label' and 'group' (got {reader.fieldnames})")
-        for line_no, row in enumerate(reader, start=2):
-            raw, group = (row["raw_label"] or "").strip(), (row["group"] or "").strip()
-            if not raw or not group:
-                errors.append(f"line {line_no}: blank raw_label or group")
-            elif group.casefold() in missing_set:
-                errors.append(
-                    f"line {line_no}: group '{group}' is a missing value -- use '{UNCLASSIFIED}' to send "
-                    f"'{raw}' to background"
-                )
-            elif raw in label_map:
-                errors.append(f"line {line_no}: raw_label '{raw}' is listed more than once")
-            else:
-                label_map[raw] = group
-    if errors:
-        sys.exit(f"Error: invalid --label-map {path}:\n  " + "\n  ".join(errors))
-    return label_map
-
-
-def resolve_label(raw: str, label_map: dict, missing_set: set[str], multi: str) -> tuple[str, str | None]:
-    """(final label, rule that changed it: 'label_map' | 'label_missing' | 'label_multi' | None).
-
-    Raises ValueError for label_multi=smallest on a label whose parts aren't all
-    whole numbers -- never guess.
+    Raises ValueError for a GPSC ";" label whose parts aren't all whole numbers
+    (optionally GPSC-prefixed) -- never guess.
     """
-    if raw in label_map:
-        return label_map[raw], "label_map"
-    if raw == "" or raw.casefold() in missing_set:
-        return UNCLASSIFIED, "label_missing"
-    if MULTI_SEP in raw and multi != "keep":
-        if multi == "unclassified":
-            return UNCLASSIFIED, "label_multi"
-        parts = [p.strip() for p in raw.split(MULTI_SEP)]
-        if not all(p.isascii() and p.isdigit() for p in parts):
-            raise ValueError(raw)
-        return str(min(int(p) for p in parts)), "label_multi"
-    return raw, None
+    if raw == "" or raw.casefold() in MISSING_SET:
+        return UNCLASSIFIED, "missing_value"
+    if not (gpsc and MULTI_SEP in raw):
+        return raw, None
+    parts = [GPSC_PART.fullmatch(p.strip()) for p in raw.split(MULTI_SEP)]
+    if not all(parts):
+        raise ValueError(raw)
+    numbers = {int(m.group(2)) for m in parts}
+    prefix = parts[0].group(1) or ""
+    if numbers == GPSC_UNMERGED:
+        return f"{prefix}235_9", "gpsc_multi"
+    return f"{prefix}{min(numbers)}", "gpsc_multi"
 
 
 def load_assemblies(assembly_input: str) -> tuple[dict, list[str]]:
@@ -239,9 +183,6 @@ def main():
     prefix = args.species_name
 
     sample_col, group_label = args.sample_col.strip(), args.group_label.strip()
-    missing_values, missing_source = parse_missing(args.label_missing)
-    missing_set = {v.casefold() for v in missing_values}
-
     # All text, no pandas NA guessing: labels are exactly what's in the file.
     metadata = pd.read_csv(args.metadata, dtype=str, keep_default_na=False)
     metadata.columns = [str(c).strip() for c in metadata.columns]
@@ -257,27 +198,27 @@ def main():
         metadata = metadata.drop_duplicates(subset=sample_col)
         print(f"warning: ignored {duplicates} row(s) with a duplicate {sample_col}", file=sys.stderr)
 
-    label_map = load_label_map(args.label_map, missing_set) if args.label_map else {}
-
-    # Resolve each distinct raw label once. Genomes whose label is missing aren't
-    # dropped -- they're relabelled unclassified and kept.
+    # Resolve each distinct raw label once.
+    gpsc = group_label.casefold() == "gpsc"
     resolved, bad_multi = {}, []
     for raw in metadata[group_label].unique():
         try:
-            resolved[raw] = resolve_label(raw, label_map, missing_set, args.label_multi)
+            resolved[raw] = resolve_label(raw, gpsc)
         except ValueError:
             bad_multi.append(raw)
     if bad_multi:
         sys.exit(
-            f"Error: --label-multi smallest needs every '{MULTI_SEP}'-separated part to be a whole number; "
-            f"these labels aren't: {', '.join(repr(b) for b in sorted(bad_multi))}. "
-            "Fix them in the metadata or list them in --label-map."
+            f"Error: GPSC labels containing '{MULTI_SEP}' must be whole numbers (optionally GPSC-prefixed) "
+            f"in every part; these aren't: {', '.join(repr(b) for b in sorted(bad_multi))}. "
+            "Fix them in the metadata."
         )
     metadata["_raw_label"] = metadata[group_label]
     metadata["_rule"] = metadata["_raw_label"].map(lambda r: resolved[r][1])
     metadata[group_label] = metadata["_raw_label"].map(lambda r: resolved[r][0])
-    blank_label = metadata[group_label].eq(UNCLASSIFIED) & metadata["_rule"].notna()
-    label_map_unmatched = sorted(set(label_map) - set(resolved))
+    # A label that already reads "unclassified" (any case) is unclassified too.
+    labelled_uncl = metadata[group_label].str.casefold().eq(UNCLASSIFIED)
+    metadata.loc[labelled_uncl, group_label] = UNCLASSIFIED
+    blank_label = metadata["_rule"].eq("missing_value")
 
     # Match each metadata row to an assembly by normalised filename.
     assemblies, dead_paths = load_assemblies(args.assembly_dir or args.assembly_paths)
@@ -296,7 +237,7 @@ def main():
     n_dropped = int((~matched).sum())
     n_relabelled = int((blank_label & matched).sum())
 
-    # Assembly files no metadata row claimed -> keep them too, as "unclassified".
+    # Assembly files no metadata row claimed are "unclassified" (and dropped below).
     claimed = set(kept["_want"])
     orphan_paths = sorted(p for safe, p in by_safe_name.items() if safe not in claimed)
     orphan_rows = pd.DataFrame(
@@ -308,22 +249,20 @@ def main():
             "_reason": "no_metadata_row",
         }
     )
-    # Why each genome is unclassified, for the dropped list: the rule that sent it
-    # there, or a metadata label that literally reads "unclassified".
-    kept["_reason"] = kept["_rule"].fillna("labelled_unclassified")
+    # Why each genome is unclassified, for the dropped list: a missing value, or a
+    # metadata label that literally reads "unclassified".
+    kept["_reason"] = kept["_rule"].where(kept["_rule"].eq("missing_value"), "labelled_unclassified")
 
     cols = [sample_col, group_label, "file_path", "_raw_label", "_reason"]
     written = pd.concat([kept[cols], orphan_rows[cols]], ignore_index=True)
 
-    dropped_unclassified = written.iloc[0:0]
-    if args.unclassified == "drop":
-        is_uncl = written[group_label] == UNCLASSIFIED
-        dropped_unclassified, written = written[is_uncl], written[~is_uncl]
-        if written.empty:
-            sys.exit(
-                f"Error: --unclassified drop left no genomes for {prefix} -- all "
-                f"{len(dropped_unclassified)} are unclassified. Check --group-label and the metadata labels."
-            )
+    is_uncl = written[group_label] == UNCLASSIFIED
+    dropped_unclassified, written = written[is_uncl], written[~is_uncl]
+    if written.empty:
+        sys.exit(
+            f"Error: no genomes left for {prefix} -- all {len(dropped_unclassified)} are "
+            f"{UNCLASSIFIED}. Check --group-label and the metadata labels."
+        )
     # sort by label, then sample ID within each label -- fixes colour-ID order
     written = written.sort_values(
         [group_label, sample_col], key=lambda c: c.astype(str)
@@ -333,13 +272,12 @@ def main():
     out.mkdir(parents=True, exist_ok=True)
 
     dropped_path = out / f"{prefix}_dropped_unclassified.tsv"
-    if args.unclassified == "drop":
-        (
-            dropped_unclassified[[sample_col, "_raw_label", "_reason"]]
-            .rename(columns={sample_col: "Sample_ID", "_raw_label": "raw_label", "_reason": "reason"})
-            .sort_values(["reason", "Sample_ID"])
-            .to_csv(dropped_path, index=False, sep="\t")
-        )
+    (
+        dropped_unclassified[[sample_col, "_raw_label", "_reason"]]
+        .rename(columns={sample_col: "Sample_ID", "_raw_label": "raw_label", "_reason": "reason"})
+        .sort_values(["reason", "Sample_ID"])
+        .to_csv(dropped_path, index=False, sep="\t")
+    )
 
     written["file_path"].to_csv(out / f"{prefix}_file_colors_input.txt", index=False, header=False)
     (
@@ -352,7 +290,7 @@ def main():
         str(label): int(n)
         for label, n in written[group_label].value_counts().sort_index().items()
     }
-    rewritten = kept[kept[group_label] != kept["_raw_label"]]
+    rewritten = kept[kept["_rule"].notna()]
     label_changes = [
         {"raw_label": raw, "new_label": final, "changed_by": rule, "genomes": int(n)}
         for (raw, final, rule), n in rewritten.groupby(["_raw_label", group_label, "_rule"]).size().items()
@@ -370,22 +308,13 @@ def main():
         "relabelled_unclassified": n_relabelled,
         "assemblies_without_metadata_row": len(orphan_paths),
         "assemblies_per_group": per_group,
-        "label_settings": {
-            "label_missing": missing_values,
-            "label_missing_source": missing_source,
-            "label_multi": args.label_multi,
-            "label_map": args.label_map,
-            "unclassified_genomes": args.unclassified,
-        },
+        "missing_values": list(MISSING_VALUES),
         "label_changes": label_changes,
-        "label_map_unmatched": label_map_unmatched,
         "note": (
             "Genome counts first, then how group labels were cleaned. 'unclassified' genomes are "
-            "metadata rows whose label was blank or a missing value (or was sent there by a label "
-            "rule), plus assembly files with no metadata row. "
-            "They stay in the index unless label_settings.unclassified_genomes is 'drop'; dropped "
-            "ones are counted in assemblies_dropped_unclassified and listed in "
-            "<species>_dropped_unclassified.tsv. "
+            "metadata rows whose label was blank, a missing value or read 'unclassified', plus "
+            "assembly files with no metadata row. They're always left out of the index: counted in "
+            "assemblies_dropped_unclassified and listed in <species>_dropped_unclassified.tsv. "
             "assemblies_dropped_fasta_not_found are metadata rows whose assembly FASTA wasn't found."
         ),
     }
@@ -400,7 +329,7 @@ def main():
     if len(dropped_unclassified):
         summary += f"; {len(dropped_unclassified)} {UNCLASSIFIED} dropped from the index"
     if n_relabelled:
-        summary += f"; {n_relabelled} missing or rewritten label -> {UNCLASSIFIED}"
+        summary += f"; {n_relabelled} missing label(s) -> {UNCLASSIFIED}"
     print(summary, file=sys.stderr)
     if label_changes:
         print(
@@ -416,14 +345,8 @@ def main():
             print(f"  ... and {len(label_changes) - 20} more", file=sys.stderr)
     if len(dropped_unclassified):
         print(
-            f"warning: {len(dropped_unclassified)} {UNCLASSIFIED} genome(s) left out of the index "
-            f"(--unclassified drop); markers are not checked against them. See {dropped_path.name}",
-            file=sys.stderr,
-        )
-    if label_map_unmatched:
-        print(
-            f"warning: {len(label_map_unmatched)} --label-map raw_label(s) match no metadata label: "
-            + ", ".join(repr(u) for u in label_map_unmatched[:10]),
+            f"warning: {len(dropped_unclassified)} {UNCLASSIFIED} genome(s) left out of the index; "
+            f"markers are not checked against them. See {dropped_path.name}",
             file=sys.stderr,
         )
 
