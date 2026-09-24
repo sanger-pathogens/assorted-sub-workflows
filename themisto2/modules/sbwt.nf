@@ -20,18 +20,18 @@ process SBWT_BUILD {
     tuple val(meta), path(sbwt_index), path(lcs_index), emit: index
 
     script:
-    sbwt_index   = "unitigs-k${params.color_index_kmer_size}.sbwt"
-    lcs_index    = "unitigs-k${params.color_index_kmer_size}.lcs"
+    sbwt_index   = "unitigs-k${params.colour_index_kmer_size}.sbwt"
+    lcs_index    = "unitigs-k${params.colour_index_kmer_size}.lcs"
     def temp_dir = params.temp_dir ? "${params.temp_dir}/sbwt/${meta.ID}" : "sbwt_temp"
     def mem_gb = Math.floor(task.memory.toGiga() * 0.95) as int
     """
     mkdir -p ${temp_dir}
     sbwt build \\
         -i ${unitigs_fna} \\
-        -o unitigs-k${params.color_index_kmer_size} \\
+        -o unitigs-k${params.colour_index_kmer_size} \\
         -r \\
         -l \\
-        -k ${params.color_index_kmer_size} \\
+        -k ${params.colour_index_kmer_size} \\
         -m ${mem_gb} \\
         -t ${task.cpus} \\
         --temp-dir ${temp_dir}

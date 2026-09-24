@@ -14,14 +14,14 @@ process THEMISTO2_BUILD {
     publishDir mode: 'copy', path: "${params.outdir}/themisto2/${meta.stage ? "${meta.stage}_" : ''}${meta.ID}_build/"
 
     input:
-    tuple val(meta), path(file_colors_input), path(sbwt_index), path(lcs_index)
+    tuple val(meta), path(file_colours_input), path(sbwt_index), path(lcs_index)
 
     output:
     tuple val(meta), path(index_thm2), emit: index
 
     script:
     index_thm2 = "index.thm2"
-    index_build_params = "--file-colors ${file_colors_input} -o ${index_thm2} -s ${sbwt_index} -l ${lcs_index} -k ${params.color_index_kmer_size} -t ${task.cpus}"
+    index_build_params = "--file-colors ${file_colours_input} -o ${index_thm2} -s ${sbwt_index} -l ${lcs_index} -k ${params.colour_index_kmer_size} -t ${task.cpus}"
 
     if (params.temp_dir) {
         temp_storage_location = "${params.temp_dir}/themisto2/${meta.ID}"
@@ -34,7 +34,7 @@ process THEMISTO2_BUILD {
 
     """
     mkdir -p ${temp_storage_location}
-    sed -i '/^\s*\$/d' "${file_colors_input}"
+    sed -i '/^\s*\$/d' "${file_colours_input}"
     themisto2 build ${index_build_params}
     """
 }
@@ -74,7 +74,7 @@ process THEMISTO2_EXPORT {
 
     output:
     tuple val(meta), path("export.unitigs.fa"),    emit: unitigs
-    tuple val(meta), path("export.color_sets.txt"), emit: color_sets
+    tuple val(meta), path("export.color_sets.txt"), emit: colour_sets
     tuple val(meta), path("export.metadata.txt"),  emit: metadata
 
     script:

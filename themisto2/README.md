@@ -1,8 +1,8 @@
 # themisto2
 
-Nextflow DSL2 sub-workflow library (no `main.nf` of its own) providing `BUILD_COLOR_INDEX` and `MARKER_FILTERING`, included by parent pipelines such as [lsmd](../../README.md). See that repo's README for the full pipeline documentation -- pipeline steps, parameters, outputs and the `stats.json` field reference.
+Nextflow DSL2 sub-workflow library (no `main.nf` of its own) providing `BUILD_COLOUR_INDEX` and `MARKER_FILTERING`, included by parent pipelines such as [lsmd](../../README.md). See that repo's README for the full pipeline documentation -- pipeline steps, parameters, outputs and the `stats.json` field reference.
 
-## `BUILD_COLOR_INDEX`
+## `BUILD_COLOUR_INDEX`
 
 ### Inputs
 
@@ -16,7 +16,7 @@ The parent pipeline builds this channel. In lsmd that's [`subworkflows/manifest_
 
 ### Group-label cleaning
 
-[color_mapping.py](./bin/color_mapping.py) reads the metadata as text (so `3` never becomes `3.0`), strips whitespace from headers and the sample and label columns, then applies these rules to each label, in order:
+[colour_mapping.py](./bin/colour_mapping.py) reads the metadata as text (so `3` never becomes `3.0`), strips whitespace from headers and the sample and label columns, then applies these rules to each label, in order:
 
 1. **Missing values**: an empty label, or one of `NA`, `N/A`, `#N/A`, `NaN`, `null`, `none`, `unknown`, `missing`, `-`, `?`, `.`, `not applicable`, `not available`, `not collected`, `not provided` (case-insensitive), becomes `unclassified`.
 2. **GPSC `;` labels**, only when `--group_label` is `GPSC` (any case). GPS merge-history labels such as `1215;5` or `GPSC1215;GPSC5` become their smallest number, keeping the label's `GPSC` prefix if it has one (`1215;5` → `5`, `GPSC3;28` → `GPSC3`). **Exception:** 235 with 9, in any order or prefix form (`235;9`, `9;235`, `GPSC235;9`, `GPSC9;235`), is kept as its own group `235_9` (`GPSC235_9` with the prefix). It's a mixture of GPSC9 and GPSC235, but current evidence doesn't say to merge the two. A `;` label with a part that isn't a whole number (e.g. `5;abc`) stops the run, listing every bad label. For any other `--group_label`, `;` labels are left as written.
@@ -28,7 +28,7 @@ Genomes whose final label is `unclassified` are **always left out of the index**
 ### Emitted channels
 
 - `sbwt_index`: `tuple(meta, sbwt, lcs)` -- species-wide index.
-- `species_export`: `tuple(meta, unitigs, color_sets, export_metadata, label_mapping)` -- species-wide Themisto2 export; feeds `MARKER_FILTERING`'s `LINEAGE_SPECIFICITY_FILTER` input.
+- `species_export`: `tuple(meta, unitigs, colour_sets, export_metadata, label_mapping)` -- species-wide Themisto2 export; feeds `MARKER_FILTERING`'s `LINEAGE_SPECIFICITY_FILTER` input.
 - `checkpoints`: `tuple(meta, row_tsv)` -- per-stage count rows (see "Checkpoint counts" below).
 
 ### Lineage-specificity candidate filtering
@@ -46,9 +46,9 @@ Everything downstream of the species-wide index build: rebuilds each targeted li
 
 ### Inputs
 
-- `species_export_ch`: `tuple(meta, unitigs, color_sets, export_metadata, label_mapping)` -- `BUILD_COLOR_INDEX.out.species_export`. `meta.ID` = species id.
+- `species_export_ch`: `tuple(meta, unitigs, colour_sets, export_metadata, label_mapping)` -- `BUILD_COLOUR_INDEX.out.species_export`. `meta.ID` = species id.
 - `target_groups_ch`: `tuple(meta, target_groups_string)` -- from the including pipeline's manifest parsing (in lsmd, `MANIFEST_PARSE.out.target_groups`), same slim `[ID: species]` meta as `species_export_ch`, joined in here.
-- `atb_target_species_ch`: `tuple(meta, atb_target_species_string)` -- from the including pipeline's manifest parsing (`MANIFEST_PARSE.out.atb_target_species`). In lsmd this is the manifest's `species` value, or a blank string when that name isn't in `--atb_color_names`, which skips the ATB cross-species check for that species (see below).
+- `atb_target_species_ch`: `tuple(meta, atb_target_species_string)` -- from the including pipeline's manifest parsing (`MANIFEST_PARSE.out.atb_target_species`). In lsmd this is the manifest's `species` value, or a blank string when that name isn't in `--atb_colour_names`, which skips the ATB cross-species check for that species (see below).
 
 ### Emitted channels
 
@@ -57,7 +57,7 @@ Everything downstream of the species-wide index build: rebuilds each targeted li
 
 ### Candidate index rebuild
 
-`LINEAGE_SPECIFICITY_FILTER`'s output (one candidate FASTA per targeted lineage) is wrapped into a colour-list (`CANDIDATE_COLOR_LIST`) and rebuilt end to end: GGCAT -> SBWT build/check -> Themisto2 build/stats. This is a QC gate only -- no export needed, since the ATB check below reads unitigs straight off `SBWT_DUMP_UNITIGS`, not a Themisto2 export. A lineage whose candidate FASTA comes back empty (nothing cleared the lineage-specificity thresholds) skips the rebuild entirely, with a `log.warn`, rather than failing the run.
+`LINEAGE_SPECIFICITY_FILTER`'s output (one candidate FASTA per targeted lineage) is wrapped into a colour-list (`CANDIDATE_COLOUR_LIST`) and rebuilt end to end: GGCAT -> SBWT build/check -> Themisto2 build/stats. This is a QC gate only -- no export needed, since the ATB check below reads unitigs straight off `SBWT_DUMP_UNITIGS`, not a Themisto2 export. A lineage whose candidate FASTA comes back empty (nothing cleared the lineage-specificity thresholds) skips the rebuild entirely, with a `log.warn`, rather than failing the run.
 
 ### ATB cross-species check
 
@@ -69,7 +69,7 @@ Besides the final `PASS` markers, `FILTER_ATB_MARKERS` also writes `FLAG` (off-t
 
 ## Dependencies
 
-All software dependencies are containerised (GGCAT, SBWT, Themisto2, and a `pandas` container for [color_mapping.py](./bin/color_mapping.py) and [atb_cross_species_filter.py](./bin/atb_cross_species_filter.py)).
+All software dependencies are containerised (GGCAT, SBWT, Themisto2, and a `pandas` container for [colour_mapping.py](./bin/colour_mapping.py) and [atb_cross_species_filter.py](./bin/atb_cross_species_filter.py)).
 
 ## GGCAT `-e` (unitig links)
 
@@ -79,15 +79,15 @@ It's candidate-only because it was measured to cost +58% output file size (504MB
 
 ## Checkpoint counts (`pipeline_counts.tsv`)
 
-Both `BUILD_COLOR_INDEX` and `MARKER_FILTERING` tap a fixed set of key stages (colour file, GGCAT unitigs, Themisto2 index, exported/dumped FASTA, final markers) through `CHECKPOINT_FASTA`/`CHECKPOINT_THEMISTO` (`modules/checkpoint.nf`, split by input type) as a side channel -- never joined back into the workflow, just counted. Rows from every stage across both subworkflows are combined by the including pipeline's `main.nf` (`collectFile`) into one `pipeline_counts.tsv`, ordered by an `order` key (`BUILD_COLOR_INDEX` uses 10-40, `MARKER_FILTERING` continues from 50).
+Both `BUILD_COLOUR_INDEX` and `MARKER_FILTERING` tap a fixed set of key stages (colour file, GGCAT unitigs, Themisto2 index, exported/dumped FASTA, final markers) through `CHECKPOINT_FASTA`/`CHECKPOINT_THEMISTO` (`modules/checkpoint.nf`, split by input type) as a side channel -- never joined back into the workflow, just counted. Rows from every stage across both subworkflows are combined by the including pipeline's `main.nf` (`collectFile`) into one `pipeline_counts.tsv`, ordered by an `order` key (`BUILD_COLOUR_INDEX` uses 10-40, `MARKER_FILTERING` continues from 50).
 
 Columns, by input `kind`:
 
 | kind | columns populated |
 | --- | --- |
-| `colorfile` | `n_seqs` (line count) |
+| `colourfile` | `n_seqs` (line count) |
 | `fasta` | `n_seqs`, `sum_bp`, `min_len`, `median_len`, `max_len` (via `seqkit stats -a`), `n_revcomp_dupes` (via `seqkit rmdup -s`) |
-| `themisto` | `n_kmers`, `n_colors`, `n_unitigs` (via `themisto2 stats`) |
+| `themisto` | `n_kmers`, `n_colours`, `n_unitigs` (via `themisto2 stats`) |
 
 **Number of reverse-complement duplicates** (`n_revcomp_dupes`) counts FASTA records that are reverse-complement duplicates of another record already in the same file -- i.e. two records that are the same underlying DNA fragment, just written from opposite strands (`ACGT` vs. its reverse complement `ACGT`->`CGTA`->complemented). A byte-for-byte comparison won't catch these; `seqkit rmdup -s` canonicalises each sequence against its reverse complement before deduping, and compares both strands by default. The rest of this section refers to it by its column name, `n_revcomp_dupes`.
 

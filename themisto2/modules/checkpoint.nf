@@ -1,4 +1,4 @@
-def CHECKPOINT_HEADER = 'order\\tstage\\tid\\tspecies\\tn_kmers\\tn_colors\\tn_unitigs\\tn_seqs\\tsum_bp\\tmin_len\\tmedian_len\\tmax_len\\tn_revcomp_dupes'
+def CHECKPOINT_HEADER = 'order\\tstage\\tid\\tspecies\\tn_kmers\\tn_colours\\tn_unitigs\\tn_seqs\\tsum_bp\\tmin_len\\tmedian_len\\tmax_len\\tn_revcomp_dupes'
 def CHECKPOINT_ROW_FMT = '%s\\t%s\\t%s\\t%s\\t%s\\t%s\\t%s\\t%s\\t%s\\t%s\\t%s\\t%s\\t%s'
 
 process CHECKPOINT_FASTA {
@@ -23,7 +23,7 @@ process CHECKPOINT_FASTA {
     def order_key = String.format('%03d', order as int)
     """
     case "${kind}" in
-      colorfile)
+      colourfile)
         n_seqs=\$(grep -c . "${target}" || true)
         ;;
 
@@ -40,7 +40,7 @@ process CHECKPOINT_FASTA {
         ;;
 
       *)
-        echo "CHECKPOINT_FASTA: unexpected kind '${kind}' (expected fasta or colorfile)" >&2
+        echo "CHECKPOINT_FASTA: unexpected kind '${kind}' (expected fasta or colourfile)" >&2
         exit 1
         ;;
     esac
@@ -48,7 +48,7 @@ process CHECKPOINT_FASTA {
     printf '${CHECKPOINT_HEADER}\\n' > "${row_tsv}"
     printf '${CHECKPOINT_ROW_FMT}\\n' \\
         "${order_key}" "${stage}" "${meta.ID}" "${species}" \\
-        "\${n_kmers:-}" "\${n_colors:-}" "\${n_unitigs:-}" "\${n_seqs:-}" "\${sum_bp:-}" \\
+        "\${n_kmers:-}" "\${n_colours:-}" "\${n_unitigs:-}" "\${n_seqs:-}" "\${sum_bp:-}" \\
         "\${min_len:-}" "\${median_len:-}" "\${max_len:-}" "\${n_revcomp_dupes:-}" >> "${row_tsv}"
     """
 }
@@ -76,13 +76,13 @@ process CHECKPOINT_THEMISTO {
     """
     themisto2 stats -i "${target}" -t ${task.cpus} > stats.txt
     n_kmers=\$(sed -n 's/^Number of k-mers: //p' stats.txt)
-    n_colors=\$(sed -n 's/^Number of colors: //p' stats.txt)
+    n_colours=\$(sed -n 's/^Number of colors: //p' stats.txt)
     n_unitigs=\$(sed -n 's/^Number of forward unitigs (not bidirected): //p' stats.txt)
 
     printf '${CHECKPOINT_HEADER}\\n' > "${row_tsv}"
     printf '${CHECKPOINT_ROW_FMT}\\n' \\
         "${order_key}" "${stage}" "${meta.ID}" "${species}" \\
-        "\${n_kmers:-}" "\${n_colors:-}" "\${n_unitigs:-}" "\${n_seqs:-}" "\${sum_bp:-}" \\
+        "\${n_kmers:-}" "\${n_colours:-}" "\${n_unitigs:-}" "\${n_seqs:-}" "\${sum_bp:-}" \\
         "\${min_len:-}" "\${median_len:-}" "\${max_len:-}" "\${n_revcomp_dupes:-}" >> "${row_tsv}"
     """
 }

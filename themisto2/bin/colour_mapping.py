@@ -5,7 +5,7 @@ Build Themisto2's ``--file-colors`` input for a species-wide colour index.
 Reads one metadata table (one row per genome) and writes, into --output_dir,
 three files prefixed with the species name (--species-name):
 
-  <species>_file_colors_input.txt  assembly paths, one per line, grouped by label
+  <species>_file_colours_input.txt  assembly paths, one per line, grouped by label
   <species>_label_mapping.tsv      Sample_ID -> label, in index (colour-ID) order
   <species>_stats.json             summary counts, incl. assemblies per group
 
@@ -83,7 +83,7 @@ def fs_safe(name: str) -> str:
 
 
 def parse_args():
-    p = argparse.ArgumentParser(description="Build Themisto2 file-colors input from a metadata table.")
+    p = argparse.ArgumentParser(description="Build Themisto2 file-colours input from a metadata table.")
     p.add_argument("--metadata", required=True, help="Path to the metadata CSV.")
     p.add_argument(
         "--species-name",
@@ -136,11 +136,11 @@ def load_assemblies(assembly_input: str) -> tuple[dict, list[str]]:
     """(basename -> full path, dead paths). From a directory or a path-list file.
 
     Path-list entries that don't point at an existing file are pulled out into
-    the second list -- a wrong path in the .txt must not reach file_colors_input.
+    the second list -- a wrong path in the .txt must not reach file_colours_input.
     """
     path = Path(assembly_input)
     if path.is_dir():
-        # Resolve to a canonical absolute path so file_colors_input.txt is readable
+        # Resolve to a canonical absolute path so file_colours_input.txt is readable
         # from a different task's work dir (staged symlinks won't resolve there).
         root = path.resolve()
         return {name: str(root / name) for name in os.listdir(root)}, []
@@ -279,7 +279,7 @@ def main():
         .to_csv(dropped_path, index=False, sep="\t")
     )
 
-    written["file_path"].to_csv(out / f"{prefix}_file_colors_input.txt", index=False, header=False)
+    written["file_path"].to_csv(out / f"{prefix}_file_colours_input.txt", index=False, header=False)
     (
         written[[sample_col, group_label]]
         .rename(columns={sample_col: "Sample_ID", group_label: "label"})

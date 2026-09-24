@@ -1,7 +1,7 @@
 {
   "pipeline": "themisto2",
   "params": {
-    "Color mapping ": {
+    "Colour mapping ": {
       "assembly_suffix": {
         "default": null,
         "help_text": "Suffix of assembly filename. Only required when the user provides a path to an assemblies directory."
@@ -16,7 +16,7 @@
       }
     },
     "Building the colour index ": {
-      "color_index_kmer_size": {
+      "colour_index_kmer_size": {
         "default": "31",
         "help_text": "The k-mer size to use for the GGCAT / SBWT / Themisto2 builds. Must be the same across all three tools."
       },
@@ -44,7 +44,7 @@
         "default": "/lustre/scratch124/pam/teams/team230/ja40/ATB-species/ATB-species.thm2",
         "help_text": "Themisto2 index of AllTheBacteria, one colour per species. Candidate markers are pseudoaligned against it to check they aren't found in other species. The default is the Sanger farm copy."
       },
-      "atb_color_names": {
+      "atb_colour_names": {
         "default": "/lustre/scratch124/pam/teams/team230/ja40/ATB-species/color_names.txt",
         "help_text": "Colour ID -> ATB species name for --atb_index. Must match that index."
       },

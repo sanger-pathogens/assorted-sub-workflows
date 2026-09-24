@@ -1,4 +1,4 @@
-include { LINEAGE_SPECIFICITY_FILTER; CANDIDATE_COLOR_LIST } from '../modules/lineage_specificity_filtering.nf'
+include { LINEAGE_SPECIFICITY_FILTER; CANDIDATE_COLOUR_LIST } from '../modules/lineage_specificity_filtering.nf'
 include { GGCAT as GGCAT_CANDIDATE                         } from '../modules/ggcat.nf'
 include { SBWT_BUILD as SBWT_BUILD_CANDIDATE; SBWT_CHECK as SBWT_CHECK_CANDIDATE; SBWT_DUMP_UNITIGS } from '../modules/sbwt.nf'
 include { THEMISTO2_BUILD as THEMISTO2_BUILD_CANDIDATE; THEMISTO2_STATS as THEMISTO2_STATS_CANDIDATE; THEMISTO2_ATB_PSEUDOALIGN } from '../modules/themisto2.nf'
@@ -14,7 +14,7 @@ workflow MARKER_FILTERING {
 
     main:
     atb_index_ch       = Channel.value(file(params.atb_index, checkIfExists: true))
-    atb_color_names_ch = Channel.value(file(params.atb_color_names, checkIfExists: true))
+    atb_colour_names_ch = Channel.value(file(params.atb_colour_names, checkIfExists: true))
 
     species_export_ch
     | join(target_groups_ch)
@@ -40,9 +40,9 @@ workflow MARKER_FILTERING {
     | map { meta, fasta -> [meta + [stage: 'candidate'], fasta] }
     | set { candidate_fasta_nonempty }
 
-    CANDIDATE_COLOR_LIST(candidate_fasta_nonempty)
+    CANDIDATE_COLOUR_LIST(candidate_fasta_nonempty)
 
-    GGCAT_CANDIDATE(CANDIDATE_COLOR_LIST.out.file_colors)
+    GGCAT_CANDIDATE(CANDIDATE_COLOUR_LIST.out.file_colours)
     SBWT_BUILD_CANDIDATE(GGCAT_CANDIDATE.out.unitigs)
 
     SBWT_BUILD_CANDIDATE.out.index
@@ -55,7 +55,7 @@ workflow MARKER_FILTERING {
     | join(SBWT_BUILD_CANDIDATE.out.index.map { meta, sbwt, lcs -> [meta, lcs] })
     | set { candidate_checked_index }
 
-    CANDIDATE_COLOR_LIST.out.file_colors
+    CANDIDATE_COLOUR_LIST.out.file_colours
     | join(candidate_checked_index)
     | set { candidate_themisto_build_input }
 
@@ -102,7 +102,7 @@ workflow MARKER_FILTERING {
     | join(atb_branch.checked.map { meta, fasta, atb, excl -> [meta, atb, excl] })
     | set { filter_atb_input }
 
-    FILTER_ATB_MARKERS(filter_atb_input, atb_color_names_ch)
+    FILTER_ATB_MARKERS(filter_atb_input, atb_colour_names_ch)
 
     FILTER_ATB_MARKERS.out.pass
     | mix(markers_unchecked)

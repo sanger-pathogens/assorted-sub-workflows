@@ -14,23 +14,23 @@ process GGCAT {
     publishDir mode: 'copy', path: "${params.outdir}/ggcat/${meta.stage ? "${meta.stage}_" : ''}${meta.ID}/", enabled: params.publish_intermediate
 
     input:
-    tuple val(meta), path(file_colors_input)
+    tuple val(meta), path(file_colours_input)
 
     output:
     tuple val(meta), path(unitigs_fna), emit: unitigs
 
     script:
     def temp_dir = params.temp_dir ? "${params.temp_dir}/ggcat/${meta.ID}" : "ggcat_temp"
-    unitigs_fna = "unitigs-k${params.color_index_kmer_size}.fna"
+    unitigs_fna = "unitigs-k${params.colour_index_kmer_size}.fna"
     def mem_gb = Math.floor(task.memory.toGiga() * 0.95) as int
     def links_flag = meta.stage == 'candidate' ? '-e' : ''
     """
     mkdir -p ${temp_dir}
     ggcat build \\
-        -l ${file_colors_input} \\
+        -l ${file_colours_input} \\
         -o ${unitigs_fna} \\
         -s 1 \\
-        -k ${params.color_index_kmer_size} \\
+        -k ${params.colour_index_kmer_size} \\
         -t ${temp_dir} \\
         -j ${task.cpus} \\
         -m ${mem_gb} \\

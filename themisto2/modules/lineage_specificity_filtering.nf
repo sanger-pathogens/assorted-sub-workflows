@@ -10,7 +10,7 @@ process LINEAGE_SPECIFICITY_FILTER {
                saveAs: { fn -> "${meta.ID}_${fn}" }
 
     input:
-    tuple val(meta), path(unitigs), path(color_sets), path(export_metadata), path(label_mapping), val(target_groups)
+    tuple val(meta), path(unitigs), path(colour_sets), path(export_metadata), path(label_mapping), val(target_groups)
 
     output:
     tuple val(meta), path("*_candidate_unitigs.fasta"), emit: unitigs,      optional: true
@@ -24,7 +24,7 @@ process LINEAGE_SPECIFICITY_FILTER {
     """
     ${moduleDir}/../bin/lineage_specificity_filter.py \\
         --unitigs ${unitigs} \\
-        --color-sets ${color_sets} \\
+        --colour-sets ${colour_sets} \\
         --export-metadata ${export_metadata} \\
         --label-mapping ${label_mapping} \\
         ${lineages_arg} \\
@@ -38,7 +38,7 @@ process LINEAGE_SPECIFICITY_FILTER {
     """
 }
 
-process CANDIDATE_COLOR_LIST {
+process CANDIDATE_COLOUR_LIST {
     tag "${meta.ID}"
     label 'cpu_1'
     label 'mem_2'
@@ -50,11 +50,11 @@ process CANDIDATE_COLOR_LIST {
     tuple val(meta), path(candidate_fasta)
 
     output:
-    tuple val(meta), path(file_colors), emit: file_colors
+    tuple val(meta), path(file_colours), emit: file_colours
 
     script:
-    file_colors = "candidate_file_colors.txt"
+    file_colours = "candidate_file_colours.txt"
     """
-    readlink -f ${candidate_fasta} > ${file_colors}
+    readlink -f ${candidate_fasta} > ${file_colours}
     """
 }

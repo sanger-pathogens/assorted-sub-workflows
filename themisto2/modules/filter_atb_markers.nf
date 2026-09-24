@@ -10,7 +10,7 @@ process FILTER_ATB_MARKERS {
 
     input:
     tuple val(meta), path(jsonl), path(candidate_fasta), val(atb_target_species), val(atb_exclude_species)
-    path(color_names)
+    path(colour_names)
 
     output:
     tuple val(meta), path("${prefix}_PASS.fasta"),         emit: pass
@@ -27,7 +27,7 @@ process FILTER_ATB_MARKERS {
     ${moduleDir}/../bin/atb_cross_species_filter.py \\
         --jsonl ${jsonl} \\
         --fasta ${candidate_fasta} \\
-        --color-names ${color_names} \\
+        --color-names ${colour_names} \\
         --target-species ${atb_target_species} \\
         --min-within ${params.atb_min_within} \\
         --max-outside ${params.atb_max_outside} \\
