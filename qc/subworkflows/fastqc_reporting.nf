@@ -6,6 +6,7 @@ workflow FASTQC_MULTIQC {
     take:
     fastq_path_ch
 
+    main:
     if (!params.skip_fastqc) {
         FASTQC(fastq_path_ch)
         def post_qc_report = false
@@ -17,6 +18,8 @@ workflow FASTQC_MULTIQC {
         | set { fastqc_zips }
 
         MULTIQC(fastqc_zips, post_qc_report)
-
     }
+    
+    emit:
+    fastqc_report = MULTIQC.out.report
 }
