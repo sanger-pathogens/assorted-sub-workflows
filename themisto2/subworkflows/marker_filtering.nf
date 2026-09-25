@@ -1,7 +1,7 @@
 include { LINEAGE_SPECIFICITY_FILTER; CANDIDATE_COLOUR_LIST } from '../modules/lineage_specificity_filtering.nf'
 include { GGCAT as GGCAT_CANDIDATE                         } from '../modules/ggcat.nf'
 include { SBWT_BUILD as SBWT_BUILD_CANDIDATE; SBWT_CHECK as SBWT_CHECK_CANDIDATE; SBWT_DUMP_UNITIGS } from '../modules/sbwt.nf'
-include { THEMISTO2_BUILD as THEMISTO2_BUILD_CANDIDATE; THEMISTO2_STATS as THEMISTO2_STATS_CANDIDATE; THEMISTO2_ATB_PSEUDOALIGN } from '../modules/themisto2.nf'
+include { THEMISTO2_BUILD as THEMISTO2_BUILD_CANDIDATE; THEMISTO2_STATS as THEMISTO2_STATS_CANDIDATE; THEMISTO2_EXPORT as THEMISTO2_EXPORT_CANDIDATE; THEMISTO2_ATB_PSEUDOALIGN } from '../modules/themisto2.nf'
 include { FILTER_ATB_MARKERS                               } from '../modules/filter_atb_markers.nf'
 include { CHECKPOINT_FASTA; CHECKPOINT_THEMISTO             } from '../modules/checkpoint.nf'
 
@@ -62,6 +62,9 @@ workflow MARKER_FILTERING {
     THEMISTO2_BUILD_CANDIDATE(candidate_themisto_build_input)
     THEMISTO2_STATS_CANDIDATE(THEMISTO2_BUILD_CANDIDATE.out.index)
 
+    // Checkpoint only: one record per unitig (no strand duplicates), unlike SBWT_DUMP_UNITIGS.
+    THEMISTO2_EXPORT_CANDIDATE(THEMISTO2_STATS_CANDIDATE.out.index)
+
     candidate_checked_index
     | map { meta, sbwt, lcs -> [meta, sbwt] }
     | set { candidate_sbwt_for_dump }
@@ -73,7 +76,10 @@ workflow MARKER_FILTERING {
     | map { meta, atb, excl -> [meta.ID, atb, excl] }
     | set { atb_target_species_by_species }
 
-    SBWT_DUMP_UNITIGS.out.unitigs
+    // ATB check reads GGCAT's candidate unitigs directly: one record per unitig. The candidate
+    // SBWT/Themisto2 rebuild below is QC-only (checkpoints 70/75/80); SBWT_DUMP_UNITIGS writes
+    // both strands of every unitig, which used to double the ATB query and its counts.
+    GGCAT_CANDIDATE.out.unitigs
     | map { meta, fasta -> [meta.species, meta, fasta] }
     | join(atb_target_species_by_species)
     | map { species, meta, fasta, atb, excl -> [meta, fasta, atb, excl] }
@@ -111,6 +117,7 @@ workflow MARKER_FILTERING {
     Channel.empty()
     | mix( candidate_fasta_per_lineage.map           { meta, f -> [meta, 50, 'candidate_specificity_filter', 'fasta', f] } )
     | mix( GGCAT_CANDIDATE.out.unitigs.map           { meta, f -> [meta, 60, 'candidate_ggcat_unitigs', 'fasta', f] } )
+    | mix( THEMISTO2_EXPORT_CANDIDATE.out.unitigs.map { meta, f -> [meta, 75, 'candidate_export_unitigs', 'fasta', f] } )
     | mix( SBWT_DUMP_UNITIGS.out.unitigs.map         { meta, f -> [meta, 80, 'candidate_dumped_fasta', 'fasta', f] } )
     | mix( markers.map                               { meta, f -> [meta, 90, 'markers_atb_checked', 'fasta', f] } )
     | set { fasta_checkpoint_inputs }
