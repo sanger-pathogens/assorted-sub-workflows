@@ -13,13 +13,13 @@ workflow FASTQC_MULTIQC {
 
         FASTQC.out.zip
         | map { meta, zip1, zip2 -> [zip1, zip2] }
-        | collect()
         | flatten()
+        | collect()
         | set { fastqc_zips }
 
         MULTIQC(fastqc_zips, post_qc_report)
     }
-    
+
     emit:
     fastqc_report = MULTIQC.out.report
 }
