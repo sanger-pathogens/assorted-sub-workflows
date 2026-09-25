@@ -53,8 +53,8 @@
         "help_text": "Minimum fraction of a marker's k-mers that must be found in the target species (the manifest's species)."
       },
       "atb_max_outside": {
-        "default": "specificity_max_outside",
-        "help_text": "Maximum fraction of a marker's k-mers allowed in any other ATB species (except those in the manifest's atb_exclude_species). Defaults to the same value as --specificity_max_outside."
+        "default": "0.05",
+        "help_text": "Maximum fraction of a marker's k-mers allowed in any other ATB species (except those in the manifest's atb_exclude_species). Independent of --specificity_max_outside."
       }
     },
     "General configs": {
