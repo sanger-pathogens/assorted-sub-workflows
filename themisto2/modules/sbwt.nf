@@ -49,16 +49,24 @@ process SBWT_CHECK {
     container "/data/pam/installs/packages/sbwt-rs-cli/bug_fix_setdiff_commit_f93d92_2026.08.04.13.38.59/sbwt-rs-cli-0.4.2-f93d92c/image/sbwt-rs-cli_bug_fix_setdiff_commit_f93d92_2026.08.04.13.38.59.sif"
 
     // Validates the index and passes the same file on, so there's nothing to publish.
+    // Exits 0 either way and reports the result in SBWT_CHECK_RESULT (PASS/FAIL), so the
+    // calling subworkflow can log it: nextflow-commons' default error strategy would
+    // otherwise ignore a failed check and silently drop everything downstream of it.
+    // Out-of-memory/time kills still come through as task failures and are retried.
 
     input:
     tuple val(meta), path(sbwt_index)
 
     output:
-    tuple val(meta), path(sbwt_index), emit: index
+    tuple val(meta), path(sbwt_index), env(SBWT_CHECK_RESULT), emit: index
 
     script:
     """
-    sbwt check -i ${sbwt_index} -t ${task.cpus}
+    if sbwt check -i ${sbwt_index} -t ${task.cpus}; then
+        SBWT_CHECK_RESULT=PASS
+    else
+        SBWT_CHECK_RESULT=FAIL
+    fi
     """
 }
 

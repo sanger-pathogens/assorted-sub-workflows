@@ -60,7 +60,7 @@
     "General configs": {
       "publish_intermediate": {
         "default": "false",
-        "help_text": "Publish the per-stage intermediates (GGCAT unitigs, SBWT indexes, checkpoint count rows). false = keep only the final outputs; flip on to inspect a run."
+        "help_text": "Publish the per-stage intermediates (GGCAT unitigs, SBWT indexes and dumps, Themisto2 exports and stats). false = keep only the final outputs, including each species' checkpoint/pipeline_counts.tsv; flip on to inspect a run."
       }
     }
   }

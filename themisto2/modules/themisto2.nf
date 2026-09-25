@@ -52,15 +52,19 @@ process THEMISTO2_STATS {
 
     container "quay.io/sangerpathogens/themisto2:0.0.1"
 
+    // stats.txt feeds CHECKPOINT_THEMISTO; the index itself is only passed on, not published.
+    publishDir mode: 'copy', path: "${index_outdir(meta, 'themisto2/stats')}", pattern: 'stats.txt', enabled: params.publish_intermediate
+
     input:
     tuple val(meta), path(index_thm2)
 
     output:
     tuple val(meta), path(index_thm2), emit: index
+    tuple val(meta), path('stats.txt'), emit: stats
 
     script:
     """
-    themisto2 stats -i ${index_thm2} -t ${task.cpus}
+    themisto2 stats -i ${index_thm2} -t ${task.cpus} | tee stats.txt
     """
 }
 

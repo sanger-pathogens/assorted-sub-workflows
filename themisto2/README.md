@@ -61,7 +61,7 @@ Everything downstream of the species-wide index build: rebuilds each targeted li
 
 ### Candidate index rebuild
 
-`LINEAGE_SPECIFICITY_FILTER`'s output (one candidate FASTA per targeted lineage) is wrapped into a colour-list (`CANDIDATE_COLOUR_LIST`) and rebuilt end to end: GGCAT -> SBWT build/check -> Themisto2 build/stats. This is a QC gate only: nothing downstream reads the candidate index. The ATB check below reads GGCAT's candidate unitigs (`GGCAT_CANDIDATE`) directly; the SBWT/Themisto2 rebuild only feeds checkpoints 70/75/80. A lineage whose candidate FASTA comes back empty (nothing cleared the lineage-specificity thresholds) skips the rebuild entirely, with a `log.warn`, rather than failing the run.
+`LINEAGE_SPECIFICITY_FILTER`'s output (one candidate FASTA per targeted lineage) is wrapped into a colour-list (`CANDIDATE_COLOUR_LIST`) and rebuilt end to end: GGCAT -> SBWT build/check -> Themisto2 build/stats. This is a QC gate only: nothing downstream reads the candidate index. The ATB check below reads GGCAT's candidate unitigs (`GGCAT_CANDIDATE`) directly; the SBWT/Themisto2 rebuild only feeds the `candidate_sbwt_unitigs`, `candidate_themisto_index` and `candidate_export_unitigs` checkpoints. A lineage whose candidate FASTA comes back empty (nothing cleared the lineage-specificity thresholds) skips the rebuild entirely, with a `log.warn`, rather than failing the run.
 
 > **TODO (backlog):** the ATB check no longer depends on the candidate SBWT/Themisto2 rebuild, so it could go entirely: every count it gives (unitigs, k-mers, strand duplicates) can come from the GGCAT FASTA checkpoint. `THEMISTO2_BUILD` also always publishes the candidate index as `results/<species>/index/<group>_marker_index.thm2`, which reads like a deliverable but is a single-colour index of pre-ATB candidates -- gate it behind `--publish_intermediate` or drop it with the rebuild.
 
@@ -85,28 +85,49 @@ It's candidate-only because it was measured to cost +58% output file size (504MB
 
 ## Checkpoint counts (`pipeline_counts.tsv`)
 
-Both `BUILD_COLOUR_INDEX` and `MARKER_FILTERING` tap a fixed set of key stages (colour file, GGCAT unitigs, Themisto2 index, exported/dumped FASTA, final markers) through `CHECKPOINT_FASTA`/`CHECKPOINT_THEMISTO` (`modules/checkpoint.nf`, split by input type) as a side channel -- never joined back into the workflow, just counted. Rows from every stage across both subworkflows are combined by the including pipeline's `main.nf` (`collectFile`) into one `pipeline_counts.tsv`, ordered by an `order` key (`BUILD_COLOUR_INDEX` uses 10-40, `MARKER_FILTERING` continues from 50).
+Both `BUILD_COLOUR_INDEX` and `MARKER_FILTERING` tap a fixed set of key stages (colour file, GGCAT unitigs, SBWT-dumped unitigs, Themisto2 index, exported FASTA, final markers) through `CHECKPOINT_FASTA`/`CHECKPOINT_THEMISTO` (`modules/checkpoint.nf`, split by input type) as a side channel -- never joined back into the workflow, just counted. The including pipeline's `main.nf` passes each species' rows to `CHECKPOINT_REPORT`, which writes one `results/<species>/checkpoint/pipeline_counts.tsv`, always published.
 
-Columns, by input `kind`:
+Rows are in pipeline order. `checkpoint_steps()` in `modules/checkpoint.nf` lists every stage once, in the order it happens, with the step (process) whose output it counts; that step is the report's first column. To add a stage, insert it in that list where it happens in the pipeline; there are no numbers to update. A stage missing from the list stops the run, with an error naming it, when its checkpoint task starts.
+
+| step | stage |
+| --- | --- |
+| `BUILD_COLOUR_INDEX:COLOUR_MAPPING` | `species_colourfile` |
+| `BUILD_COLOUR_INDEX:GGCAT_SPECIES` | `species_ggcat_unitigs` |
+| `BUILD_COLOUR_INDEX:SBWT_DUMP_UNITIGS_SPECIES` | `species_sbwt_unitigs` |
+| `BUILD_COLOUR_INDEX:THEMISTO2_BUILD_SPECIES` | `species_themisto_index` |
+| `BUILD_COLOUR_INDEX:THEMISTO2_EXPORT_SPECIES` | `species_export_unitigs` |
+| `MARKER_FILTERING:LINEAGE_SPECIFICITY_FILTER` | `candidate_specificity_filter` |
+| `MARKER_FILTERING:GGCAT_CANDIDATE` | `candidate_ggcat_unitigs` |
+| `MARKER_FILTERING:SBWT_DUMP_UNITIGS_CANDIDATE` | `candidate_sbwt_unitigs` |
+| `MARKER_FILTERING:THEMISTO2_BUILD_CANDIDATE` | `candidate_themisto_index` |
+| `MARKER_FILTERING:THEMISTO2_EXPORT_CANDIDATE` | `candidate_export_unitigs` |
+| `MARKER_FILTERING:FILTER_ATB_MARKERS` | `markers_atb_checked` |
+| `POST_PROCESS_MARKERS` | `markers_postproc_pass`, `markers_postproc_reject` (with `--marker_post_processing`) |
+
+Columns, by input kind:
 
 | kind | columns populated |
 | --- | --- |
-| `colourfile` | `n_seqs` (line count) |
-| `fasta` | `n_seqs`, `sum_bp`, `min_len`, `median_len`, `max_len` (via `seqkit stats -a`), `n_revcomp_dupes` (via `seqkit rmdup -s`) |
-| `themisto` | `n_kmers`, `n_colours`, `n_unitigs` (via `themisto2 stats`) |
+| colour file | `n_seqs` (line count) |
+| FASTA | `n_seqs`, `sum_bp`, `min_len`, `median_len`, `max_len` (via `seqkit stats -a`), `n_kmers` (k-mer positions: sum of length - k + 1), `n_revcomp_dupes` (via `seqkit rmdup -s`) |
+| Themisto2 index | `n_kmers`, `n_colours`, `n_unitigs`, parsed from `THEMISTO2_STATS`' `stats.txt` (published with `publish_intermediate` under `index/themisto2/stats/`) rather than loading the index again, which ran out of memory for the species index |
+
+`n_kmers` for a FASTA counts every k-mer position, so a file holding both strands (the SBWT dumps) shows twice the k-mers of GGCAT's output, matching `themisto2 stats`' count for the same index.
+
+Checkpoint tasks use nextflow-commons' default error strategy: out-of-memory or time-limit kills are retried with more memory, and any other failure is ignored, so a checkpoint never stops the run (its row is just missing). That default applies to every process, so `SBWT_CHECK` always exits 0 and reports PASS or FAIL instead: both are logged to `.nextflow.log`, and a failed index goes no further (for the species index, nothing downstream runs for that species).
 
 **Number of reverse-complement duplicates** (`n_revcomp_dupes`) counts FASTA records that are reverse-complement duplicates of another record already in the same file -- i.e. two records that are the same underlying DNA fragment, just written from opposite strands (`ACGT` vs. its reverse complement `ACGT`->`CGTA`->complemented). A byte-for-byte comparison won't catch these; `seqkit rmdup -s` canonicalises each sequence against its reverse complement before deduping, and compares both strands by default. The rest of this section refers to it by its column name, `n_revcomp_dupes`.
 
-This column exists because `SBWT_DUMP_UNITIGS` (`marker_filtering.nf`, stage `candidate_dumped_fasta`, order 80) reports both strands of every unitig as separate records, so its `n_revcomp_dupes` is expected to be ~100% of `n_seqs` -- this is normal, not a bug. The preceding checkpoint, `candidate_ggcat_unitigs` (order 60, GGCAT's own output before the SBWT round-trip), is expected to show 0 revcomp dupes. Having both stages in `pipeline_counts.tsv` makes that divergence visible on every run without a manual check (found while investigating PAT-3592). The ATB check used to read this dump, which doubled its query and every PASS/FLAG/ABSENT count in `summary.txt`; it now reads GGCAT's output instead.
+This column exists because `SBWT_DUMP_UNITIGS` (`marker_filtering.nf`, stage `candidate_sbwt_unitigs`) reports both strands of every unitig as separate records, so its `n_revcomp_dupes` is expected to be ~100% of `n_seqs` -- this is normal, not a bug. The preceding checkpoint, `candidate_ggcat_unitigs` (GGCAT's own output before the SBWT round-trip), is expected to show 0 revcomp dupes. Having both stages in `pipeline_counts.tsv` makes that divergence visible on every run without a manual check (found while investigating PAT-3592). The ATB check used to read this dump, which doubled its query and every PASS/FLAG/ABSENT count in `summary.txt`; it now reads GGCAT's output instead.
 
-`candidate_export_unitigs` (order 75, `THEMISTO2_EXPORT_CANDIDATE`) is a checkpoint-only `themisto2 export` of the candidate index, published under `index/themisto2/export/groups/<group>/` and not used by the ATB check. It shows the doubling comes from the candidate SBWT (built with `-r`, so it stores both strands) being read by `sbwt dump-unitigs`, not from Themisto2: the export writes one record per unitig. Checked by hand on the 7PET run of 23 Sep 2026:
+`candidate_export_unitigs` (`THEMISTO2_EXPORT_CANDIDATE`) is a checkpoint-only `themisto2 export` of the candidate index, published under `index/themisto2/export/groups/<group>/` and not used by the ATB check. It shows the doubling comes from the candidate SBWT (built with `-r`, so it stores both strands) being read by `sbwt dump-unitigs`, not from Themisto2: the export writes one record per unitig. Checked by hand on the 7PET run of 23 Sep 2026:
 
-| mode | GGCAT (60) | Themisto2 export (75) | SBWT dump (80) | canonical k-mers, all three |
+| mode | GGCAT | Themisto2 export | SBWT dump | canonical k-mers, all three |
 | --- | --- | --- | --- | --- |
 | core | 469, 0 dupes | 469, 0 dupes | 938, 469 dupes | 16,106 |
 | relaxed | 968, 0 dupes | 968, 0 dupes | 1,936, 968 dupes | 54,447 |
 | catchall | 29,206, 0 dupes | 29,206, 0 dupes | 58,410, 29,201 dupes | 2,030,656 |
 
-All three stages hold the identical k-mer set. In catchall, 3 cyclic unitigs (45, 2,119, 2,699 bp) are written from a different start point by each tool, and the dump writes some of them once rather than twice, which is why its dupe count isn't exactly half there. `themisto2 stats`' "Number of forward unitigs (not bidirected)" (checkpoint 70, `n_unitigs`) counts both strands too, so it matches the dump, not the export.
+All three stages hold the identical k-mer set. In catchall, 3 cyclic unitigs (45, 2,119, 2,699 bp) are written from a different start point by each tool, and the dump writes some of them once rather than twice, which is why its dupe count isn't exactly half there. `themisto2 stats`' "Number of forward unitigs (not bidirected)" (`candidate_themisto_index`, `n_unitigs`) counts both strands too, so it matches the dump, not the export.
 
 The `seqkit rmdup` dedup check runs unguarded on every `fasta`-kind checkpoint, including species-wide FASTAs (millions of records) -- by design, not oversight. It replaced an older hand-rolled awk canonicalisation that needed a `REVCOMP_CHECK_MAX` size cap because it was too slow to run unguarded at species-wide scale; `seqkit rmdup` doesn't need that cap, benchmarked at ~17s for ~5M records under the fixed `mem_4` label (PAT-3592).
