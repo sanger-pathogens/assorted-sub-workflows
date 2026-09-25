@@ -151,7 +151,6 @@ workflow STRAIN_MAPPER {
     if (!params.skip_cleanup) {
         ch_mapped.join(CONVERT_TO_BAM.out.mapped_reads_bam) // join all contents of "channel" together towards deletion
         | join(SAMTOOLS_SORT.out.sorted_reads)
-        | join(INDEX_SORTED_BAM.out.indexed_bam)
         | join(BCFTOOLS_MPILEUP.out.mpileup_file)
         | join(BCFTOOLS_CALL.out.vcf_allpos)
         | join(coverage_finished)  // use these *_finished dummy value channels as a way to ensure waiting on completion of all branches of the workflow
