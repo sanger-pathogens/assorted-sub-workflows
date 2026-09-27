@@ -4,7 +4,8 @@ include { MULTIQC } from '../../reporting/modules/multiqc.nf'
 workflow FASTQC_MULTIQC {
 
     take:
-    fastq_path_ch
+    fastq_path_ch       // meta_map, read1_path, read2_path
+    report_name_prefix  // val_str
 
     main:
 
@@ -18,7 +19,7 @@ workflow FASTQC_MULTIQC {
             .flatten()
             .collect()
 
-        MULTIQC(fastqc_zips, []) // no custom multiqc config
+        MULTIQC(fastqc_zips, [], report_name_prefix) // no custom multiqc config
         fastqc_report = MULTIQC.out.report
     } else {
         fastqc_report = Channel.value("FastQC skipped")
