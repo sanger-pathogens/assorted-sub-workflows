@@ -38,25 +38,37 @@ workflow IRODS_EXTRACTOR {
         }
         | set { downloaded_objects }
 
-        // Extract the Illumina fastqs from the CRAMs and publish them to the output directory
-        CRAM_EXTRACT(downloaded_objects.illumina_to_unpack)
+        if (!params.search) {
+            // Extract the Illumina fastqs from the CRAMs and publish them to the output directory
+            CRAM_EXTRACT(downloaded_objects.illumina_to_unpack)
 
-        // Establish the read type and branch the channel
-        downloaded_objects.ONT.branch{ meta_map ->
-            ont_format_fastq: meta_map.ont_format == "fastq"
+            // Establish the read type and branch the channel
+            downloaded_objects.ONT.branch{ meta_map ->
+                ont_format_fastq: meta_map.ont_format == "fastq"
 
-            ont_format_unbasecalled: meta_map.ont_format == "pod5" || meta_map.ont_format == "fast5"
+                ont_format_unbasecalled: meta_map.ont_format == "pod5" || meta_map.ont_format == "fast5"
 
-            other: true
+                other: true
+            }
+            | set { downloaded_ont_objects }
+
+            // Publish the reads and/or squiggles to the output directory
+            PUBLISH_FASTQ(downloaded_ont_objects.ont_format_fastq)
+            PUBLISH_UNBASECALLED(downloaded_ont_objects.ont_format_unbasecalled)
+
+            reads_ch = CRAM_EXTRACT.out.reads_ch // tuple val(meta), path(forward_fastq), path(reverse_fastq)
+            ont_reads_ch = PUBLISH_FASTQ.out.path_channel // tuple val(meta), path(fastq)
+            ont_unbasecalled_ch = PUBLISH_UNBASECALLED.out.path_channel // tuple val(meta), path(fast5/pod5)
+        } else {
+            log.info "Search only mode enabled, no reads will be extracted or published."
+            reads_ch = Channel.empty()
+            ont_reads_ch = Channel.empty()
+            ont_unbasecalled_ch = Channel.empty()
         }
-        | set { downloaded_ont_objects }
-
-        // Publish the reads and/or squiggles to the output directory
-        PUBLISH_FASTQ(downloaded_ont_objects.ont_format_fastq)
-        PUBLISH_UNBASECALLED(downloaded_ont_objects.ont_format_unbasecalled)
-
     emit:
-    reads_ch = CRAM_EXTRACT.out.reads_ch // tuple val(meta), path(forward_fastq), path(reverse_fastq)
+    reads_ch // tuple val(meta), path(forward_fastq), path(reverse_fastq)
+    ont_reads_ch // tuple val(meta), path(fastq)
+    ont_unbasecalled_ch // tuple val(meta), path(fast5/pod5)
 }
 
 workflow CRAM_EXTRACT {
