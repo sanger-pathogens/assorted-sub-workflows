@@ -22,6 +22,24 @@ workflow IRODS_QUERY {
         meta_file_ch
 }
 
+workflow CRAM_EXTRACT {
+
+    take:
+    meta_cram_ch
+
+    main:
+    COLLATE_FASTQ(meta_cram_ch)
+    | set { reads_ch }
+
+    if (params.cleanup_intermediate_files_irods_extractor) {
+        COLLATE_FASTQ.out.remove_channel.flatten()
+                .filter(Path)
+                .map { it.delete() }
+    }
+
+    emit: reads_ch // tuple val(meta), path(forward_fastq), path(reverse_fastq
+}
+
 workflow IRODS_EXTRACTOR {
 
     take:
@@ -66,25 +84,7 @@ workflow IRODS_EXTRACTOR {
             ont_unbasecalled_ch = Channel.empty()
         }
     emit:
-    reads_ch // tuple val(meta), path(forward_fastq), path(reverse_fastq)
+    illumina_reads_ch // tuple val(meta), path(forward_fastq), path(reverse_fastq)
     ont_reads_ch // tuple val(meta), path(fastq)
     ont_unbasecalled_ch // tuple val(meta), path(fast5/pod5)
-}
-
-workflow CRAM_EXTRACT {
-
-    take:
-    meta_cram_ch
-
-    main:
-    COLLATE_FASTQ(meta_cram_ch)
-    | set { reads_ch }
-
-    if (params.cleanup_intermediate_files_irods_extractor) {
-        COLLATE_FASTQ.out.remove_channel.flatten()
-                .filter(Path)
-                .map { it.delete() }
-    }
-
-    emit: reads_ch // tuple val(meta), path(forward_fastq), path(reverse_fastq
 }
