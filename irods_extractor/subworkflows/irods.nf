@@ -22,6 +22,24 @@ workflow IRODS_QUERY {
         meta_file_ch
 }
 
+workflow CRAM_EXTRACT {
+
+    take:
+    meta_cram_ch
+
+    main:
+    COLLATE_FASTQ(meta_cram_ch)
+    | set { reads_ch }
+
+    if (params.cleanup_intermediate_files_irods_extractor) {
+        COLLATE_FASTQ.out.remove_channel.flatten()
+                .filter(Path)
+                .map { it.delete() }
+    }
+
+    emit: reads_ch // tuple val(meta), path(forward_fastq), path(reverse_fastq
+}
+
 workflow IRODS_EXTRACTOR {
 
     take:
@@ -56,35 +74,17 @@ workflow IRODS_EXTRACTOR {
             PUBLISH_FASTQ(downloaded_ont_objects.ont_format_fastq)
             PUBLISH_UNBASECALLED(downloaded_ont_objects.ont_format_unbasecalled)
 
-            reads_ch = CRAM_EXTRACT.out.reads_ch // tuple val(meta), path(forward_fastq), path(reverse_fastq)
+            illumina_reads_ch = CRAM_EXTRACT.out.reads_ch // tuple val(meta), path(forward_fastq), path(reverse_fastq)
             ont_reads_ch = PUBLISH_FASTQ.out.path_channel // tuple val(meta), path(fastq)
             ont_unbasecalled_ch = PUBLISH_UNBASECALLED.out.path_channel // tuple val(meta), path(fast5/pod5)
         } else {
             log.info "Search only mode enabled, no reads will be extracted or published."
-            reads_ch = Channel.empty()
+            illumina_reads_ch = Channel.empty()
             ont_reads_ch = Channel.empty()
             ont_unbasecalled_ch = Channel.empty()
         }
     emit:
-    reads_ch // tuple val(meta), path(forward_fastq), path(reverse_fastq)
+    illumina_reads_ch // tuple val(meta), path(forward_fastq), path(reverse_fastq)
     ont_reads_ch // tuple val(meta), path(fastq)
     ont_unbasecalled_ch // tuple val(meta), path(fast5/pod5)
-}
-
-workflow CRAM_EXTRACT {
-
-    take:
-    meta_cram_ch
-
-    main:
-    COLLATE_FASTQ(meta_cram_ch)
-    | set { reads_ch }
-
-    if (params.cleanup_intermediate_files_irods_extractor) {
-        COLLATE_FASTQ.out.remove_channel.flatten()
-                .filter(Path)
-                .map { it.delete() }
-    }
-
-    emit: reads_ch // tuple val(meta), path(forward_fastq), path(reverse_fastq
 }

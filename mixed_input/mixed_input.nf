@@ -33,6 +33,8 @@ workflow MIXED_INPUT {
     if ('IRODS' in active_workflows) {
         IRODS_QUERY 
         | IRODS_EXTRACTOR
+
+        IRODS_EXTRACTOR.out.illumina_reads_ch
         | set { reads_from_irods_ch }
     } else {
         Channel.of("none")

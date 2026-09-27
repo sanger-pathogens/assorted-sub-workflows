@@ -4,12 +4,32 @@ include { FILTER_HOST_READS; GET_HOST_READS } from './modules/filter_reads.nf'
 include { GENERATE_STATS                    } from './modules/generate_stats.nf'
 include { COLLATE_STATS                     } from './modules/collate_stats.nf'
 
+def validate_parameters() {
+    // Parameter checking function
+    def errors = 0
+
+    if (params.bmtagger_db) {
+        bmtagger_db=file(params.bmtagger_db)
+        if (!bmtagger_db.exists()) {
+            log.error("The bmtagger database folder specified does not exist.")
+            errors += 1
+        }
+    }
+
+    if (errors > 0) {
+            log.error(String.format("%d errors detected", errors))
+            exit 1
+    }
+}
 
 workflow METAWRAP_QC {
     take:
     fastq_path_ch
 
     main:
+
+    validate_parameters()
+
     TRIMGALORE(fastq_path_ch)
 
     BMTAGGER(TRIMGALORE.out.trimmed_fastqs)
