@@ -74,12 +74,12 @@ workflow IRODS_EXTRACTOR {
             PUBLISH_FASTQ(downloaded_ont_objects.ont_format_fastq)
             PUBLISH_UNBASECALLED(downloaded_ont_objects.ont_format_unbasecalled)
 
-            reads_ch = CRAM_EXTRACT.out.reads_ch // tuple val(meta), path(forward_fastq), path(reverse_fastq)
+            illumina_reads_ch = CRAM_EXTRACT.out.reads_ch // tuple val(meta), path(forward_fastq), path(reverse_fastq)
             ont_reads_ch = PUBLISH_FASTQ.out.path_channel // tuple val(meta), path(fastq)
             ont_unbasecalled_ch = PUBLISH_UNBASECALLED.out.path_channel // tuple val(meta), path(fast5/pod5)
         } else {
             log.info "Search only mode enabled, no reads will be extracted or published."
-            reads_ch = Channel.empty()
+            illumina_reads_ch = Channel.empty()
             ont_reads_ch = Channel.empty()
             ont_unbasecalled_ch = Channel.empty()
         }
