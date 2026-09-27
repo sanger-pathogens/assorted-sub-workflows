@@ -21,10 +21,12 @@ process MULTIQC {
     def custom_config = multiqc_config ? "--config ${multiqc_config}" : "" // add config if you supply one
 
     date = "${workflow.start}".split('T')[0] // workflow start is ugly 2024-02-29T12:01:26.233465Z, so split on T to use only date
-    out_report_name_base = "${report_name_prefix}-${date}"
+    out_report_name_base = "${date}-${report_name_prefix}"
     out_report = "${out_report_name_base}.html"
-    output_data = "${out_report_name_base}_data.tar.gz"
-    output_plots = "${out_report_name_base}_plots.tar.gz"
+    output_data_base = "${out_report_name_base}_data"
+    output_data = "${output_data_base}.tar.gz"
+    output_plots_base = "${out_report_name_base}_plots"
+    output_plots = "${output_plots_base}.tar.gz"
 
     """
     multiqc \\
@@ -34,15 +36,15 @@ process MULTIQC {
         .
 
     tar -czf ${output_data} \\
-        -C *report_data \\
+        -C ${output_data_base} \\
         --exclude 'multiqc_data.json' \\
-        --transform='s,^./,${output_data.replaceFirst(/\.tar.gz$/, '')}/,' \\
+        --transform='s,^./,${output_data_base}/,' \\
         .
 
-    if [[ -d ${date}-report_plots ]]; then
+    if [[ -d ${output_plots_base} ]]; then
         tar -czf ${output_plots} \\
-            -C *report_plots/svg  \\
-            --transform='s,^./,${output_plots.replaceFirst(/\.tar.gz$/, '')}/,' \\
+            -C ${output_plots_base}/svg  \\
+            --transform='s,^./,${output_plots_base}/,' \\
             .
     fi
     """
