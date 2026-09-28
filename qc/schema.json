@@ -19,6 +19,10 @@
             "fastqc_no_fail_criteria": {
                 "default": "assorted-sub-workflows/qc/assets/fastqc_no_fail_criteria.json",
                 "help_text": "JSON file containing definition of an array specifying which items in the FastQC summary.txt are required to NOT have the value FAIL for the sample to be considered a pass (i.e. they could have WARN)"
+            },
+            "skip_fastqc": {
+                "default": false,
+                "help_text": "Skip FastQC step."
             }
         },
         "kraken2bracken QC": {
