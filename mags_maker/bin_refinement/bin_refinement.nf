@@ -3,7 +3,8 @@ include { BINETTE } from './modules/binette.nf'
 /*
 ##############################################################################################################################################################
 #
-# Reconciles the four binners' outputs (comebin, SemiBin2, MetaCAT, MaxBin2) with Binette into one final bin set per sample.
+# Reconciles the four binners' outputs (comebin, SemiBin2, MetaCAT, MaxBin2 - or CONCOCT in place of comebin with
+# --no_gpu) with Binette into one final bin set per sample.
 #
 # This replaces the original pipeline's custom n-wise bin-combination + BINNING_REFINER + CheckM1/2 + MERGE_BINS logic
 # (see git history for that implementation) with a single, purpose-built bin-reconciliation tool. Binette does the
@@ -17,7 +18,7 @@ include { BINETTE } from './modules/binette.nf'
 
 workflow MAG_BIN_REFINEMENT {
     take:
-    bins      // [meta, comebin_bins, semibin2_bins, metacat_bins, maxbin2_bins]
+    bins      // [meta, [first_bins, semibin2_bins, metacat_bins, maxbin2_bins]] - first = comebin, or concoct with --no_gpu
     contigs   // [meta, assembly]
 
     main:

@@ -8,6 +8,11 @@ include { SPLIT_DEPTHS;
 include { COMEBIN                 } from './modules/comebin.nf'
 include { SEMIBIN2                } from './modules/semibin2.nf'
 include { METACAT                 } from './modules/metacat.nf'
+include { CUT_UP_FASTA;
+          ESTIMATE_ABUNDANCE;
+          CONCOCT;
+          CUTUP_CLUSTERING;
+          SPLIT_BINS              } from './modules/concoct.nf'
 
 /*
 ##############################################################################################################################################################
@@ -88,8 +93,17 @@ workflow MAG_BINNING {
     | join(contigs)
     | set { bam_bai_and_contigs }
 
-    COMEBIN_WF(bam_bai_and_contigs)
-    | set { comebin_bins }
+    // First binner slot: comebin (default, needs a GPU) or, with --no_gpu, CONCOCT -
+    // the best GPU-free combination in the exhaustive 3-/4-binner sweep
+    // (SemiBin2 + MetaCAT + MaxBin2 + CONCOCT: 229 vs 237 total HQ bins over 18
+    // samples for the default set; +18.7% over the original metaWRAP trio).
+    if (params.no_gpu) {
+        CONCOCT_WF(bam_plus_index, contigs)
+        | set { first_bins }
+    } else {
+        COMEBIN_WF(bam_bai_and_contigs)
+        | set { first_bins }
+    }
 
     SEMIBIN2_WF(bam_bai_and_contigs)
     | set { semibin2_bins }
@@ -100,10 +114,13 @@ workflow MAG_BINNING {
     MAXBIN_WF(bam, contigs)
     | set { maxbin_bins }
 
-    comebin_bins
+    // Emit [meta, [bin_dir x4]] in this fixed order: first slot (comebin or
+    // concoct), semibin2, metacat, maxbin2 - BINETTE labels them in the same order.
+    first_bins
     | join(semibin2_bins)
     | join(metacat_bins)
     | join(maxbin_bins)
+    | map { meta, b1, b2, b3, b4 -> [meta, [b1, b2, b3, b4]] }
     | set { final_bins }
 
     emit:
@@ -116,6 +133,30 @@ workflow COMEBIN_WF {
 
     main:
     COMEBIN(bam_bai_and_contigs)
+    | set { bins }
+
+    emit:
+    bins
+}
+
+workflow CONCOCT_WF {
+    take:
+    bam_plus_index  // [meta, bam, bai]
+    contigs         // [meta, assembly]
+
+    main:
+    CUT_UP_FASTA(contigs)
+
+    CUT_UP_FASTA.out.bed
+    | join(bam_plus_index)
+    | ESTIMATE_ABUNDANCE
+
+    CUT_UP_FASTA.out.split_fasta
+    | join(ESTIMATE_ABUNDANCE.out.depths)
+    | CONCOCT
+    | CUTUP_CLUSTERING
+    | join(contigs)
+    | SPLIT_BINS
     | set { bins }
 
     emit:

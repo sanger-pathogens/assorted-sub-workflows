@@ -1,7 +1,13 @@
+// Resource labels re-sized 2026-09-30 for --no_gpu. The originals (mem_100M..mem_1) were
+// tuned on a tiny dev assembly and never run at scale in this fork. Measured on the
+// largest benchmark assembly (38510_3_49, 290 MB contigs, 3.8 GB BAM), all first-attempt:
+//   CUT_UP_FASTA 33 MB | ESTIMATE_ABUNDANCE 221 MB | CONCOCT 476 MB, 27 min on 8 cpus
+//   CUTUP_CLUSTERING 3 MB | SPLIT_BINS 18 MB
+// Labels leave ~4-9x headroom for deeper samples; mem_N escalates on exit 130.
 process CUT_UP_FASTA {
     tag "${meta.ID}"
     label 'cpu_1'
-    label 'mem_100M'
+    label 'mem_1'
     label 'time_12'
 
     container 'quay.io/biocontainers/concoct:1.0.0--py36h88e4a8a_5'
@@ -24,7 +30,7 @@ process CUT_UP_FASTA {
 process ESTIMATE_ABUNDANCE {
     tag "${meta.ID}"
     label 'cpu_1'
-    label 'mem_250M'
+    label 'mem_2'
     label 'time_12'
 
     container 'quay.io/biocontainers/concoct:1.0.0--py36h88e4a8a_5'
@@ -44,8 +50,8 @@ process ESTIMATE_ABUNDANCE {
 
 process CONCOCT {
     tag "${meta.ID}"
-    label 'cpu_1'
-    label 'mem_1'
+    label 'cpu_8'
+    label 'mem_4'
     label 'time_12'
 
     container 'quay.io/biocontainers/concoct:1.0.0--py36h88e4a8a_5'
@@ -71,7 +77,7 @@ process CONCOCT {
 process CUTUP_CLUSTERING {
     tag "${meta.ID}"
     label 'cpu_1'
-    label 'mem_250M'
+    label 'mem_1'
     label 'time_12'
 
     container 'quay.io/biocontainers/concoct:1.0.0--py36h88e4a8a_5'
@@ -92,7 +98,7 @@ process CUTUP_CLUSTERING {
 process SPLIT_BINS {
     tag "${meta.ID}"
     label 'cpu_1'
-    label 'mem_100M'
+    label 'mem_1'
     label 'time_12'
 
     container 'quay.io/sangerpathogens/python-curl:3.11'

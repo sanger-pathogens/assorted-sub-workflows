@@ -9,11 +9,11 @@ process BINETTE {
     publishDir mode: 'copy', path: "${params.outdir}/${meta.ID}/binette/", pattern: "${report_txt}"
 
     input:
-    tuple val(meta), path(comebin_bins, stageAs: 'comebin_bins'),
-                     path(semibin2_bins, stageAs: 'semibin2_bins'),
-                     path(metacat_bins, stageAs: 'metacat_bins'),
-                     path(maxbin2_bins, stageAs: 'maxbin2_bins'),
-                     path(assembly)
+    // Four bin dirs in MAG_BINNING's fixed order. They are staged generically and
+    // linked under their real binner's name below, so Binette's report says
+    // "concoct_bins" when --no_gpu put CONCOCT in the first slot, never a
+    // mislabelled "comebin_bins".
+    tuple val(meta), path(bin_dirs, stageAs: 'bin_input_?'), path(assembly)
 
     output:
     // Emit the DIRECTORY, not a glob of its contents. `path("final_bins/*")`
@@ -31,9 +31,15 @@ process BINETTE {
 
     script:
     report_txt = "${meta.ID}_binette_quality_report.tsv"
+    names = [params.no_gpu ? 'concoct' : 'comebin', 'semibin2', 'metacat', 'maxbin2']
+    assert bin_dirs.size() == names.size() : "BINETTE expected ${names.size()} bin dirs, got ${bin_dirs.size()}"
+    links = [bin_dirs, names].transpose().collect { d, n -> "ln -s ${d} ${n}_bins" }.join('\n    ')
+    bin_args = names.collect { "${it}_bins" }.join(' ')
     """
+    ${links}
+
     binette \\
-        --bin_dirs comebin_bins semibin2_bins metacat_bins maxbin2_bins \\
+        --bin_dirs ${bin_args} \\
         --fasta_extensions .fasta .fa .fna \\
         --contigs ${assembly} \\
         --checkm2_db ${params.checkm2_db} \\

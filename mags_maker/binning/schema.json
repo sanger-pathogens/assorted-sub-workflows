@@ -36,6 +36,10 @@
             "metacat_wheel_url":{
                 "default": "/data/pam/team162/shared_scratch/software_dbs/metacat_wheel/metacat-1.0.6-py3-none-any.whl",
                 "help_text": "Path (or URL) to the MetaCAT pip wheel to install at runtime (no bioconda/biocontainers package exists yet). Defaults to a pre-downloaded local copy so the task doesn't depend on outbound network access."
+            },
+            "no_gpu":{
+                "default": "false",
+                "help_text": "Run without a GPU: replace comebin with CONCOCT, so Binette reconciles SemiBin2 + MetaCAT + MaxBin2 + CONCOCT (the best GPU-free combination in the 18-sample benchmark: 96% of the full 6-binner HQ-bin total, vs comebin + SemiBin2 + MetaCAT + MaxBin2 by default). Use when you cannot submit to a GPU queue."
             }
         }
     }
