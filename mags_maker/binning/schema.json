@@ -3,7 +3,7 @@
         "binning Subworkflow Options": {
             "bin_seed": {
                 "default": "1234",
-                "help_text": "Set a fixed seed for metaBAT1/2 and CONCOCT."
+                "help_text": "Set a fixed seed for CONCOCT (used with --no_gpu)."
             },
             "concoct_min_contig": {
                 "default": "1000",
@@ -11,23 +11,23 @@
             },
             "maxbin2_min_contig": {
                 "default": "1000",
-                "help_text": "Minimum threshold for contig size (kb). The lowest accepted value is 500."
+                "help_text": "Minimum threshold for contig size (bp) for MaxBin2. The lowest accepted value is 500."
             },
             "metabat_min_contig": {
                 "default": "1500",
-                "help_text": "Minimum threshold for contig size (kb). The lowest accepted value is 1500."
+                "help_text": "Legacy metaBAT option (metaBAT is no longer run). Still counted when choosing the pre-binning contig-length filter, which uses the smallest of --maxbin2_min_contig, --concoct_min_contig and this value. The lowest accepted value is 1500."
             },
             "maxbin_markers":{
                 "default": "140",
-                "help_text": "Marker set to choose from 107 marker genes present in >95% of bacteria, or 40 marker gene sets that are universal among bacteria and archaea."
+                "help_text": "MaxBin2 marker set: 40 (universal bacteria + archaea) or 107 (present in >95% of bacteria). MaxBin2 treats any value other than 40 as 107, so the inherited default of 140 runs the 107-gene set."
             },
             "metabat1":{
                 "default": "false",
-                "help_text": "Run metaBAT1 binning instead of default metaBAT2."
+                "help_text": "Legacy option, no effect: metaBAT1/2 are no longer part of the binner set."
             },
             "keep_unbinned":{
                 "default": "false",
-                "help_text": "Keep unbinned contigs."
+                "help_text": "Keep CONCOCT's unbinned contigs in its bin set (only relevant with --no_gpu)."
             },
             "semibin2_environment":{
                 "default": "human_gut",
