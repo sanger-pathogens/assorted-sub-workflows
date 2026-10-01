@@ -29,7 +29,6 @@ workflow CRAM_EXTRACT {
 
     main:
     COLLATE_FASTQ(meta_with_paths_ch)
-    | set { reads_ch }
 
     if (params.cleanup_intermediate_files_irods_extractor) {
         COLLATE_FASTQ.out.remove_channel.flatten()
@@ -37,7 +36,8 @@ workflow CRAM_EXTRACT {
             .map { it.delete() }
     }
 
-    emit: reads_ch // tuple val(meta), path(forward_fastq), path(reverse_fastq
+    emit: 
+    reads_ch = COLLATE_FASTQ.out.fastq_channel // tuple val(meta), path(forward_fastq), path(reverse_fastq)
 }
 
 workflow IRODS_EXTRACTOR {
