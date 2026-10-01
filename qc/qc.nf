@@ -6,23 +6,13 @@ include { PASS_OR_FAIL_FASTQC
 include { REPORT              } from './modules/reporting.nf'
 include { TAXO_PROFILE        } from '../taxo_profile/taxo_profile.nf'
 
-workflow QC {
+workflow QC_ILLUMINA {
     take:
     reads_ch // meta, read_1, read_2
 
-    main:
-    reads_ch.branch{ meta, fwd, rev ->
-    illumina_to_unpack: meta.Platform == "ILLUMINA"
-
-    ONT: meta.Platform == "ONT"
-
-    other: true
-    }
-    | set { reads_ch }
-
     if (params.run_qc) {
 
-        reads_ch.illumina_to_unpack
+        reads_ch
         | (FASTQC & TAXO_PROFILE)
 
         fastqc_pass_criteria = file(params.fastqc_pass_criteria, checkIfExists: true)
@@ -103,4 +93,35 @@ workflow QC {
     bracken_mpa_reports
     sylphtax_mpa_report
     qc_summary
+}
+
+workflow QC {
+    take:
+    reads_ch // meta, read_1, read_2
+
+    main:
+
+    main:
+    // this gating might be redundant given that IRODS_EXTRACTOR already outputs platform-segregated channels, 
+    // but it is a safety measure to avoid processing the wring type of data. 
+    // We could drop this in the future when settled on how we handle mutliple patforms.
+    reads_ch.branch{ meta, fwd, rev ->
+    illumina: meta.Platform == "ILLUMINA"
+
+    ONT: meta.Platform == "ONT"
+
+    other: true
+    }
+    | set { reads_ch }
+
+    QC_ILLUMINA(reads_ch.illumina)
+
+    emit:
+    // in the future, we may want to combine these output channels with those derived from an ONT_QC workflow here,
+    // but for now, just emmit the QC_ILLUMINA outputs directly
+    multiqc_input = QC_ILLUMINA.out.multiqc_input
+    kraken2_style_bracken_reports = QC_ILLUMINA.out.kraken2_style_bracken_reports
+    bracken_mpa_reports = QC_ILLUMINA.out.bracken_mpa_reports
+    sylphtax_mpa_report = QC_ILLUMINA.out.sylphtax_mpa_report
+    qc_summary = QC_ILLUMINA.out.qc_summary
 }
