@@ -13,7 +13,7 @@ workflow IRODS_QUERY {
 
         if (params.save_metadata) {
             meta_file_ch
-            | collectFile() { map -> [ "lane_metadata.txt", map.collect{it}.join(', ') + '\n' ] }
+            | collectFile() { map -> [ "lane_metadata.jsonl", groovy.json.JsonOutput.toJson(map) + '\n' ] }  // json, not map.toString(), so values holding ',' '=' or a newline survive
             | set{ metadata_only }
 
             METADATA_QUERIED(metadata_only, "irods_queried")
