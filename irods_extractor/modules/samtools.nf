@@ -15,6 +15,7 @@ process COLLATE_FASTQ {
 
     output:
     tuple val(meta), path(forward_fastq), path(reverse_fastq), emit: fastq_channel
+    path(meta.local_path), emit: remove_channel
 
     script:
     forward_fastq = "${meta.ID}${params.raw_reads_suffix}_1.fastq.gz"

@@ -8,10 +8,10 @@ workflow IRODS_QUERY {
         main:
         BEEFEATER()
         | splitJson() //split that sample row into metadata
-        | set { meta_file_ch }
+        | set { meta_with_paths_ch }
 
         if (params.save_metadata) {
-            meta_file_ch
+            meta_with_paths_ch
             | collectFile() { map -> [ "lane_metadata.txt", map.collect{it}.join(', ') + '\n' ] }
             | set{ metadata_only }
 
@@ -19,19 +19,19 @@ workflow IRODS_QUERY {
         }
 
         emit:
-        meta_file_ch
+        meta_with_paths_ch
 }
 
 workflow CRAM_EXTRACT {
 
     take:
-    meta_cram_ch
+    meta_with_paths_ch
 
     main:
-    COLLATE_FASTQ(meta_cram_ch)
+    COLLATE_FASTQ(meta_with_paths_ch)
     | set { reads_ch }
 
-    if (params.cleanup_intermediate_files_irods_extractor) {
+if (params.cleanup_intermediate_files_irods_extractor) {
         COLLATE_FASTQ.out.remove_channel.flatten()
                 .filter(Path)
                 .map { it.delete() }
