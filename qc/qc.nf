@@ -10,6 +10,7 @@ workflow QC_ILLUMINA {
     take:
     reads_ch // meta, read_1, read_2
 
+    main:
     if (params.run_qc) {
 
         reads_ch
@@ -98,8 +99,6 @@ workflow QC_ILLUMINA {
 workflow QC {
     take:
     reads_ch // meta, read_1, read_2
-
-    main:
 
     main:
     // this gating might be redundant given that IRODS_EXTRACTOR already outputs platform-segregated channels, 
