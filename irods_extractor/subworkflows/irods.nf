@@ -7,6 +7,7 @@ include { PUBLISH_FASTQ
 workflow IRODS_QUERY {
         main:
         BEEFEATER()
+        | flatten() //beefeater emits one file per platform, so emit them one at a time
         | splitJson() //split that sample row into metadata
         | set { meta_file_ch }
 
