@@ -32,7 +32,7 @@ workflow CRAM_EXTRACT {
     COLLATE_FASTQ(meta_with_paths_ch)
 
     if (params.cleanup_intermediate_files_irods_extractor) {
-        COLLATE_FASTQ.out.remove_channel.flatten()
+        COLLATE_FASTQ.out.files_to_remove.flatten()
             .filter(Path)
             .map { file -> NextflowTool.safeDelete(file, workflow.workDir, log) }
     }

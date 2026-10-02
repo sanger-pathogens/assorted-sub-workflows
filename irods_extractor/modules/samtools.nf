@@ -15,7 +15,7 @@ process COLLATE_FASTQ {
 
     output:
     tuple val(meta), path(forward_fastq), path(reverse_fastq), emit: fastq_channel
-    path(input_file), emit: remove_channel
+    path(local_link), emit: files_to_remove
 
     script:
     input_file = file(meta.local_path)
