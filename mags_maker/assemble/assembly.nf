@@ -3,8 +3,8 @@ include { MEGAHIT                    } from './modules/megahit.nf'
 include { REMOVE_SMALL_CONTIGS;
           FIX_MEGAHIT_CONTIG_NAMING;
           SORT_CONTIGS               } from './modules/helper_scripts.nf'
-include { BWA_INDEX;
-          BWA                        } from './modules/bwa.nf'
+include { MINIBWA_INDEX;
+          MINIBWA                    } from './modules/minibwa.nf'
 include { MAPPED_READS_TO_FASTQ      } from './modules/samtools.nf'
 include { QUAST                      } from './modules/quast.nf'
 
@@ -51,11 +51,11 @@ workflow METAWRAP_ASSEMBLE {
         }
 
         if (params.megahit) {
-            BWA_INDEX(metaspades_scaffolds)
+            MINIBWA_INDEX(metaspades_scaffolds)
             | set { indexed_scaffolds }
 
             reads_ch.join(indexed_scaffolds)
-            | BWA
+            | MINIBWA
             | MAPPED_READS_TO_FASTQ
             | set { final_reads_ch }
         }

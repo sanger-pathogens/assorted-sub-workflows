@@ -4,7 +4,7 @@ process MINIBWA_INDEX {
     label 'mem_2'
     label 'time_12'
 
-    container 'quay.io/biocontainers/minibwa:0.6--hab16a5f_0'
+    container 'quay.io/sangerpathogens/minibwa-samtools:0.7-1.23'
 
     input:
     tuple val(meta), path(reference)
@@ -24,21 +24,19 @@ process MINIBWA {
     label 'mem_2'
     label 'time_12'
 
-    container 'quay.io/biocontainers/minibwa:0.6--hab16a5f_0'
+    container 'quay.io/sangerpathogens/minibwa-samtools:0.7-1.23'
 
     input:
     tuple val(meta), path(reads_1), path(reads_2), path(reference), path(bwa_index_files)
 
     output:
-    tuple val(meta), path(mapped_sam), emit: mapped_sam
+    tuple val(meta), path(mapped_bam), emit: mapped_bam
 
     script:
-    // minibwa's container ships only minibwa itself (no samtools), so SAM->sorted BAM
-    // conversion is a separate process (SORT_TO_BAM in samtools.nf) - see MINIBWA_WF below.
-    // -t threads, legacy bwa-mem-compatible CLI (`mem`, not the newer `map`) - same interface
-    // as the original bwa mem call this replaces.
-    mapped_sam = "${meta.ID}_mapped.sam"
+    mapped_bam = "${meta.ID}_mapped.bam"
     """
-    minibwa mem -t ${task.cpus} ${reference} ${reads_1} ${reads_2} > ${mapped_sam}
+    minibwa mem -t ${task.cpus} ${reference} ${reads_1} ${reads_2} \\
+      | samtools view -@ ${task.cpus} -b - \\
+      | samtools sort -@ ${task.cpus} -o "${mapped_bam}"
     """
 }

@@ -1,7 +1,6 @@
 include { MINIBWA_INDEX;
           MINIBWA                 } from '../assemble/modules/minibwa.nf'
-include { INDEX;
-          SORT_TO_BAM             } from './modules/samtools.nf'
+include { INDEX                   } from './modules/samtools.nf'
 include { CONTIG_DEPTHS_NO_INTRA  } from './modules/metabat2.nf'
 include { SPLIT_DEPTHS;
           MAXBIN2                 } from './modules/maxbin2.nf'
@@ -78,7 +77,6 @@ workflow MAG_BINNING {
 
     reads.join(indexed_contigs)
     | MINIBWA
-    | SORT_TO_BAM
     | set { bam }
 
     INDEX(bam)

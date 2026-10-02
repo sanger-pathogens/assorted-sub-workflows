@@ -16,10 +16,20 @@ process COMEBIN {
     script:
     bins_out = "comebin/comebin_res/comebin_res_bins"
     """
+    mkdir -p tmp
+    export TMPDIR="\$PWD/tmp"
+    trap 'rm -rf "\$PWD/tmp"' EXIT
+
     mkdir -p bamfiles
     ln -s "\$PWD/${bam}" "bamfiles/${bam}"
     ln -s "\$PWD/${bai}" "bamfiles/${bai}"
 
     run_comebin.sh -a ${assembly} -p bamfiles -o comebin -t ${task.cpus} -b 256
+
+    # run_comebin.sh can exit 0 after an internal failure; make it error properly
+    if [ -z "\$(ls -A ${bins_out} 2>/dev/null)" ]; then
+        echo "ERROR: COMEBin produced no bins in ${bins_out}" >&2
+        exit 1
+    fi
     """
 }
