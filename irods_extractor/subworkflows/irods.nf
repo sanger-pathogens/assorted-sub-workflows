@@ -7,12 +7,13 @@ include { PUBLISH_FASTQ
 workflow IRODS_QUERY {
         main:
         BEEFEATER()
+        | flatten() //beefeater emits one file per platform, so emit them one at a time
         | splitJson() //split that sample row into metadata
         | set { meta_file_ch }
 
         if (params.save_metadata) {
             meta_file_ch
-            | collectFile() { map -> [ "lane_metadata.txt", map.collect{it}.join(', ') + '\n' ] }
+            | collectFile() { map -> [ "lane_metadata.jsonl", groovy.json.JsonOutput.toJson(map) + '\n' ] }  // json, not map.toString(), so values holding ',' '=' or a newline survive
             | set{ metadata_only }
 
             METADATA_QUERIED(metadata_only, "irods_queried")

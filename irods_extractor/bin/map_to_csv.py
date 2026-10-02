@@ -1,17 +1,18 @@
 #!/usr/bin/env python3
 
 import argparse
+import json
 import pandas as pd
 
 #This file needs to be moved to the /bin/ folder inside the project directory intending to use this script.
 
 def parse_arguments() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="tool to write csv from nextflow map",
+        description="Tool to write csv from nextflow maps serialised as JSON Lines",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
     parser.add_argument("--input_map_list",
-        help="A collection of maps from nextflow to be written to csv",
+        help="A collection of maps from nextflow, one JSON object per line",
     )
 
     parser.add_argument("--output",
@@ -20,19 +21,24 @@ def parse_arguments() -> argparse.Namespace:
     )
     return parser.parse_args()
 
-def element_in_list_to_dict(input_list: list):
-    output_list = []
-    for i in input_list:
-        metadata = {}
-        pairs = i.rstrip().split(', ')
-        for pair in pairs:
-            full_data= pair.split('=')
-            key = full_data[0]
-            value = full_data[1:]
-            metadata[key] = "".join(value)
-        output_list.append(metadata)
-    return output_list
-        
+def records_from_jsonl(input_lines: list, source: str):
+    """Parse one map per line.
+
+    The maps are serialised with JsonOutput.toJson rather than Map.toString so
+    that values containing ',', '=' or a newline survive the round trip.
+    """
+    records = []
+    for line_number, line in enumerate(input_lines, start=1):
+        if not line.strip():
+            continue
+        try:
+            records.append(json.loads(line))
+        except json.JSONDecodeError as error:
+            raise ValueError(
+                f"{source} line {line_number} is not a JSON object: {error}"
+            ) from error
+    return records
+
 
 def dataframe_from_input_list(input_list: list):
    df = pd.DataFrame(input_list)
@@ -44,7 +50,7 @@ args = parse_arguments()
 with open(args.input_map_list) as file:
     input_data = file.readlines()
 
-data_list = element_in_list_to_dict(input_data)
+data_list = records_from_jsonl(input_data, args.input_map_list)
 
 df = dataframe_from_input_list(data_list)
 

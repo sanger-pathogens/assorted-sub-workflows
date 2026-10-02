@@ -38,10 +38,10 @@ process BEEFEATER {
     label 'mem_2'
     label 'time_12'
 
-    container 'quay.io/sangerpathogens/beefeater:v1.1.0'
+    container 'quay.io/sangerpathogens/beefeater:v1.2.0'
 
     output:
-    path("*output.csv"), emit: csv_ch //this is a json but the output file name is messed up to fix
+    path("*_output_*.json"), emit: json_ch // one file per platform, e.g. <date>_output_ILLUMINA.json
 
     script:
     // Get the absolute path to the output directory
