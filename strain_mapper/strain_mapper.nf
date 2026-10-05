@@ -158,7 +158,7 @@ workflow STRAIN_MAPPER {
     | set { consensus_finished }
 
     if (!params.skip_cleanup) {
-        ch_mapped.join(CONVERT_TO_BAM.out.mapped_reads_bam) // join all contents of "channel" together towards deletion
+        ch_mapped.join(INDEX_SORTED_BAM.out.indexed_bam) // join all contents of "channel" together towards deletion
         | join(SAMTOOLS_SORT.out.sorted_reads)
         | join(BCFTOOLS_MPILEUP.out.mpileup_file)
         | join(BCFTOOLS_CALL.out.vcf_allpos)
