@@ -31,24 +31,14 @@ workflow MIXED_INPUT {
     }
 
     if ('IRODS' in active_workflows) {
-<<<<<<< HEAD
         IRODS_QUERY 
         | IRODS_EXTRACTOR
 
         IRODS_EXTRACTOR.out.illumina_reads_ch
-=======
-        IRODS_QUERY
-        | IRODS_EXTRACTOR
->>>>>>> e9e7293 (beef fixes before rebase)
-        | set { reads_from_irods_ch }
     } else {
         Channel.of("none")
         | set { reads_from_irods_ch }
     }
-
-    if ('READS_MANIFEST' in active_workflows ) {
-        def manifestToUse = params.manifest_of_reads ? params.manifest_of_reads : params.manifest
-
         input_reads_ch = file(manifestToUse)
 
         INPUT_CHECK(input_reads_ch)
