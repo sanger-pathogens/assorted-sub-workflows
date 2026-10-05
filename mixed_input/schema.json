@@ -46,7 +46,7 @@
             },
             "manifest_from_dir": {
                 "default": "false",
-                "help_text": ""
+                "help_text": "Path to a directory containing paired FASTQ files. Pairing will be detected using '_[12]' or '_R[12]' preceding the file extension. Recognised extensions include '.fastq', '.fq', '.fastq.gz', '.fq.gz', but please refer to specific pipeline documentation for format limitations."
             },
             "fastq_validation": {
                 "default": "relaxed",
