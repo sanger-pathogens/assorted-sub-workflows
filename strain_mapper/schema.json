@@ -3,8 +3,10 @@
     "params": {
         "Read mapping input parameters": {
             "reference": {
-                "default": "none",
-                "help_text": "Path to reference genome in fasta format"
+                "help_text": "Path to reference genome in fasta format. At least one of this or `--reference_manifest` options need to be supplied."
+            },
+            "reference_manifest": {
+                "help_text": "Path to manifest listing paths to reference genomes in fasta format. Required headers are `ID,reference`, where `ID` is a unique identifier for the input read set to be mapped, matching those listed in the input manifest, and `reference` is the path to the fasta file. At least one of this or `--reference` options need to be supplied. Input samples not listed in the reference manifest will be mapped against the reference provided with `--reference`."
             }
         },
         "Read mapping procesing options": {

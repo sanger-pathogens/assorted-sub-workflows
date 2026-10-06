@@ -3,13 +3,22 @@
 //
 // MODULES
 //
-include { BOWTIE2; BOWTIE2_INDEX } from './modules/bowtie2'
-include { BWA; BWA_INDEX } from './modules/bwa'
-include { CONVERT_TO_BAM; SAMTOOLS_SORT; INDEX_REF; INDEX_BAM as INDEX_SORTED_BAM; INDEX_BAM as INDEX_DEDUP_BAM; SAMTOOLS_STATS } from './modules/samtools'
-include { BCFTOOLS_CALL; BCFTOOLS_MPILEUP; BCFTOOLS_FILTERING; BCFTOOLS_EXTRACT; PUBLISH_VCF } from './modules/bcftools'
-include { PICARD_MARKDUP } from './modules/picard'
+include { BOWTIE2          } from './modules/bowtie2'
+include { INDEX_REF        } from './subworkflows/index_ref.nf'
+include { BWA              } from './modules/bwa'
+include { CONVERT_TO_BAM; 
+          SAMTOOLS_SORT; 
+          INDEX_BAM as INDEX_SORTED_BAM; 
+          INDEX_BAM as INDEX_DEDUP_BAM; 
+          SAMTOOLS_STATS   } from './modules/samtools'
+include { BCFTOOLS_CALL; 
+          BCFTOOLS_MPILEUP; 
+          BCFTOOLS_FILTERING; 
+          BCFTOOLS_EXTRACT; 
+          PUBLISH_VCF      } from './modules/bcftools'
+include { PICARD_MARKDUP   } from './modules/picard'
 include { CURATE_CONSENSUS } from './modules/curate'
-include { BAM_COVERAGE } from './modules/deeptools'
+include { BAM_COVERAGE     } from './modules/deeptools'
 
 /*
 ========================================================================================
@@ -20,74 +29,60 @@ include { BAM_COVERAGE } from './modules/deeptools'
 workflow STRAIN_MAPPER {
 
     take:
-    ch_reads        // tuple( meta, read_1, read_2 )
-    reference       // file: given reference
+    ch_reads_with_ref        // tuple( meta, read_1, read_2, reference )
+          // reference file paths
 
     main:
 
-    //
-    //BOWTIE2 WORKFLOW
-    //
+    ch_reads_with_ref
+    .map{ meta, read_1, read_2, reference -> reference }
+    .unique()
+    .set{ references }
 
+    INDEX_REF(references)
+
+    // INDEX_REF keys its outputs on the original reference path as a string, because the
+    // reference it emits alongside them is a work directory path. Key the reads the same
+    // way so both sides of the combine below agree.
+    ch_reads_with_ref
+    .map{ meta, read_1, read_2, reference -> [reference.toString(), meta, read_1, read_2] }
+    .set { ch_ref_with_reads }
+
+    // lookup used to re-attach the reference after mapping, where only meta survives
+    ch_reads_with_ref
+    .map{ meta, read_1, read_2, reference -> [meta, reference.toString()] }
+    .set { ch_meta_ref_key }
+
+    ch_reads_with_ref
+    .map{ meta, read_1, read_2, reference -> [reference.toString(), meta, read_1, read_2] }
+    .set { ch_ref_with_reads }
+
+    // lookup used to re-attach the reference after mapping, where only meta survives
+    ch_reads_with_ref
+    .map{ meta, read_1, read_2, reference -> [meta, reference.toString()] }
+    .set { ch_meta_ref_key }
+
+    // MAPPING
     if (params.mapper == "bowtie2") {
-        //BOWTIE2 INDEX
-        bt2_index_files = file("${reference}.bt2")
-        if (bt2_index_files.isFile()) {
-            Channel.fromPath(bt2_index_files)
-            | collect
-            | set { ch_bt2_index }
+        ch_ref_with_reads
+        .combine(INDEX_REF.out.ch_bt2_index, by: 0)
+        .map { ref_key, meta, read_1, read_2, reference, bt2_index_files -> [meta, read_1, read_2, reference, bt2_index_files] }
+        .set { ch_reads_with_indexed_ref }
 
-        } else {
-            BOWTIE2_INDEX( reference )
-            | set { ch_bt2_index }
-        }
-
-        //
-        // MAPPING: Bowtie2
-        //
-        BOWTIE2 ( ch_reads, ch_bt2_index )
+        BOWTIE2 ( ch_reads_with_indexed_ref )
         | set { ch_mapped }
 
     } else if (params.mapper == "bwa") {
-        //
-        //BWA WORKFLOW
-        //
+        ch_ref_with_reads
+        .combine(INDEX_REF.out.ch_bwa_index, by: 0)
+        .map { ref_key, meta, read_1, read_2, reference, bwa_index_files -> [meta, read_1, read_2, reference, bwa_index_files] }
+        .set { ch_reads_with_indexed_ref }
 
-        // BWA INDEX
-        bwa_index_files = file("${reference}.amb")
-        if (bwa_index_files.isFile()) {
-            index_files = Channel.fromPath("${reference}{.amb,.ann,.bwt,.pac,.sa}")
-
-            index_files
-            | collect
-            | map { collected_indexes -> [reference, collected_indexes]}
-            | set { ch_bwa_index }
-
-        } else {
-            BWA_INDEX(reference)
-            | set { ch_bwa_index }
-        }
-
-        //
-        // MAPPING: Bwa
-        //
-        BWA( ch_reads, ch_bwa_index )
+        BWA( ch_reads_with_indexed_ref )
         | set { ch_mapped }
 
     } else {
         error "supplied mapper: ${params.mapper} is not currently supported"
-    }
-
-
-    // INDEX REF FASTA FOR DOWNSTREAM PROCESSES
-    faidx_file = file("${reference}.fai")
-    if (faidx_file.isFile()) {
-        Channel.of( [reference, faidx_file] )
-        | set { ch_ref_index }
-
-    } else {
-        INDEX_REF(reference)
-        | set { ch_ref_index }
     }
 
     //
@@ -114,7 +109,11 @@ workflow STRAIN_MAPPER {
         BAM_COVERAGE.out.finished_ch
         | set { coverage_finished }
     } else {
-        coverage_finished = Channel.value("BAM_COVERAGE not run")
+        // keyed placeholder: the cleanup joins below match on meta, so a bare
+        // value channel here would silently drop every sample
+        bam_index
+        .map { meta, bam, bai -> [meta, "BAM_COVERAGE not run"] }
+        .set { coverage_finished }
     }
 
     if (params.samtools_stats){
@@ -122,12 +121,16 @@ workflow STRAIN_MAPPER {
         SAMTOOLS_STATS.out.finished_ch
         | set { stats_finished }
     } else {
-        stats_finished = Channel.value("SAMTOOLS_STATS not run")
+        bam_index
+        .map { meta, bam, bai -> [meta, "SAMTOOLS_STATS not run"] }
+        .set { stats_finished }
     }
 
-
-    bam_index
-    | combine(ch_ref_index)
+    bam_index                                                   // [meta, bam, bai]
+    .join(ch_meta_ref_key)                                      // [meta, bam, bai, ref_key]
+    .map { meta, bam, bai, ref_key -> [ref_key, meta, bam, bai] }
+    .combine(INDEX_REF.out.ch_ref_index, by: 0)                 // [ref_key, meta, bam, bai, reference, faidx]
+    .map { ref_key, meta, bam, bai, reference, faidx -> [meta, bam, bai, reference, faidx] }
     | BCFTOOLS_MPILEUP
     | BCFTOOLS_CALL
     | set { ch_vcf_allpos }
@@ -143,18 +146,20 @@ workflow STRAIN_MAPPER {
 
     PUBLISH_VCF( ch_vcf_final )
     
-    ch_vcf_final
-    | combine(ch_ref_index)
-    | set { ch_vcf_and_ref }
+    ch_vcf_final                                                // [meta, vcf]
+    .join(ch_meta_ref_key)                                      // [meta, vcf, ref_key]
+    .map { meta, vcf, ref_key -> [ref_key, meta, vcf] }
+    .combine(INDEX_REF.out.ch_ref_index, by: 0)                 // [ref_key, meta, vcf, reference, faidx]
+    .map { ref_key, meta, vcf, reference, faidx -> [meta, vcf, reference, faidx] }
+    .set { ch_vcf_and_ref }
 
     CURATE_CONSENSUS( ch_vcf_and_ref )
     CURATE_CONSENSUS.out.finished_ch
     | set { consensus_finished }
 
     if (!params.skip_cleanup) {
-        ch_mapped.join(CONVERT_TO_BAM.out.mapped_reads_bam) // join all contents of "channel" together towards deletion
+        ch_mapped.join(INDEX_SORTED_BAM.out.indexed_bam) // join all contents of "channel" together towards deletion
         | join(SAMTOOLS_SORT.out.sorted_reads)
-        | join(INDEX_SORTED_BAM.out.indexed_bam)
         | join(BCFTOOLS_MPILEUP.out.mpileup_file)
         | join(BCFTOOLS_CALL.out.vcf_allpos)
         | join(coverage_finished)  // use these *_finished dummy value channels as a way to ensure waiting on completion of all branches of the workflow
@@ -162,7 +167,7 @@ workflow STRAIN_MAPPER {
         | join(consensus_finished)
         | flatten
         | filter(Path)
-        | map { it.delete() }
+        | map { file -> NextflowTool.safeDelete(file, workflow.workDir, log) }
 
         if (!params.skip_read_deduplication) {
             PICARD_MARKDUP.out.dedup_reads
@@ -171,7 +176,7 @@ workflow STRAIN_MAPPER {
             | join(consensus_finished)
             | flatten
             | filter(Path)
-            | map { it.delete() }
+            | map { file -> NextflowTool.safeDelete(file, workflow.workDir, log) }
         }
     }
 

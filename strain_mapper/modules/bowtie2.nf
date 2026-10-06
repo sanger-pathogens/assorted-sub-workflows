@@ -7,8 +7,7 @@ process BOWTIE2 {
     container 'quay.io/biocontainers/bowtie2:2.5.1--py310h8d7afc0_0'
 
     input:
-    tuple val(meta), path(reads_1), path(reads_2)
-    path(bt2_index_files)
+    tuple val(meta), path(reads_1), path(reads_2), path(reference), path(bt2_index_files)
 
     output:
     tuple val(meta), path("${mapped_reads}"),  emit: mapped_reads
@@ -36,10 +35,13 @@ process BOWTIE2_INDEX {
     container 'quay.io/biocontainers/bowtie2:2.5.1--py310h8d7afc0_0'
 
     input:
-    path(reference)
+    // ref_key is the original reference path as a string; it is passed as a val so
+    // it is not staged and survives unchanged, giving downstream joins a stable key
+    // (path(reference) below is re-emitted as a work directory path, so it cannot be one)
+    tuple val(ref_key), path(reference)
 
     output:
-    path("${reference.baseName}*.bt2"),  emit: bt2_index
+    tuple val(ref_key), path(reference), path("${reference.baseName}*.bt2"),  emit: bt2_index
 
     script:
     ref_basename = "${reference.baseName}"
