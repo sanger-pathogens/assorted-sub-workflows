@@ -9,10 +9,10 @@ workflow IRODS_QUERY {
         BEEFEATER()
         | flatten() //beefeater emits one file per platform, so emit them one at a time
         | splitJson() //split that sample row into metadata
-        | set { meta_file_ch }
+        | set { meta_with_paths_ch }
 
         if (params.save_metadata) {
-            meta_file_ch
+            meta_with_paths_ch
             | collectFile() { map -> [ "lane_metadata.jsonl", groovy.json.JsonOutput.toJson(map) + '\n' ] }  // json, not map.toString(), so values holding ',' '=' or a newline survive
             | set{ metadata_only }
 
@@ -20,25 +20,25 @@ workflow IRODS_QUERY {
         }
 
         emit:
-        meta_file_ch
+        meta_with_paths_ch
 }
 
 workflow CRAM_EXTRACT {
 
     take:
-    meta_cram_ch
+    meta_with_paths_ch
 
     main:
-    COLLATE_FASTQ(meta_cram_ch)
-    | set { reads_ch }
+    COLLATE_FASTQ(meta_with_paths_ch)
 
     if (params.cleanup_intermediate_files_irods_extractor) {
-        COLLATE_FASTQ.out.remove_channel.flatten()
-                .filter(Path)
-                .map { it.delete() }
+        COLLATE_FASTQ.out.files_to_remove.flatten()
+            .filter(Path)
+            .map { file -> NextflowTool.safeDelete(file, workflow.workDir, log) }
     }
 
-    emit: reads_ch // tuple val(meta), path(forward_fastq), path(reverse_fastq
+    emit: 
+    reads_ch = COLLATE_FASTQ.out.fastq_channel // tuple val(meta), path(forward_fastq), path(reverse_fastq)
 }
 
 workflow IRODS_EXTRACTOR {
@@ -57,33 +57,34 @@ workflow IRODS_EXTRACTOR {
         }
         | set { downloaded_objects }
 
-        if (!params.search) {
-            // Extract the Illumina fastqs from the CRAMs and publish them to the output directory
-            CRAM_EXTRACT(downloaded_objects.illumina_to_unpack)
+    if (!params.search) {
+        // Extract the Illumina fastqs from the CRAMs and publish them to the output directory
+        CRAM_EXTRACT(downloaded_objects.illumina_to_unpack)
 
-            // Establish the read type and branch the channel
-            downloaded_objects.ONT.branch{ meta_map ->
-                ont_format_fastq: meta_map.ont_format == "fastq"
+        // Establish the read type and branch the channel
+        downloaded_objects.ONT.branch{ meta_map ->
+            ont_format_fastq: meta_map.ont_format == "fastq"
 
-                ont_format_unbasecalled: meta_map.ont_format == "pod5" || meta_map.ont_format == "fast5"
+            ont_format_unbasecalled: meta_map.ont_format == "pod5" || meta_map.ont_format == "fast5"
 
-                other: true
-            }
-            | set { downloaded_ont_objects }
-
-            // Publish the reads and/or squiggles to the output directory
-            PUBLISH_FASTQ(downloaded_ont_objects.ont_format_fastq)
-            PUBLISH_UNBASECALLED(downloaded_ont_objects.ont_format_unbasecalled)
-
-            illumina_reads_ch = CRAM_EXTRACT.out.reads_ch // tuple val(meta), path(forward_fastq), path(reverse_fastq)
-            ont_reads_ch = PUBLISH_FASTQ.out.path_channel // tuple val(meta), path(fastq)
-            ont_unbasecalled_ch = PUBLISH_UNBASECALLED.out.path_channel // tuple val(meta), path(fast5/pod5)
-        } else {
-            log.info "Search only mode enabled, no reads will be extracted or published."
-            illumina_reads_ch = Channel.empty()
-            ont_reads_ch = Channel.empty()
-            ont_unbasecalled_ch = Channel.empty()
+            other: true
         }
+        | set { downloaded_ont_objects }
+
+        // Publish the reads and/or squiggles to the output directory
+        PUBLISH_FASTQ(downloaded_ont_objects.ont_format_fastq)
+        PUBLISH_UNBASECALLED(downloaded_ont_objects.ont_format_unbasecalled)
+
+        illumina_reads_ch = CRAM_EXTRACT.out.reads_ch // tuple val(meta), path(forward_fastq), path(reverse_fastq)
+        ont_reads_ch = PUBLISH_FASTQ.out.path_channel // tuple val(meta), path(fastq)
+        ont_unbasecalled_ch = PUBLISH_UNBASECALLED.out.path_channel // tuple val(meta), path(fast5/pod5)
+    } else {
+        log.info "Search only mode enabled, no reads will be extracted or published."
+        illumina_reads_ch = Channel.empty()
+        ont_reads_ch = Channel.empty()
+        ont_unbasecalled_ch = Channel.empty()
+    }
+    
     emit:
     illumina_reads_ch // tuple val(meta), path(forward_fastq), path(reverse_fastq)
     ont_reads_ch // tuple val(meta), path(fastq)

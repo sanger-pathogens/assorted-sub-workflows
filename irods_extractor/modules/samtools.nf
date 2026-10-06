@@ -15,14 +15,18 @@ process COLLATE_FASTQ {
 
     output:
     tuple val(meta), path(forward_fastq), path(reverse_fastq), emit: fastq_channel
+    path(local_link), emit: files_to_remove
 
     script:
+    input_file = file(meta.local_path)
+    local_link = input_file.getName()
     forward_fastq = "${meta.ID}${params.raw_reads_suffix}_1.fastq.gz"
     reverse_fastq = "${meta.ID}${params.raw_reads_suffix}_2.fastq.gz"
 
     """
+    ln -s ${input_file} ./${local_link}
     samtools collate -O \
-    -f ${meta.local_path} \
+    -f ${local_link} \
     -@ ${task.cpus} \
     |
     samtools fastq -N \

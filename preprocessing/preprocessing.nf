@@ -5,7 +5,7 @@ include { HOST_READ_REMOVAL } from './subworkflows/host_read_removal.nf'
 include { COMPRESS_READS       
           DECOMPRESS_READS  } from './modules/helper_processes.nf'
 
-workflow PREPROCESSING {
+workflow PREPROCESSING_ILLUMINA {
 
     /*
     -----------------------------------------------------------------
@@ -18,18 +18,10 @@ workflow PREPROCESSING {
     reads_ch
 
     main:
-    reads_ch.branch{ meta, fwd, rev ->
-        illumina_to_unpack: meta.Platform == "ILLUMINA"
-
-        ONT: meta.Platform == "ONT"
-
-        other: true
-    }
-    | set { reads_ch }
 
     // Illumina preprocessing subworkflow, passing only Illumina reads into the preprocessing steps
     if (params.preprocessing) {
-        DECOMPRESS_READS(reads_ch.illumina_to_unpack)
+        DECOMPRESS_READS(reads_ch)
         | set{ decompressed_reads_ch }
 
         if (params.run_trimmomatic){
@@ -73,7 +65,7 @@ workflow PREPROCESSING {
         // for when turning off preprocessing or for non-illumina data, 
         // just pass through the reads without preprocessing and empty channels for stats
         // so to streamline downstream workflow compatibility
-        preprocessed_reads_ch = reads_ch.illumina_to_unpack
+        preprocessed_reads_ch = reads_ch
         collated_trimming_stats_ch = Channel.empty()
         collated_host_reads_stats_ch = Channel.empty()
     }
@@ -81,6 +73,38 @@ workflow PREPROCESSING {
     preprocessed_reads_ch
     collated_trimming_stats_ch
     collated_host_reads_stats_ch
+}
 
+workflow PREPROCESSING {
+    /*
+    -----------------------------------------------------------------
+    Preprocessing fastq files
+    -----------------------------------------------------------------
 
+    */
+
+    take:
+    reads_ch
+
+    main:
+    // this gating might be redundant given that IRODS_EXTRACTOR already outputs platform-segregated channels, 
+    // but it is a safety measure to avoid processing the wring type of data. 
+    // We could drop this in the future when settled on how we handle mutliple patforms.
+    reads_ch.branch{ meta, fwd, rev ->
+        illumina: meta.Platform == "ILLUMINA"
+
+        ONT: meta.Platform == "ONT"
+
+        other: true
+    }
+    | set { reads_ch }
+
+    PREPROCESSING_ILLUMINA(reads_ch.illumina) // in the future, can insert here other preprocessing workflows for ONT or other platforms
+
+    emit:
+    // in the future, we may want to combine these output channels with those derived from an PREPROCESSING_ONT workflow here,
+    // but for now, just emmit the PREPROCESSING_ILLUMINA outputs directly
+    preprocessed_reads_ch = PREPROCESSING_ILLUMINA.out.preprocessed_reads_ch
+    collated_trimming_stats_ch = PREPROCESSING_ILLUMINA.out.collated_trimming_stats_ch
+    collated_host_reads_stats_ch = PREPROCESSING_ILLUMINA.out.collated_host_reads_stats_ch
 }
