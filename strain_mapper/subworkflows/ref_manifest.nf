@@ -19,7 +19,6 @@ workflow REF_MANIFEST_PARSE {
     references // channel: [ val(meta), Path(reference) ]
 }
 
-// Function to get list of [ meta, fastq_1, fastq_2 ]
 def create_ref_channels(LinkedHashMap row) {
     def meta = [:]
     meta.ID = row.ID
