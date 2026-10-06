@@ -6,8 +6,7 @@ process SYLPH_SKETCH {
 
     publishDir "${params.outdir}/${meta.ID}/sylph/", pattern: "*.sylsp", mode: 'copy', overwrite: true, enabled: params.save_sylph_sketches
 
-    container 'gitlab-registry.internal.sanger.ac.uk/sanger-pathogens/docker-images/sylph:0.8.1--ha6fb395_0'
-
+    container 'quay.io/biocontainers/sylph:0.8.1--ha6fb395_0'
     input:
     tuple val(meta), path(read_1), path(read_2)
 
@@ -28,7 +27,7 @@ process SYLPH_PROFILE {
 
     publishDir "${params.outdir}/${meta.ID}/sylph/", pattern: "*.tsv", mode: 'copy', overwrite: true
 
-    container 'gitlab-registry.internal.sanger.ac.uk/sanger-pathogens/docker-images/sylph:0.8.1--ha6fb395_0'
+    container 'quay.io/biocontainers/sylph:0.8.1--ha6fb395_0'
 
     input:
     tuple val(meta), path(sketch)
@@ -50,7 +49,7 @@ process SYLPHTAX_TAXPROF {
 
     publishDir "${params.outdir}/${meta.ID}/sylph/", pattern: "*.sylphmpa", mode: 'copy', overwrite: true
 
-    container 'gitlab-registry.internal.sanger.ac.uk/sanger-pathogens/docker-images/sylph-tax:1.2.0'
+    container 'quay.io/biocontainers/sylph-tax:1.2.0--pyhdfd78af_0'
 
     input:
     tuple val(meta), path(sylph_report)
