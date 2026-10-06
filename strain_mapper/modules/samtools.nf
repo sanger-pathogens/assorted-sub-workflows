@@ -54,7 +54,7 @@ process INDEX_REF {
     publishDir "${params.outdir}/sorted_ref", mode: 'copy', overwrite: true
 
     conda 'bioconda::samtools=1.17'
-    container 'quay.io/biocontainers/samtools:1.17--hd87286a_2'
+    container 'quay.io-biocontainers-samtools-1.22--h96c455f_0'
 
     input:
     // see BOWTIE2_INDEX for why ref_key is carried as a val
