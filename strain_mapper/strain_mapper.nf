@@ -53,15 +53,6 @@ workflow STRAIN_MAPPER {
     .map{ meta, read_1, read_2, reference -> [meta, reference.toString()] }
     .set { ch_meta_ref_key }
 
-    ch_reads_with_ref
-    .map{ meta, read_1, read_2, reference -> [reference.toString(), meta, read_1, read_2] }
-    .set { ch_ref_with_reads }
-
-    // lookup used to re-attach the reference after mapping, where only meta survives
-    ch_reads_with_ref
-    .map{ meta, read_1, read_2, reference -> [meta, reference.toString()] }
-    .set { ch_meta_ref_key }
-
     // MAPPING
     if (params.mapper == "bowtie2") {
         ch_ref_with_reads
