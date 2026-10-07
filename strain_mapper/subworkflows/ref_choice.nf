@@ -30,8 +30,10 @@ workflow CHECK_REFERENCES {
             .set { ch_reference_manifest }
     }
 
+    generic_reference_ch = Channel.of(generic_reference)
+
     emit:
-    generic_reference
+    generic_reference_ch
     ch_reference_manifest
 }
 
@@ -39,7 +41,7 @@ workflow PICK_REFERENCE {
     take:
     reads_ch // tuple( meta, read_1, read_2 )
     ch_reference_manifest // tuple( ID, meta, reference path )
-    generic_reference // value: Path
+    generic_reference_ch // value: Path
 
     main:
     reads_ch
@@ -47,12 +49,16 @@ workflow PICK_REFERENCE {
         [metaread.ID, metaread, reads_1, reads_2]
     }
     .join(ch_reference_manifest, remainder: true)
+    .combine(generic_reference_ch)
     .map { row ->
         def (mid, meta, reads_1, reads_2) = row
-        def reference = row.size() >= 6 ? row[5] : null
-        [meta, reads_1, reads_2, reference ?: generic_reference] // prefer manifest reference if available
+        def specific_reference = row.size() >= 6 ? row[5] : null
+        def generic_reference = row.size() >= 7 ? row[6] : null
+        [meta, reads_1, reads_2, specific_reference ?: generic_reference] // prefer manifest reference if available
     }
     .set { ch_reads_with_ref }
+
+    ch_reads_with_ref.view()
 
     if (!params.drop_without_ref){
         ch_reads_with_ref.filter { meta, reads_1, reads_2, reference -> reference == null }
