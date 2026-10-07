@@ -39,6 +39,8 @@ workflow STRAIN_MAPPER {
 
     ch_reads_with_ref = PICK_REFERENCE(reads_ch, CHECK_REFERENCES.out.ch_reference_manifest, CHECK_REFERENCES.out.generic_reference) // tuple( meta, read_1, read_2, reference )
 
+    ch_reads_with_ref.view()
+
     ch_reads_with_ref
     .map{ meta, read_1, read_2, reference -> reference }
     .unique()
