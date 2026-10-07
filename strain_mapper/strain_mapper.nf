@@ -6,7 +6,7 @@
 include { BOWTIE2          } from './modules/bowtie2'
 include { INDEX_REF        } from './subworkflows/index_ref.nf'
 include { CHECK_REFERENCES; 
-          PICK_REFERENCE   } from './subworkflows/check_references.nf'
+          PICK_REFERENCE   } from './subworkflows/reference_choice.nf'
 include { BWA              } from './modules/bwa'
 include { CONVERT_TO_BAM; 
           SAMTOOLS_SORT; 
