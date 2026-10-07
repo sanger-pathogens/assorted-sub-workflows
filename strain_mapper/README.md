@@ -28,7 +28,7 @@ sampleC,NA
 
 - **`ID`** must match a sample ID from the reads input — the `ID` column of `--manifest_of_reads`, or the ID that `mixed_input` derives for iRODS, ENA and directory input.
 - **`reference`** is a path to a FASTA file. Paths are validated while the manifest is parsed, and the run fails immediately with the offending path if a file is missing.
-- **`NA`** means "no specific reference for this sample". The row is dropped and the sample falls back to `--reference`.
+- **`NA`** means "no specific reference for this sample". The row is dropped and the sample falls back to `--reference` (note that it is not required to document samples that do not have a specific reference, they can just be omitted from the manifest of references).
 
 ### How each sample gets its reference
 
@@ -36,9 +36,11 @@ For every sample emerging from `mixed_input`:
 
 1. If its ID appears in the reference manifest with a real path, that reference is used.
 2. Otherwise `--reference` is used.
-3. If neither applies, the sample is **dropped from the run**.
+3. If neither applies:
+  a. if `--drop_without_ref` is `true`: the reference-less sample is **dropped from the run**
+  b. if `--drop_without_ref` is `false` (default): an error will be raised, interrupting the pipeline.
 
-Running with `--reference_manifest` alone and a manifest that does not cover every sample will therefore produce fewer results than samples submitted (a warning is issued). Supply `--reference` as a fallback unless you deliberately want to restrict the run to the manifested samples.
+If `--drop_without_ref` is `true`, running with `--reference_manifest` alone and a manifest that does not cover every sample may therefore produce fewer results than samples submitted (a warning is issued). Supply `--reference` as a fallback unless you deliberately want to restrict the run to the manifested samples.
 
 ### Indexing
 
