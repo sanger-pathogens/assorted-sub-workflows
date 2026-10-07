@@ -55,6 +55,9 @@ workflow PICK_REFERENCE {
         def specific_reference = row.size() >= 6 ? row[5] : null
         def generic_reference = row.size() >= 7 ? row[6] : null
         [meta, reads_1, reads_2, specific_reference ?: generic_reference] // prefer manifest reference if available
+    }.filter { meta, reads_1, reads_2, reference ->
+        // meta is null for reference manifest rows whose ID matched no input sample,
+        meta != null
     }
     .set { ch_reads_with_ref }
 
@@ -75,9 +78,8 @@ workflow PICK_REFERENCE {
     }
 
     ch_reads_with_ref.filter { meta, reads_1, reads_2, reference ->
-        // meta is null for reference manifest rows whose ID matched no input sample,
         // reference is null for samples with no manifest entry and no --reference
-        meta != null && reference != null
+        reference != null
     }
     .set { all_reads_ready_to_map_with_ref_ch }
 
