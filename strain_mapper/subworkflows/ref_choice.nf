@@ -61,8 +61,6 @@ workflow PICK_REFERENCE {
     }
     .set { ch_reads_with_ref }
 
-    ch_reads_with_ref.view()
-
     if (!params.drop_without_ref){
         ch_reads_with_ref.filter { meta, reads_1, reads_2, reference -> reference == null }
         .map { meta, reads_1, reads_2, reference -> meta.ID }
