@@ -1,3 +1,5 @@
+include { REF_MANIFEST_PARSE } from './ref_manifest.nf'
+
 workflow CHECK_REFERENCES {
     main:
     generic_reference = null
