@@ -5,6 +5,8 @@
 //
 include { BOWTIE2          } from './modules/bowtie2'
 include { INDEX_REF        } from './subworkflows/index_ref.nf'
+include { CHECK_REFERENCES; 
+          PICK_REFERENCE   } from './subworkflows/ref_choice.nf'
 include { BWA              } from './modules/bwa'
 include { CONVERT_TO_BAM; 
           SAMTOOLS_SORT; 
@@ -29,15 +31,18 @@ include { BAM_COVERAGE     } from './modules/deeptools'
 workflow STRAIN_MAPPER {
 
     take:
-    ch_reads_with_ref        // tuple( meta, read_1, read_2, reference )
-          // reference file paths
+    reads_ch        // tuple( meta, read_1, read_2 )
 
     main:
+
+    CHECK_REFERENCES()
+
+    ch_reads_with_ref = PICK_REFERENCE(reads_ch, CHECK_REFERENCES.out.ch_reference_manifest, CHECK_REFERENCES.out.generic_reference_ch) // tuple( meta, read_1, read_2, reference )
 
     ch_reads_with_ref
     .map{ meta, read_1, read_2, reference -> reference }
     .unique()
-    .set{ references }
+    .set{ references }  // reference file paths
 
     INDEX_REF(references)
 

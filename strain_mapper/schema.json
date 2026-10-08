@@ -7,6 +7,10 @@
             },
             "reference_manifest": {
                 "help_text": "Path to manifest listing paths to reference genomes in fasta format. Required headers are `ID,reference`, where `ID` is a unique identifier for the input read set to be mapped, matching those listed in the input manifest, and `reference` is the path to the fasta file. At least one of this or `--reference` options need to be supplied. Input samples not listed in the reference manifest will be mapped against the reference provided with `--reference`."
+            },
+            "drop_without_ref": {
+                "default": "false",
+                "help_text": "Drop samples from the input manifest that do not have a reference genome specified in the reference manifest in the absence of a generic reference (provided via `--reference`)."
             }
         },
         "Read mapping procesing options": {

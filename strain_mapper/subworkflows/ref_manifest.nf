@@ -28,12 +28,10 @@ def create_ref_channels(LinkedHashMap row) {
     def errors = []
     def array = []
     // check short reads
-    if ( !(row.reference == 'NA') ) {
-        if ( !file(row.reference).exists() ) {
-            errors << "Reference fasta file does not exist:\n${row.reference}"
-        }
-        reference = file(row.reference)
+    if ( !file(row.reference).exists() ) {
+        errors << "Reference fasta file does not exist:\n${row.reference}"
     }
+    reference = file(row.reference)
 
     if (errors) {
         errors.add(0, "Errors while parsing input manifest!")
