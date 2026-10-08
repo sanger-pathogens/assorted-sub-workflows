@@ -23,12 +23,10 @@ A CSV with the required header `ID,reference`:
 ID,reference
 sampleA,/path/to/strain_1.fasta
 sampleB,/path/to/strain_2.fasta
-sampleC,NA
 ```
 
 - **`ID`** must match a sample ID from the reads input — the `ID` column of `--manifest_of_reads`, or the ID that `mixed_input` derives for iRODS, ENA and directory input.
-- **`reference`** is a path to a FASTA file. Paths are validated while the manifest is parsed, and the run fails immediately with the offending path if a file is missing.
-- **`NA`** means "no specific reference for this sample". The row is dropped and the sample falls back to `--reference` (note that it is not required to document samples that do not have a specific reference, they can just be omitted from the manifest of references).
+- **`reference`** is a path to a FASTA file. Paths are validated while the manifest is parsed, and the run fails immediately with the offending path if a file is missing. Samples that do not have a specific reference associated to them can just be omitted from the manifest of references.
 
 ### How each sample gets its reference
 
@@ -86,7 +84,7 @@ ch_ref_index    // [ ref_key, reference, faidx ]
 
 The string key is necessary because an index process re-emits its reference as a work directory path, which no longer compares equal to the path the reads carry.
 
-`REF_MANIFEST_PARSE` is a separate entry point that parses and validates the reference manifest, emitting `[ meta, reference ]` with `NA` rows already removed.
+`REF_MANIFEST_PARSE` is a separate entry point that parses and validates the reference manifest, emitting `[ meta, reference ]`.
 
 ## Parameters
 
