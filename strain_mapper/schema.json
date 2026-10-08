@@ -10,7 +10,7 @@
             },
             "drop_without_ref": {
                 "default": "false",
-                "help_text": "Drop samples from the input manifest that do not have a reference genome specified in the reference manifest in the basence of a generic reference (provided via `--reference`)."
+                "help_text": "Drop samples from the input manifest that do not have a reference genome specified in the reference manifest in the absence of a generic reference (provided via `--reference`)."
             }
         },
         "Read mapping procesing options": {
