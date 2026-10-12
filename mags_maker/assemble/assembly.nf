@@ -1,3 +1,5 @@
+import groovy.json.JsonOutput
+
 include { METASPADES                 } from './modules/spades.nf'
 include { MEGAHIT                    } from './modules/megahit.nf'
 include { REMOVE_SMALL_CONTIGS;
@@ -8,7 +10,7 @@ include { BWA_INDEX;
 include { MAPPED_READS_TO_FASTQ      } from './modules/samtools.nf'
 include { QUAST                      } from './modules/quast.nf'
 
-include { GET_LABEL                  } from  '../../pipeline_resource_optimisation/get_label.nf'
+include { GET_LABEL                  } from  '../../pipeline_resource_optimisation/modules/get_label.nf'
 
 /*
 #############################################################################################################################################################
@@ -38,14 +40,40 @@ workflow METAWRAP_ASSEMBLE {
         log.warn("have to select at least one of --metaspades or --megahit")
     }
     
-
     if (params.metaspades) {
-        GET_LABEL()
 
-        label_ch = GET_LABEL.out.label_file
-            .map { file -> file.text.trim() + " MB" }
+        if (!params.model_x_table) {
+            error("--metaspades needs --model_x_table: a CSV of model features with one row per sample, keyed by a sample_ID column")
+        }
 
-        METASPADES(reads_ch, label_ch)
+        // One emission per row, keyed by whatever feature columns the CSV happens to have.
+        // Every column except sample_ID becomes one JSON object for that sample.
+        channel
+        .fromPath ( params.model_x_table, checkIfExists: true )
+        .splitCsv ( header:true, sep:',', strip:true )
+        .map { row ->
+            def features = row.findAll { column, value -> column != 'sample_ID' }
+                .collectEntries { column, value -> [column, value?.isNumber() ? value as BigDecimal : value] }
+            [ row.sample_ID, JsonOutput.toJson(features) ]
+        }
+        .set { model_x_ch }
+
+        // Pair each sample's reads with its own row of features, so the prediction can be
+        // tagged with the sample it belongs to and merged back into that sample's meta
+        reads_ch
+        .map { meta, read_1, read_2 -> [ meta.ID, meta, read_1, read_2 ] }
+        .join ( model_x_ch, failOnMismatch: true, failOnDuplicate: true )
+        .set { reads_with_features }
+
+        GET_LABEL( reads_with_features.map { id, meta, read_1, read_2, features -> [ meta, features ] } )
+
+        GET_LABEL.out.label
+        .map { meta, label -> [ meta.ID, meta + [ memory_label: "${label.trim()} MB" ] ] }
+        .join ( reads_with_features.map { id, meta, read_1, read_2, features -> [ id, read_1, read_2 ] } )
+        .map { id, meta, read_1, read_2 -> [ meta, read_1, read_2 ] }
+        .set { reads_with_label }
+
+        METASPADES(reads_with_label)
         | REMOVE_SMALL_CONTIGS
         REMOVE_SMALL_CONTIGS.out.long_contigs.set { metaspades_scaffolds }
 
@@ -61,7 +89,9 @@ workflow METAWRAP_ASSEMBLE {
             BWA_INDEX(metaspades_scaffolds)
             | set { indexed_scaffolds }
 
-            reads_ch.join(indexed_scaffolds)
+            // reads_with_label, not reads_ch: the scaffolds carry the labelled meta, so the
+            // join key has to be the labelled meta too
+            reads_with_label.join(indexed_scaffolds)
             | BWA
             | MAPPED_READS_TO_FASTQ
             | set { final_reads_ch }
