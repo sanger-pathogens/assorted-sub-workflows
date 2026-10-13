@@ -1,9 +1,21 @@
-include { BEEFEATER_SEARCH
+include { BEEFEATER_SEARCH;
           BEEFEATER_GET                 } from '../modules/beefeater.nf'
 include { COLLATE_FASTQ                 } from '../modules/samtools.nf'
 include { METADATA as METADATA_QUERIED  } from '../modules/metadata_save.nf'
 include { PUBLISH_FASTQ
           PUBLISH_UNBASECALLED          } from '../modules/publish.nf'
+
+/*
+Fail on records that share an ID. beefeater names each download by ID, so records sharing one
+would overwrite each other's file, both be paired with whichever copy landed, and collide on publish.
+*/
+def check_unique_ids(records) {
+    def duplicates = records.groupBy { it.ID }.findAll { id, group -> group.size() > 1 }
+    if (duplicates) {
+        def details = duplicates.collect { id, group -> "  ${id}: ${group*.irods_path.join(', ')}" }.join('\n')
+        error "${duplicates.size()} ID(s) are shared by more than one search record, so their downloads would overwrite each other:\n${details}"
+    }
+}
 
 /*
 Group search records into json batch files of batch_size, named <prefix>_batch_<n>.json.
@@ -13,7 +25,10 @@ so the same records give the same batches and -resume reuses completed downloads
 def batch_records(records_ch, batch_size, prefix) {
     return records_ch
         .toSortedList { a, b -> a.ID <=> b.ID }
-        .flatMap { records -> records.collate(batch_size).withIndex() }
+        .flatMap { records ->
+            check_unique_ids(records)
+            records.collate(batch_size).withIndex()
+        }
         .map { batch, index ->
             [ "${prefix}_batch_${String.format('%05d', index)}.json", groovy.json.JsonOutput.toJson(batch) ]
         }
@@ -61,11 +76,11 @@ workflow IRODS_GET {
         }
         | set { records_by_platform }
 
-    // ONT collections can be very large, so they are batched separately
     batch_records(records_by_platform.other, params.irods_batch_size, "reads")
     | mix(batch_records(records_by_platform.ont, params.irods_ont_batch_size, "ont"))
     | collectFile { name_and_json -> name_and_json }
     | BEEFEATER_GET
+    | view
 
     BEEFEATER_GET.out.downloaded
     | flatMap { downloaded_json, downloads ->
@@ -83,6 +98,7 @@ workflow IRODS_GET {
         }
         .findAll { meta, downloaded_file -> downloaded_file }
     }
+    | view
     | set { downloaded_ch }
 
     emit:
