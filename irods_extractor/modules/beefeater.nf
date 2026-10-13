@@ -71,12 +71,14 @@ process BEEFEATER_SEARCH {
 
     def query    = generate_query(params)
 
-    def translate_manifest = ""
+    def manifest = ""
     if (params.manifest_of_lanes) {
-        def orig_manifest = file(params.manifest_of_lanes)
-        def new_header    = orig_manifest.readLines()[0].split(',').collect { translateKey(it.trim()) }.join(',')
-        translate_manifest = """{ echo '${new_header}'; tail -n +2 '${orig_manifest}'; } > translated_manifest_of_lanes.csv"""
-        manifest = "--manifest translated_manifest_of_lanes.csv"
+        def orig_manifest  = file(params.manifest_of_lanes)
+        def lines          = orig_manifest.readLines()
+        def new_header     = lines[0].split(',').collect { translateKey(it.trim()) }.join(',')
+        def translated_csv = file("translated_manifest_of_lanes.csv")
+        translated_csv.text = ([new_header] + lines.drop(1)).join('\n') + '\n'
+        manifest = "--manifest ${translated_csv}"
     }
     def service_user = params.service_user ? "-su " : ""
     """
