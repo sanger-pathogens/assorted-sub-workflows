@@ -54,13 +54,14 @@ process INDEX_REF {
     publishDir "${params.outdir}/sorted_ref", mode: 'copy', overwrite: true
 
     conda 'bioconda::samtools=1.17'
-    container 'quay.io/biocontainers/samtools:1.17--hd87286a_2'
+    container 'quay.io-biocontainers-samtools-1.22--h96c455f_0'
 
     input:
-    path(reference)
+    // see BOWTIE2_INDEX for why ref_key is carried as a val
+    tuple val(ref_key), path(reference)
 
     output:
-    tuple path(reference), path("${faidx}"),  emit: ref_index
+    tuple val(ref_key), path(reference), path("${faidx}"),  emit: ref_index
 
     script:
     faidx = "${reference}.fai"
