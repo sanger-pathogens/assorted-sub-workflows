@@ -82,8 +82,6 @@ process BEEFEATER_SEARCH {
     }
     def service_user = params.service_user ? "-su " : ""
     """
-    ${translate_manifest}
-
     beefeater search \\
         --file_format json \\
         --pool_size ${params.irods_pool_size} \\
