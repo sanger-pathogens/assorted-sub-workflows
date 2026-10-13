@@ -1,5 +1,5 @@
 def translateKey(in_key) {
-    switch(in_key){ 
+    switch(in_key){
         case 'studyid':
         return 'study_id'
 
@@ -33,12 +33,12 @@ def generate_query(params) {
 }
 
 
-process BEEFEATER {
+process BEEFEATER_SEARCH {
     label 'cpu_1'
     label 'mem_2'
     label 'time_12'
 
-    container 'quay.io/sangerpathogens/beefeater:v1.2.0'
+    container "quay.io/sangerpathogens/beefeater:v1.3.0"
 
     output:
     path("*_output_*.json"), emit: json_ch // one file per platform, e.g. <date>_output_ILLUMINA.json
@@ -70,27 +70,55 @@ process BEEFEATER {
     }
 
     def query    = generate_query(params)
-    def manifest = ""
+
+    def translate_manifest = ""
     if (params.manifest_of_lanes) {
-        def orig_manifest  = file(params.manifest_of_lanes)
-        def lines          = orig_manifest.readLines()
-        def new_header     = lines[0].split(',').collect { translateKey(it.trim()) }.join(',')
-        def translated_csv = file("translated_manifest_of_lanes.csv")
-        translated_csv.text = ([new_header] + lines.drop(1)).join('\n') + '\n'
-        manifest = "--manifest ${translated_csv}"
+        def orig_manifest = file(params.manifest_of_lanes)
+        def new_header    = orig_manifest.readLines()[0].split(',').collect { translateKey(it.trim()) }.join(',')
+        translate_manifest = """{ echo '${new_header}'; tail -n +2 '${orig_manifest}'; } > translated_manifest_of_lanes.csv"""
+        manifest = "--manifest translated_manifest_of_lanes.csv"
     }
-    // def manifest = params.manifest_of_lanes ? "--manifest ${params.manifest_of_lanes}" : ""
-    def search   = params.search ? "" : "--get"
     def service_user = params.service_user ? "-su " : ""
     """
+    ${translate_manifest}
+
     beefeater search \\
         --file_format json \\
+        --pool_size ${params.irods_pool_size} \\
         ${service_user} \\
         ${query} \\
         ${manifest} \\
-        ${search} \\
         ${prevent_redownload_opts} \\
         ${ont_options}
-        
+
+    """
+}
+
+
+process BEEFEATER_GET {
+    tag "${batch_json.baseName}"
+    label 'cpu_1'
+    label 'mem_2'
+    label 'time_queue_from_normal'
+    maxForks params.irods_max_concurrent_gets
+
+    container "quay.io/sangerpathogens/beefeater:v1.3.0"
+
+    input:
+    path(batch_json)
+
+    output:
+    tuple path("downloaded_*.json"), path("results/*"), emit: downloaded
+
+    script:
+    def service_user = params.service_user ? "-su " : ""
+    """
+    beefeater -v get \\
+        --input ${batch_json} \\
+        --file_format json \\
+        --output_file downloaded.json \\
+        --get_directory results \\
+        --pool_size ${params.irods_pool_size} \\
+        ${service_user}
     """
 }

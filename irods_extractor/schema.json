@@ -11,6 +11,36 @@
                 "help_text": "[ONT reads only] Retrieves the read files based on the selected option [reads|unbasecalled].\n            If 'reads' is selected, Beefeater will select the reads files according to this priority rule: 'fastq' > 'pass fastq' > 'pass bam' > 'unbasecalled' (\"squiggles\", in either pod5 or fast5 format)."
             }
         },
+        "Irods download options": {
+            "irods_batch_size": {
+                "default": 20,
+                "help_text": "Number of files downloaded per beefeater job. Smaller batches start unpacking sooner but submit more jobs."
+            },
+            "irods_ont_batch_size": {
+                "default": 1,
+                "help_text": "Number of ONT collections downloaded per beefeater job; collections can be very large."
+            },
+            "irods_max_concurrent_gets": {
+                "default": 3,
+                "help_text": "Maximum number of beefeater download jobs running at once."
+            },
+            "irods_pool_size": {
+                "default": 4,
+                "help_text": "iRODS connections held open by each beefeater job. iRODS asks each user to keep to 10-15 connections in total (irods_max_concurrent_gets x irods_pool_size)."
+            },
+            "irods_search_tokens": {
+                "default": 20,
+                "help_text": "LSF seqirods tokens requested by the beefeater search job."
+            },
+            "irods_get_tokens": {
+                "default": 20,
+                "help_text": "LSF seqirods tokens requested by each beefeater download job. The cluster has 1000 tokens shared by all users."
+            },
+            "beefeater_container": {
+                "default": "quay.io/sangerpathogens/beefeater:v1.3.0",
+                "help_text": "Container used for the beefeater search and download jobs."
+            }
+        },
         "Irods extractor processing options": {
             "cleanup_intermediate_files_irods_extractor": {
                 "default": "false",
