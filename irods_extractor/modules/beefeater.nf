@@ -38,7 +38,7 @@ process BEEFEATER_SEARCH {
     label 'mem_2'
     label 'time_12'
 
-    container "quay.io/sangerpathogens/beefeater:v1.3.0"
+    container 'quay.io/sangerpathogens/beefeater:v1.3.0'
 
     output:
     path("*_output_*.json"), emit: json_ch // one file per platform, e.g. <date>_output_ILLUMINA.json
@@ -102,7 +102,7 @@ process BEEFEATER_GET {
     label 'time_queue_from_normal'
     maxForks params.irods_max_concurrent_gets
 
-    container "quay.io/sangerpathogens/beefeater:v1.3.0"
+    container 'quay.io/sangerpathogens/beefeater:v1.3.0'
 
     input:
     path(batch_json)
