@@ -80,7 +80,6 @@ workflow IRODS_GET {
     | mix(batch_records(records_by_platform.ont, params.irods_ont_batch_size, "ont"))
     | collectFile { name_and_json -> name_and_json }
     | BEEFEATER_GET
-    | view
 
     BEEFEATER_GET.out.downloaded
     | flatMap { downloaded_json, downloads ->
@@ -98,7 +97,6 @@ workflow IRODS_GET {
         }
         .findAll { meta, downloaded_file -> downloaded_file }
     }
-    | view
     | set { downloaded_ch }
 
     emit:
