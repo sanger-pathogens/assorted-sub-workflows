@@ -12,9 +12,13 @@
             }
         },
         "Irods download options": {
-            "irods_batch_size": {
+            "irods_batch_count": {
                 "default": 20,
-                "help_text": "Number of files downloaded per beefeater job. Smaller batches start unpacking sooner but submit more jobs."
+                "help_text": "Maximum number of beefeater jobs the (non-ONT) files are split between. More batches start unpacking sooner but submit more jobs."
+            },
+            "irods_min_batch_size": {
+                "default": 20,
+                "help_text": "Minimum number of (non-ONT) files per beefeater job; runs with too few files for irods_batch_count batches of this size use fewer batches."
             },
             "irods_ont_batch_size": {
                 "default": 1,

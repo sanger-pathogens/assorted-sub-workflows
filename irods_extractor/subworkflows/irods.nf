@@ -18,16 +18,20 @@ def check_unique_ids(records) {
 }
 
 /*
-Group search records into json batch files of batch_size, named <prefix>_batch_<n>.json.
+Split search records evenly into json batch files, named <prefix>_batch_<n>.json.
+n_batches_for maps the total record count to the number of batches (capped at one record per batch).
 Records are sorted by ID first, as beefeater emits them in download-completion order,
 so the same records give the same batches and -resume reuses completed downloads.
 */
-def batch_records(records_ch, batch_size, prefix) {
+def batch_records(records_ch, prefix, n_batches_for) {
     return records_ch
         .toSortedList { a, b -> a.ID <=> b.ID }
         .flatMap { records ->
             check_unique_ids(records)
-            records.collate(batch_size).withIndex()
+            def n_batches = Math.min(records.size(), n_batches_for.call(records.size()))
+            records.withIndex()
+                .groupBy { record, i -> (i * n_batches).intdiv(records.size()) }
+                .collect { batch_index, indexed -> [ indexed*.first(), batch_index ] }
         }
         .map { batch, index ->
             [ "${prefix}_batch_${String.format('%05d', index)}.json", groovy.json.JsonOutput.toJson(batch) ]
@@ -76,8 +80,18 @@ workflow IRODS_GET {
         }
         | set { records_by_platform }
 
-    batch_records(records_by_platform.other, params.irods_batch_size, "reads")
-    | mix(batch_records(records_by_platform.ont, params.irods_ont_batch_size, "ont"))
+    /*
+    Non-ONT: one batch per irods_min_batch_size records (rounded down, at least 1), up to irods_batch_count batches.
+    So with the defaults (20, 20): fewer than 40 records is a single batch, the 20th batch is reached at 400 records,
+    and beyond that the batches grow rather than adding more jobs. irods_max_concurrent_gets limits how many run at once.
+
+    ONT: each record is a collection that can be very large, so these are batched by a fixed
+    number of collections per job (irods_ont_batch_size) instead.
+    */
+    batch_records(records_by_platform.other, "reads") { n_records ->
+        Math.max(1, Math.min(params.irods_batch_count, n_records.intdiv(params.irods_min_batch_size)))
+    }
+    | mix(batch_records(records_by_platform.ont, "ont") { n_records -> (n_records + params.irods_ont_batch_size - 1).intdiv(params.irods_ont_batch_size) })
     | collectFile { name_and_json -> name_and_json }
     | BEEFEATER_GET
 

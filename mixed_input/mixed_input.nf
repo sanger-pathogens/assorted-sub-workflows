@@ -15,6 +15,13 @@ workflow MIXED_INPUT {
     | COMBINE_READS
 
     from the start of IRODS_PIPELINES and allows for smarter and validated use of the params given
+
+    Metadata is added into the meta map for each read pair to indicate the source of the reads, so downstream steps can tell them apart:
+
+    ENA                     -> PUBLIC_PAIRED
+    READS_MANIFEST          -> ILLUMINA
+    READS_MANIFEST_FROM_DIR -> ILLUMINA
+    IRODS                   -> whatever is in the iRODS record (e.g. ILLUMINA, PACBIO, etc.)
     */
 
     // No inputs
@@ -24,6 +31,7 @@ workflow MIXED_INPUT {
     if ('ENA' in active_workflows) {
         Channel.fromPath(params.manifest_ena)
         | ENA_DOWNLOAD
+        | map { meta, read_1, read_2 -> [ meta + [Platform: 'PUBLIC_PAIRED'], read_1, read_2 ] }
         | set { reads_from_ena_ch }
     } else {
         Channel.of("none")
@@ -47,6 +55,7 @@ workflow MIXED_INPUT {
         input_reads_ch = file(manifestToUse)
 
         INPUT_CHECK(input_reads_ch)
+        | map { meta, read_1, read_2 -> [ meta + [Platform: 'ILLUMINA'], read_1, read_2 ] }
         | set { reads_from_local_ch }
     } else {
         Channel.of("none")
@@ -55,6 +64,7 @@ workflow MIXED_INPUT {
 
     if ('MANIFEST_FROM_DIR' in active_workflows) {
         MANIFEST_FROM_DIR(params.manifest_from_dir)
+        | map { meta, read_1, read_2 -> [ meta + [Platform: 'ILLUMINA'], read_1, read_2 ] }
         | set { reads_from_local_dir_ch }
     } else {
         Channel.of("none")
