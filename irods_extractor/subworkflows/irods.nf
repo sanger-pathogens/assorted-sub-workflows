@@ -143,9 +143,24 @@ workflow IRODS_EXTRACTOR {
     main:
 
     if (!params.search) {
-        // Only records that are used below are downloaded
-        input_irods_ch
-        | filter { meta -> download_route(meta) != "other" }
+        input_irods_ch.branch { meta ->
+                to_download: download_route(meta) != "other"
+                not_supported: true
+            }
+        | set { routed_records }
+
+        // If something is not processed warn the user, but don't fail the workflow. The user can still retrieve those records with beefeater directly.
+        routed_records.not_supported
+        | toList()
+        | subscribe { records ->
+            if (records) {
+                def data_types = records.collect { meta -> [meta.Platform, meta.ont_format].findAll().join(' ') }.unique()
+                def examples = records.take(5)*.ID.join(', ') + (records.size() > 5 ? ', ...' : '')
+                log.warn "${records.size()} iRODS record(s) of a data type this pipeline cannot handle at present (${data_types.join('; ')}) were not downloaded: ${examples}. To retrieve them, use the latest beefeater directly (beefeater search ... --get)."
+            }
+        }
+
+        routed_records.to_download
         | IRODS_GET
 
         IRODS_GET.out.downloaded_ch.branch { meta, downloaded_file ->
