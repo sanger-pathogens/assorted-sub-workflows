@@ -42,7 +42,7 @@
             },
             "manifest_ena": {
                 "default": "null",
-                "help_text": "Path to a manifest/file of ENA accessions (run, sample or study). Please also set the --accession_type to the appropriate accession type."
+                "help_text": "Path to a manifest/file of ENA accessions (run, sample or study). Please also set the --accession_type to the appropriate accession type. Each paired run is a separate sample in the output, named <sample_accession>_<run_accession> (e.g. SAMD00162298_DRR171262), so a sample with several runs gives one output per run."
             },
             "manifest_from_dir": {
                 "default": "null",

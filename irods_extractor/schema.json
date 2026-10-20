@@ -34,7 +34,11 @@
             },
             "irods_pool_size": {
                 "default": 4,
-                "help_text": "iRODS connections held open by each beefeater job. iRODS asks each user to keep to 10-15 connections in total (irods_max_concurrent_gets x irods_pool_size)."
+                "help_text": "iRODS connections held open by each beefeater download job. iRODS asks each user to keep to 10-15 connections in total (irods_max_concurrent_gets x irods_pool_size)."
+            },
+            "irods_search_pool_size": {
+                "default": 4,
+                "help_text": "iRODS connections held open by the beefeater search job. The search finishes before any download starts, so it does not add to the download connections."
             },
             "irods_search_tokens": {
                 "default": 20,

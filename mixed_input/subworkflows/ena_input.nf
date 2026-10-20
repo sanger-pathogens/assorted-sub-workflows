@@ -13,7 +13,7 @@ workflow ENA_DOWNLOAD {
     DOWNLOAD_METADATA(download_metadata_input)
     | splitCsv(header: true, sep: "\t")
     | map { meta, full_metadata ->
-        full_metadata.ID = "${full_metadata.sample_accession}_${full_metadata.run_accession}"
+        full_metadata.ID = "${full_metadata.sample_accession}_${full_metadata.run_accession}".toString()
         def cleaned_metadata = full_metadata.findAll { k, v -> v != '' }
         cleaned_metadata
     }
