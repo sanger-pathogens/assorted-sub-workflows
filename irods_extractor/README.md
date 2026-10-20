@@ -43,12 +43,12 @@ With `--search true` the subworkflow stops here: nothing is downloaded and the e
 
 Each record is routed on its `Platform` (and in addition, for ONT, its `ont_format`):
 
-| Record | Route |
-| --- | --- |
-| `Platform` `ILLUMINA` | downloaded, then unpacked to paired fastq (`CRAM_EXTRACT`) |
-| `Platform` `ONT`, `ont_format` `fastq` | downloaded, fastq files concatenated and published (`PUBLISH_FASTQ`) |
-| `Platform` `ONT`, `ont_format` `pod5`/`fast5` | downloaded and published as squiggles (`PUBLISH_UNBASECALLED`) |
-| anything else (e.g. PacBio, ONT `bam`) | **not downloaded**; one warning per run lists the data types and example IDs |
+| Record                                        | Route                                                                        |
+| --------------------------------------------- | ---------------------------------------------------------------------------- |
+| `Platform` `ILLUMINA`                         | downloaded, then unpacked to paired fastq (`CRAM_EXTRACT`)                   |
+| `Platform` `ONT`, `ont_format` `fastq`        | downloaded, fastq files concatenated and published (`PUBLISH_FASTQ`)         |
+| `Platform` `ONT`, `ont_format` `pod5`/`fast5` | downloaded and published as squiggles (`PUBLISH_UNBASECALLED`)               |
+| anything else (e.g. PacBio, ONT `bam`)        | **not downloaded**; one warning per run lists the data types and example IDs |
 
 Records that cannot be handled do not fail the run. To retrieve them, use the latest beefeater directly
 (`beefeater search ... --get`).
@@ -86,11 +86,11 @@ If every file in a batch fails, the job fails and is retried by the pipeline's r
 
 ### Emitted channels
 
-| Channel | Content |
-| --- | --- |
-| `illumina_reads_ch` | `tuple val(meta), path(read_1), path(read_2)` |
-| `ont_reads_ch` | `tuple val(meta), path(fastq)` |
-| `ont_unbasecalled_ch` | `tuple val(meta), path(pod5/fast5 files)` |
+| Channel               | Content                                       |
+| --------------------- | --------------------------------------------- |
+| `illumina_reads_ch`   | `tuple val(meta), path(read_1), path(read_2)` |
+| `ont_reads_ch`        | `tuple val(meta), path(fastq)`                |
+| `ont_unbasecalled_ch` | `tuple val(meta), path(pod5/fast5 files)`     |
 
 `meta` holds every iRODS metadata field of the record, including `ID` and `Platform`.
 
@@ -112,6 +112,7 @@ For ONT data set `--read_type ont`, and choose with `--ont_get_read_type`:
 
 - `unbasecalled`: raw "squiggles" (`.pod5` for recent data, `.fast5` for older data).
 - `reads` (default): the most finalised reads available for each sample, picked by these rules in order:
+
   1. `offline_basecalled`: `true` ([re-]basecalled with user-requested models) > `false` (standard NPG
      basecalling);
   2. QC status: `pass` > `fail`;
@@ -124,47 +125,47 @@ For ONT data set `--read_type ont`, and choose with `--ont_get_read_type`:
 
 **iRODS query options**
 
-| Option | Default | Description |
-| --- | --- | --- |
-| `--read_type` | `Illumina` | Platform of the data to retrieve: `Illumina` or `ont`. |
-| `--ont_get_read_type` | `reads` | (ONT only) `reads` or `unbasecalled`; see [ONT read selection](#ont-read-selection). |
-| `--search` | `false` | Search iRODS and save the metadata only; download nothing. |
-| `--service_user` | `false` | Skip beefeater's iRODS login check (`iexpire`). For service users, which authenticate to iRODS another way. |
+| Option                | Default    | Description                                                                                                 |
+| --------------------- | ---------- | ----------------------------------------------------------------------------------------------------------- |
+| `--read_type`         | `Illumina` | Platform of the data to retrieve: `Illumina` or `ont`.                                                      |
+| `--ont_get_read_type` | `reads`    | (ONT only) `reads` or `unbasecalled`; see [ONT read selection](#ont-read-selection).                        |
+| `--search`            | `false`    | Search iRODS and save the metadata only; download nothing.                                                  |
+| `--service_user`      | `false`    | Skip beefeater's iRODS login check (`iexpire`). For service users, which authenticate to iRODS another way. |
 
 **iRODS download options**
 
-| Option | Default | Description |
-| --- | --- | --- |
-| `--irods_batch_count` | `20` | Maximum number of `BEEFEATER_GET` jobs the non-ONT files are split between. More batches start unpacking sooner but submit more jobs. |
-| `--irods_min_batch_size` | `20` | Minimum number of non-ONT files in a batch. |
-| `--irods_ont_batch_size` | `1` | Number of ONT collections per job. |
-| `--irods_max_concurrent_gets` | `3` | Maximum number of `BEEFEATER_GET` jobs running at once. |
-| `--irods_pool_size` | `4` | iRODS connections held open by each `BEEFEATER_GET` job. |
-| `--irods_search_pool_size` | `4` | iRODS connections held open by the `BEEFEATER_SEARCH` job. |
-| `--irods_search_tokens` | `20` | LSF `seqirods` tokens requested by `BEEFEATER_SEARCH`. |
-| `--irods_get_tokens` | `20` | LSF `seqirods` tokens requested by each `BEEFEATER_GET` job. |
+| Option                        | Default | Description                                                                                                                           |
+| ----------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| `--irods_batch_count`         | `20`    | Maximum number of `BEEFEATER_GET` jobs the non-ONT files are split between. More batches start unpacking sooner but submit more jobs. |
+| `--irods_min_batch_size`      | `20`    | Minimum number of non-ONT files in a batch.                                                                                           |
+| `--irods_ont_batch_size`      | `1`     | Number of ONT collections per job.                                                                                                    |
+| `--irods_max_concurrent_gets` | `3`     | Maximum number of `BEEFEATER_GET` jobs running at once.                                                                               |
+| `--irods_pool_size`           | `4`     | iRODS connections held open by each `BEEFEATER_GET` job.                                                                              |
+| `--irods_search_pool_size`    | `4`     | iRODS connections held open by the `BEEFEATER_SEARCH` job.                                                                            |
+| `--irods_search_tokens`       | `20`    | LSF `seqirods` tokens requested by `BEEFEATER_SEARCH`.                                                                                |
+| `--irods_get_tokens`          | `20`    | LSF `seqirods` tokens requested by each `BEEFEATER_GET` job.                                                                          |
 
 **Extraction and output options**
 
-| Option | Default | Description |
-| --- | --- | --- |
-| `--save_fastqs` | `false` (pipelines may override) | Publish the raw unpacked fastqs. |
-| `--raw_reads_output_dir` | `raw_fastqs` | Output directory for raw unpacked reads. |
-| `--raw_reads_suffix` | `_raw` | Suffix added to raw fastq names, e.g. `<ID>_raw_1.fastq.gz`. |
-| `--save_method` | `nested` | Save outputs in per-sample folders (`nested`) or one folder (`flat`). |
-| `--cleanup_intermediate_files_irods_extractor` | `true` | Delete each CRAM from `work/` once unpacked. |
-| `--large_data` | `false` | Run `COLLATE_FASTQ` from the `week` queue with 10 GB memory, for very large files. |
-| `--save_metadata` | `true` | Save all record metadata to `metadata_irods_queried_<datetime>.csv`. |
-| `--short_metacsv_name` | `false` | Use a short date instead of a full timestamp in metadata file names. |
+| Option                                         | Default                          | Description                                                                        |
+| ---------------------------------------------- | -------------------------------- | ---------------------------------------------------------------------------------- |
+| `--save_fastqs`                                | `false` (pipelines may override) | Publish the raw unpacked fastqs.                                                   |
+| `--raw_reads_output_dir`                       | `raw_fastqs`                     | Output directory for raw unpacked reads.                                           |
+| `--raw_reads_suffix`                           | `_raw`                           | Suffix added to raw fastq names, e.g. `<ID>_raw_1.fastq.gz`.                       |
+| `--save_method`                                | `nested`                         | Save outputs in per-sample folders (`nested`) or one folder (`flat`).              |
+| `--cleanup_intermediate_files_irods_extractor` | `true`                           | Delete each CRAM from `work/` once unpacked.                                       |
+| `--large_data`                                 | `false`                          | Run `COLLATE_FASTQ` from the `week` queue with 10 GB memory, for very large files. |
+| `--save_metadata`                              | `true`                           | Save all record metadata to `metadata_irods_queried_<datetime>.csv`.               |
+| `--short_metacsv_name`                         | `false`                          | Use a short date instead of a full timestamp in metadata file names.               |
 
 ## iRODS connections and LSF tokens
 
 Two separate limits apply (guidance from ISG):
 
-| Limit | Size | Controls |
-| --- | --- | --- |
+| Limit                      | Size                            | Controls                                                       |
+| -------------------------- | ------------------------------- | -------------------------------------------------------------- |
 | iRODS database connections | 3000 shared; **10-15 per user** | Live load on the iRODS database. Not enforced: it is up to us. |
-| LSF `seqirods` tokens | 1000 per cluster, shared | Job admission: a job waits until all its tokens are free. |
+| LSF `seqirods` tokens      | 1000 per cluster, shared        | Job admission: a job waits until all its tokens are free.      |
 
 Each connection in a beefeater pool is one iRODS database connection. The search finishes before any download
 starts, so the most a run holds at once is `irods_max_concurrent_gets × irods_pool_size`: 12 with the defaults.
@@ -176,21 +177,21 @@ Live connections can be watched at
 
 Study 8279: 1,622 CRAMs, 1.84 TB, download and unpack only (October 2026):
 
-| Version | All unpacked | First sample unpacked |
-| --- | --- | --- |
-| irods_extractor v4.0.2 (one beefeater job downloads everything first, 4 connections) | 209.5 min | 173.5 min |
-| batched, 82 batches of 20 (12 connections) | 76.1 / 78.8 min | 4.7 / 5.5 min |
-| batched by count, 20 batches of ~81 (12 connections) | 73.0 min | 12.2 min |
+| Version                                                                              | All unpacked    | First sample unpacked |
+| ------------------------------------------------------------------------------------ | --------------- | --------------------- |
+| irods_extractor v4.0.2 (one beefeater job downloads everything first, 4 connections) | 209.5 min       | 173.5 min             |
+| batched, 82 batches of 20 (12 connections)                                           | 76.1 / 78.8 min | 4.7 / 5.5 min         |
+| batched by count, 20 batches of ~81 (12 connections)                                 | 73.0 min        | 12.2 min              |
 
 Most of the gain comes from unpacking while later batches are still downloading.
 
 ## Software versions
 
-| Software | Version | Image |
-| --- | --- | --- |
-| Beefeater | 1.3.0 | `quay.io/sangerpathogens/beefeater:v1.3.0` |
-| Samtools | 1.17 | `quay.io/biocontainers/samtools:1.17--hd87286a_2` |
-| pandas (metadata CSV) | 2.2.1 | `quay.io/sangerpathogens/pandas:2.2.1` |
+| Software              | Version | Image                                             |
+| --------------------- | ------- | ------------------------------------------------- |
+| Beefeater             | 1.3.0   | `quay.io/sangerpathogens/beefeater:v1.3.0`        |
+| Samtools              | 1.17    | `quay.io/biocontainers/samtools:1.17--hd87286a_2` |
+| pandas (metadata CSV) | 2.2.1   | `quay.io/sangerpathogens/pandas:2.2.1`            |
 
 Pinned versions are declared in the `modules/*.nf` files.
 
