@@ -162,10 +162,10 @@ For ONT data set `--read_type ont`, and choose with `--ont_get_read_type`:
 
 Two separate limits apply to how much data can be queried and downloaded from iRODS (guidance from the Scientific Computing team):
 
-| Resource                   | Maximum Size                    | Controls                                                       |
-| -------------------------- | ------------------------------- | -------------------------------------------------------------- |
-| iRODS database connections | 3000 shared; **10-15 per user** | Live load on the iRODS database. Not enforced: it is up to us. |
-| LSF `seqirods` tokens      | 1000 per cluster, shared        | Job admission: a job remains pending until the count of requested tokens is available.      |
+| Resource                   | Maximum Size                    | Controls                                                                               |
+| -------------------------- | ------------------------------- | -------------------------------------------------------------------------------------- |
+| iRODS database connections | 3000 shared; **10-15 per user** | Live load on the iRODS database. Not enforced: it is up to us.                         |
+| LSF `seqirods` tokens      | 1000 per cluster, shared        | Job admission: a job remains pending until the count of requested tokens is available. |
 
 Each connection in a beefeater pool is one iRODS database connection. The search finishes before any download
 starts, so the most a run holds at once is `irods_max_concurrent_gets × irods_pool_size`: 12 with the defaults.
