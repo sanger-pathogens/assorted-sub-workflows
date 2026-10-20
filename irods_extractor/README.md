@@ -33,7 +33,7 @@ platform, which is split into one record (a map of iRODS metadata plus `ID`, `Pl
 data object. With `--save_metadata true` (default), all records are also saved to
 `<outdir>/metadata_irods_queried_<datetime>.csv`.
 
-With `--search true` the subworkflow stops here: nothing is downloaded and the read channels are empty.
+With `--search true` the subworkflow stops here: nothing is downloaded and the emitted (output) read channels are empty.
 
 > Narrow queries are slow on the iRODS side. Adding `lane`/`tag_index` to a query (CLI or manifest) took
 > ~3 min for 3 plexes, against ~2 s for a whole study (study 6495, October 2026). Prefer `studyid`/`runid` where
