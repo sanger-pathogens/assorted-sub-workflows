@@ -162,7 +162,7 @@ For ONT data set `--read_type ont`, and choose with `--ont_get_read_type`:
 
 Two separate limits apply to how much data can be queried and downloaded from iRODS (guidance from the Scientific Computing team):
 
-| Limit                      | Size                            | Controls                                                       |
+| Resource                   | Maximum Size                    | Controls                                                       |
 | -------------------------- | ------------------------------- | -------------------------------------------------------------- |
 | iRODS database connections | 3000 shared; **10-15 per user** | Live load on the iRODS database. Not enforced: it is up to us. |
 | LSF `seqirods` tokens      | 1000 per cluster, shared        | Job admission: a job waits until all its tokens are free.      |
