@@ -79,8 +79,7 @@ If every file in a batch fails, the job fails and is retried by the pipeline's r
 ### 4. Unpacking and publishing (`CRAM_EXTRACT`)
 
 - **Illumina:** `COLLATE_FASTQ` runs `samtools collate | samtools fastq` and writes
-  `<ID><raw_reads_suffix>_1.fastq.gz` and `_2.fastq.gz`. Each CRAM is then deleted from `work/`
-  (`--cleanup_intermediate_files_irods_extractor`, on by default); a `-resume` downloads that batch again. Set it
+  `<ID><raw_reads_suffix>_1.fastq.gz` and `_2.fastq.gz`. Each CRAM is deleted from `work/` once unpacked; a re-run of the pipeline with `-resume` would then have to download that batch from iRODS again, as opposed to reusing cached files.. Set it
   to `false` to keep the CRAMs.
 - **ONT fastq:** all `*fastq.gz` files of the collection are concatenated into `<ID>.fastq.gz`.
 - **ONT squiggles:** the `.pod5`/`.fast5` files are published to `<outdir>/raw_unbasecalled/<ID>/`.
