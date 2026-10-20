@@ -169,7 +169,7 @@ Two separate limits apply to how much data can be queried and downloaded from iR
 
 Each connection in a beefeater pool is one iRODS database connection. The search finishes before any download
 starts, so the most a run holds at once is `irods_max_concurrent_gets × irods_pool_size`: 12 with the defaults.
-`maxForks` limits jobs within one run only, so two runs by the same user at the same time hold twice as many.
+`irods_max_concurrent_gets` sets the value of the `maxForks` directive for the `BEEFEATER_GET` process. In general, this directive limits the number of  submitted job for the processes it's applied to. However, this restriction is scoped within one pipeline run only, so two runs by the same user at the same time may submit twice as many jobs, and thus hold up to twice as many connections.
 Live connections can be watched at
 [the iRODS metrics dashboard](https://metrics.internal.sanger.ac.uk/d/000000187/irods-v4-processes?orgId=1).
 
