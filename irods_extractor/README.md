@@ -183,7 +183,7 @@ Study 8279: 1,622 CRAMs, 1.84 TB, download and unpack only (October 2026):
 | batched, 82 batches of 20 (12 connections)                                           | 76.1 / 78.8 min | 4.7 / 5.5 min         |
 | batched by count, 20 batches of ~81 (12 connections)                                 | 73.0 min        | 12.2 min              |
 
-Most of the gain comes from unpacking while later batches are still downloading.
+Most of the gain comes from avoiding the bottleneck of waiting for all downloads to complete, instead starting the downstream work (unpacking CRAM files etc.) while later batches are still downloading (asynchronous processing).
 
 ## Software versions
 
