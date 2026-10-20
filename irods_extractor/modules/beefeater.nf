@@ -84,7 +84,7 @@ process BEEFEATER_SEARCH {
     """
     beefeater search \\
         --file_format json \\
-        --pool_size ${params.irods_pool_size} \\
+        --pool_size ${params.irods_search_pool_size} \\
         ${service_user} \\
         ${query} \\
         ${manifest} \\
