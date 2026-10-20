@@ -160,7 +160,7 @@ For ONT data set `--read_type ont`, and choose with `--ont_get_read_type`:
 
 ## iRODS connections and LSF tokens
 
-Two separate limits apply (guidance from ISG):
+Two separate limits apply to how much data can be queried and downloaded from iRODS (guidance from the Scientific Computing team):
 
 | Limit                      | Size                            | Controls                                                       |
 | -------------------------- | ------------------------------- | -------------------------------------------------------------- |
