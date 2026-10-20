@@ -79,8 +79,9 @@ If every file in a batch fails, the job fails and is retried by the pipeline's r
 ### 4. Unpacking and publishing (`CRAM_EXTRACT`)
 
 - **Illumina:** `COLLATE_FASTQ` runs `samtools collate | samtools fastq` and writes
-  `<ID><raw_reads_suffix>_1.fastq.gz` and `_2.fastq.gz`. With `--cleanup_intermediate_files_irods_extractor true`
-  each CRAM is deleted from `work/` once unpacked; a `-resume` then downloads that batch again.
+  `<ID><raw_reads_suffix>_1.fastq.gz` and `_2.fastq.gz`. Each CRAM is then deleted from `work/`
+  (`--cleanup_intermediate_files_irods_extractor`, on by default); a `-resume` downloads that batch again. Set it
+  to `false` to keep the CRAMs.
 - **ONT fastq:** all `*fastq.gz` files of the collection are concatenated into `<ID>.fastq.gz`.
 - **ONT squiggles:** the `.pod5`/`.fast5` files are published to `<outdir>/raw_unbasecalled/<ID>/`.
 
@@ -136,7 +137,7 @@ For ONT data set `--read_type ont`, and choose with `--ont_get_read_type`:
 | Option | Default | Description |
 | --- | --- | --- |
 | `--irods_batch_count` | `20` | Maximum number of `BEEFEATER_GET` jobs the non-ONT files are split between. More batches start unpacking sooner but submit more jobs. |
-| `--irods_min_batch_size` | `20` | Minimum number of non-ONT files per job; runs with too few files for `irods_batch_count` batches of this size use fewer batches. |
+| `--irods_min_batch_size` | `20` | Minimum number of non-ONT files in a batch. |
 | `--irods_ont_batch_size` | `1` | Number of ONT collections per job. |
 | `--irods_max_concurrent_gets` | `3` | Maximum number of `BEEFEATER_GET` jobs running at once. |
 | `--irods_pool_size` | `4` | iRODS connections held open by each `BEEFEATER_GET` job. |
@@ -152,7 +153,7 @@ For ONT data set `--read_type ont`, and choose with `--ont_get_read_type`:
 | `--raw_reads_output_dir` | `raw_fastqs` | Output directory for raw unpacked reads. |
 | `--raw_reads_suffix` | `_raw` | Suffix added to raw fastq names, e.g. `<ID>_raw_1.fastq.gz`. |
 | `--save_method` | `nested` | Save outputs in per-sample folders (`nested`) or one folder (`flat`). |
-| `--cleanup_intermediate_files_irods_extractor` | `false` | Delete each CRAM from `work/` once unpacked. |
+| `--cleanup_intermediate_files_irods_extractor` | `true` | Delete each CRAM from `work/` once unpacked. |
 | `--large_data` | `false` | Run `COLLATE_FASTQ` from the `week` queue with 10 GB memory, for very large files. |
 | `--save_metadata` | `true` | Save all record metadata to `metadata_irods_queried_<datetime>.csv`. |
 | `--short_metacsv_name` | `false` | Use a short date instead of a full timestamp in metadata file names. |
