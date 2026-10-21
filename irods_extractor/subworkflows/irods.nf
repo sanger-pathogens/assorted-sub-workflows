@@ -25,6 +25,7 @@ so the same records give the same batches and -resume reuses completed downloads
 */
 def batch_records(records_ch, prefix, n_batches_for) {
     return records_ch
+        .filter { record -> !params.type || record.irods_path?.endsWith(".${params.type}") }
         .toSortedList { a, b -> a.ID <=> b.ID }
         .flatMap { records ->
             check_unique_ids(records)
@@ -173,9 +174,7 @@ workflow IRODS_EXTRACTOR {
         | set { downloaded_objects }
 
         // Extract the Illumina fastqs from the CRAMs and publish them to the output directory
-        downloaded_objects.illumina_to_unpack
-        | filter { _meta, cram -> cram.name.endsWith(".${params.type}") }
-        | CRAM_EXTRACT
+        CRAM_EXTRACT(downloaded_objects.illumina_to_unpack)
 
         // Publish the reads and/or squiggles to the output directory
         PUBLISH_FASTQ(downloaded_objects.ont_format_fastq)
