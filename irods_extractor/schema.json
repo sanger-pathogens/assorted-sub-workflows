@@ -9,6 +9,44 @@
             "ont_get_read_type": {
                 "default": "reads",
                 "help_text": "[ONT reads only] Retrieves the read files based on the selected option [reads|unbasecalled].\n            If 'reads' is selected, Beefeater will select the reads files according to this priority rule: 'fastq' > 'pass fastq' > 'pass bam' > 'unbasecalled' (\"squiggles\", in either pod5 or fast5 format)."
+            },
+            "service_user": {
+                "default": false,
+                "help_text": "Skip beefeater's iRODS login check (iexpire). For service users, which authenticate to iRODS another way."
+            }
+        },
+        "Irods download options": {
+            "irods_batch_count": {
+                "default": 20,
+                "help_text": "Maximum number of beefeater jobs the files are split between. More batches start unpacking sooner but submit more jobs therefore more files."
+            },
+            "irods_min_batch_size": {
+                "default": 20,
+                "help_text": "Minimum number of files per beefeater job; runs with too few files for irods_batch_count batches of this size use fewer batches."
+            },
+            "irods_ont_batch_size": {
+                "default": 1,
+                "help_text": "Number of ONT collections downloaded per beefeater job; collections can be very large and are downloaded asynchronously."
+            },
+            "irods_max_concurrent_gets": {
+                "default": 3,
+                "help_text": "Maximum number of beefeater download jobs running at once."
+            },
+            "irods_pool_size": {
+                "default": 4,
+                "help_text": "iRODS connections held open by each beefeater download job. iRODS asks each user to keep to 10-15 connections in total (irods_max_concurrent_gets x irods_pool_size)."
+            },
+            "irods_search_pool_size": {
+                "default": 4,
+                "help_text": "iRODS connections held open by the beefeater search job. The search finishes before any download starts, so it does not add to the download connections."
+            },
+            "irods_search_tokens": {
+                "default": 20,
+                "help_text": "LSF seqirods tokens requested by the beefeater search job."
+            },
+            "irods_get_tokens": {
+                "default": 20,
+                "help_text": "LSF seqirods tokens requested by each beefeater download job. The cluster has 1000 tokens shared by all users."
             }
         },
         "Irods extractor processing options": {
@@ -24,21 +62,9 @@
                 "default": "raw_fastqs",
                 "help_text": "Output directory for raw downloaded reads, as opposed to the preprocessed reads."
             },
-            "lane_plex_sep":{
-                "default": "#",
-                "help_text": "Separator to build the sample ID (a.k.a. \"NPG run id\", \"lane id\" [inaccurate but long-established PaM slang], \"lanelet id\") from runid, laneid and plexid values. Defaults to '#', which is the iRODS-native syntax, e.g. 12345_2#67."
-            },
             "save_method":{
                 "default": "nested",
                 "help_text": "Save output files in per sample folders (nested) or in one folder (flat)"
-            },
-            "irods_subset_to_skip": {
-                "default": "phix",
-                "help_text": "Skip data items for which metadata field 'subset' is set to this value"
-            },
-            "combine_same_id_crams": {
-                "default": "false",
-                "help_text": "If retrieving read files representing subsets of the same source (files will share the same run, lane and plex IDs), should these files be combined into a 'total' subset i.e. reforming the source read file before subsetting by NPG processing."
             },
             "large_data": {
                 "default": "false",
@@ -46,7 +72,7 @@
             },
             "save_metadata": {
                 "default": true,
-                "help_text": "If true, save all lane/sample metadata into a CSV file named 'metadata_irods_queried_<datetime>.csv'. If `combine_same_id_crams` is also true, an additional CSV file named 'metadata_combined_readsets_<datetime>.csv' will be created. This does not change how FASTQ files are created."
+                "help_text": "If true, save all lane/sample metadata into a CSV file named 'metadata_irods_queried_<datetime>.csv'. This does not change how FASTQ files are created."
             },
             "short_metacsv_name": {
                 "default": false,

@@ -1,5 +1,5 @@
 def translateKey(in_key) {
-    switch(in_key){ 
+    switch(in_key){
         case 'studyid':
         return 'study_id'
 
@@ -33,12 +33,12 @@ def generate_query(params) {
 }
 
 
-process BEEFEATER {
+process BEEFEATER_SEARCH {
     label 'cpu_1'
     label 'mem_2'
     label 'time_12'
 
-    container 'quay.io/sangerpathogens/beefeater:v1.2.0'
+    container 'quay.io/sangerpathogens/beefeater:v1.3.0'
 
     output:
     path("*_output_*.json"), emit: json_ch // one file per platform, e.g. <date>_output_ILLUMINA.json
@@ -70,6 +70,7 @@ process BEEFEATER {
     }
 
     def query    = generate_query(params)
+
     def manifest = ""
     if (params.manifest_of_lanes) {
         def orig_manifest  = file(params.manifest_of_lanes)
@@ -79,18 +80,45 @@ process BEEFEATER {
         translated_csv.text = ([new_header] + lines.drop(1)).join('\n') + '\n'
         manifest = "--manifest ${translated_csv}"
     }
-    // def manifest = params.manifest_of_lanes ? "--manifest ${params.manifest_of_lanes}" : ""
-    def search   = params.search ? "" : "--get"
     def service_user = params.service_user ? "-su " : ""
     """
     beefeater search \\
         --file_format json \\
+        --pool_size ${params.irods_search_pool_size} \\
         ${service_user} \\
         ${query} \\
         ${manifest} \\
-        ${search} \\
         ${prevent_redownload_opts} \\
         ${ont_options}
-        
+
+    """
+}
+
+
+process BEEFEATER_GET {
+    tag "${batch_json.baseName}"
+    label 'cpu_1'
+    label 'mem_2'
+    label 'time_queue_from_normal'
+    maxForks params.irods_max_concurrent_gets
+
+    container 'quay.io/sangerpathogens/beefeater:v1.3.0'
+
+    input:
+    path(batch_json)
+
+    output:
+    tuple path("downloaded_*.json"), path("results/*"), emit: downloaded
+
+    script:
+    def service_user = params.service_user ? "-su " : ""
+    """
+    beefeater -v get \\
+        --input ${batch_json} \\
+        --file_format json \\
+        --output_file downloaded.json \\
+        --get_directory results \\
+        --pool_size ${params.irods_pool_size} \\
+        ${service_user}
     """
 }

@@ -104,10 +104,12 @@ workflow QC {
     // this gating might be redundant given that IRODS_EXTRACTOR already outputs platform-segregated channels, 
     // but it is a safety measure to avoid processing the wring type of data. 
     // We could drop this in the future when settled on how we handle mutliple patforms.
-    reads_ch.branch{ meta, fwd, rev ->
-    illumina: meta.Platform == "ILLUMINA"
+    // items are [meta, read_1, read_2] (paired) or [meta, reads] (ONT), so only meta is read here
+    reads_ch.branch{ reads ->
+    // PUBLIC_PAIRED: paired reads from ENA (see MIXED_INPUT), QC'd like Illumina
+    illumina: reads[0].Platform in ["ILLUMINA", "PUBLIC_PAIRED"]
 
-    ONT: meta.Platform == "ONT"
+    ONT: reads[0].Platform == "ONT"
 
     other: true
     }

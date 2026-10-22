@@ -7,7 +7,7 @@ process PUBLISH_FASTQ {
     publishDir path: { if ("${params.save_method}" == "nested") "${params.outdir}/${meta.ID}/${params.raw_reads_output_dir}/" else "${params.outdir}/${params.raw_reads_output_dir}/" }, enabled: params.save_fastqs, mode: 'copy', overwrite: true, pattern: "${final_name}"
 
     input:
-    val(meta)
+    tuple val(meta), path(reads_dir)
 
     output:
     tuple val(meta), path(final_name), emit: path_channel
@@ -15,7 +15,7 @@ process PUBLISH_FASTQ {
     script:
     final_name="${meta.ID}.fastq.gz"
     """
-    cat ${meta.local_path}/*fastq.gz > ${final_name}
+    cat ${reads_dir}/*fastq.gz > ${final_name}
     """
 }
 
@@ -30,13 +30,13 @@ process PUBLISH_UNBASECALLED {
     publishDir path: "${params.outdir}/raw_unbasecalled/${meta.ID}/", mode: 'copy', overwrite: true
 
     input:
-    val(meta)
+    tuple val(meta), path(unbasecalled_dir)
 
     output:
     tuple val(meta), path("*.{pod5,fast5}"), emit: path_channel
 
     script:
     """
-    ln -s ${meta.local_path}/*.{pod5,fast5} .
+    ln -s \$(readlink -f ${unbasecalled_dir})/*.{pod5,fast5} .
     """
 }

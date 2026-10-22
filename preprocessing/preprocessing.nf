@@ -88,23 +88,31 @@ workflow PREPROCESSING {
 
     main:
     // this gating might be redundant given that IRODS_EXTRACTOR already outputs platform-segregated channels, 
-    // but it is a safety measure to avoid processing the wring type of data. 
-    // We could drop this in the future when settled on how we handle mutliple patforms.
-    reads_ch.branch{ meta, fwd, rev ->
-        illumina: meta.Platform == "ILLUMINA"
+    // but it is a good safety check to ensure that only Illumina reads are passed into the preprocessing steps
+    // items are [meta, read_1, read_2] (paired) or [meta, reads] (ONT), so only meta is read here
+    reads_ch.branch{ reads ->
+        // PUBLIC_PAIRED: paired reads from ENA (see MIXED_INPUT), preprocessed like Illumina
+        illumina: reads[0].Platform in ["ILLUMINA", "PUBLIC_PAIRED"]
 
-        ONT: meta.Platform == "ONT"
+        ONT: reads[0].Platform == "ONT"
 
         other: true
     }
     | set { reads_ch }
 
-    PREPROCESSING_ILLUMINA(reads_ch.illumina) // in the future, can insert here other preprocessing workflows for ONT or other platforms
+    // only Illumina reads are preprocessed for now so just make a not processed channel
+    reads_ch.ONT
+    | mix(reads_ch.other)
+    | set { not_preprocessed_ch }
+
+    not_preprocessed_ch.subscribe { reads ->
+        log.info "${reads[0].ID}: passed through without preprocessing, as only Illumina reads are preprocessed (Platform: ${reads[0].Platform})"
+    }
+
+    PREPROCESSING_ILLUMINA(reads_ch.illumina)
 
     emit:
-    // in the future, we may want to combine these output channels with those derived from an PREPROCESSING_ONT workflow here,
-    // but for now, just emmit the PREPROCESSING_ILLUMINA outputs directly
-    preprocessed_reads_ch = PREPROCESSING_ILLUMINA.out.preprocessed_reads_ch
+    preprocessed_reads_ch = PREPROCESSING_ILLUMINA.out.preprocessed_reads_ch.mix(not_preprocessed_ch)
     collated_trimming_stats_ch = PREPROCESSING_ILLUMINA.out.collated_trimming_stats_ch
     collated_host_reads_stats_ch = PREPROCESSING_ILLUMINA.out.collated_host_reads_stats_ch
 }

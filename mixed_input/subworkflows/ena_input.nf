@@ -1,5 +1,5 @@
 include { DOWNLOAD_METADATA; DOWNLOAD_FASTQS } from '../modules/ena_downloader'
-include { FILTER_EXISTING_OUTPUTS       } from '../../pipeline_chaining/subworkflows/skip_downloaded.nf'
+include { FILTER_EXISTING_OUTPUTS            } from '../../pipeline_chaining/subworkflows/skip_downloaded.nf'
 
 workflow ENA_DOWNLOAD {
     take:
@@ -13,11 +13,11 @@ workflow ENA_DOWNLOAD {
     DOWNLOAD_METADATA(download_metadata_input)
     | splitCsv(header: true, sep: "\t")
     | map { meta, full_metadata ->
-        full_metadata.ID = full_metadata.sample_accession
+        full_metadata.ID = "${full_metadata.sample_accession}_${full_metadata.run_accession}".toString()
         def cleaned_metadata = full_metadata.findAll { k, v -> v != '' }
         cleaned_metadata
     }
-    | filter { it.fastq_ftp.contains(';') } //if its paired its seperated by a semi-colon
+    | filter { row -> row.fastq_ftp?.contains(';') } //if its paired its seperated by a semi-colon
     | map { merged_meta ->
         def (read1_ftp, read2_ftp) = merged_meta.fastq_ftp.split(';')
         def read1_ftp_url = "ftp://${read1_ftp}"
