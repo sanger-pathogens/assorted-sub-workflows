@@ -4,7 +4,7 @@ process GET_LABEL {
     label 'mem_500M'
     label 'time_12'
 
-    container "quay.io/sangerpathogens/pipeline_resource_optimisation:test_6"
+    container "quay.io/sangerpathogens/pipeline_resource_optimisation:test_7"
 
     input:
     tuple val(meta), val(features_json)
