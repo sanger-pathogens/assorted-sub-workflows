@@ -1,5 +1,6 @@
 include { METASPADES                 } from './modules/spades.nf'
 include { MEGAHIT                    } from './modules/megahit.nf'
+include { MEGAHIT_PE                 } from './modules/megahit_pe.nf'
 include { REMOVE_SMALL_CONTIGS;
           FIX_MEGAHIT_CONTIG_NAMING;
           SORT_CONTIGS               } from './modules/helper_scripts.nf'
@@ -65,7 +66,8 @@ workflow METAWRAP_ASSEMBLE {
     }
 
     if (params.megahit) {
-        MEGAHIT(final_reads_ch)
+        // MEGAHIT-only (--metaspades false) gets the raw R1/R2 pair -> MEGAHIT_PE (-1/-2); hybrid mode keeps MEGAHIT (-r)
+        (params.metaspades ? MEGAHIT(final_reads_ch) : MEGAHIT_PE(final_reads_ch))
         | FIX_MEGAHIT_CONTIG_NAMING
         | set { megahit_contigs }
     }
