@@ -100,6 +100,11 @@ def parse_args():
         required=True,
         help="Metadata column to group and sort genomes by, written to label_mapping.tsv.",
     )
+    p.add_argument(
+        "--per-group-files",
+        action="store_true",
+        help="Output per group label file lists.",
+    )
     asm = p.add_mutually_exclusive_group(required=True)
     asm.add_argument("--assembly-dir", help="Directory containing assembly FASTA files.")
     asm.add_argument("--assembly-paths", help="Text file listing one assembly path per line.")
@@ -285,6 +290,13 @@ def main():
         .rename(columns={sample_col: "Sample_ID", group_label: "label"})
         .to_csv(out / f"{prefix}_label_mapping.tsv", index=False, sep="\t")
     )
+
+    # Write per group file lists
+    if args.per_group_files:
+        groups_outdir = out / "groups"
+        groups_outdir.mkdir(parents=True, exist_ok=True)
+        for group_key, group in written.groupby(group_label):
+            group["file_path"].to_csv(groups_outdir / f"{group_key}_file_colours_input.txt", index=False, header=False)
 
     per_group = {
         str(label): int(n)
