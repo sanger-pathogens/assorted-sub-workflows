@@ -26,10 +26,13 @@ surrounding whitespace. Each label then goes through these rules, in order:
 
 Every change is listed in stats.json (label_changes) and summarised on stderr.
 
-Genomes whose label is "unclassified" (a missing value, a label that reads
-"unclassified", or an assembly with no metadata row) are always left out of the
-index, so markers are never checked against them. They're listed, with the
-reason, in <species>_dropped_unclassified.tsv. The run stops if nothing is left.
+Genomes whose label is "unclassified" -- a missing value or a label that reads
+"unclassified" -- are listed, with the reason, in <species>_dropped_unclassified.tsv.
+By default (--unclassified drop) they're left out of the index, so markers are
+never checked against them. With --unclassified keep, they're kept in the index
+as their own "unclassified" group instead. Either way, an assembly with no
+metadata row at all can't be identified, so it's always left out of the index.
+The run stops if nothing is left.
 """
 
 from __future__ import annotations
@@ -105,6 +108,14 @@ def parse_args():
         action="store_true",
         help="Output per group label file lists.",
     )
+    p.add_argument(
+        "--unclassified",
+        choices=("keep", "drop"),
+        default="drop",
+        help="drop (default): ignore genomes that have a missing value for their --group-label column and list them in <species>_dropped_unclassified.tsv. "
+        "keep: keep these genomes as a group.",
+    )
+
     asm = p.add_mutually_exclusive_group(required=True)
     asm.add_argument("--assembly-dir", help="Directory containing assembly FASTA files.")
     asm.add_argument("--assembly-paths", help="Text file listing one assembly path per line.")
@@ -242,7 +253,7 @@ def main():
     n_dropped = int((~matched).sum())
     n_relabelled = int((blank_label & matched).sum())
 
-    # Assembly files no metadata row claimed are "unclassified" (and dropped below).
+    # Assembly files with no corresponding metadata row claimed are "unclassified".
     claimed = set(kept["_want"])
     orphan_paths = sorted(p for safe, p in by_safe_name.items() if safe not in claimed)
     orphan_rows = pd.DataFrame(
@@ -259,10 +270,14 @@ def main():
     kept["_reason"] = kept["_rule"].where(kept["_rule"].eq("missing_value"), "labelled_unclassified")
 
     cols = [sample_col, group_label, "file_path", "_raw_label", "_reason"]
-    written = pd.concat([kept[cols], orphan_rows[cols]], ignore_index=True)
+    all_rows = pd.concat([kept[cols], orphan_rows[cols]], ignore_index=True)
 
-    is_uncl = written[group_label] == UNCLASSIFIED
-    dropped_unclassified, written = written[is_uncl], written[~is_uncl]
+    # Handle orphaned assemblies (those with no metadata row) and those considered "unclassified" 
+    is_uncl = all_rows[group_label] == UNCLASSIFIED
+    no_metadata_row = all_rows["_reason"] == "no_metadata_row"
+    # Assemblies with no metadata row at all are always left out regardless of --unclassified
+    drop_mask = no_metadata_row if args.unclassified == "keep" else is_uncl
+    dropped_unclassified, written = all_rows[drop_mask], all_rows[~drop_mask]
     if written.empty:
         sys.exit(
             f"Error: no genomes left for {prefix} -- all {len(dropped_unclassified)} are "
@@ -322,12 +337,16 @@ def main():
         "assemblies_per_group": per_group,
         "missing_values": list(MISSING_VALUES),
         "label_changes": label_changes,
+        "unclassified": args.unclassified,
         "note": (
             "Genome counts first, then how group labels were cleaned. 'unclassified' genomes are "
-            "metadata rows whose label was blank, a missing value or read 'unclassified', plus "
-            "assembly files with no metadata row. They're always left out of the index: counted in "
-            "assemblies_dropped_unclassified and listed in <species>_dropped_unclassified.tsv. "
-            "assemblies_dropped_fasta_not_found are metadata rows whose assembly FASTA wasn't found."
+            "metadata rows whose label was blank, a missing value or read 'unclassified'. With "
+            "--unclassified drop (the default) they're left out of the index, counted in "
+            "assemblies_dropped_unclassified and listed in <species>_dropped_unclassified.tsv; with "
+            "--unclassified keep they're kept as their own 'unclassified' group instead. Assembly "
+            "files with no metadata row at all are always left out of the index the same way, "
+            "regardless of --unclassified. assemblies_dropped_fasta_not_found are metadata rows "
+            "whose assembly FASTA wasn't found."
         ),
     }
     with open(out / f"{prefix}_stats.json", "w") as fh:
