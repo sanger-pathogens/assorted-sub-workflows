@@ -27,7 +27,7 @@ surrounding whitespace. Each label then goes through these rules, in order:
 Every change is listed in stats.json (label_changes) and summarised on stderr.
 
 Genomes whose label is "unclassified" -- a missing value or a label that reads
-"unclassified" -- are listed, with the reason, in <species>_dropped_unclassified.tsv.
+"unclassified" -- are listed, with the reason, in <species>_dropped.tsv.
 By default (--unclassified drop) they're left out of the index, so markers are
 never checked against them. With --unclassified keep, they're kept in the index
 as their own "unclassified" group instead. Either way, an assembly with no
@@ -112,7 +112,7 @@ def parse_args():
         "--unclassified",
         choices=("keep", "drop"),
         default="drop",
-        help="drop (default): ignore genomes that have a missing value for their --group-label column and list them in <species>_dropped_unclassified.tsv. "
+        help="drop (default): ignore genomes that have a missing value for their --group-label column and list them in <species>_dropped.tsv. "
         "keep: keep these genomes as a group.",
     )
 
@@ -250,55 +250,62 @@ def main():
 
     kept = metadata[matched].copy()
     kept["file_path"] = kept["_want"].map(by_safe_name)
-    n_dropped = int((~matched).sum())
+    n_unmatched = int((~matched).sum())
     n_relabelled = int((blank_label & matched).sum())
 
-    # Assembly files with no corresponding metadata row claimed are "unclassified".
+    # Specify reason why genomes lack a group label:
+    # Assembly files with no corresponding metadata row are assigned reason "no_metadata_row".
+    # If group label is a missing value, or "unclassified", reason is "missing_value" or "labelled_unclassified"
+    # None for anything else.
     claimed = set(kept["_want"])
     orphan_paths = sorted(p for safe, p in by_safe_name.items() if safe not in claimed)
     orphan_rows = pd.DataFrame(
         {
             sample_col: [strip_suffix(Path(p).name, args.assembly_suffix) for p in orphan_paths],
-            group_label: UNCLASSIFIED,
+            group_label: "",
             "file_path": orphan_paths,
             "_raw_label": "",
             "_reason": "no_metadata_row",
         }
     )
-    # Why each genome is unclassified, for the dropped list: a missing value, or a
-    # metadata label that literally reads "unclassified".
-    kept["_reason"] = kept["_rule"].where(kept["_rule"].eq("missing_value"), "labelled_unclassified")
+    kept["_reason"] = None
+    kept.loc[kept["_rule"].eq("missing_value"), "_reason"] = "missing_value"
+    kept.loc[
+        kept[group_label].eq(UNCLASSIFIED) & kept["_reason"].isna(), "_reason"
+    ] = "labelled_unclassified"
 
+    # Subset the columns of interest (for reporting) and combine orphaned assemblies with those kept
     cols = [sample_col, group_label, "file_path", "_raw_label", "_reason"]
     all_rows = pd.concat([kept[cols], orphan_rows[cols]], ignore_index=True)
 
-    # Handle orphaned assemblies (those with no metadata row) and those considered "unclassified" 
-    is_uncl = all_rows[group_label] == UNCLASSIFIED
+    # What assemblies should be dropped?
+    # Assemblies with no metadata row at all are always dropped.
+    # `--unclassified keep` puts UNCLASSIFIED genomes (a missing or literal "unclassified" label) into
+    # their own group, otherwise dropped.
     no_metadata_row = all_rows["_reason"] == "no_metadata_row"
-    # Assemblies with no metadata row at all are always left out regardless of --unclassified
-    drop_mask = no_metadata_row if args.unclassified == "keep" else is_uncl
-    dropped_unclassified, written = all_rows[drop_mask], all_rows[~drop_mask]
-    if written.empty:
-        sys.exit(
-            f"Error: no genomes left for {prefix} -- all {len(dropped_unclassified)} are "
-            f"{UNCLASSIFIED}. Check --group-label and the metadata labels."
-        )
-    # sort by label, then sample ID within each label -- fixes colour-ID order
-    written = written.sort_values(
-        [group_label, sample_col], key=lambda c: c.astype(str)
-    )
+    known_unclassified = all_rows["_reason"].isin(("missing_value", "labelled_unclassified"))
+    drop_mask = no_metadata_row if args.unclassified == "keep" else (no_metadata_row | known_unclassified)
+    dropped, written = all_rows[drop_mask], all_rows[~drop_mask]
 
     out = Path(args.output_dir)
     out.mkdir(parents=True, exist_ok=True)
 
-    dropped_path = out / f"{prefix}_dropped_unclassified.tsv"
+    dropped_path = out / f"{prefix}_dropped.tsv"
     (
-        dropped_unclassified[[sample_col, "_raw_label", "_reason"]]
+        dropped[[sample_col, "_raw_label", "_reason"]]
         .rename(columns={sample_col: "Sample_ID", "_raw_label": "raw_label", "_reason": "reason"})
         .sort_values(["reason", "Sample_ID"])
         .to_csv(dropped_path, index=False, sep="\t")
     )
 
+    # sort by label, then sample ID within each label -- fixes colour-ID order
+    if written.empty:
+        sys.exit(
+            f"Error: no genomes left for {prefix} -- all {len(dropped)} were dropped. Check {dropped_path} for more details. Check --group-label and the metadata labels."
+        )
+    written = written.sort_values(
+        [group_label, sample_col], key=lambda c: c.astype(str)
+    )
     written["file_path"].to_csv(out / f"{prefix}_file_colours_input.txt", index=False, header=False)
     (
         written[[sample_col, group_label]]
@@ -327,10 +334,10 @@ def main():
     stats = {
         "species": prefix,
         "group_label_column": group_label,
-        "assemblies_total": len(written) + n_dropped + len(dropped_unclassified),
+        "assemblies_total": len(written) + n_unmatched + len(dropped),
         "assemblies_written": len(written),
-        "assemblies_dropped_fasta_not_found": n_dropped,
-        "assemblies_dropped_unclassified": len(dropped_unclassified),
+        "assemblies_dropped_fasta_not_found": n_unmatched,
+        "assemblies_dropped": len(dropped),
         "assembly_paths_missing_file": len(dead_paths),
         "relabelled_unclassified": n_relabelled,
         "assemblies_without_metadata_row": len(orphan_paths),
@@ -342,7 +349,7 @@ def main():
             "Genome counts first, then how group labels were cleaned. 'unclassified' genomes are "
             "metadata rows whose label was blank, a missing value or read 'unclassified'. With "
             "--unclassified drop (the default) they're left out of the index, counted in "
-            "assemblies_dropped_unclassified and listed in <species>_dropped_unclassified.tsv; with "
+            "assemblies_dropped and listed in <species>_dropped.tsv; with "
             "--unclassified keep they're kept as their own 'unclassified' group instead. Assembly "
             "files with no metadata row at all are always left out of the index the same way, "
             "regardless of --unclassified. assemblies_dropped_fasta_not_found are metadata rows "
@@ -353,14 +360,14 @@ def main():
         json.dump(stats, fh, indent=2)
 
     summary = f"{prefix}: {stats['assemblies_written']}/{stats['assemblies_total']} assemblies written"
-    if n_dropped:
-        summary += f"; {n_dropped} dropped (FASTA not found)"
+    if n_unmatched:
+        summary += f"; {n_unmatched} dropped (FASTA not found)"
     if orphan_paths:
-        summary += f"; {len(orphan_paths)} had no metadata row -> {UNCLASSIFIED}"
-    if len(dropped_unclassified):
-        summary += f"; {len(dropped_unclassified)} {UNCLASSIFIED} dropped from the index"
+        summary += f"; {len(orphan_paths)} had no metadata row"
     if n_relabelled:
         summary += f"; {n_relabelled} missing label(s) -> {UNCLASSIFIED}"
+    if len(dropped):
+        summary += f"; {len(dropped)} assemblies dropped from the index"
     print(summary, file=sys.stderr)
     if label_changes:
         print(
@@ -374,9 +381,9 @@ def main():
             )
         if len(label_changes) > 20:
             print(f"  ... and {len(label_changes) - 20} more", file=sys.stderr)
-    if len(dropped_unclassified):
+    if len(dropped):
         print(
-            f"warning: {len(dropped_unclassified)} {UNCLASSIFIED} genome(s) left out of the index; "
+            f"warning: {len(dropped)} {UNCLASSIFIED} genome(s) left out of the index; "
             f"markers are not checked against them. See {dropped_path.name}",
             file=sys.stderr,
         )
