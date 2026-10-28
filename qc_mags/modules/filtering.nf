@@ -16,10 +16,9 @@ process FILTER_FASTAS {
 
     script:
     fasta_ext = params.fasta_ext.replaceAll(/^\./, '')
-    // copy, not symlink: the SEQKIT outputs these point at are deleted by the batch cleanup while publishDir may still be copying
     """
     for file in ${filenames.join(" ")}; do
-        cp -L fastas/\${file} .
+        ln -s fastas/\${file} .
     done
     """
 }
