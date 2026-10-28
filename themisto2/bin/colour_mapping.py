@@ -124,7 +124,7 @@ def parse_args():
         default=".contigs.fasta",
         help="Suffix appended to Sample_ID to form the assembly filename (default: .contigs.fasta).",
     )
-    p.add_argument("--output_dir", required=True, help="Directory to write the output files into.")
+    p.add_argument("--output_dir", required=True, type=Path, help="Directory to write the output files into.")
     return p.parse_args()
 
 
