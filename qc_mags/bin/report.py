@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-"""Merge the pre-/post-QC QUAST, CheckM2 and GUNC reports and the GTDB-Tk summary of one batch into one table."""
 
 import argparse
 import json
@@ -12,8 +11,6 @@ import pandas as pd
 
 JOIN_COLUMN_STEM = "genome_name"
 JOIN_COLUMN = f"preqc_{JOIN_COLUMN_STEM}"
-POSTQC_COLUMN = f"postqc_{JOIN_COLUMN_STEM}"
-TOOLS = ("GUNC", "CHECKM2", "GTDBTK", "QUAST")
 COMPLETENESS_COLUMN = "checkm2_postqc_Completeness"
 CONTAMINATION_COLUMN = "checkm2_postqc_Contamination"
 GUNC_COLUMN = "gunc_postqc_pass.GUNC"
@@ -23,34 +20,138 @@ TAXONOMY_COLUMN = "gtdbtk_classification"
 ISOLATE_REVIEW_FLAG = "isolate_completeness_le_90: check CheckM2 model coverage (novel species?) before trusting the tier"
 
 
+def setup_logging(log_file: str = "qc_merge.log"):
+    logging.basicConfig(
+        level=logging.INFO,
+        handlers=[logging.StreamHandler(), logging.FileHandler(log_file, mode="w")],
+        format="%(asctime)s - %(levelname)s - %(message)s",
+    )
+    logging.info("Logging initialized.")
+
+
+def read_tsv(path: Path, name: str) -> pd.DataFrame:
+    try:
+        df = pd.read_csv(path, sep="\t")
+        logging.info(f"{name} loaded successfully: {path}")
+    except Exception as e:
+        logging.error(f"Error reading {name} from {path}: {e}")
+        sys.exit(1)
+    return df
+
+
 def read_config(path: Path) -> dict:
-    with open(path) as f:
-        config = json.load(f)
-    missing_tools = set(TOOLS) - config.keys()
-    if missing_tools:
-        raise SystemExit(f"Report config {path} is missing tool(s) {sorted(missing_tools)}")
-    for tool in TOOLS:
-        missing_keys = {"id_column", "keep_columns"} - config[tool].keys()
-        if missing_keys:
-            raise SystemExit(f"Report config {path}: tool '{tool}' is missing {sorted(missing_keys)}")
-    unexpected = config.keys() - set(TOOLS)
-    if unexpected:
-        logging.warning(f"Report config contains keys that were not expected (and are ignored): {unexpected}")
+    try:
+        with open(path) as f:
+            config = json.load(f)
+    except Exception as e:
+        logging.error(f"Error reading configuration file {path}: {e}")
+        sys.exit(1)
+    try:
+        validate_config(config)
+    except InvalidConfig as e:
+        logging.error(
+            f"Invalid config structure detected in configuration file {path}: {e}"
+        )
+        sys.exit(1)
     return config
 
 
-def strip_postqc_name(names: pd.Series) -> pd.Series:
-    """cleaned_<name>_filtered_kept_contigs -> <name>; names without the wrapper are left unchanged."""
-    return names.str.extract(r"^cleaned_(.*)_filtered_kept_contigs$")[0].fillna(names)
+class InvalidConfig(ValueError):
+    pass
 
 
-def process_input_report(df: pd.DataFrame, tool_config: dict, prefix: str, id_column: str) -> pd.DataFrame:
-    rename = {tool_config["id_column"]: id_column}
-    rename.update({column: f"{prefix}_{column}" for column in tool_config["keep_columns"]})
-    df = df.rename(columns=rename)[list(rename.values())]
-    if id_column == POSTQC_COLUMN:
-        df[JOIN_COLUMN] = strip_postqc_name(df[id_column])
+def validate_config(config: dict) -> None:
+    valid_tools = {"GUNC", "CHECKM2", "GTDBTK", "QUAST"}
+    expected_tools = valid_tools & config.keys()
+    unexpected_tools = set(config.keys()) - valid_tools
+    if expected_tools == set():
+        raise InvalidConfig(
+            f"Config does not contain at least one valid tool: {valid_tools}"
+        )
+    if unexpected_tools != set():
+        logging.warning(
+            f"Config contains keys that were not expected (and are ignored): {unexpected_tools}"
+        )
+    for tool in expected_tools:
+        missing_keys = {"id_column", "keep_columns"} - config[tool].keys()
+        if missing_keys != set():
+            raise InvalidConfig(
+                f"Config is missing a mandatory key for tool '{tool}': {missing_keys}"
+            )
+    logging.info("Config passed validation")
+
+
+def process_input_report(
+    df: pd.DataFrame, config: dict, tool: str, qc_stage: Optional[str] = None
+) -> pd.DataFrame:
+    tool = tool.lower()
+    columns = config[tool.upper()]["keep_columns"]
+    rename_dict = {}
+    if qc_stage is not None:
+        assert qc_stage in ("preqc", "postqc")
+        rename_dict[config[tool.upper()]["id_column"]] = (
+            f"{qc_stage}_{JOIN_COLUMN_STEM}"
+        )
+    else:
+        rename_dict[config[tool.upper()]["id_column"]] = JOIN_COLUMN
+    for column in columns:
+        if qc_stage is not None:
+            rename_dict[column] = f"{tool}_{qc_stage}_{column}"
+        else:
+            rename_dict[column] = f"{tool}_{column}"
+    return df.rename(columns=rename_dict)[rename_dict.values()]
+
+
+def process_postqc_genome_name(df: pd.DataFrame) -> pd.DataFrame:
+    new_df = df.copy()
+    new_df[JOIN_COLUMN] = df[f"postqc_{JOIN_COLUMN_STEM}"].str.extract(
+        r"cleaned_(.*)_filtered_kept_contigs"
+    )
+    return new_df
+
+
+def enrich_fields(df: pd.DataFrame, genome_type: str, genome_types: dict) -> pd.DataFrame:
+    df["sample_or_strain_name"] = (
+        df[JOIN_COLUMN].str.rsplit("_", expand=True, n=1).loc[:, 0]
+    )
+    # genome type comes from --genome_type/--genome_types (curated provenance), never from the genome name
+    df["genome_status"] = genome_type
+    if genome_types:
+        # mixed run: per-genome type from the table; genomes not listed keep the run-level type
+        hit = df[JOIN_COLUMN].map(genome_types)
+        df.loc[hit.notna(), "genome_status"] = hit[hit.notna()]
+        logging.info(f"--genome_types: {int(hit.notna().sum())} of {len(df)} genomes typed from the table "
+                     f"({int((hit == 'isolate').sum())} isolate); the rest use --genome_type {genome_type}")
+        if hit.notna().sum() == 0:
+            logging.warning("--genome_types matched no genome in this report: check the 'genome' column "
+                            "uses input genome names without extension (preqc_genome_name)")
+    return add_mimag_quality(df)
+
+
+def merge_all(*dfs: pd.DataFrame, genome_type: str = "mag", genome_types: dict = None) -> pd.DataFrame:
+    df, other_dfs = dfs[0], dfs[1:]
+    join_keys = [JOIN_COLUMN]
+    for other_df in other_dfs:
+        overlapping_cols = set(df.columns) & set(other_df.columns)
+        cols_to_drop = overlapping_cols - set(join_keys)
+        other_df_clean = other_df.drop(columns=cols_to_drop)
+        df = df.merge(other_df_clean, on=join_keys, how="left")
+    df = enrich_fields(df, genome_type, genome_types)
     return df
+
+
+def reorder_columns(df: pd.DataFrame) -> pd.DataFrame:
+    priority_cols = [
+        JOIN_COLUMN,
+        f"postqc_{JOIN_COLUMN_STEM}",
+        "sample_or_strain_name",
+        "genome_status",
+        QUALITY_COLUMN,
+        REVIEW_COLUMN,
+    ]
+    other_cols = sorted([col for col in df.columns if col not in priority_cols])
+    new_order = priority_cols + other_cols
+    return df[new_order]
 
 
 def mimag_quality(completeness, contamination, gunc_pass, genome_type) -> Optional[str]:
@@ -111,36 +212,6 @@ def read_genome_types(path) -> dict:
     return dict(zip(t["genome"], t["genome_type"].str.strip().str.lower()))
 
 
-def enrich_fields(df: pd.DataFrame, genome_type: str, genome_types: dict) -> pd.DataFrame:
-    df["sample_or_strain_name"] = df[JOIN_COLUMN].str.rsplit("_", expand=True, n=1).loc[:, 0]
-    df["genome_status"] = genome_type
-    if genome_types:
-        # mixed run: per-genome type from the table; genomes not listed keep the run-level type
-        hit = df[JOIN_COLUMN].map(genome_types)
-        df.loc[hit.notna(), "genome_status"] = hit[hit.notna()]
-        logging.info(f"--genome_types: {int(hit.notna().sum())} of {len(df)} genomes typed from the table "
-                     f"({int((hit == 'isolate').sum())} isolate); the rest use --genome_type {genome_type}")
-        if hit.notna().sum() == 0:
-            logging.warning("--genome_types matched no genome in this report: check the 'genome' column "
-                            "uses input genome names without extension (preqc_genome_name)")
-    return add_mimag_quality(df)
-
-
-def merge_all(dfs: list) -> pd.DataFrame:
-    df = dfs[0]
-    for other in dfs[1:]:
-        # post-QC reports all carry postqc_genome_name; keep only the first copy
-        df = df.merge(other.drop(columns=(set(df.columns) & set(other.columns)) - {JOIN_COLUMN}),
-                      on=JOIN_COLUMN, how="left")
-    return df
-
-
-def reorder_columns(df: pd.DataFrame) -> pd.DataFrame:
-    priority_cols = [JOIN_COLUMN, POSTQC_COLUMN, "sample_or_strain_name", "genome_status", QUALITY_COLUMN,
-                     REVIEW_COLUMN]
-    return df[priority_cols + sorted(col for col in df.columns if col not in priority_cols)]
-
-
 def check_taxonomy(df: pd.DataFrame) -> None:
     """Warn about genomes without a GTDB-Tk call; fail if NO genome has one, as that means the GTDB-Tk summary
     is empty or did not join on genome name, and the report would look complete without any taxonomy."""
@@ -164,49 +235,84 @@ def check_taxonomy(df: pd.DataFrame) -> None:
         sys.exit(2)
 
 
-# argument -> (tool, column prefix, name of the id column after renaming), in merge order (pre-QC QUAST first)
-REPORTS = {
-    "pre_qc_quast": ("QUAST", "quast_preqc", JOIN_COLUMN),
-    "pre_qc_checkm2": ("CHECKM2", "checkm2_preqc", JOIN_COLUMN),
-    "pre_qc_gunc": ("GUNC", "gunc_preqc", JOIN_COLUMN),
-    "gtdbtk": ("GTDBTK", "gtdbtk", JOIN_COLUMN),
-    "post_qc_quast": ("QUAST", "quast_postqc", POSTQC_COLUMN),
-    "post_qc_checkm2": ("CHECKM2", "checkm2_postqc", POSTQC_COLUMN),
-    "post_qc_gunc": ("GUNC", "gunc_postqc", POSTQC_COLUMN),
-}
-
-
 def parse_args():
-    parser = argparse.ArgumentParser(description=__doc__)
-    for arg in REPORTS:
-        parser.add_argument(f"--{arg}", type=Path, required=True, help=f"{arg} report TSV")
-    parser.add_argument("--config", type=Path, required=True, help="Path to report configuration file")
-    parser.add_argument("--output", type=Path, required=True, help="Output TSV path")
-    parser.add_argument("--genome_type", choices=("mag", "isolate"), default="mag",
-                        help="genome type of every genome in the run: 'mag' (default; GUNC gates the tier) or "
-                        "'isolate' (pure cultures; GUNC reported but advisory)")
-    parser.add_argument("--genome_types", type=Path, default=None,
-                        help="optional TSV for mixed runs: columns genome (input genome name without extension) "
-                        "and genome_type (mag|isolate); genomes not listed use --genome_type")
+    parser = argparse.ArgumentParser(
+        description="Merge GUNC, CheckM2 and post-QC metadata."
+    )
+    parser.add_argument(
+        "--pre_qc_quast", type=Path, required=True, help="Path to pre-QC QUAST report TSV"
+    )
+    parser.add_argument(
+        "--pre_qc_checkm2", type=Path, required=True, help="Path to pre-QC CheckM2 TSV"
+    )
+    parser.add_argument(
+        "--pre_qc_gunc", type=Path, required=True, help="Path to pre-QC GUNC TSV"
+    )
+    parser.add_argument(
+        "--post_qc_quast", type=Path, required=True, help="Path to post-QC QUAST report TSV"
+    )
+    parser.add_argument(
+        "--post_qc_checkm2", type=Path, required=True, help="Path to post-QC CheckM2 TSV",
+    )
+    parser.add_argument(
+        "--post_qc_gunc", type=Path, required=True, help="Path to post-QC GUNC TSV"
+    )
+    parser.add_argument(
+        "--gtdbtk", type=Path, required=True, help="Path to GTDBTK TSV"
+    )
+    parser.add_argument(
+        "--config", type=Path, required=True, help="Path to report configuration file"
+    )
+    parser.add_argument(
+        "--output", type=Path, required=True, help="Output TSV path"
+    )
+    parser.add_argument(
+        "--genome_type", choices=("mag", "isolate"), default="mag",
+        help="genome type of every genome in the run: 'mag' (default; GUNC gates the tier) or "
+        "'isolate' (pure cultures; GUNC reported but advisory)",
+    )
+    parser.add_argument(
+        "--genome_types", type=Path, default=None,
+        help="optional TSV for mixed runs: columns genome (input genome name without extension) and "
+        "genome_type (mag|isolate); genomes not listed use --genome_type",
+    )
     return parser.parse_args()
 
 
 def main():
-    logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
+    setup_logging()
     args = parse_args()
+
     config = read_config(args.config)
 
+    args_qc_stage = {
+        "pre_qc_quast": ["preqc","quast"],
+        "pre_qc_checkm2": ["preqc", "checkm2"],
+        "pre_qc_gunc": ["preqc", "gunc"],
+        "gtdbtk": [None, "gtdbtk"],
+        "post_qc_quast": ["postqc", "quast"],
+        "post_qc_checkm2": ["postqc", "checkm2"],
+        "post_qc_gunc": ["postqc", "gunc"]
+    }
+
     dfs = []
-    for arg, (tool, prefix, id_column) in REPORTS.items():
-        df = process_input_report(pd.read_csv(getattr(args, arg), sep="\t"), config[tool], prefix, id_column)
-        if tool == "GTDBTK":
+    for arg, qc in args_qc_stage.items():
+        qc_stage = qc[0]
+        tool = qc[1]
+        df = read_tsv(vars(args)[arg], arg)
+        df = process_input_report(df, config, tool, qc_stage)
+
+        if qc_stage == "postqc":
+            df = process_postqc_genome_name(df)
+        elif tool == "gtdbtk":
             # GTDB-Tk ids are post-QC names when it runs on the cleaned fastas; strip them to the pre-QC join key
-            df[JOIN_COLUMN] = strip_postqc_name(df[JOIN_COLUMN])
+            stripped = df[JOIN_COLUMN].str.extract(r"^cleaned_(.*)_filtered_kept_contigs$").loc[:, 0]
+            df[JOIN_COLUMN] = stripped.fillna(df[JOIN_COLUMN])
         dfs.append(df)
 
-    merged = merge_all(dfs)
-    merged = enrich_fields(merged, args.genome_type, read_genome_types(args.genome_types))
+    merged = merge_all(*dfs, genome_type=args.genome_type, genome_types=read_genome_types(args.genome_types))
     merged = reorder_columns(merged)
+
     check_taxonomy(merged)
 
     merged.to_csv(args.output, sep="\t", index=False)
