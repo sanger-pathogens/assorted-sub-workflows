@@ -1,31 +1,4 @@
-process MDMCLEANER_SKIP {
-    // Isolates (pure cultures) are not cleaned: pass the genome through unchanged, under the file name
-    // MDMCLEANER would have produced, so the post-QC steps treat both genome types identically.
-    tag "${meta.ID}"
-    label "cpu_1"
-    label "mem_1"
-    label "time_30m"
-
-    container  'quay.io/biocontainers/seqkit:2.10.0--h9ee0642_0'
-
-    input:
-    tuple val(group_key), val(meta), path(fasta)
-
-    output:
-    tuple val(group_key), val(meta), path("*_filtered_kept_contigs.${output_fasta_ext}"), emit: results
-
-    script:
-    fasta_ext = params.fasta_ext.replaceAll(/^\./, '')
-    output_fasta_ext = "${fasta_ext}.gz"
-    name = fasta.name.endsWith(".${fasta_ext}") ? fasta.name[0..<(fasta.name.length() - fasta_ext.length() - 1)] : fasta.baseName
-    """
-    if gzip -t ${fasta} 2>/dev/null; then
-        cp ${fasta} ${name}_filtered_kept_contigs.${output_fasta_ext}
-    else
-        gzip -c ${fasta} > ${name}_filtered_kept_contigs.${output_fasta_ext}
-    fi
-    """
-}
+include { fastaExt; genomeName } from './helper_functions.nf'
 
 process MDMCLEANER {
     tag "${meta.ID}"
@@ -44,11 +17,10 @@ process MDMCLEANER {
     tuple val(group_key), val(meta), path("*.${output_fasta_ext}"), emit: results
 
     script:
-    fasta_ext = params.fasta_ext.replaceAll(/^\./, '')
+    fasta_ext = fastaExt()
     output_fasta_ext = "${fasta_ext}.gz"
-    // genome name = input file name without .<fasta_ext>[.gz]; MDMcleaner names its outputs after it
-    genome_name = fasta.name.endsWith('.gz') ? fasta.name[0..<-3] : fasta.name
-    genome_name = genome_name.endsWith(".${fasta_ext}") ? genome_name[0..<-(fasta_ext.length() + 1)] : genome_name
+    // MDMcleaner names its outputs after the genome name
+    genome_name = genomeName(fasta)
     """
     # MDMcleaner splits contig names at ':' when it matches rRNA hits back to contigs, so a name such as
     # '3300029572.a:Ga0244925_108424' (JGI/IMG style) raises KeyError and the genome is dropped by the
@@ -91,27 +63,5 @@ process MDMCLEANER {
     done
 
     mv mdmcleaner_output/*/*_filtered_kept_contigs.${output_fasta_ext} .
-    """
-}
-
-process MDMCLEANER_AUDIT {
-    executor 'local'
-
-    publishDir mode: 'copy', path: "${params.outdir}/report/"
-
-    input:
-    path(sent)
-    path(cleaned)
-
-    output:
-    path("mdmcleaner_skipped.tsv"), emit: skipped
-    stdout emit: n_skipped
-
-    script:
-    """
-    printf 'batch\\tgenome\\n' > mdmcleaner_skipped.tsv
-    sort -u ${cleaned} > cleaned.sorted
-    sort -u ${sent} | awk -F'\\t' 'NR==FNR {done[\$0]=1; next} !(\$0 in done)' cleaned.sorted - >> mdmcleaner_skipped.tsv
-    printf '%s' \$(( \$(wc -l < mdmcleaner_skipped.tsv) - 1 ))
     """
 }

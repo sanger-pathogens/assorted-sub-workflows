@@ -34,6 +34,7 @@ Other parameters:
 - `--autoqc_config` (default: null) Optional parameter to filter MAGs that pass QC thresholds specified in the config. When applying this option you must either provide the path to a config or with the string "default" use the provided config at `./assorted-sub-workflows/qc_mags/assets/autoqc_config.json`. See [AutoQC configuration](#autoqc-configuration) for more details.
 - `--min_contig` (default: 1000) Contigs below this length will be filtered out by seqkit.
 - `--skip_raw_reports` (default: false) Skip publishing raw reports from various QC tools, keeping only final summary reports.
+- `--skip_cleanup` (default: false) Keep each batch's intermediate work directories. By default they are deleted once the batch has finished to save disk space, so a `-resume` reruns finished batches.
 - `--temp_file_storage` (default: `/tmp`): Specify a directory where GTDB-Tk can store temporary files during processing. Options are '/tmp', '/dev/shm' or 'null' (write to memory). See [GTDB-Tk runtime](#gdtbk-runtime) for more details.
 - `--temp_space` (default: `30GB`): Request a specific amount of temporary working space to reserve for GTDB-Tk. See [GTDB-Tk runtime](#gdtbk-runtime) for more details.
 

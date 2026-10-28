@@ -43,6 +43,10 @@
         "default": "false",
         "help_text": "Skip publishing raw reports from various QC tools, keeping only final summary reports."
       },
+      "skip_cleanup": {
+        "default": "false",
+        "help_text": "Keep each batch's intermediate work directories. By default they are deleted once the batch has finished to save disk space, so a -resume reruns finished batches."
+      },
       "temp_file_storage": {
         "default": "/tmp",
         "help_text": "Specify a directory where GTDBTk can store temporary files during processing (see README for more information). Options are '/tmp', '/dev/shm' or 'null' (write to memory)."

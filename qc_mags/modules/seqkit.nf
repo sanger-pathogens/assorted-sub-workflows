@@ -1,3 +1,5 @@
+include { fastaExt; genomeName } from './helper_functions.nf'
+
 process SEQKIT {
     tag "${meta.ID}"
     label "cpu_1"
@@ -15,7 +17,9 @@ process SEQKIT {
     tuple val(group_key), val(meta), path(finalName), emit: results
 
     script:
-    finalName = "cleaned_${fasta.getBaseName()}" 
+    // MDMCLEANER output is <name>_filtered_kept_contigs; isolates arrive uncleaned, so both get the same output name
+    genome_name = genomeName(fasta).replaceAll(/_filtered_kept_contigs$/, '')
+    finalName = "cleaned_${genome_name}_filtered_kept_contigs.${fastaExt()}"
     """
     seqkit seq ${fasta} -m ${params.min_contig} > ${finalName}
 
