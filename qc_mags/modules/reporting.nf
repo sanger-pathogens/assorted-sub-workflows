@@ -63,12 +63,10 @@ process COMBINE_REPORTS {
     script:
     command = "${projectDir}/assorted-sub-workflows/qc_mags/bin/combine_reports.py"
     combined_report = "all_final_report.tsv"
-    genome_types_arg = params.genome_types ? "--genome_types ${file(params.genome_types, checkIfExists: true)}" : ""
     """
     ${command} \\
         --reports batch_reports/* \\
         --sample_map ${sample_map} \\
-        --genome_type ${params.genome_type} ${genome_types_arg} \\
         --output ${combined_report}
     """
 }

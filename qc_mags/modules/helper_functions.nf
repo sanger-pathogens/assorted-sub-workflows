@@ -18,28 +18,35 @@ def genomeName(fasta) {
     return name.endsWith(ext) ? name[0..<-ext.length()] : name.replaceAll(/\.[^.]*$/, '')
 }
 
-// Genome type per genome (preqc name -> 'mag'|'isolate') for MIXED runs, from --genome_types (curated
-// provenance); genomes not listed use --genome_type. Validated as in bin/report.py read_genome_types.
+// Genome type per genome (preqc name -> 'mag'|'isolate') for MIXED runs, read from the --genome_types TSV
+// (header: genome<TAB>genome_type). Genomes not listed use --genome_type. bin/report.py relies on this validation.
 def genomeTypeMap() {
+    def genome_types = ['mag', 'isolate']
+    if (!(params.genome_type in genome_types)) { error "--genome_type must be mag or isolate, found '${params.genome_type}'" }
     if (!params.genome_types) { return [:] }
-    def rows = file(params.genome_types, checkIfExists: true).readLines()
-    def header = rows[0].split('\t').collect { it.trim() }
-    def gi = header.indexOf('genome')
-    def ti = header.indexOf('genome_type')
-    if (gi < 0 || ti < 0) { error "--genome_types ${params.genome_types}: needs columns 'genome' and 'genome_type'" }
-    def types = rows.drop(1).findAll { it.trim() }.collectEntries { l ->
-        def c = l.split('\t', -1)
-        [(c[gi].trim()): c[ti].trim().toLowerCase()]
+
+    def lines = file(params.genome_types, checkIfExists: true).readLines()
+    if (lines[0].trim() != "genome\tgenome_type") {
+        error "--genome_types ${params.genome_types}: header must be 'genome<TAB>genome_type'"
     }
-    def bad = (types.values() as Set) - ['mag', 'isolate']
-    if (bad) { error "--genome_types ${params.genome_types}: genome_type must be mag or isolate, found ${bad.sort()}" }
+    def types = [:]
+    lines.eachWithIndex { line, i ->
+        if (i == 0 || !line.trim()) { return }
+        def fields = line.split('\t', -1)*.trim()
+        def where = "--genome_types ${params.genome_types} line ${i + 1}"
+        if (fields.size() != 2) { error "${where}: expected 2 tab-separated columns, found ${fields.size()}" }
+        def genome = fields[0]
+        def type = fields[1].toLowerCase()
+        if (!(type in genome_types)) { error "${where}: genome_type must be mag or isolate, found '${fields[1]}'" }
+        if (types.containsKey(genome)) { error "${where}: genome '${genome}' is listed twice" }
+        types[genome] = type
+    }
     return types
 }
 
 // Genome type of a single genome: --genome_types entry if listed, otherwise --genome_type
 def genomeType(Map types, String name) {
-    String run_type = (params.genome_type == 'isolate') ? 'isolate' : 'mag'
-    return types.getOrDefault(name, run_type)
+    return types.getOrDefault(name, params.genome_type)
 }
 
 // Re-batch [meta, [fastas]] into [batch meta, [fastas]] of params.batch_size genomes each

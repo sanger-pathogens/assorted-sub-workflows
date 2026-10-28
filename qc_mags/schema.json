@@ -61,7 +61,7 @@
       },
       "genome_type": {
         "default": "mag",
-        "help_text": "Genome type of every genome in the run: 'mag' (default; GUNC gates the HQ/MQ tier) or 'isolate' (pure cultures; same CheckM2 thresholds, GUNC reported but advisory). Set it from curated provenance, never from genome names. 'auto' is deprecated and means 'mag'."
+        "help_text": "Genome type of every genome in the run: 'mag' (default; GUNC gates the HQ/MQ tier) or 'isolate' (pure cultures; same CheckM2 thresholds, GUNC reported but advisory). Set it from curated provenance, never from genome names."
       },
       "genome_types": {
         "default": "null",
