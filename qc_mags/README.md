@@ -35,7 +35,7 @@ Other parameters:
 - `--genome_types` (default: null): Optional TSV giving the type of individual genomes, for runs mixing MAGs and isolates. Genomes not listed use `--genome_type`. See [Genome types: MAGs and isolates](#genome-types-mags-and-isolates).
 - `--fast_taxonomy` (default: false): Run GTDB-Tk without `--place_species`, using fewer CPUs and less memory. See [Taxonomic classification](#taxonomic-classification).
 - `--report_config` (default: [`./assets/report_config.json`](./assets/report_config.json)). See [Report configuration](#report-configuration) for more details.
-- `--autoqc_config` (default: null) Optional parameter to filter genomes that pass QC thresholds specified in the config. When applying this option you must either provide the path to a config or with the string "default" use the provided config at [`./assets/autoqc_config.tsv`](./assets/autoqc_config.tsv). See [AutoQC configuration](#autoqc-configuration) for more details.
+- `--autoqc_config` (default: null) Optional parameter to filter genomes that pass QC thresholds specified in the config. When applying this option you must either provide the path to a config or with the string "default" use the provided config at [`./assorted-sub-workflows/qc_mags/assets/autoqc_config.tsv`](./assorted-sub-workflows/qc_mags/assets/autoqc_config.tsv). See [AutoQC configuration](#autoqc-configuration) for more details.
 - `--min_contig` (default: 1000) Contigs below this length will be filtered out by seqkit.
 - `--skip_raw_reports` (default: false) Skip publishing raw reports from various QC tools, keeping only final summary reports.
 - `--publish_mdmcleaner` (default: false) Also publish the MDMCleaner output FASTAs (before `min_contig` filtering) to `mdmcleaner/`.
@@ -108,7 +108,7 @@ _GUNC_
 
 _QUAST_
 
-- quast*preqc*\# contigs
+- quast_preqc_\# contigs
 - quast_preqc_Largest contig
 - quast_preqc_Total length
 - quast_preqc_GC (%)
