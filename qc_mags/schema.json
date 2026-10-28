@@ -54,6 +54,18 @@
       "batch_size": {
         "default": "0 (batch per id)",
         "help_text": "Number of MAGs to process in a batch when running suitable tools. See README for more information."
+      },
+      "genome_type": {
+        "default": "mag",
+        "help_text": "Genome type of every genome in the run: 'mag' (default; GUNC gates the HQ/MQ tier) or 'isolate' (pure cultures; same CheckM2 thresholds, GUNC reported but advisory). Set it from curated provenance, never from genome names. 'auto' is deprecated and means 'mag'."
+      },
+      "genome_types": {
+        "default": "null",
+        "help_text": "Optional TSV for mixed runs with columns genome (input genome name without extension) and genome_type (mag or isolate), from curated provenance. Genomes not listed use --genome_type."
+      },
+      "lsf_group": {
+        "default": "null",
+        "help_text": "LSF fairshare group to submit every task under (adds -G <group>), e.g. team162f. Unset = your default group."
       }
     }
   }

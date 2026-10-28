@@ -1,11 +1,10 @@
 process GTDBTK {
     tag "${meta.ID}"
-    label params.fast_taxonomy ? (params.batch_size > 100 ? "cpu_4"  : "cpu_2") : (params.batch_size > 100 ? "cpu_64" : "cpu_8")
-    label "time_12"
-    label params.fast_taxonomy ? (params.batch_size > 100 ? "mem_50" : "mem_32") : (params.temp_file_storage ? "mem_64" : "mem_120")
+    label((params.fast_taxonomy) ? (params.batch_size > 100 ? "cpu_4" : "cpu_2") : (params.batch_size > 100 ? "cpu_64" : "cpu_8"))
+    label((params.fast_taxonomy || params.temp_file_storage) ? "mem_64" : "mem_120")
+    label "time_queue_from_normal"
 
-
-    container  'quay.io/biocontainers/gtdbtk:2.7.2--pyhdfd78af_0'
+    container  'quay.io/biocontainers/gtdbtk:2.8.0--pyhdfd78af_0'
 
     publishDir mode: 'copy', path: "${params.outdir}/${qc_stage}/gtdbtk/", enabled: !(params.skip_raw_reports)
 
@@ -41,7 +40,7 @@ process GTDBTK {
 
     gtdbtk classify_wf --genome_dir fastas -x ${params.fasta_ext} ${place_flag} --cpus ${task.cpus} --out_dir gtdbtk_outdir \$scratch_flag
 
-    cp gtdbtk_outdir/gtdbtk.bac*.summary.tsv ${report_tsv}
+    awk 'FNR==1 && NR!=1 {next} {print}' gtdbtk_outdir/gtdbtk.bac*.summary.tsv \$(ls gtdbtk_outdir/gtdbtk.ar*.summary.tsv 2>/dev/null) > ${report_tsv}
     """
 
 }
