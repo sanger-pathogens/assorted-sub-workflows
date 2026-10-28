@@ -22,15 +22,7 @@ process MDMCLEANER {
     // MDMcleaner names its outputs after the genome name
     genome_name = genomeName(fasta)
     """
-    # MDMcleaner splits contig names at ':' when it matches rRNA hits back to contigs, so a name such as
-    # '3300029572.a:Ga0244925_108424' (JGI/IMG style) raises KeyError and the genome is dropped by the
-    # 'ignore' errorStrategy without any warning (305 El Mouali 2026 genomes, Oct 2026). Swap ':' for a
-    # placeholder in a copy of the input, then restore it in the cleaned output, so contig names come out
-    # exactly as they went in.
-    # barrnap (inside MDMcleaner) greps every line of nhmmer's output for /fail|error/i, and that output names the
-    # input file, so a genome whose FILE NAME contains "fail" or "error" is reported as an nhmmer failure and
-    # dropped (found 2026-10-16 with a test genome called mag_gunc_fail). Run MDMcleaner on a neutrally named
-    # copy and rename its outputs back afterwards.
+    # remove colons common in JGI/IMG style genome names and name them something neutral to prefer barnapp error
     mkdir -p header_safe
     if gzip -t ${fasta} 2>/dev/null; then
         zcat ${fasta} | sed '/^>/ s/:/__COLON__/g' | gzip > header_safe/qcgenome.${fasta_ext}.gz
