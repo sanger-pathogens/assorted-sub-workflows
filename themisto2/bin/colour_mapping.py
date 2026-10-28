@@ -87,20 +87,23 @@ def fs_safe(name: str) -> str:
 
 def parse_args():
     p = argparse.ArgumentParser(description="Build Themisto2 file-colours input from a metadata table.")
-    p.add_argument("--metadata", required=True, help="Path to the metadata CSV.")
+    p.add_argument("--metadata", required=True, type=Path, help="Path to the metadata CSV.")
     p.add_argument(
         "--species-name",
         required=True,
+        type=str,
         help="Species identifier (from the manifest); used as the output filename prefix.",
     )
     p.add_argument(
         "--sample-col",
         default="Sample_ID",
+        type=str,
         help="Metadata column holding sample identifiers (default: Sample_ID).",
     )
     p.add_argument(
         "--group-label",
         required=True,
+        type=str,
         help="Metadata column to group and sort genomes by, written to label_mapping.tsv.",
     )
     p.add_argument(
@@ -112,16 +115,18 @@ def parse_args():
         "--unclassified",
         choices=("keep", "drop"),
         default="drop",
+        type=str,
         help="drop (default): ignore genomes that have a missing value for their --group-label column and list them in <species>_dropped.tsv. "
         "keep: keep these genomes as a group.",
     )
 
     asm = p.add_mutually_exclusive_group(required=True)
-    asm.add_argument("--assembly-dir", help="Directory containing assembly FASTA files.")
-    asm.add_argument("--assembly-paths", help="Text file listing one assembly path per line.")
+    asm.add_argument("--assembly-dir", type=Path, help="Directory containing assembly FASTA files.")
+    asm.add_argument("--assembly-paths", type=Path, help="Text file listing one assembly path per line.")
     p.add_argument(
         "--assembly-suffix",
         default=".contigs.fasta",
+        type=str,
         help="Suffix appended to Sample_ID to form the assembly filename (default: .contigs.fasta).",
     )
     p.add_argument("--output_dir", required=True, type=Path, help="Directory to write the output files into.")
@@ -287,7 +292,7 @@ def main():
     drop_mask = no_metadata_row if args.unclassified == "keep" else (no_metadata_row | known_unclassified)
     dropped, written = all_rows[drop_mask], all_rows[~drop_mask]
 
-    out = Path(args.output_dir)
+    out = args.output_dir
     out.mkdir(parents=True, exist_ok=True)
 
     dropped_path = out / f"{prefix}_dropped.tsv"
