@@ -31,13 +31,13 @@ process GGCAT {
     """
     mkdir -p ${temp_dir}
     ggcat build \\
-        -l ${file_colors_input} \\
-        -o ${unitigs_fna} \\
-        -s 1 \\
-        -k ${params.color_index_kmer_size} \\
-        -t ${temp_dir} \\
-        -j ${task.cpus} \\
-        -m ${mem_gb} \\
-        -p
+        --input-lists ${file_colors_input} \\
+        --output-file ${unitigs_fna} \\
+        --min-multiplicity 1 \\
+        --kmer-length ${params.color_index_kmer_size} \\
+        --temp-dir ${temp_dir} \\
+        --threads-count ${task.cpus} \\
+        --memory ${mem_gb} \\
+        --prefer-memory
     """
 }
