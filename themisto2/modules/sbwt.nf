@@ -14,7 +14,7 @@ process SBWT_BUILD {
     }
     scratch true
 
-    container "/data/pam/installs/packages/sbwt-rs-cli/bug_fix_setdiff_commit_f93d92_2026.08.04.13.38.59/sbwt-rs-cli-0.4.2-f93d92c/image/sbwt-rs-cli_bug_fix_setdiff_commit_f93d92_2026.08.04.13.38.59.sif"
+    container 'quay.io/sangerpathogens/sbwt-rs-cli:0.2.0-25f33b7'
 
     // meta.stage disambiguates the candidate rebuild from that lineage's own build.
     publishDir mode: 'copy', path: "${params.outdir}/sbwt/${meta.stage ? "${meta.stage}/" : ''}${meta.ID}/", enabled: params.publish_intermediate
@@ -28,9 +28,12 @@ process SBWT_BUILD {
     script:
     sbwt_index   = "unitigs-k${params.color_index_kmer_size}.sbwt"
     lcs_index    = "unitigs-k${params.color_index_kmer_size}.lcs"
+
     def temp_dir = params.temp_dir ? "${params.temp_dir}/sbwt/${meta.ID}" : "sbwt_temp"
+
     // Provide memory target 10% lower than LSF job suggested by Jarno
     def mem_gb = (task.memory.toGiga() * 0.9).toInteger()
+
     // -l is required for the .lcs output declared above (else "Missing output file(s)").
     """
     mkdir -p ${temp_dir}
