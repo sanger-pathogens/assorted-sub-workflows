@@ -29,8 +29,8 @@ process SBWT_BUILD {
     sbwt_index   = "unitigs-k${params.color_index_kmer_size}.sbwt"
     lcs_index    = "unitigs-k${params.color_index_kmer_size}.lcs"
     def temp_dir = params.temp_dir ? "${params.temp_dir}/sbwt/${meta.ID}" : "sbwt_temp"
-    // Cap -m at 95% of the allocation -- LSF kills a job that hits its exact limit.
-    def mem_gb = Math.floor(task.memory.toGiga() * 0.95) as int
+    // Provide memory target 10% lower than LSF job suggested by Jarno
+    def mem_gb = (task.memory.toGiga() * 0.9).toInteger()
     // -l is required for the .lcs output declared above (else "Missing output file(s)").
     """
     mkdir -p ${temp_dir}

@@ -26,8 +26,8 @@ process GGCAT {
     // Per-meta.ID subpath so concurrent tasks don't collide on a shared temp_dir.
     def temp_dir = params.temp_dir ? "${params.temp_dir}/ggcat/${meta.ID}" : "ggcat_temp"
     unitigs_fna = "unitigs-k${params.color_index_kmer_size}.fna"
-    // Cap -m at 95% of the allocation -- LSF kills a job that hits its exact limit.
-    def mem_gb = Math.floor(task.memory.toGiga() * 0.95) as int
+    // Provide memory target 10% lower than LSF job suggested by Jarno
+    def mem_gb = (task.memory.toGiga() * 0.9).toInteger()
     """
     mkdir -p ${temp_dir}
     ggcat build \\
