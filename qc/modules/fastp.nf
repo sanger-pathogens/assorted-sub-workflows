@@ -22,10 +22,14 @@ process FASTP {
 
     def poly_g = params.fastp_trim_poly_g ? "-g" : "-G"
     """
-    fastp -w ${task.cpus} -i ${read_1} -I ${read_2} \\
-        -o ${preproc_read_stem}_1.fastq.gz -O ${preproc_read_stem}_2.fastq.gz \\
+    fastp -w ${task.cpus} \\
+        --in1 ${read_1} \\
+        --in2 ${read_2} \\
+        --out1 ${preproc_read_stem}_1.fastq.gz \\
+        --out2 ${preproc_read_stem}_2.fastq.gz \\
         ${params.fastp_options} ${poly_g} \\
-        -j ${meta.ID}.fastp.json -h ${meta.ID}.fastp.html
+        --json ${meta.ID}.fastp.json \\
+        --html ${meta.ID}.fastp.html
     """
 }
 
