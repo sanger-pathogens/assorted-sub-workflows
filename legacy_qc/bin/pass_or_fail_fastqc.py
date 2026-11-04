@@ -49,7 +49,7 @@ def get_criteria(criteria_filepath, option):
 
 def main():
     parser = argparse.ArgumentParser(
-        prog="assorted-sub-workflows/qc/bin/pass_or_fail_fastqc.py",
+        prog="assorted-sub-workflows/legacy_qc/bin/pass_or_fail_fastqc.py",
         description='parse JSON input to define which item of a FastQC report should have what value for the short reads set to be considered "pass"',
     )
 

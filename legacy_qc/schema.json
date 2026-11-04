@@ -1,0 +1,39 @@
+{ 
+    "pipeline": "Legacy QC (sub-workflow)",
+    "params": {
+        "Preprocessing options": {
+            "preprocessing": {
+                "default": "true",
+                "help_text": "Run the preprocessing subworkflow, use false to skip preprocessing stages"
+            }
+        },
+        "FastQC": {
+            "save_fastqc": {
+                "default": false,
+                "help_text": "Flag to publish FastQC output"
+            },
+            "fastqc_pass_criteria": {
+                "default": "assorted-sub-workflows/legacy_qc/assets/fastqc_pass_criteria.json",
+                "help_text": "JSON file containing definition of an array specifying which items in the FastQC summary.txt are required to have the value PASS for the sample to be considered a pass"
+            },
+            "fastqc_no_fail_criteria": {
+                "default": "assorted-sub-workflows/legacy_qc/assets/fastqc_no_fail_criteria.json",
+                "help_text": "JSON file containing definition of an array specifying which items in the FastQC summary.txt are required to NOT have the value FAIL for the sample to be considered a pass (i.e. they could have WARN)"
+            },
+            "skip_fastqc": {
+                "default": false,
+                "help_text": "Skip FastQC step."
+            }
+        },
+        "kraken2bracken QC": {
+            "genus_abundance_threshold": {
+                "default": 90,
+                "help_text": "Fail the sample if the top genus abundance is lower than this"
+            },
+            "species_abundance_threshold": {
+                "default": 85,
+                "help_text": "Fail the sample if the top species abundance is lower than this"
+            }
+        }
+    }
+}

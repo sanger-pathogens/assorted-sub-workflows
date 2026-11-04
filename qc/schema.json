@@ -1,38 +1,76 @@
-{ 
+{
     "pipeline": "QC (sub-workflow)",
     "params": {
-        "Preprocessing options": {
-            "preprocessing": {
-                "default": "true",
-                "help_text": "Run the preprocessing subworkflow, use false to skip preprocessing stages"
+        "QC options": {
+            "run_qc": {
+                "default": true,
+                "help_text": "Run QC (human read removal, fastp trimming, sylph profiling) on paired short reads. When false, reads pass through unchanged."
+            },
+            "publish_clean_reads": {
+                "default": true,
+                "help_text": "Publish the QC'd reads into <outdir>/<preprocessing_output_dir>."
+            },
+            "preprocessing_output_dir": {
+                "default": "preprocessed_fastqs",
+                "help_text": "Output directory for QC'd reads."
+            },
+            "preproc_read_suffix": {
+                "default": "_preprocessed",
+                "help_text": "Suffix for QC'd read file names (e.g. <ID>_preprocessed_1.fastq.gz)."
             }
         },
-        "FastQC": {
-            "save_fastqc": {
-                "default": false,
-                "help_text": "Flag to publish FastQC output"
+        "Human read removal": {
+            "host_removal": {
+                "default": "auto",
+                "help_text": "Which samples get bowtie2 human read removal: auto (every sample except reads from iRODS, which NPG has already depleted), all or none."
             },
-            "fastqc_pass_criteria": {
-                "default": "assorted-sub-workflows/qc/assets/fastqc_pass_criteria.json",
-                "help_text": "JSON file containing definition of an array specifying which items in the FastQC summary.txt are required to have the value PASS for the sample to be considered a pass"
-            },
-            "fastqc_no_fail_criteria": {
-                "default": "assorted-sub-workflows/qc/assets/fastqc_no_fail_criteria.json",
-                "help_text": "JSON file containing definition of an array specifying which items in the FastQC summary.txt are required to NOT have the value FAIL for the sample to be considered a pass (i.e. they could have WARN)"
-            },
-            "skip_fastqc": {
-                "default": false,
-                "help_text": "Skip FastQC step."
+            "host_bowtie2_index": {
+                "default": "/lustre/scratch125/core/sciops_repository/references/Homo_sapiens/T2T-CHM13v2.0/all/bowtie2/T2T-CHM13v2.0.fa",
+                "help_text": "bowtie2 index of the human reference (NPG's T2T-CHM13v2.0 by default)."
             }
         },
-        "kraken2bracken QC": {
-            "genus_abundance_threshold": {
-                "default": 90,
-                "help_text": "Fail the sample if the top genus abundance is lower than this"
+        "fastp": {
+            "fastp_options": {
+                "default": "--cut_right --cut_right_window_size 4 --cut_right_mean_quality 20 --max_len1 151 --max_len2 151 --length_required 70 -Q -z 4",
+                "help_text": "Options passed to fastp, matched to the previous Trimmomatic defaults (SLIDINGWINDOW:4:20 CROP:151 MINLEN:70)."
             },
-            "species_abundance_threshold": {
-                "default": 85,
-                "help_text": "Fail the sample if the top species abundance is lower than this"
+            "fastp_trim_poly_g": {
+                "default": true,
+                "help_text": "Force polyG tail trimming (fastp -g). Set to false to disable it (-G)."
+            },
+            "save_fastp_reports": {
+                "default": true,
+                "help_text": "Publish the per-sample fastp JSON and HTML reports into <outdir>/<ID>/fastp/."
+            }
+        },
+        "Sylph": {
+            "sylph_profile": {
+                "default": true,
+                "help_text": "Run sylph taxonomic profiling on the QC'd reads."
+            },
+            "sylph_db": {
+                "default": "/data/pam/software/sylph/gtdb-r232-c200-dbv1/gtdb-r232-c200-dbv1.syldb",
+                "help_text": "Sylph database to profile against."
+            },
+            "sylph_tax_metadata": {
+                "default": "/data/pam/software/sylph-tax/v1/gtdb_r232_metadata.tsv",
+                "help_text": "sylph-tax taxonomy metadata matching --sylph_db."
+            },
+            "sylph_k": {
+                "default": 31,
+                "help_text": "k-mer size for sylph sketches (21 or 31)."
+            },
+            "sylph_profile_options": {
+                "default": "-u",
+                "help_text": "Extra options for sylph profile (-u: estimate the unknown fraction)."
+            },
+            "sylph_profile_batch_size": {
+                "default": 200,
+                "help_text": "Number of samples profiled per sylph profile job; the database is loaded once per batch."
+            },
+            "save_sylph_sketches": {
+                "default": false,
+                "help_text": "Publish sylph sketches into <outdir>/<ID>/sylph/."
             }
         }
     }

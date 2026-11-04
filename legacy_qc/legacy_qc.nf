@@ -1,0 +1,128 @@
+#!/usr/bin/env nextflow
+include { FASTQC              } from './modules/fastqc.nf'
+include { PASS_OR_FAIL_FASTQC
+          PASS_OR_FAIL_K2B
+          PASS_OR_FAIL_SYLPH  } from './modules/pass_or_fail.nf'
+include { REPORT              } from './modules/reporting.nf'
+include { TAXO_PROFILE        } from '../taxo_profile/taxo_profile.nf'
+
+workflow QC_ILLUMINA {
+    take:
+    reads_ch // meta, read_1, read_2
+
+    main:
+    if (params.run_qc) {
+
+        reads_ch
+        | (FASTQC & TAXO_PROFILE)
+
+        fastqc_pass_criteria = file(params.fastqc_pass_criteria, checkIfExists: true)
+        fastqc_no_fail_criteria = file(params.fastqc_no_fail_criteria, checkIfExists: true)
+
+        PASS_OR_FAIL_FASTQC(FASTQC.out.zip, fastqc_pass_criteria, fastqc_no_fail_criteria)
+        | set { fastqc_results }
+
+        FASTQC.out.zip.collect{it[1,2]}
+            | mix(TAXO_PROFILE.out.ch_kraken2_style_bracken_reports.collect{it[1]})
+            | mix(TAXO_PROFILE.out.sylphtax_mpa_report.collect{it[1]})
+            | collect
+            | set { multiqc_input }
+
+        pass_fail_fastqc_ch = fastqc_results.map { sample_pass_fail -> [sample_pass_fail[0].ID, sample_pass_fail[1]] } // Sample ID, Pass/Fail status e.g [ERR14241855, pass] 
+
+        if (params.bracken_profile) {
+
+            TAXO_PROFILE.out.ch_kraken2_style_bracken_reports
+            | PASS_OR_FAIL_K2B
+            | set { k2b_results }
+
+            pass_fail_k2b_ch = k2b_results.map { sample_pass_fail -> [sample_pass_fail[0].ID, sample_pass_fail[1]] }
+        }
+
+        if (params.sylph_profile) {
+            
+            TAXO_PROFILE.out.sylphtax_mpa_report
+                | PASS_OR_FAIL_SYLPH
+                | set { sylph_results }
+
+            pass_fail_sylph_ch = sylph_results.map { sample_pass_fail -> [sample_pass_fail[0].ID, sample_pass_fail[1]] }
+
+        }
+
+        if (params.bracken_profile && params.sylph_profile) {
+            pass_fail_channel = pass_fail_fastqc_ch.join(pass_fail_k2b_ch, remainder: true)
+                                .map { flat -> flat.flatten() }
+                                .join(pass_fail_sylph_ch, remainder: true)
+                                .map { flat -> flat.flatten() }
+        
+        } 
+        else if (params.bracken_profile) {
+            pass_fail_channel = pass_fail_fastqc_ch.join(pass_fail_k2b_ch, remainder: true)
+                                .map { flat -> flat.flatten() }
+        } 
+        else if (params.sylph_profile) {
+            pass_fail_channel = pass_fail_fastqc_ch.join(pass_fail_sylph_ch, remainder: true)
+                                .map { flat -> flat.flatten() }
+        } 
+        else {
+            pass_fail_channel = pass_fail_fastqc_ch
+        }
+
+        // map dynamic number of columns into a list of sample lists for reporting
+        pass_fail_channel = pass_fail_channel.collect()
+                            .map { flat -> 
+                            int numCols = 2 + (params.bracken_profile ? 1 : 0) + (params.sylph_profile ? 1 : 0)
+                            flat.collate(numCols) }
+        
+        REPORT(pass_fail_channel)
+
+        kraken2_style_bracken_reports = TAXO_PROFILE.out.ch_kraken2_style_bracken_reports
+        bracken_mpa_reports = TAXO_PROFILE.out.ch_mpa_abundance_reports
+        sylphtax_mpa_report = TAXO_PROFILE.out.sylphtax_mpa_report
+        qc_summary = REPORT.out.qc_summary
+
+    } else {
+        multiqc_input = Channel.empty()
+        kraken2_style_bracken_reports = Channel.empty()
+        bracken_mpa_reports = Channel.empty()
+        sylphtax_mpa_report = Channel.empty()
+        qc_summary = Channel.empty()
+    }
+    emit:
+    multiqc_input
+    kraken2_style_bracken_reports
+    bracken_mpa_reports
+    sylphtax_mpa_report
+    qc_summary
+}
+
+workflow QC {
+    take:
+    reads_ch // meta, read_1, read_2
+
+    main:
+    // this gating might be redundant given that IRODS_EXTRACTOR already outputs platform-segregated channels, 
+    // but it is a safety measure to avoid processing the wring type of data. 
+    // We could drop this in the future when settled on how we handle mutliple patforms.
+    // items are [meta, read_1, read_2] (paired) or [meta, reads] (ONT), so only meta is read here
+    reads_ch.branch{ reads ->
+    // PUBLIC_PAIRED: paired reads from ENA (see MIXED_INPUT), QC'd like Illumina
+    illumina: reads[0].Platform in ["ILLUMINA", "PUBLIC_PAIRED"]
+
+    ONT: reads[0].Platform == "ONT"
+
+    other: true
+    }
+    | set { reads_ch }
+
+    QC_ILLUMINA(reads_ch.illumina)
+
+    emit:
+    // in the future, we may want to combine these output channels with those derived from an ONT_QC workflow here,
+    // but for now, just emmit the QC_ILLUMINA outputs directly
+    multiqc_input = QC_ILLUMINA.out.multiqc_input
+    kraken2_style_bracken_reports = QC_ILLUMINA.out.kraken2_style_bracken_reports
+    bracken_mpa_reports = QC_ILLUMINA.out.bracken_mpa_reports
+    sylphtax_mpa_report = QC_ILLUMINA.out.sylphtax_mpa_report
+    qc_summary = QC_ILLUMINA.out.qc_summary
+}

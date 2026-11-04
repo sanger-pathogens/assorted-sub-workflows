@@ -13,7 +13,7 @@ process PASS_OR_FAIL_FASTQC {
     tuple val(meta), env(pass_or_fail), emit: pass_or_fail
 
     script:
-    passfail_fastqc_script = "${projectDir}/assorted-sub-workflows/qc/bin/pass_or_fail_fastqc.py"
+    passfail_fastqc_script = "${projectDir}/assorted-sub-workflows/legacy_qc/bin/pass_or_fail_fastqc.py"
 
     """
     unzip ${read_1_zip}

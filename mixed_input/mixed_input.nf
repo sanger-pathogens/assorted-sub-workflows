@@ -22,6 +22,9 @@ workflow MIXED_INPUT {
     READS_MANIFEST          -> ILLUMINA
     READS_MANIFEST_FROM_DIR -> ILLUMINA
     IRODS                   -> whatever is in the iRODS record (e.g. ILLUMINA, PACBIO, etc.)
+
+    input_source records where each read pair came from (IRODS, ENA, READS_MANIFEST or MANIFEST_FROM_DIR),
+    e.g. so QC can skip human read removal for iRODS reads, which NPG has already depleted.
     */
 
     // No inputs
@@ -31,7 +34,7 @@ workflow MIXED_INPUT {
     if ('ENA' in active_workflows) {
         Channel.fromPath(params.manifest_ena)
         | ENA_DOWNLOAD
-        | map { meta, read_1, read_2 -> [ meta + [Platform: 'PUBLIC_PAIRED'], read_1, read_2 ] }
+        | map { meta, read_1, read_2 -> [ meta + [Platform: 'PUBLIC_PAIRED', input_source: 'ENA'], read_1, read_2 ] }
         | set { reads_from_ena_ch }
     } else {
         Channel.of("none")
@@ -43,6 +46,7 @@ workflow MIXED_INPUT {
         | IRODS_EXTRACTOR
 
         IRODS_EXTRACTOR.out.illumina_reads_ch
+        | map { meta, read_1, read_2 -> [ meta + [input_source: 'IRODS'], read_1, read_2 ] }
         | set { reads_from_irods_ch }
     } else {
         Channel.of("none")
@@ -55,7 +59,7 @@ workflow MIXED_INPUT {
         input_reads_ch = file(manifestToUse)
 
         INPUT_CHECK(input_reads_ch)
-        | map { meta, read_1, read_2 -> [ meta + [Platform: 'ILLUMINA'], read_1, read_2 ] }
+        | map { meta, read_1, read_2 -> [ meta + [Platform: 'ILLUMINA', input_source: 'READS_MANIFEST'], read_1, read_2 ] }
         | set { reads_from_local_ch }
     } else {
         Channel.of("none")
@@ -64,7 +68,7 @@ workflow MIXED_INPUT {
 
     if ('MANIFEST_FROM_DIR' in active_workflows) {
         MANIFEST_FROM_DIR(params.manifest_from_dir)
-        | map { meta, read_1, read_2 -> [ meta + [Platform: 'ILLUMINA'], read_1, read_2 ] }
+        | map { meta, read_1, read_2 -> [ meta + [Platform: 'ILLUMINA', input_source: 'MANIFEST_FROM_DIR'], read_1, read_2 ] }
         | set { reads_from_local_dir_ch }
     } else {
         Channel.of("none")
