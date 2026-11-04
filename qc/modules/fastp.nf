@@ -27,7 +27,8 @@ process FASTP {
         --in2 ${read_2} \\
         --out1 ${preproc_read_stem}_1.fastq.gz \\
         --out2 ${preproc_read_stem}_2.fastq.gz \\
-        ${params.fastp_options} ${poly_g} \\
+        ${params.fastp_options} \\
+        ${poly_g} \\
         --json ${meta.ID}.fastp.json \\
         --html ${meta.ID}.fastp.html
     """
