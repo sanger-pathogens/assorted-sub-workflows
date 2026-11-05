@@ -5,6 +5,7 @@ include { FASTP
 include { SYLPH_SKETCH
           SYLPH_PROFILE
           SYLPHTAX_TAXPROF     } from './modules/sylph.nf'
+include { MULTIQC              } from '../reporting/modules/multiqc.nf'
 
 //switch is banned :(
 def needs_host_removal(meta) {
@@ -51,6 +52,7 @@ workflow QC {
     host_removal_stats = QC_ILLUMINA.out.host_removal_stats
     sylph_report = QC_ILLUMINA.out.sylph_report
     sylphtax_mpa_report = QC_ILLUMINA.out.sylphtax_mpa_report
+    multiqc_report = QC_ILLUMINA.out.multiqc_report
 }
 
 workflow QC_ILLUMINA {
@@ -101,12 +103,27 @@ workflow QC_ILLUMINA {
             sylphtax_mpa_report = Channel.empty()
         }
 
+        if (params.qc_multiqc_report) {
+            // one report across all samples: bowtie2 human alignment, fastp trimming and sylph-tax profiles
+            BOWTIE2_HOST_REMOVAL.out.log
+            | mix(FASTP.out.json)
+            | mix(sylphtax_mpa_report.map { meta, report -> report })
+            | collect
+            | set { multiqc_input }
+
+            MULTIQC(multiqc_input, file(params.qc_multiqc_config, checkIfExists: true), params.qc_report_name)
+            multiqc_report = MULTIQC.out.report
+        } else {
+            multiqc_report = Channel.empty()
+        }
+
     } else {
         preprocessed_reads_ch = reads_ch
         fastp_stats = Channel.empty()
         host_removal_stats = Channel.empty()
         sylph_report = Channel.empty()
         sylphtax_mpa_report = Channel.empty()
+        multiqc_report = Channel.empty()
     }
 
     emit:
@@ -115,6 +132,7 @@ workflow QC_ILLUMINA {
     host_removal_stats
     sylph_report
     sylphtax_mpa_report
+    multiqc_report
 }
 
 workflow SYLPH {

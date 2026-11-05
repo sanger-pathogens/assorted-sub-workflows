@@ -38,7 +38,7 @@
                 "default": true,
                 "help_text": "Force polyG tail trimming (fastp -g). Set to false to disable it (-G)."
             },
-            "save_fastp_reports": {
+            "save_individual_fastp_reports": {
                 "default": true,
                 "help_text": "Publish the per-sample fastp JSON and HTML reports into <outdir>/<ID>/fastp/."
             }
@@ -71,6 +71,20 @@
             "save_sylph_sketches": {
                 "default": false,
                 "help_text": "Publish sylph sketches into <outdir>/<ID>/sylph/."
+            }
+        },
+        "MultiQC": {
+            "qc_multiqc_report": {
+                "default": true,
+                "help_text": "Make one MultiQC report of the bowtie2 human alignment, fastp and sylph-tax results across all samples, in <outdir>/multiqc."
+            },
+            "qc_report_name": {
+                "default": "qc_report",
+                "help_text": "MultiQC report name; the file is <date>-<qc_report_name>.html."
+            },
+            "qc_multiqc_config": {
+                "default": "assorted-sub-workflows/qc/assets/multiqc_config.yaml",
+                "help_text": "MultiQC config used for the QC report (sample naming and section order)."
             }
         }
     }

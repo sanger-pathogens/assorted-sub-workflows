@@ -1,0 +1,18 @@
+title: "QC report"
+subtitle: "Human read removal (bowtie2), fastp trimming and sylph-tax profiles"
+
+# fastp otherwise names samples after the input file in its command line (e.g. <ID>_hostfree_1)
+use_filename_as_sample_name:
+  - fastp
+
+# so every section shows the bare sample ID: <ID>.fastp.json, <ID>.bowtie2.log, <ID>.sylphmpa
+extra_fn_clean_exts:
+  - ".fastp"
+  - ".bowtie2"
+
+module_order:
+  - bowtie2:
+      name: "Human read removal (bowtie2)"
+      info: "alignment of each read against T2T-CHM13v2.0; a pair is removed if either mate aligned."
+  - fastp
+  - sylphtax
