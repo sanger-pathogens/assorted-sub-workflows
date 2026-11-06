@@ -47,7 +47,7 @@ process REPORT {
 process COMBINE_REPORTS {
     label 'cpu_1'
     label 'mem_2'
-    label 'time_1'
+    label 'time_12'
 
     publishDir mode: 'copy', path: "${params.outdir}/report/"
 
