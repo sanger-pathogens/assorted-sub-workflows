@@ -10,7 +10,7 @@ process THEMISTO2_BUILD {
     }
     scratch true
 
-    container "quay.io/sangerpathogens/themisto2:0.1.0-ffb98e6"
+    container "quay.io/sangerpathogens/themisto2:0.1.0-ffb98e6-c1"
 
     // meta.stage disambiguates the candidate rebuild from the lineage's own build.
     publishDir mode: 'copy', path: "${params.outdir}/themisto2/${meta.stage ? "${meta.stage}/" : ''}${meta.ID}/build/"
@@ -49,7 +49,7 @@ process THEMISTO2_STATS {
     label 'mem_2' // real peak RSS <35 MB
     label 'time_30m'
 
-    container "quay.io/sangerpathogens/themisto2:0.1.0-ffb98e6"
+    container "quay.io/sangerpathogens/themisto2:0.1.0-ffb98e6-c1"
 
     input:
     tuple val(meta), path(index_thm2)
@@ -71,7 +71,7 @@ process THEMISTO2_EXPORT {
     label 'mem_4'
     label 'time_queue_from_normal'
 
-    container "quay.io/sangerpathogens/themisto2:0.1.0-ffb98e6"
+    container "quay.io/sangerpathogens/themisto2:0.1.0-ffb98e6-c1"
 
     publishDir mode: 'copy', path: "${params.outdir}/themisto2/${meta.stage ? "${meta.stage}/" : ''}${meta.ID}/export/"
 
