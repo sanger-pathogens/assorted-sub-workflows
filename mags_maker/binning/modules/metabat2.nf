@@ -88,6 +88,7 @@ process METABAT2 {
     tuple val(meta), path("metabat/"),  emit: depth
 
     script:
+    tmpout=metabat2.o
     """
     metabat2 -i ${assembly} \\
         -a ${depth_text} \\
@@ -95,7 +96,11 @@ process METABAT2 {
         -m ${params.metabat_min_contig} \\
         -t ${task.cpus} \\
         --unbinned \\
-        --seed ${params.bin_seed}
+        --seed ${params.bin_seed} \\
+        > ${tmpout}
+    
+    grep "0 bins (0 bases in total) formed." ${tmpout} && cat ${tmpout} && echo "No bins formed, will now exit cleanly." && exit 7
+    cat ${tmpout}
 
     #move stuff out of the bin that isn't to use
     ## top 3 files are added in later version, we touch the files to avoid a crash 
