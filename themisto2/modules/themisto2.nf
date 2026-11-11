@@ -1,7 +1,7 @@
 process THEMISTO2_BUILD {
     tag "${meta.ID}"
-    label 'cpu_32'
-    label "mem_8"
+    label "cpu_${params.cpu_themisto2_build}"
+    label "mem_${params.mem_themisto2_build}"
     label 'time_queue_from_normal'
 
     // request /tmp only if /tmp is actually the temp dir (assumes TMPDIR unset)
