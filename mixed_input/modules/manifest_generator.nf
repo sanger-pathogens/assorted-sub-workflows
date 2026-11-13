@@ -3,18 +3,19 @@ process MANIFEST_GENERATOR {
     label "mem_1"
     label "time_30m"
 
-    publishDir "${params.outdir}", mode: 'copy'
+    container 'quay.io/sangerpathogens/manifest_generator:2.0.1-86d7316'
+
+    publishDir "${params.outdir}/manifest", mode: 'copy'
 
     input:
-    val input_dir
+    val(input_dir)
 
     output:
-    path "manifest/manifest.csv", emit: 'ch_manifest_from_dir'
+    path(output_manifest), emit: 'ch_manifest_from_dir'
 
     script:
-    manifest_script = "${projectDir}/assorted-sub-workflows/mixed_input/bin/generate_manifest.py"
+    output_manifest = "manifest.csv"
     """
-    mkdir -p manifest
-    ${manifest_script} -i ${input_dir} -o manifest -v ${params.fastq_validation} -d ${params.max_depth}
+    manifest_generator.py --from_dir_recursive ${input_dir} --name ${output_manifest} --max_depth ${params.max_depth}
     """
 }
