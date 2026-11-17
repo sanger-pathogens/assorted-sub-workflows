@@ -58,9 +58,9 @@ Sylph profiling waits for every sample to be sketched before the batches start.
 
 | Parameter                  | Default                              | Description                                                                                  |
 | -------------------------- | ------------------------------------ | -------------------------------------------------------------------------------------------- |
-| `--run_qc`                 | `true`                               | Run QC. When false, reads pass through unchanged and the QC outputs are empty.               |
-| `--host_removal`           | `auto`                               | `auto` (all but iRODS reads), `all` or `none`.                                               |
-| `--host_bowtie2_index`     | NPG T2T-CHM13v2.0                    | bowtie2 index of the human reference.                                                        |
+| `--run_qc`                 | `true`                               | Run reads preprocessing (human read removal with Bowtie2 + reads quality trimming and filtering with fastp) and QC (fastp reads quality report + Sylph taxonomy profiling). When false, reads pass through unchanged and the QC outputs are empty.               |
+| `--host_removal`           | `auto`                               | `auto` (all but reads pulled from Sanger iRODS), `all` or `none`.                                               |
+| `--host_bowtie2_index`     | NPG T2T-CHM13v2.0                    | bowtie2 index of the human reference genome.                                                        |
 | `--fastp_options`          | see `qc.config`                      | Options passed to fastp.                                                                     |
 | `--fastp_trim_poly_g`      | `true`                               | Force polyG trimming (`-g`); false disables it (`-G`).                                       |
 | `--save_individual_fastp_reports` | `true`                       | Publish fastp JSON/HTML reports.                                                             |

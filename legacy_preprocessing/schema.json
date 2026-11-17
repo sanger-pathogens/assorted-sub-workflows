@@ -2,6 +2,10 @@
     "pipeline": "Preprocessing (sub-workflow)",
     "params": {
         "General pre-processing options":{
+            "preprocessing": {
+                "default": "true",
+                "help_text": "Enables reads pre-processing (trimming, host removal etc.) after extraction. Setting to true only switches on the Trimmomatic step by default (see Pre-processing options)."
+            },
             "publish_clean_reads": {
                 "default": "true",
                 "help_text": "Save the pre-processed reads (gzip-compressed) in the preprocessing/ output folder."
