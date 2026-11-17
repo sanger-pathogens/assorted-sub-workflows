@@ -117,6 +117,8 @@ workflow QC_ILLUMINA {
             multiqc_report = Channel.empty()
         }
 
+        qc_summary = Channel.empty() // TO DO make simple fail/pass QC summary report
+
     } else {
         preprocessed_reads_ch = reads_ch
         fastp_stats = Channel.empty()
@@ -124,6 +126,7 @@ workflow QC_ILLUMINA {
         sylph_report = Channel.empty()
         sylphtax_mpa_report = Channel.empty()
         multiqc_report = Channel.empty()
+        qc_summary = Channel.empty()
     }
 
     emit:
