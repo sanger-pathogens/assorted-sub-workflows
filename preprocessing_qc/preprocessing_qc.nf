@@ -19,7 +19,7 @@ def needs_host_removal(meta) {
     return meta.input_source != "IRODS"
 }
 
-workflow QC {
+workflow PREPROCESSING_QC {
     take:
     reads_ch // meta, read_1, read_2
 
