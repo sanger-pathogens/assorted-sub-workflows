@@ -137,6 +137,7 @@ workflow QC_ILLUMINA {
     sylph_report
     sylphtax_mpa_report
     multiqc_report
+    qc_summary
 }
 
 workflow SYLPH {
