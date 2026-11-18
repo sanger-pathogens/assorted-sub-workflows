@@ -53,6 +53,7 @@ workflow PREPROCESSING_QC {
     sylph_report = QC_ILLUMINA.out.sylph_report
     sylphtax_mpa_report = QC_ILLUMINA.out.sylphtax_mpa_report
     multiqc_report = QC_ILLUMINA.out.multiqc_report
+    qc_summary = QC_ILLUMINA.out.qc_summary
 }
 
 workflow QC_ILLUMINA {
