@@ -38,9 +38,11 @@ process SYLPH_PROFILE {
     path("*_sylph_profile.tsv"), optional: true, emit: sylph_reports
 
     script:
+    def estimate_unknown = params.sylph_estimate_unknown ? (params.sylph_read_seq_id ? "-u --read-seq-id ${params.sylph_read_seq_id}" : "-u") : ""
     """
-    sylph profile -t ${task.cpus} -k ${params.sylph_k} ${params.sylph_profile_options} \\
-        -o batch_${batch_index}.tsv ${sketches} ${params.sylph_db}
+    sylph profile -t ${task.cpus} -k ${params.sylph_k} ${estimate_unknown} \\
+        -o batch_${batch_index}.tsv ${sketches} ${params.sylph_db} \\
+        ${params.sylph_profile_options}
 
     # rows are grouped by sample (first column, the sketch name given by -S)
     awk -F'\\t' 'NR==1 {header=\$0; next}
