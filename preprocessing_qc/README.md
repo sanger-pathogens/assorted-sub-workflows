@@ -20,7 +20,7 @@ for pipelines using this QC. The previous QC workflow (FastQC, Kraken2/Bracken, 
 ## Usage
 
 ```groovy
-include { QC } from './assorted-sub-workflows/qc/qc.nf'
+include { QC } from './assorted-sub-workflows/preprocessing_qc/preprocessing_qc.nf'
 
 MIXED_INPUT()
 | QC
@@ -29,7 +29,7 @@ MIXED_INPUT()
 and in `nextflow.config`:
 
 ```groovy
-includeConfig "./assorted-sub-workflows/qc/qc.config"
+includeConfig "./assorted-sub-workflows/preprocessing_qc/preprocessing_qc.config"
 ```
 
 ## Outputs

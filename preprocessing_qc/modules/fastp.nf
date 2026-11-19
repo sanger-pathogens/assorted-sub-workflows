@@ -51,7 +51,7 @@ process COLLATE_FASTP_STATS {
     path("fastp_statistics.tsv"), emit: fastp_stats
 
     script:
-    command = "${projectDir}/assorted-sub-workflows/qc/bin/fastp_stats.py"
+    command = "${projectDir}/assorted-sub-workflows/preprocessing_qc/bin/fastp_stats.py"
     """
     ${command} ${fastp_jsons} > fastp_statistics.tsv
     """
