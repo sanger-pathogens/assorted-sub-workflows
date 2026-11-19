@@ -5,6 +5,7 @@ include { FASTP
 include { SYLPH_SKETCH
           SYLPH_PROFILE
           SYLPHTAX_TAXPROF     } from './modules/sylph.nf'
+include { PASS_OR_FAIL_SYLPH   } from './modules/pass_or_fail.nf'
 include { MULTIQC              } from '../reporting/modules/multiqc.nf'
 
 //switch is banned :(
@@ -89,19 +90,31 @@ workflow QC_ILLUMINA {
         | mix(reads_by_host_removal_ch.no_host_removal)
         | FASTP
 
-        FASTP.out.json.collect()
-        | COLLATE_FASTP_STATS
-        | set { fastp_stats }
+        COLLATE_FASTP_STATS(FASTP.out.json.collect())
+        fastp_stats = COLLATE_FASTP_STATS.out.fastp_stats
 
         preprocessed_reads_ch = FASTP.out.reads
+
+        // one item per sample: [Sample_id, 6 fastp grades]
+        COLLATE_FASTP_STATS.out.fastp_fail_pass
+        | splitCsv(header: true, sep: '\t')
+        | map { row -> [row.Sample_id] + row.values().drop(1) }
+        | set { pass_fail_fastp_ch }
 
         if (params.sylph_profile) {
             SYLPH(preprocessed_reads_ch)
             sylph_report = SYLPH.out.sylph_report
             sylphtax_mpa_report = SYLPH.out.sylphtax_mpa_report
+            
+            PASS_OR_FAIL_SYLPH(sylphtax_mpa_report)
+            pass_fail_sylph_ch = PASS_OR_FAIL_SYLPH.out.pass_or_fail.map { meta, pass_fail -> [meta.ID, pass_fail] }
+
+            // [Sample_id, 6 fastp grades, sylph grade]
+            pass_fail_channel = pass_fail_fastp_ch.join(pass_fail_sylph_ch, remainder: true)
         } else {
             sylph_report = Channel.empty()
             sylphtax_mpa_report = Channel.empty()
+            pass_fail_channel = pass_fail_fastp_ch
         }
 
         if (params.qc_multiqc_report) {
@@ -118,7 +131,22 @@ workflow QC_ILLUMINA {
             multiqc_report = Channel.empty()
         }
 
-        qc_summary = Channel.empty() // TO DO make simple fail/pass QC summary report
+        // one row per sample; NA where a sample has no sylph grade or sylph is off
+        def qc_summary_header = ["Sample_id",
+            "read1_per_base_quality", "read1_per_seq_quality", "read1_per_base_N",
+            "read2_per_base_quality", "read2_per_seq_quality", "read2_per_base_N",
+            "sylph_taxonomy"]
+        pass_fail_channel
+        | map { row ->
+            def cols = row.collect { value -> value == null ? "NA" : value }
+            cols += ["NA"] * (qc_summary_header.size() - cols.size())
+            cols.join("\t") + "\n"
+        }
+        | collectFile(name: "sample_pass_fail_qc_summary.tsv",
+                      seed: qc_summary_header.join("\t") + "\n",
+                      sort: true,
+                      storeDir: "${params.outdir}/qc_pass_fail_summary")
+        | set { qc_summary }
 
     } else {
         preprocessed_reads_ch = reads_ch

@@ -42,17 +42,18 @@ process COLLATE_FASTP_STATS {
 
     container 'quay.io/sangerpathogens/python-curl:3.11'
 
-    publishDir "${params.outdir}/preprocessing_summary_stats", mode: 'copy', overwrite: true, pattern: "*_statistics.tsv"
+    publishDir "${params.outdir}/preprocessing_summary_stats", mode: 'copy', overwrite: true, pattern: "fastp_*.tsv"
 
     input:
     path(fastp_jsons)
 
     output:
     path("fastp_statistics.tsv"), emit: fastp_stats
+    path("fastp_fail_pass.tsv"), emit: fastp_fail_pass
 
     script:
     command = "${projectDir}/assorted-sub-workflows/preprocessing_qc/bin/fastp_stats.py"
     """
-    ${command} ${fastp_jsons} > fastp_statistics.tsv
+    ${command} ${fastp_jsons}
     """
 }
