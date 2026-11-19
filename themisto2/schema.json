@@ -52,31 +52,31 @@
       },
       "temp_space": {
         "default": "10000",
-        "help_text": "Amount of /tmp space (MB) that will be reserved for index creation, if /tmp is being used as the temporary storage directory."
+        "help_text": "Amount of temporary space (MB) that will be reserved for index creation, if /tmp is being used as the temporary storage directory."
       },
       "cpu_ggcat": {
         "default": "16",
-        "help_text": "Defines the starting LSF request for threads (see common config for allowed values). Escalates on retry."
+        "help_text": "Defines the starting request for task CPUs (see common config for allowed values). Escalates on retry."
       },
       "mem_ggcat": {
         "default": "8",
-        "help_text": "Defines the starting LSF request for memory (see common config for allowed values). Escalates on retry."
+        "help_text": "Defines the starting request for task memory (see common config for allowed values). Escalates on retry."
     },
       "cpu_sbwt": {
         "default": "16",
-        "help_text": "Defines the starting LSF request for threads (see common config for allowed values). Escalates on retry."
+        "help_text": "Defines the starting request for task CPUs (see common config for allowed values). Escalates on retry."
       },
       "mem_sbwt": {
         "default": "8",
-        "help_text": "Defines the starting LSF request for memory (see common config for allowed values). Escalates on retry."
+        "help_text": "Defines the starting request for task memory (see common config for allowed values). Escalates on retry."
     },
       "cpu_themisto2_build": {
         "default": "16",
-        "help_text": "Defines the starting LSF request for threads (see common config for allowed values). Escalates on retry."
+        "help_text": "Defines the starting request for task CPUs (see common config for allowed values). Escalates on retry."
       },
       "mem_themisto2_build": {
         "default": "8",
-        "help_text": "Defines the starting LSF request for memory (see common config for allowed values). Escalates on retry."
+        "help_text": "Defines the starting request for task memory (see common config for allowed values). Escalates on retry."
     },
     "Output options": {
       "publish_intermediate": {
