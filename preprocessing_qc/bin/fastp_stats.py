@@ -4,20 +4,32 @@ import argparse
 import json
 from pathlib import Path
 
-COLUMNS = [
-    "Sample_id",
+COLUMNS_STATS = [
+    "sample_id",
     "reads_before",
     "reads_after",
     "pct_reads_kept",
     "bases_before",
     "bases_after",
+    "q30_rate_before",
     "q30_rate_after",
+    "gc_content_before",
     "gc_content_after",
     "duplication_rate",
-    "low_quality_reads",
-    "too_many_N_reads",
-    "too_short_reads",
+    "low_quality_reads_filtered",
+    "too_many_N_reads_filtered",
+    "too_short_reads_filtered",
     "adapter_trimmed_reads",
+]
+
+COLUMNS_FAIL_PASS = [
+  "sample_id",
+  "read1_per_base_quality",
+  "read1_per_seq_quality",
+  "read1_per_base_N",
+  "read2_per_base_quality",
+  "read2_per_seq_quality",
+  "read2_per_base_N",
 ]
 
 def fail_pass_fastp_filtered_reads(report, sample_id, outfailpasshandle):
@@ -61,7 +73,9 @@ def extract_stats_to_json(report, json_path, outtsvhandle):
         f"{kept:.2f}",
         before["total_bases"],
         after["total_bases"],
+        before["q30_rate"],
         after["q30_rate"],
+        before["gc_content"],
         after["gc_content"],
         report.get("duplication", {}).get("rate", ""),
         filtering["low_quality_reads"],
@@ -82,9 +96,9 @@ def main():
     args = parser.parse_args()
 
     tsvout = open("fastp_statistics.tsv", "w")
-    tsvout.write("\t".join(COLUMNS) + "\n")
+    tsvout.write("\t".join(COLUMNS_STATS) + "\n")
     failpassout = open("fastp_fail_pass.tsv", "w")
-    failpassout.write("Sample_id\tread1_per_base_quality\tread1_per_seq_quality\tread1_per_base_N\tread2_per_base_quality\tread2_per_seq_quality\tread2_per_base_N\n")
+    failpassout.write("\t".join(COLUMNS_FAIL_PASS) + "\n")
     for path in sorted(args.fastp_jsons, key=lambda p: Path(p).name):
         sample_row(path, tsvout, failpassout)
     tsvout.close()
