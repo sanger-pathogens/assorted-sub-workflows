@@ -1,26 +1,16 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-settings.json",
   "permissions": {
-    "additionalDirectories": [
-      "/tmp"
-    ],
-    "allow": [
-      "WebFetch(domain:sanger.ac.uk)"
-    ]
+    "additionalDirectories": ["/tmp"],
+    "allow": ["WebFetch(domain:sanger.ac.uk)"]
   },
   "sandbox": {
     "filesystem": {
-      "allowRead": [
-        "/tmp"
-      ],
-      "allowWrite": [
-        "/tmp"
-      ]
+      "allowRead": ["/tmp"],
+      "allowWrite": ["/tmp"]
     },
     "network": {
-      "allowedDomains": [
-        "sanger.ac.uk"
-      ]
+      "allowedDomains": ["sanger.ac.uk"]
     }
   }
 }
