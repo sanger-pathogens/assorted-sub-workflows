@@ -95,10 +95,12 @@ workflow QC_ILLUMINA {
 
         preprocessed_reads_ch = FASTP.out.reads
 
-        // one item per sample: [Sample_id, 6 fastp grades]
+        // one item per sample: [sample_id, [6 fastp grades]]
+        // grades are kept as a single list so a join with remainder pads them with one null, not misaligned columns
+        def n_fastp_grades = 6
         COLLATE_FASTP_STATS.out.fastp_fail_pass
         | splitCsv(header: true, sep: '\t')
-        | map { row -> [row.Sample_id] + row.values().drop(1) }
+        | map { row -> [row.sample_id, row.values().drop(1)] }
         | set { pass_fail_fastp_ch }
 
         if (params.sylph_profile) {
@@ -109,12 +111,16 @@ workflow QC_ILLUMINA {
             PASS_OR_FAIL_SYLPH(sylphtax_mpa_report)
             pass_fail_sylph_ch = PASS_OR_FAIL_SYLPH.out.pass_or_fail.map { meta, pass_fail -> [meta.ID, pass_fail] }
 
-            // [Sample_id, 6 fastp grades, sylph grade]
-            pass_fail_channel = pass_fail_fastp_ch.join(pass_fail_sylph_ch, remainder: true)
+            // [sample_id, 6 fastp grades, sylph grade]; NA where a sample is missing from either side
+            pass_fail_channel = pass_fail_fastp_ch
+            | join(pass_fail_sylph_ch, remainder: true)
+            | map { id, fastp_grades, sylph_grade ->
+                [id] + (fastp_grades ?: ["NA"] * n_fastp_grades) + [sylph_grade ?: "NA"]
+            }
         } else {
             sylph_report = Channel.empty()
             sylphtax_mpa_report = Channel.empty()
-            pass_fail_channel = pass_fail_fastp_ch
+            pass_fail_channel = pass_fail_fastp_ch.map { id, fastp_grades -> [id] + fastp_grades }
         }
 
         if (params.qc_multiqc_report) {
@@ -132,7 +138,7 @@ workflow QC_ILLUMINA {
         }
 
         // one row per sample; NA where a sample has no sylph grade or sylph is off
-        def qc_summary_header = ["Sample_id",
+        def qc_summary_header = ["sample_id",
             "read1_per_base_quality", "read1_per_seq_quality", "read1_per_base_N",
             "read2_per_base_quality", "read2_per_seq_quality", "read2_per_base_N",
             "sylph_taxonomy"]
