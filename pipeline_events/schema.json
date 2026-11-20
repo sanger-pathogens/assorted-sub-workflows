@@ -21,6 +21,10 @@
             "track_batch_metadata": {
                 "default": "false",
                 "help_text": "Track batch-level metadata files for the pipeline run (pipeline run manifest, reads QC summary, trimming and host read removal stats summaries)."
+            },
+            "testing": {
+                "default": "false",
+                "help_text": "Use the dev/staging version of the pipeline events API container."
             }
         }
     }
