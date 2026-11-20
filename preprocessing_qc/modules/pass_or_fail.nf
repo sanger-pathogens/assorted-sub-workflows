@@ -20,7 +20,7 @@ process PASS_OR_FAIL_SYLPH {
         top_species_abun=\${top_species_abun:-0}
         genus_check=\$(echo "\$top_genus_abun < ${params.genus_abundance_threshold}" | bc)
         species_check=\$(echo "\$top_species_abun < ${params.species_abundance_threshold}" | bc)
-        pass_or_fail=\$(if [ \$genus_check -eq 1 ] || [ \$species_check -eq 1 ]; then echo 'fail'; else echo 'pass'; fi)
+        pass_or_fail=\$(if [ \$genus_check -eq 1 ] || [ \$species_check -eq 1 ]; then echo 'FAIL'; else echo 'PASS'; fi)
 
     else
         pass_or_fail=\$(echo "NA")

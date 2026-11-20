@@ -29,7 +29,7 @@ process BOWTIE2_HOST_REMOVAL {
     reads_in=\$(head -1 ${meta.ID}.bowtie2.log | awk '{print \$1}')
     aligned=\$(grep -E 'aligned (exactly 1 time|>1 times)' ${meta.ID}.bowtie2.log | awk '{s+=\$1} END{print s+0}')
     kept=\$(( \$(zcat ${meta.ID}_hostfree_1.fastq.gz | wc -l) / 4 * 2 ))
-    printf "Sample_id\\treads_in\\treads_aligned_human\\treads_kept\\tpct_removed\\n%s\\t%s\\t%s\\t%s\\t%s\\n" ${meta.ID} \$reads_in \$aligned \$kept \\
+    printf "sample_id\\treads_in\\treads_aligned_human\\treads_kept\\tpct_removed\\n%s\\t%s\\t%s\\t%s\\t%s\\n" ${meta.ID} \$reads_in \$aligned \$kept \\
         \$(awk -v i=\$reads_in -v k=\$kept 'BEGIN{printf "%.4f", i ? 100*(i-k)/i : 0}') > ${meta.ID}_host_removal_stats.tsv
     """
 }
