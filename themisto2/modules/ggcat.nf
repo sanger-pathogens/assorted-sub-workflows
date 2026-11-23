@@ -1,7 +1,7 @@
 process GGCAT {
     tag "${meta.ID}"
-    label 'cpu_32'
-    label "mem_8"
+    label "cpu_${params.cpu_ggcat}"
+    label "mem_${params.mem_ggcat}"
     label 'time_queue_from_normal'
 
     // request /tmp only if /tmp is actually the temp dir (assumes TMPDIR unset)
@@ -26,18 +26,18 @@ process GGCAT {
     // Per-meta.ID subpath so concurrent tasks don't collide on a shared temp_dir.
     def temp_dir = params.temp_dir ? "${params.temp_dir}/ggcat/${meta.ID}" : "ggcat_temp"
     unitigs_fna = "unitigs-k${params.color_index_kmer_size}.fna"
-    // Cap -m at 95% of the allocation -- LSF kills a job that hits its exact limit.
-    def mem_gb = Math.floor(task.memory.toGiga() * 0.95) as int
+    // Provide memory target 10% lower than LSF job suggested by Jarno
+    def mem_gb = (task.memory.toGiga() * 0.9).toInteger()
     """
     mkdir -p ${temp_dir}
     ggcat build \\
-        -l ${file_colors_input} \\
-        -o ${unitigs_fna} \\
-        -s 1 \\
-        -k ${params.color_index_kmer_size} \\
-        -t ${temp_dir} \\
-        -j ${task.cpus} \\
-        -m ${mem_gb} \\
-        -p
+        --input-lists ${file_colors_input} \\
+        --output-file ${unitigs_fna} \\
+        --min-multiplicity 1 \\
+        --kmer-length ${params.color_index_kmer_size} \\
+        --temp-dir ${temp_dir} \\
+        --threads-count ${task.cpus} \\
+        --memory ${mem_gb} \\
+        --prefer-memory
     """
 }
