@@ -10,7 +10,7 @@ This workflow performs assembly quality control, with a focus on metagenome-asse
 
 It runs the following steps on the assembly (`fasta` files):
 
-1. **Input check**: every input FASTA is checked once before any QC. GenBank-style `//` lines and blank lines are removed, and sequences containing non-nucleotide characters are reported. See [Input checks](#input-checks).
+1. **Input check**: every input FASTA is checked and cleaned of formatting problems before any QC. See [Input checks](#input-checks).
 2. **QUAST, CheckM2 and GUNC**: [QUAST](https://github.com/ablab/quast) evaluates genome/metagenome assemblies by computing various metrics. [CheckM2](https://github.com/chklovski/CheckM2) is used to predict the completeness and contamination of genomic bins (independent of their taxonomic classification). [GUNC](https://github.com/grp-bork/gunc) is also run to check for chimerism and contamination. This stage is the 'preqc'.
 3. **MDMCleaner and seqkit**: [MDMCleaner](https://github.com/KIT-IBG-5/mdmcleaner) is used to remove contaminant contigs and provide reliable contig classification of metagenome assembled genomes (MAGs); isolates skip this step. Sequences that are less than a minimum length (see param `min_contig`) are then removed from every genome using [seqkit](https://bioinf.shenwei.me/seqkit/). See [Decontamination](#decontamination).
 4. **QUAST, CheckM2 and GUNC**: The same commands as in stage 2 are run on the cleaned fasta outputs (postqc).
@@ -35,11 +35,11 @@ Other parameters:
 - `--genome_types` (default: null): Optional TSV giving the type of individual genomes, for runs mixing MAGs and isolates. Genomes not listed use `--genome_type`. See [Genome types: MAGs and isolates](#genome-types-mags-and-isolates).
 - `--fast_taxonomy` (default: false): Run GTDB-Tk without `--place_species`, using fewer CPUs and less memory. See [Taxonomic classification](#taxonomic-classification).
 - `--report_config` (default: [`./assets/report_config.json`](./assets/report_config.json)). See [Report configuration](#report-configuration) for more details.
-- `--autoqc_config` (default: null) Optional parameter to filter genomes that pass QC thresholds specified in the config. When applying this option you must either provide the path to a config or with the string "default" use the provided config at [`./assorted-sub-workflows/qc_mags/assets/autoqc_config.tsv`](./assorted-sub-workflows/qc_mags/assets/autoqc_config.tsv). See [AutoQC configuration](#autoqc-configuration) for more details.
+- `--autoqc_config` (default: null) Optional config to filter genomes on QC thresholds: a path to a config, or `default` for the provided one. See [AutoQC configuration](#autoqc-configuration) for more details.
 - `--min_contig` (default: 1000) Contigs below this length will be filtered out by seqkit.
 - `--skip_raw_reports` (default: false) Skip publishing raw reports from various QC tools, keeping only final summary reports.
 - `--publish_mdmcleaner` (default: false) Also publish the MDMCleaner output FASTAs (before `min_contig` filtering) to `mdmcleaner/`.
-- `--skip_cleanup` (default: false) Keep each batch's intermediate work directories. By default they are deleted once the batch has finished to save disk space, so the use Nextflow `-resume` will restart the pipeline without any checkpoints. See [Work directory cleanup](#work-directory-cleanup).
+- `--skip_cleanup` (default: false) Keep each batch's intermediate work directories, which are otherwise deleted. See [Work directory cleanup](#work-directory-cleanup).
 - `--batch_size` (default: 0) Number of genomes per batch. `0` processes each input element (sample) as its own batch. See [Batching large runs](#batching-large-runs).
 - `--temp_file_storage` (default: `/tmp`): Specify a directory where GTDB-Tk can store temporary files during processing. Options are '/tmp', '/dev/shm' or 'null' (write to memory). See [GTDB-Tk runtime](#gtdb-tk-runtime) for more details.
 - `--temp_space` (default: `30GB`): Request a specific amount of temporary working space to reserve for GTDB-Tk and MDMCleaner. Only required when using LSF to submit jobs. See [GTDB-Tk runtime](#gtdb-tk-runtime) for more details.
@@ -75,15 +75,7 @@ NOTE: In addition to columns derived from the tool reports, every report include
 
 `all_final_report.tsv` concatenates all batch reports and adds a `sample_id` column (second column), taken from the `ID` of the input element each genome came from. If the same genome file name appears under several IDs and the batch cannot tell them apart, `sample_id` lists all of them separated by `;`.
 
-The default columns included in the final report are as follows:
-_General_
-
-- preqc_genome_name
-- postqc_genome_name
-- sample_or_strain_name
-- genome_status
-- mimag_quality
-- qc_review
+Besides the columns above, the default report config adds the following columns:
 
 _CheckM2_
 
@@ -117,8 +109,8 @@ _QUAST_
 - quast_preqc_auN
 - quast_preqc_L50
 - quast_preqc_L90
-- quast*preqc*\# N's per 100 kbp
-- quast*postqc*\# contigs
+- quast_preqc_\# N's per 100 kbp
+- quast_postqc_\# contigs
 - quast_postqc_Largest contig
 - quast_postqc_Total length
 - quast_postqc_GC (%)
@@ -127,15 +119,13 @@ _QUAST_
 - quast_postqc_auN
 - quast_postqc_L50
 - quast_postqc_L90
-- quast*postqc*\# N's per 100 kbp
+- quast_postqc_\# N's per 100 kbp
 
 A note on **number of contigs** metrics: QUAST "# contigs" reports all contigs (both in pre and post QC reports) whilst GUNC's "num_contigs" is defined as all contigs that contain a mapped gene.
 
 Please see output reports for these individual tools to see which columns you can _add_ to your own configuration. Remove any by omitting them from your custom config. If a custom config leaves out `Completeness` or `Contamination` for CheckM2, `mimag_quality` is left empty; if it leaves out `pass.GUNC` for GUNC, no MAG can be `HQ` (a warning is logged in both cases).
 
 If no genome in a batch has a GTDB-Tk classification, the report step fails rather than writing a report without taxonomy, since this means the GTDB-Tk summary was empty or did not match the genome names. Genomes missing a classification individually are listed as a warning in the task log.
-
-If using `autoqc` ensure your report config includes the column you wish to filter on. See below for more information.
 
 ### Quality tiers
 
@@ -158,7 +148,7 @@ The rRNA/tRNA criteria of the full MIMAG high-quality standard are not assessed.
 
 It is also possible to automatically filter genomes based on QC metrics produced in the summary report described in [Report configuration](#report-configuration).
 
-To apply this function, you must enable AutoQC by supplying a configuration file path to `--autoqc_config` (config as described [here](../mixed_input/README.md#filter_metadatapy)) or by supplying the string "default" so that the default [autoqc_config.tsv](./assets/autoqc_config.tsv) is used.
+To apply this function, you must enable AutoQC by supplying a configuration file path to `--autoqc_config` (config as described [in mixed input](../mixed_input/README.md#filter_metadatapy)) or by supplying the string "default" so that the default [autoqc_config.tsv](./assets/autoqc_config.tsv) is used. Any other value makes the pipeline stop with an error, as no config file can be found.
 
 The default AutoQC config's pass criteria are:
 
@@ -173,11 +163,9 @@ column	filter	datatype
 mimag_quality	"mimag_quality == 'HQ'"	str
 ```
 
-It is possible to add filtering rules to the autoqc config for columns\* within the report config. If using a custom report config you can customise your AutoQC config: for the column using the tool name (lowercase) and `keep_column` from the report config seperated by an underscore. i.e. `<tool>_<keep_column>`. Note that for adding filters based on CheckM2 or GUNC you must specify whether to use preqc or postqc reports i.e. `<tool>_<qc_stage>_<keep_column>`, as shown in the filterable column list above.
+It is possible to add filtering rules to the autoqc config for columns\* within the report config; a column you filter on must be included in your report config. If using a custom report config you can customise your AutoQC config: for the column using the tool name (lowercase) and `keep_column` from the report config separated by an underscore. i.e. `<tool>_<keep_column>`. Note that for adding filters based on CheckM2 or GUNC you must specify whether to use preqc or postqc reports i.e. `<tool>_<qc_stage>_<keep_column>`, as shown in the filterable column list above.
 
 \*NOTE: Unfortunately QUAST report columns are not currently columns you can AutoQC on. This is an area for future development and should be possible in future versions.
-
-Please note - if you add the parameter `--autoqc_config` but do not supply either a valid config file path or "default" the pipeline will error on not being able to find a config file to use.
 
 ### Genome types: MAGs and isolates
 
@@ -224,7 +212,7 @@ Outputs are produced per batch: `<batch>` is the input element's `ID` when `--ba
 - Reports generated by CheckM2, GUNC and QUAST in `pre_qc/` and `post_qc/`, and by GTDB-Tk (bacterial and archaeal summaries combined) in `post_qc/gtdbtk/` (unless using `--skip_raw_reports`).
 - In `report/`:
   - `<batch>_final_report.tsv`: final report per batch (with customisable columns) combining individual reports from various pipeline tools.
-  - `all_final_report.tsv`: all batch reports combined, with a `sample_id` column.
+  - `all_final_report.tsv`: all batch reports combined, with a `sample_id` column (see [Report configuration](#report-configuration)).
   - `<batch>_filter_summary.tsv`: summary of contigs filtered out per bin. Please note that the small contigs (below `min_contig`) are calculated first, the contigs MDMCleaner-failed contigs are only those removed despite their length being above `min_contig`.
   - `input_fasta_fixes.tsv`: fixes and warnings from the [input check](#input-checks).
   - `mdmcleaner_skipped.tsv`: MAGs that failed MDMCleaner and have no post-QC result (see [Decontamination](#decontamination)).
@@ -243,8 +231,8 @@ By default the workflow runs GTDB-Tk with `--place_species`, which also places t
 
 ### GTDB-Tk runtime
 
-- Runtime and memory can be reduced for GTDB-Tk classficiation by specifying the `--temp_file_storage` option with either `/tmp` or `/dev/shm`. Writing these files to disk instead of keeping everything in memory reduces peak RAM usage by up to 89% and can improve runtime by up to 10%. This often allows the job to run with a smaller memory request, meaning it can start faster on cluster schedulers.
-- If you know the size of your samples you can request a specific temp memory using `--temp_space <XX>GB`. This lets you reserve a specific amount of temporary memory/disk space. Typically you should request < 100 GB, and no more then 1000 GB, as larger requests may cause jobs to remain pending. Note that due to a know bug reported in the farm documentation, request half the memory you require as LSF double-accounts /tmp use see [here](https://ssg-confluence.internal.sanger.ac.uk/spaces/FARM/pages/101361225/Useful+LSF+resources#UsefulLSFresources-Resources).
+- Runtime and memory can be reduced for GTDB-Tk classification by specifying the `--temp_file_storage` option with either `/tmp` or `/dev/shm`. Writing these files to disk instead of keeping everything in memory reduces peak RAM usage by up to 89% and can improve runtime by up to 10%. This often allows the job to run with a smaller memory request, meaning it can start faster on cluster schedulers.
+- If you know the size of your samples you can request a specific temp memory using `--temp_space <XX>GB`. This lets you reserve a specific amount of temporary memory/disk space. Typically you should request < 100 GB, and no more than 1000 GB, as larger requests may cause jobs to remain pending. Note that due to a known bug reported in the farm documentation, request half the memory you require as LSF double-accounts /tmp use see [here](https://ssg-confluence.internal.sanger.ac.uk/spaces/FARM/pages/101361225/Useful+LSF+resources#UsefulLSFresources-Resources).
 - At most 10 GTDB-Tk and 10 MDMCleaner tasks run at once.
 
 ### Work directory cleanup
@@ -281,4 +269,4 @@ This flag aggregates MAGs across samples into batches of N, with any remainder a
 
 Batch size involves a trade-off between throughput and resource usage. Larger batches improve computational efficiency but increase run-time per job, while smaller batches can reduce latency — particularly on an uncontested cluster — but at the cost of significantly higher memory overhead. Note that batches below ~1000 MAGs may incur disproportionate database loading overhead relative to actual QC compute time. A batch size of 1000–2000 MAGs is recommended for most use cases to strike a balance.
 
-With batching, outputs are named `batch_1`, `batch_2`, ... instead of by sample. The input `ID` of each genome is recorded before batching, and is reported in the `sample_id` column of `report/all_final_report.tsv`.
+Outputs are then named by batch rather than by sample (see [Outputs](#outputs)), and each genome's input `ID` is kept in the `sample_id` column of `report/all_final_report.tsv`.
