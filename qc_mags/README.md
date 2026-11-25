@@ -239,7 +239,7 @@ By default the workflow runs GTDB-Tk with `--place_species`, which also places t
 
 By default, once a batch is finished (its final report and contig filtering summary are written, plus its autoQC outputs if `--autoqc_config` is set), the work directories of that batch's tasks are deleted to save disk space. Only directories inside the run's `work/` directory are deleted; links to input files are removed without touching the files they point to.
 
-Because the deleted tasks are no longer cached, `-resume` reruns any batch that had already finished. To keep everything, for example to debug a task or to resume a run cheaply, use `--skip_cleanup`.
+Use `--skip_cleanup` to stop this behaviour.
 
 ### Dependencies
 
@@ -247,7 +247,7 @@ All software dependencies are containerised. Databases must be made available fo
 
 ### Troubleshooting
 
-If a process in the pipeline fails with a non-zero exit code that is not recognised as a signal that memory or runtime limits were reached, the process will not be re-run and will be ignored. To understand why it has been ignored, please check the process-specific log file `.command.log` in the work directory of the affected process. With the default cleanup the work directories of finished batches are deleted, so rerun with `--skip_cleanup` to keep them.
+If a process in the pipeline fails with a non-zero exit code that is not recognised as a signal that memory (130) or runtime limits were reached (140), the process will not be re-run and will be ignored. To understand why it has been ignored, please check the process-specific log file `.command.log` in the work directory of the affected process. With the default cleanup the work directories of finished batches are deleted, so rerun with `--skip_cleanup` to keep them.
 
 Genomes missing from the final report are usually explained by `report/mdmcleaner_skipped.tsv` (MAGs that failed MDMCleaner) or `report/input_fasta_fixes.tsv` (problems found in the input FASTAs).
 
