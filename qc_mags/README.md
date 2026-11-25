@@ -42,7 +42,7 @@ Other parameters:
 - `--skip_cleanup` (default: false) Keep each batch's intermediate work directories. By default they are deleted once the batch has finished to save disk space, so the use Nextflow `-resume` will restart the pipeline without any checkpoints. See [Work directory cleanup](#work-directory-cleanup).
 - `--batch_size` (default: 0) Number of genomes per batch. `0` processes each input element (sample) as its own batch. See [Batching large runs](#batching-large-runs).
 - `--temp_file_storage` (default: `/tmp`): Specify a directory where GTDB-Tk can store temporary files during processing. Options are '/tmp', '/dev/shm' or 'null' (write to memory). See [GTDB-Tk runtime](#gtdb-tk-runtime) for more details.
-- `--temp_space` (default: `30GB`): Request a specific amount of temporary working space to reserve for GTDB-Tk and MDMCleaner. See [GTDB-Tk runtime](#gtdb-tk-runtime) for more details.
+- `--temp_space` (default: `30GB`): Request a specific amount of temporary working space to reserve for GTDB-Tk and MDMCleaner. Only required when using LSF to submit jobs. See [GTDB-Tk runtime](#gtdb-tk-runtime) for more details.
 
 ## Configuration
 

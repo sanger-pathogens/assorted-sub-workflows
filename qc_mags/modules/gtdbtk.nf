@@ -17,7 +17,7 @@ process GTDBTK {
 
     script:
     report_tsv = "${meta.ID}_gtdbtk_summary.tsv"
-    place_flag = params.place_species ? "" : "--place_species"
+    place_flag = params.place_species ? "--place_species" : ""
 
     """
     if [[ -n ${params.temp_file_storage} && "${params.temp_file_storage}" != "null" ]]; then
