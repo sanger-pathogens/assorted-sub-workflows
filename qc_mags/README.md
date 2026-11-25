@@ -237,7 +237,7 @@ If MDMCleaner fails on a MAG for a reason other than running out of memory or ti
 
 ### Taxonomic classification
 
-GTDB-Tk `classify_wf` runs on the cleaned genomes, after decontamination and length filtering. Its summary combines the bacterial and archaeal results. GTDB-Tk first compares each genome with the GTDB species representatives by average nucleotide identity (skani); genomes without a close match are placed in the reference tree to classify them.
+GTDB-Tk `classify_wf` runs on the cleaned genomes, after decontamination and length filtering. Its summary combines the bacterial and archaeal results. GTDB-Tk first compares each genome with the GTDB species representatives using skani to model average nucleotide identity using sketches; genomes without a close match are placed in the reference tree to classify them.
 
 By default the workflow runs GTDB-Tk with `--place_species`, which also places the genomes already classified by skani into the tree. `--fast_taxonomy` drops this option and runs GTDB-Tk with fewer CPUs (2 instead of 8, or 4 instead of 64 for batches over 100 genomes) and 64 GB memory. Genomes that match a species representative are still classified to species by skani, but they are no longer placed in the tree, so the placement-related columns of the GTDB-Tk summary can differ.
 
