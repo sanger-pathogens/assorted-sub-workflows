@@ -19,41 +19,18 @@ process MDMCLEANER {
     script:
     fasta_ext = fastaExt()
     output_fasta_ext = "${fasta_ext}.gz"
-    // MDMcleaner names its outputs after the genome name
+    // MDMcleaner runs on a copy called qcgenome; the kept contigs are written back out under the genome name
     genome_name = genomeName(fasta)
     """
-    # remove colons common in JGI/IMG style genome names and name them something neutral to prefer barnapp error
-    mkdir -p header_safe
-    if gzip -t ${fasta} 2>/dev/null; then
-        zcat ${fasta} | sed '/^>/ s/:/__COLON__/g' | gzip > header_safe/qcgenome.${fasta_ext}.gz
-        staged=header_safe/qcgenome.${fasta_ext}.gz
-    else
-        sed '/^>/ s/:/__COLON__/g' ${fasta} > header_safe/qcgenome.${fasta_ext}
-        staged=header_safe/qcgenome.${fasta_ext}
-    fi
+    # MDMcleaner's barrnap step fails on any file name containing "fail"/"error", and MDMcleaner splits contig
+    # names on ':' (JGI/IMG style). Run it on a neutrally named copy with ':' swapped out, then restore both.
+    zcat -f ${fasta} | sed '/^>/ s/:/__COLON__/g' > qcgenome.${fasta_ext}
 
     mdmcleaner set_configs --db_basedir ${params.mdmcleaner_db} --threads ${task.cpus}
-    mdmcleaner clean -i \$staged -o mdmcleaner_output -t ${task.cpus} -c mdmcleaner.config --fast_run
+    mdmcleaner clean -i qcgenome.${fasta_ext} -o mdmcleaner_output -t ${task.cpus} -c mdmcleaner.config --fast_run
 
-    # restore the genome's own name on MDMcleaner's output folder and files
-    if [ -d mdmcleaner_output/qcgenome ]; then
-        for file in mdmcleaner_output/qcgenome/qcgenome_*; do
-            mv "\$file" "mdmcleaner_output/qcgenome/${genome_name}_\${file##*/qcgenome_}"
-        done
-        mv mdmcleaner_output/qcgenome mdmcleaner_output/${genome_name}
-    fi
-
-    for file in mdmcleaner_output/*/*.fasta.gz; do
-        zcat "\$file" | sed '/^>/ s/__COLON__/:/g' | gzip > "\$file.tmp"
-        mv "\$file.tmp" "\$file"
-    done
-
-    # Rename files to match desired extension as mdmcleaner is always fasta
-    for file in mdmcleaner_output/*/*.fasta.gz; do
-        new_name=\$(echo "\$file" | sed "s|\\.fasta\\.gz\$|.${output_fasta_ext}|")
-        mv "\$file" "\$new_name"
-    done
-
-    mv mdmcleaner_output/*/*_filtered_kept_contigs.${output_fasta_ext} .
+    zcat mdmcleaner_output/qcgenome/qcgenome_filtered_kept_contigs.fasta.gz \
+        | sed '/^>/ s/__COLON__/:/g' \
+        | gzip > ${genome_name}_filtered_kept_contigs.${output_fasta_ext}
     """
 }
