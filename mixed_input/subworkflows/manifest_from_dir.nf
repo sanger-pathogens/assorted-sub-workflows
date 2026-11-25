@@ -9,7 +9,7 @@ workflow MANIFEST_FROM_DIR {
     dir_path
 
     main:
-        def resolved_dir = workflow.launchDir.resolve(params.manifest_from_dir).normalize()
+        def resolved_dir = workflow.launchDir.resolve(dir_path).normalize()
         MANIFEST_GENERATOR(resolved_dir)
 
         ch_manifest = MANIFEST_GENERATOR.out.ch_manifest_from_dir
