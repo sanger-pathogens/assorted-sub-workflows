@@ -95,14 +95,11 @@ def main():
     parser.add_argument("fastp_jsons", nargs="+", help="fastp JSON reports named <ID>.fastp.json")
     args = parser.parse_args()
 
-    tsvout = open("fastp_statistics.tsv", "w")
-    tsvout.write("\t".join(COLUMNS_STATS) + "\n")
-    failpassout = open("fastp_fail_pass.tsv", "w")
-    failpassout.write("\t".join(COLUMNS_FAIL_PASS) + "\n")
-    for path in sorted(args.fastp_jsons, key=lambda p: Path(p).name):
-        sample_row(path, tsvout, failpassout)
-    tsvout.close()
-    failpassout.close()
+    with open("fastp_statistics.tsv", "w") as tsvout, open("fastp_fail_pass.tsv", "w") as failpassout:
+        tsvout.write("\t".join(COLUMNS_STATS) + "\n") 
+        failpassout.write("\t".join(COLUMNS_FAIL_PASS) + "\n")
+        for path in sorted(args.fastp_jsons, key=lambda p: Path(p).name):
+            sample_row(path, tsvout, failpassout)
 
 
 if __name__ == "__main__":
