@@ -38,7 +38,7 @@ process COLLATE_FASTP_STATS {
     tag "all samples"
     label 'cpu_1'
     label 'mem_1'
-    label 'time_30m'
+    label 'time_12'
 
     container 'quay.io/sangerpathogens/python-curl:3.11'
 
